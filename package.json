@@ -9,6 +9,8 @@
     "@types/jest": "^27.5.2",
     "@types/node": "^16.18.68",
     "@types/react": "^18.2.45",
+    "react-router-dom": "^6.21.1",
+    "axios": "^1.6.2",
     "@types/react-dom": "^18.2.18",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
