@@ -1,5 +1,4 @@
 import http from "../http-common";
-import RouteLogRecordDto from "../components/RouteLog/dto/RouteLogRecordDto";
 import RouteLogRecord from "../components/RouteLog/model/RouteLogRecord";
 
 const get = (parcelId: number) => {

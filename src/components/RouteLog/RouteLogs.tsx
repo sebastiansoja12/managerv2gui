@@ -1,7 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import RouteLogRecordDto from "./dto/RouteLogRecordDto";
 import RouteLogService from "../../hooks/RouteLogService";
-import RouteLogRecordDetailDto from "./dto/RouteLogRecordDetailDto";
 import RouteLogRecordTable from "./RouteLogComponent";
 import RouteLogRecord from "./model/RouteLogRecord";
 

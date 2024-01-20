@@ -1,6 +1,7 @@
-import { getCoreRowModel, useReactTable, flexRender, getPaginationRowModel} from '@tanstack/react-table';
-import type { ColumnDef } from '@tanstack/react-table';
+import type {ColumnDef} from '@tanstack/react-table';
+import {flexRender, getCoreRowModel, useReactTable} from '@tanstack/react-table';
 import {useMemo} from "react";
+
 interface ReactTableProps<T extends object> {
     data: T[];
     columns: ColumnDef<T>[];
