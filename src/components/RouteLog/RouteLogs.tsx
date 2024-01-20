@@ -23,9 +23,6 @@ const RouteLogs: React.FC = () =>  {
         fetchRouteLogRecord();
     }, []);
 
-    const [searchTerm, setSearchTerm] = useState<string>('');
-
-
     return (
         <div>
             {routeLogRecord ? (

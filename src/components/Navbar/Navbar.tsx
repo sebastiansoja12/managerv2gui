@@ -1,7 +1,6 @@
 import React, {useRef} from 'react';
 import {FaBars, FaTimes} from 'react-icons/fa';
 import './styles/main.css';
-import {Link} from "@mui/material";
 
 
 const isUserLoggedIn = () => {

@@ -28,15 +28,6 @@ const dummyData = () => {
     return items;
 }
 
-const AComponentThatUsesTable = () => {
-    return (
-        <div className="px-10 py-5 md:w-1/2 m-auto">
-            <Table data={dummyData()} columns={cols}  showFooter/>
-            {/* .... */}
-        </div>
-    );
-};
-
 const cols = useMemo<ColumnDef<Item>[]>(
     () => [
         {
