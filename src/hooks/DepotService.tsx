@@ -1,6 +1,5 @@
 // DepotService.ts
 
-import axios from 'axios';
 import Depot from "../class/depots/Depot";
 import http from "../http-common";
 const getAll = () => {
