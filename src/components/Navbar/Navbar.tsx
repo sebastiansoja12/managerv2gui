@@ -1,7 +1,12 @@
 import React, {useRef} from 'react';
 import {FaBars, FaTimes} from 'react-icons/fa';
 import './styles/main.css';
+import {Link} from "@mui/material";
 
+
+const isUserLoggedIn = () => {
+    return localStorage.getItem("logged");
+}
 const Navbar: React.FC = () => {
     const navRef = useRef<HTMLDivElement>(null);
     const showNavbar = () => {
@@ -22,6 +27,7 @@ const Navbar: React.FC = () => {
                 <button className="nav-btn nav-close-btn" onClick={showNavbar}>
                     <FaTimes/>
                 </button>
+                {isUserLoggedIn() ? <a href="/logout">Log out</a> : <a href="/login">Log in</a>}
             </nav>
             <button className="nav-btn" onClick={showNavbar}>
                 <FaBars/>
