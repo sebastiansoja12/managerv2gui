@@ -5,6 +5,7 @@ import {BrowserRouter, Route, Routes} from 'react-router-dom';
 import Navbar from "./components/Navbar/Navbar";
 import RouteLogs from "./components/RouteLog/RouteLogs";
 import LoginPage from "./components/LoginPage/LoginPage";
+import SoftwareConfigurationList from "./components/SoftwareConfiguration/SoftwareConfigurationList";
 
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
                                 <Route path="depots" element={<Depots/>}/>
                                 <Route path="parcels" element={<RouteLogs/>} />
                                 <Route path="login" element={<LoginPage/>} />
+                                <Route path="software-configurations" element={<SoftwareConfigurationList/>} />
                             </Routes>
                         </div>
                     </BrowserRouter>
