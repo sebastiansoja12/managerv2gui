@@ -1,38 +1,206 @@
-import React, {useRef} from 'react';
-import {FaBars, FaTimes} from 'react-icons/fa';
+import React from 'react';
+import {
+    AppBar,
+    Avatar,
+    Box,
+    Button,
+    Container,
+    IconButton,
+    Menu,
+    MenuItem,
+    Toolbar,
+    Tooltip,
+    Typography,
+} from '@mui/material';
+import {Menu as MenuIcon} from '@mui/icons-material';
+import AdbIcon from '@mui/icons-material/Adb';
 import './styles/main.css';
 
+const isUserLoggedIn = () => localStorage.getItem("logged");
 
-const isUserLoggedIn = () => {
-    return localStorage.getItem("logged");
-}
-const Navbar: React.FC = () => {
-    const navRef = useRef<HTMLDivElement>(null);
-    const showNavbar = () => {
-        if (navRef.current) {
-            navRef.current.classList.toggle('responsive_nav');
-        }
+function ResponsiveAppBar() {
+    const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
+    const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
+
+    const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
+        setAnchorElNav(event.currentTarget);
+    };
+
+    const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
+        setAnchorElUser(event.currentTarget);
+    };
+
+    const handleCloseNavMenu = () => {
+        setAnchorElNav(null);
+    };
+
+    const handleCloseUserMenu = () => {
+        setAnchorElUser(null);
     };
 
     return (
-        <header>
-            <h3>Manager 2.0</h3>
-            <nav ref={navRef}>
-                <a href="/routes">Routes</a>
-                <a href="/parcels">Parcel list</a>
-                <a href="/returns">Returns</a>
-                <a href="/supplies">Supplies</a>
-                <a href="/depots">Depots</a>
-                <button className="nav-btn nav-close-btn" onClick={showNavbar}>
-                    <FaTimes/>
-                </button>
-                {isUserLoggedIn() ? <a href="/logout">Log out</a> : <a href="/login">Log in</a>}
-            </nav>
-            <button className="nav-btn" onClick={showNavbar}>
-                <FaBars/>
-            </button>
-        </header>
-    );
-};
+        <AppBar position="static">
+            <Container maxWidth="xl">
+                <Toolbar disableGutters>
+                    <Typography
+                        variant="h6"
+                        noWrap
+                        component="a"
+                        href="/"
+                        sx={{
+                            mr: 15,
+                            display: { xs: 'none', md: 'flex' },
+                            fontFamily: 'monospace',
+                            fontWeight: 1000,
+                            letterSpacing: '.2rem',
+                            color: 'inherit',
+                            textDecoration: 'none',
+                            transition: 'color 0.3s ease-in-out',
+                            '&:hover': {
+                                color: '#1122da',
+                            },
+                        }}
+                    >
+                        Manager 2.0
+                    </Typography>
 
-export default Navbar;
+
+                    <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
+                        <IconButton
+                            size="large"
+                            aria-label="account of current user"
+                            aria-controls="menu-appbar"
+                            aria-haspopup="true"
+                            onClick={handleOpenNavMenu}
+                            color="inherit"
+                        >
+                            <MenuIcon />
+                        </IconButton>
+                        <Menu
+                            id="menu-appbar"
+                            anchorEl={anchorElNav}
+                            anchorOrigin={{
+                                vertical: 'bottom',
+                                horizontal: 'left',
+                            }}
+                            keepMounted
+                            transformOrigin={{
+                                vertical: 'top',
+                                horizontal: 'left',
+                            }}
+                            open={Boolean(anchorElNav)}
+                            onClose={handleCloseNavMenu}
+                            sx={{
+                                display: { xs: 'block', md: 'none' },
+                            }}
+                        >
+                            <MenuItem onClick={handleCloseNavMenu}>
+                                <Typography textAlign="center">Routes</Typography>
+                            </MenuItem>
+                            <MenuItem onClick={handleCloseNavMenu}>
+                                <Typography textAlign="center">Parcels</Typography>
+                            </MenuItem>
+                            <MenuItem onClick={handleCloseNavMenu}>
+                                <Typography textAlign="center">Depots</Typography>
+                            </MenuItem>
+                            <MenuItem onClick={handleCloseNavMenu}>
+                                <Typography textAlign="center">Software Configuration</Typography>
+                            </MenuItem>
+                            <MenuItem onClick={handleCloseNavMenu}>
+                                <Typography textAlign="center">Suppliers</Typography>
+                            </MenuItem>
+                            <MenuItem onClick={handleCloseNavMenu}>
+                                <Typography textAlign="center">Users</Typography>
+                            </MenuItem>
+                            <MenuItem onClick={handleCloseNavMenu}>
+                                <Typography textAlign="center">Add route</Typography>
+                            </MenuItem>
+                        </Menu>
+                    </Box>
+
+                    <AdbIcon sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} />
+                    <Typography
+                        variant="h5"
+                        noWrap
+                        component="a"
+                        href="#app-bar-with-responsive-menu"
+                        sx={{
+                            mr: 2,
+                            display: { xs: 'flex', md: 'none' },
+                            flexGrow: 1,
+                            fontFamily: 'monospace',
+                            fontWeight: 700,
+                            letterSpacing: '.3rem',
+                            color: 'inherit',
+                            textDecoration: 'none',
+                        }}
+                    >
+                        LOGO
+                    </Typography>
+                    <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
+                        <Button sx={{ my: 2, color: 'white', display: 'block' }} href="/routes">
+                            Routes
+                        </Button>
+                        <Button sx={{ my: 2, color: 'white', display: 'block' }} href="/parcels">
+                            Parcels
+                        </Button>
+                        <Button sx={{ my: 2, color: 'white', display: 'block' }} href="/depots">
+                            Depots
+                        </Button>
+                        <Button sx={{ my: 2, color: 'white', display: 'block' }} href="/software-configurations">
+                            Software Configuration
+                        </Button>
+                        <Button sx={{ my: 2, color: 'white', display: 'block' }} href="/suppliers">
+                            Suppliers
+                        </Button>
+                        <Button sx={{ my: 2, color: 'white', display: 'block' }} href="/users">
+                            Users
+                        </Button>
+                        <Button sx={{ my: 2, color: 'white', display: 'block' }} href="/add/route">
+                            Add route
+                        </Button>
+                    </Box>
+
+                    <Box sx={{ flexGrow: 0 }}>
+                        <Tooltip title="Open settings">
+                            <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                                <Avatar alt="User Avatar" src="/static/images/avatar/2.jpg" />
+                            </IconButton>
+                        </Tooltip>
+                        <Menu
+                            sx={{ mt: '45px' }}
+                            id="menu-appbar"
+                            anchorEl={anchorElUser}
+                            anchorOrigin={{
+                                vertical: 'top',
+                                horizontal: 'right',
+                            }}
+                            keepMounted
+                            transformOrigin={{
+                                vertical: 'top',
+                                horizontal: 'right',
+                            }}
+                            open={Boolean(anchorElUser)}
+                            onClose={handleCloseUserMenu}
+                        >
+                            <MenuItem onClick={handleCloseUserMenu}>
+                                <Typography textAlign="center">Profile</Typography>
+                            </MenuItem>
+                            <MenuItem onClick={handleCloseUserMenu}>
+                                <Typography textAlign="center">Account</Typography>
+                            </MenuItem>
+                            <MenuItem onClick={handleCloseUserMenu}>
+                                <Typography textAlign="center">Dashboard</Typography>
+                            </MenuItem>
+                            <MenuItem onClick={handleCloseUserMenu}>
+                                <Typography textAlign="center">{isUserLoggedIn() ? 'Logout' : 'Log in'}</Typography>
+                            </MenuItem>
+                        </Menu>
+                    </Box>
+                </Toolbar>
+            </Container>
+        </AppBar>
+    );
+}
+
+export default ResponsiveAppBar;
