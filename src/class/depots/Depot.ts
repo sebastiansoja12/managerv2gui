@@ -5,4 +5,8 @@ export default interface Depot {
     city: string;
     street: string;
     country: string;
+    postalCode:string;
+    telephoneNumber:string;
+    nip:string;
+    openingHours:string;
 }

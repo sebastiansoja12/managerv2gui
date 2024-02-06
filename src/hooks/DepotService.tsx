@@ -1,5 +1,3 @@
-// DepotService.ts
-
 import Depot from "../class/depots/Depot";
 import http from "../http-common";
 const getAll = () => {

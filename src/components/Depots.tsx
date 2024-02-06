@@ -29,6 +29,10 @@ const Depots: React.FC = () => {
                     <th>City</th>
                     <th>Street</th>
                     <th>Country</th>
+                    <th>Postal Code</th>
+                    <th>NIP</th>
+                    <th>Telephone Number</th>
+                    <th>Opening Hours</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -38,6 +42,10 @@ const Depots: React.FC = () => {
                         <td>{depot.city}</td>
                         <td>{depot.street}</td>
                         <td>{depot.country}</td>
+                        <td>{depot.postalCode}</td>
+                        <td>{depot.nip}</td>
+                        <td>{depot.telephoneNumber}</td>
+                        <td>{depot.openingHours}</td>
                     </tr>
                 ))}
                 </tbody>
