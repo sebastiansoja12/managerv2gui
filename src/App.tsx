@@ -1,6 +1,6 @@
 import React from 'react';
 import './App.css';
-import Depots from "./components/Depots";
+import Departments from "./components/Departments";
 import {BrowserRouter, Route, Routes} from 'react-router-dom';
 import Navbar from "./components/Navbar/Navbar";
 import RouteLogs from "./components/RouteLog/RouteLogs";
@@ -18,7 +18,7 @@ function App() {
                         <div>
                             <Routes>
                                 <Route path="/"/>
-                                <Route path="depots" element={<Depots/>}/>
+                                <Route path="depots" element={<Departments/>}/>
                                 <Route path="parcels" element={<RouteLogs/>} />
                                 <Route path="login" element={<LoginPage/>} />
                                 <Route path="software-configurations" element={<SoftwareConfigurationList/>} />

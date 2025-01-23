@@ -19,7 +19,7 @@
 - Software Configuration FFT-445
 - Login component FFT-409
 - Viewing route records FFT-404
-- Depots page FFT-412
+- Departments page FFT-412
 - MUI dependencies
 - Call to Manager backend
 

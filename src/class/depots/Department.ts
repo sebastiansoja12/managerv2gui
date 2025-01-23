@@ -1,7 +1,7 @@
-import DepotCode from "./DepotCode";
+import DepartmentCode from "../../components/DepartmentCode";
 
-export default interface Depot {
-    depotCode: DepotCode;
+export default interface Department {
+    departmentCode: DepartmentCode;
     city: string;
     street: string;
     country: string;
