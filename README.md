@@ -1,1 +1,1 @@
-Manager 2.0 GUI - Development version 2025.1 - 1st January, 2025
+**Manager 2.0 GUI - Development Version 2026.2  - 1st May, 2026**
