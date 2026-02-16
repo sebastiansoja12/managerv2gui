@@ -169,8 +169,7 @@ const ShipmentCreate: React.FC = () => {
     const createShipment = async () => {
         setLoading(true);
         try {
-            const response = await ShipmentService.create(createRequest(),
-                "");
+            const response = await ShipmentService.create(createRequest());
             setNotice({
                 severity: "success",
                 message: `Utworzono przesyłkę ${response.data.shipmentId}, tracking ${response.data.trackingNumber}`,

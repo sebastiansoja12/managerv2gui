@@ -19,27 +19,15 @@ import {
 
 const client = new BackendClient(http);
 
-const create = (
-    data: ShipmentCreateRequestApi,
-    token: string
-) => {
+const create = (data: ShipmentCreateRequestApi) => {
     return client.post<ShipmentCreateRequestApi, ShipmentCreateResponseDto>(
         "/shipments",
-        data,
-        {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        }
+        data
     );
 };
 
-const get = (shipmentId: number, token: string) => {
-    return client.get<ShipmentDto>(`/shipments/${shipmentId}`, {
-        headers: {
-            Authorization: `Bearer ${token}`,
-        },
-    });
+const get = (shipmentId: number) => {
+    return client.get<ShipmentDto>(`/shipments/${shipmentId}`);
 };
 
 const getByTrackingNumber = (trackingNumber: string) => {

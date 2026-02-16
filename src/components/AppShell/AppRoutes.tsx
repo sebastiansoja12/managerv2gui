@@ -4,6 +4,7 @@ import LoginPage from "../LoginPage/LoginPage";
 import ShipmentCreate from "../Shipment/ShipmentCreate";
 import ShipmentList from "../Shipment/ShipmentList";
 import SoftwareConfigurationList from "../SoftwareConfiguration/SoftwareConfigurationList";
+import UserProfile from "../UserProfile/UserProfile";
 
 function AppRoutes() {
     return (
@@ -15,6 +16,7 @@ function AppRoutes() {
             <Route path="shipments/list" element={<ShipmentList/>}/>
             <Route path="shipments/create" element={<ShipmentCreate/>}/>
             <Route path="login" element={<LoginPage/>}/>
+            <Route path="profile" element={<UserProfile/>}/>
             <Route path="software-configurations" element={<SoftwareConfigurationList/>}/>
         </Routes>
     );

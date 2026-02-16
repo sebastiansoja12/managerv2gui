@@ -149,7 +149,7 @@ const ShipmentList: React.FC = () => {
     });
 
     const findById = () => runOperation(async () => {
-        const response = await ShipmentService.get(numericShipmentId(lookupId), localStorage.getItem("token") || "");
+        const response = await ShipmentService.get(numericShipmentId(lookupId));
         upsertShipment(response.data);
         setNotice({severity: "success", message: "Przesyłka została dodana do tabeli"});
     });

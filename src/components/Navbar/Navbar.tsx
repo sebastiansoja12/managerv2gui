@@ -18,12 +18,10 @@ import {
     SupportAgent,
     TaskAlt,
 } from '@mui/icons-material';
+import {getAppEnvironment} from "../../config/appEnvironment";
+import {AppTabDefinition} from "../AppShell/types";
 import './styles/main.css';
-
-export type AppTabDefinition = {
-    label: string;
-    path: string;
-};
+import {getAppVersion} from "../../config/appConfig";
 
 type NavbarItem = AppTabDefinition & {
     icon: React.ElementType;
@@ -79,7 +77,7 @@ const menus: NavbarMenu[] = [
 
 function Navbar({activePath, onOpenTab}: NavbarProps) {
     const [openMenu, setOpenMenu] = React.useState<string | null>(null);
-    const environment = (process.env.REACT_APP_ENVIRONMENT || process.env.NODE_ENV || "prod").toLowerCase();
+    const environment = getAppEnvironment();
 
     const openTab = (tab: AppTabDefinition) => {
         onOpenTab(tab);
@@ -164,7 +162,11 @@ function Navbar({activePath, onOpenTab}: NavbarProps) {
                 <button className="top-nav-icon-button" type="button" aria-label="Powiadomienia">
                     <NotificationsNone fontSize="small" />
                 </button>
-                <button className="top-nav-user" type="button">
+                <button
+                    className="top-nav-user"
+                    onClick={() => openTab({label: "Mój profil", path: "/profile"})}
+                    type="button"
+                >
                     <span className="top-nav-user-avatar"><Person fontSize="small" /></span>
                     <span>
                         <strong>Admin</strong>
