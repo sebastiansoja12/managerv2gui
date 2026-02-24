@@ -1,12 +1,21 @@
 import DepartmentCode from "../../components/DepartmentCode";
 
-export default interface Department {
-    departmentCode: DepartmentCode;
+export interface Address {
     city: string;
     street: string;
-    country: string;
-    postalCode:string;
-    telephoneNumber:string;
-    nip:string;
-    openingHours:string;
+    postalCode: string;
+    countryCode: string;
+}
+
+export default interface Department {
+    departmentCode: DepartmentCode;
+    address: Address;
+    taxId: string;
+    telephoneNumber: string;
+    openingHours: string;
+    email: string;
+    departmentType: string;
+    status: string;
+    createdAt: string;
+    updatedAt: string;
 }

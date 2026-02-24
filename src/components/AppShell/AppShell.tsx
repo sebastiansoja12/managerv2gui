@@ -1,18 +1,27 @@
 import React from "react";
 import {Navigate, useLocation, useNavigate} from "react-router-dom";
+import {Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography} from "@mui/material";
 import {isAuthenticated} from "../../auth/AuthTokenStorage";
 import Navbar from "../Navbar/Navbar";
 import AppRoutes from "./AppRoutes";
 import AppTabs from "./AppTabs";
-import {normalizePath, tabTitles} from "./tabConfig";
+import {getTabTitle, normalizePath} from "./tabConfig";
 import {AppTabDefinition} from "./types";
+import {
+    getOperationalProfile,
+    OperationalProfile,
+    setOperationalProfile,
+} from "../../config/operationalProfile";
+import pl from "../../i18n/pl";
 
 function AppShell() {
     const location = useLocation();
     const navigate = useNavigate();
     const [openTabs, setOpenTabs] = React.useState<AppTabDefinition[]>([
-        {label: "Strona startowa", path: "/"},
+        {label: pl.navigation.home, path: "/"},
     ]);
+    const [operationalProfile, updateOperationalProfile] = React.useState<OperationalProfile>(getOperationalProfile);
+    const [pendingOperationalProfile, setPendingOperationalProfile] = React.useState<OperationalProfile | null>(null);
 
     const activePath = normalizePath(location.pathname);
     const loginRoute = location.pathname === "/login";
@@ -34,12 +43,40 @@ function AppShell() {
         navigate(normalizedTab.path);
     };
 
+    const applyOperationalProfile = (profile: OperationalProfile) => {
+        setOperationalProfile(profile);
+        updateOperationalProfile(profile);
+        setOpenTabs([{label: pl.navigation.home, path: "/"}]);
+        navigate("/");
+    };
+
+    const changeOperationalProfile = (profile: OperationalProfile) => {
+        if (profile === operationalProfile) {
+            return;
+        }
+
+        const hasOpenBusinessTabs = openTabs.some((tab) => tab.path !== "/");
+        if (hasOpenBusinessTabs) {
+            setPendingOperationalProfile(profile);
+            return;
+        }
+
+        applyOperationalProfile(profile);
+    };
+
+    const confirmOperationalProfileChange = () => {
+        if (pendingOperationalProfile) {
+            applyOperationalProfile(pendingOperationalProfile);
+            setPendingOperationalProfile(null);
+        }
+    };
+
     React.useEffect(() => {
         if (loginRoute) {
             return;
         }
 
-        const label = tabTitles[activePath] || "Nowa karta";
+        const label = getTabTitle(activePath);
         setOpenTabs((currentTabs) => {
             if (currentTabs.some((tab) => tab.path === activePath)) {
                 return currentTabs;
@@ -80,7 +117,12 @@ function AppShell() {
 
     return (
         <>
-            <Navbar activePath={activePath} onOpenTab={openTab}/>
+            <Navbar
+                activePath={activePath}
+                onOpenTab={openTab}
+                onOperationalProfileChange={changeOperationalProfile}
+                operationalProfile={operationalProfile}
+            />
             <AppTabs
                 activePath={activePath}
                 openTabs={openTabs}
@@ -89,8 +131,24 @@ function AppShell() {
                 onSelectTab={navigate}
             />
             <div className="app-main-content">
-                <AppRoutes/>
+                <AppRoutes onOpenTab={openTab} operationalProfile={operationalProfile}/>
             </div>
+            <Dialog open={Boolean(pendingOperationalProfile)} onClose={() => setPendingOperationalProfile(null)}>
+                <DialogTitle>{pl.app.profileChangeDialog.title}</DialogTitle>
+                <DialogContent>
+                    <Typography>
+                        {pl.app.profileChangeDialog.description}
+                    </Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setPendingOperationalProfile(null)}>
+                        {pl.app.profileChangeDialog.cancel}
+                    </Button>
+                    <Button variant="contained" onClick={confirmOperationalProfileChange}>
+                        {pl.app.profileChangeDialog.confirm}
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </>
     );
 }

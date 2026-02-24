@@ -5,9 +5,6 @@ import AuthService from "../../hooks/AuthService";
 import {ApiErrorResponse} from "../../api/ApiResult";
 import {CurrentUserDto} from "../../auth/UserProfileDto";
 import "./styles/user-profile.css";
-import {RefreshTokenRequestDto} from "../../auth/RefreshTokenRequestDto";
-import {clearAuthToken, setAuthToken} from "../../auth/AuthTokenStorage";
-import {redirect} from "react-router-dom";
 
 type Notice = {
     severity: "success" | "error";
@@ -45,24 +42,6 @@ function UserProfile() {
     useEffect(() => {
         loadProfile();
     }, [loadProfile]);
-
-    const logout = async () => {
-        try {
-            const request: RefreshTokenRequestDto = {
-                username: user?.username ?? "",
-                refreshToken: "123"
-            };
-            console.log(request);
-            await AuthService.logout(request);
-            setUser(null);
-            clearAuthToken()
-        } catch (error) {
-            showError(error, "Nie udało się wylogować");
-        } finally {
-            setLoading(false);
-            window.location.reload();
-        }
-    }
 
     const changePassword = async () => {
         if (!currentPassword || !newPassword || !repeatPassword) {
@@ -183,10 +162,6 @@ function UserProfile() {
             <Snackbar open={Boolean(notice)} autoHideDuration={4500} onClose={() => setNotice(null)}>
                 {notice ? <Alert severity={notice.severity} onClose={() => setNotice(null)}>{notice.message}</Alert> : undefined}
             </Snackbar>
-
-            <Button disabled={loading} startIcon={<Key />} variant="contained" onClick={logout}>
-                Wyloguj
-            </Button>
         </div>
     );
 }

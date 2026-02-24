@@ -15,6 +15,9 @@ import {
 } from '@mui/material';
 import { KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
 import RouteLogRecord from './model/RouteLogRecord';
+
+const recordShipmentId = (record: RouteLogRecord) => record.parcelId?.value || record.shipmentId?.value || "-";
+
 const Row: React.FC<{ record: RouteLogRecord }> = ({ record }) => {
     const [open, setOpen] = useState(false);
 
@@ -26,7 +29,7 @@ const Row: React.FC<{ record: RouteLogRecord }> = ({ record }) => {
                         {open ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
                     </IconButton>
                 </TableCell>
-                <TableCell>{record.parcelId.value}</TableCell>
+                <TableCell>{recordShipmentId(record)}</TableCell>
                 <TableCell>{record.returnCode.value}</TableCell>
                 <TableCell>{record.faultDescription.value}</TableCell>
             </TableRow>
@@ -52,11 +55,11 @@ const Row: React.FC<{ record: RouteLogRecord }> = ({ record }) => {
                                 {record.routeLogRecordDetails.routeLogRecordDetailSet.map((detail) => (
                                     <TableRow key={detail.id}>
                                         <TableCell>{detail.id}</TableCell>
-                                        <TableCell>{detail.zebraId}</TableCell>
+                                        <TableCell>{detail.zebraId || detail.terminalId?.value || "-"}</TableCell>
                                         <TableCell>{detail.version}</TableCell>
                                         <TableCell>{detail.username}</TableCell>
                                         <TableCell>{detail.depotCode}</TableCell>
-                                        <TableCell>{detail.parcelStatus}</TableCell>
+                                        <TableCell>{detail.parcelStatus || detail.shipmentStatus}</TableCell>
                                         <TableCell>{detail.description}</TableCell>
                                         <TableCell>{detail.timestamp}</TableCell>
                                         <TableCell>{detail.processType}</TableCell>
@@ -81,7 +84,7 @@ const RouteLogRecordTable: React.FC<{ data: Array<RouteLogRecord> }> = ({ data }
         }
         const searchTermLower = searchTerm.toLowerCase();
         return data.filter((record) =>
-            record.parcelId.value.toString().toLowerCase().includes(searchTermLower)
+            recordShipmentId(record).toString().toLowerCase().includes(searchTermLower)
         );
     };
 
@@ -113,7 +116,7 @@ const RouteLogRecordTable: React.FC<{ data: Array<RouteLogRecord> }> = ({ data }
                     </TableHead>
                     <TableBody>
                         {filteredRecords.map((record) => (
-                            <Row key={record.parcelId.value} record={record} />
+                            <Row key={recordShipmentId(record)} record={record} />
                         ))}
                     </TableBody>
                 </Table>
