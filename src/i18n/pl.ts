@@ -230,6 +230,23 @@ export const pl = {
             shown: "Pokazano",
             of: "z",
         },
+        form: {
+            sections: {
+                shipmentOperations: "Operacje na przesyłce",
+                sender: "Nadawca",
+                receiver: "Odbiorca",
+            },
+            fields: {
+                shipmentStatus: "Status przesyłki",
+                firstName: "Imię",
+                lastName: "Nazwisko",
+                email: "E-mail",
+                phone: "Telefon",
+                city: "Miasto",
+                postalCode: "Kod pocztowy",
+                street: "Ulica",
+            }
+        },
         status: {
             CREATED: "Utworzona",
             REROUTE: "W trakcie zmiany trasy",
