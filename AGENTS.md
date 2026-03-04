@@ -5,3 +5,4 @@
 - Use i18n translations instead of hardcoding name
 - Ask backend only if there is no current data in memory
 - Create needed classes in separate files
+- Add i18n everytime in /i18n
