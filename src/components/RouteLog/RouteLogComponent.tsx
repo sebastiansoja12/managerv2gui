@@ -15,8 +15,9 @@ import {
 } from '@mui/material';
 import { KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
 import RouteLogRecord from './model/RouteLogRecord';
+import pl from "../../i18n/translate";
 
-const recordShipmentId = (record: RouteLogRecord) => record.parcelId?.value || record.shipmentId?.value || "-";
+const recordShipmentId = (record: RouteLogRecord) => record.parcelId?.value || record.shipmentId?.value || pl.common.dash;
 
 const Row: React.FC<{ record: RouteLogRecord }> = ({ record }) => {
     const [open, setOpen] = useState(false);
@@ -39,23 +40,23 @@ const Row: React.FC<{ record: RouteLogRecord }> = ({ record }) => {
                         <Table>
                             <TableHead>
                                 <TableRow>
-                                    <TableCell>ID</TableCell>
-                                    <TableCell>Zebra ID</TableCell>
-                                    <TableCell>Zebra Version</TableCell>
-                                    <TableCell>Username</TableCell>
-                                    <TableCell>Depot Code</TableCell>
-                                    <TableCell>Parcel Status</TableCell>
-                                    <TableCell>Description</TableCell>
-                                    <TableCell>Timestamp</TableCell>
-                                    <TableCell>Process Type</TableCell>
-                                    <TableCell>Request</TableCell>
+                                    <TableCell>{pl.routeLogs.columns.id}</TableCell>
+                                    <TableCell>{pl.routeLogs.columns.zebraId}</TableCell>
+                                    <TableCell>{pl.routeLogs.columns.zebraVersion}</TableCell>
+                                    <TableCell>{pl.routeLogs.columns.username}</TableCell>
+                                    <TableCell>{pl.routeLogs.columns.depotCode}</TableCell>
+                                    <TableCell>{pl.routeLogs.columns.parcelStatus}</TableCell>
+                                    <TableCell>{pl.routeLogs.columns.description}</TableCell>
+                                    <TableCell>{pl.routeLogs.columns.timestamp}</TableCell>
+                                    <TableCell>{pl.routeLogs.columns.processType}</TableCell>
+                                    <TableCell>{pl.routeLogs.columns.request}</TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
                                 {record.routeLogRecordDetails.routeLogRecordDetailSet.map((detail) => (
                                     <TableRow key={detail.id}>
                                         <TableCell>{detail.id}</TableCell>
-                                        <TableCell>{detail.zebraId || detail.terminalId?.value || "-"}</TableCell>
+                                        <TableCell>{detail.zebraId || detail.terminalId?.value || pl.common.dash}</TableCell>
                                         <TableCell>{detail.version}</TableCell>
                                         <TableCell>{detail.username}</TableCell>
                                         <TableCell>{detail.depotCode}</TableCell>
@@ -93,11 +94,11 @@ const RouteLogRecordTable: React.FC<{ data: Array<RouteLogRecord> }> = ({ data }
     return (
         <Container>
             <Typography variant="h4" align="center" gutterBottom>
-                Parcel Table
+                {pl.routeLogs.title}
             </Typography>
 
             <TextField
-                label="Search by Parcel ID"
+                label={pl.routeLogs.searchByShipmentId}
                 variant="outlined"
                 fullWidth
                 margin="normal"
@@ -109,9 +110,9 @@ const RouteLogRecordTable: React.FC<{ data: Array<RouteLogRecord> }> = ({ data }
                     <TableHead>
                         <TableRow>
                             <TableCell />
-                            <TableCell>Parcel ID</TableCell>
-                            <TableCell>Return Code</TableCell>
-                            <TableCell>Fault Description</TableCell>
+                            <TableCell>{pl.routeLogs.columns.shipmentId}</TableCell>
+                            <TableCell>{pl.routeLogs.columns.returnCode}</TableCell>
+                            <TableCell>{pl.routeLogs.columns.faultDescription}</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>

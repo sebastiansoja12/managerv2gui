@@ -20,7 +20,6 @@ import {
 } from "@mui/icons-material";
 import {useNavigate, useParams} from "react-router-dom";
 import ShipmentService from "../../hooks/ShipmentService";
-import RouteLogService from "../../hooks/RouteLogService";
 import {ApiErrorResponse} from "../../api/ApiResult";
 import RouteLogRecord from "../RouteLog/model/RouteLogRecord";
 import {
@@ -30,9 +29,8 @@ import {
     shipmentStatuses,
     ShipmentStatusDto,
 } from "./dto/ShipmentDto";
-import pl from "../../i18n/pl";
+import pl from "../../i18n/translate";
 import "./styles/shipments.css";
-import en from "../../i18n/en";
 
 type Notice = {
     severity: "success" | "error" | "info";
@@ -58,20 +56,20 @@ const clonePerson = (person?: PersonApi): PersonApi => ({
 
 const fullName = (person?: PersonApi) => {
     const value = `${person?.firstName || ""} ${person?.lastName || ""}`.trim();
-    return value || "-";
+    return value || pl.common.dash;
 };
 
 const formatPrice = (shipment?: ShipmentDto | null) => {
     if (!shipment?.price) {
-        return "-";
+        return pl.common.dash;
     }
 
-    return `${shipment.price.amount.toLocaleString("pl-PL")} ${shipment.price.currency}`;
+    return `${shipment.price.amount.toLocaleString(pl.common.locale)} ${shipment.price.currency}`;
 };
 
 const formatDateTime = (date?: string) => {
     if (!date) {
-        return "-";
+        return pl.common.dash;
     }
 
     const parsed = new Date(date);
@@ -79,7 +77,7 @@ const formatDateTime = (date?: string) => {
         return date;
     }
 
-    return parsed.toLocaleString("pl-PL", {
+    return parsed.toLocaleString(pl.common.locale, {
         day: "2-digit",
         month: "2-digit",
         year: "numeric",
@@ -101,13 +99,13 @@ const routeDetails = (routeLog: RouteLogRecord | null): RouteDetail[] => {
     });
 };
 
-const detailStatus = (detail: RouteDetail) => detail.shipmentStatus || detail.parcelStatus || "-";
+const detailStatus = (detail: RouteDetail) => detail.shipmentStatus || detail.parcelStatus || pl.common.dash;
 
 const detailStatusLabel = (status: string) => pl.shipments.status[status as ShipmentStatusDto] || status;
 
-const detailDepartment = (detail: RouteDetail) => detail.departmentCode || detail.depotCode || "-";
+const detailDepartment = (detail: RouteDetail) => detail.departmentCode || detail.depotCode || pl.common.dash;
 
-const detailTerminal = (detail: RouteDetail) => detail.terminalId?.value || detail.zebraId || "-";
+const detailTerminal = (detail: RouteDetail) => detail.terminalId?.value || detail.zebraId || pl.common.dash;
 
 const ShipmentControlCenter: React.FC = () => {
     const navigate = useNavigate();
@@ -122,14 +120,13 @@ const ShipmentControlCenter: React.FC = () => {
     const [saving, setSaving] = useState<boolean>(false);
     const [notice, setNotice] = useState<Notice | null>(null);
 
-    const parsedShipmentId = Number(shipmentId);
-    const validShipmentId = Number.isFinite(parsedShipmentId) && parsedShipmentId > 0;
+    const validShipmentId = Boolean(shipmentId && /^\d+$/.test(shipmentId) && !/^0+$/.test(shipmentId));
     const decodedTrackingNumber = trackingNumber ? decodeURIComponent(trackingNumber) : "";
 
     const details = useMemo(() => routeDetails(routeLog), [routeLog]);
     const currentCourierDetail = details.find((detail) => detail.supplierCode || detail.username) || null;
 
-    const showError = (error: unknown, fallback = "Operacja nie powiodła się") => {
+    const showError = (error: unknown, fallback = pl.shipments.messages.operationFailed) => {
         const apiError = error as ApiErrorResponse;
         setNotice({
             severity: "error",
@@ -144,37 +141,26 @@ const ShipmentControlCenter: React.FC = () => {
         setRecipient(clonePerson(data.recipient));
     };
 
-    const loadRouteLog = async (shipmentToLoad: ShipmentDto) => {
-        setLoadingRouteLog(true);
-        try {
-            const response = await RouteLogService.get(shipmentToLoad.shipmentId.value);
-            setRouteLog(response.data);
-        } catch (error) {
-            setRouteLog(null);
-            setNotice({severity: "info", message: "Brak historii route trackera dla tej przesyłki"});
-        } finally {
-            setLoadingRouteLog(false);
-        }
-    };
-
     const loadShipment = async () => {
         if (!decodedTrackingNumber && !validShipmentId) {
             setLoadingShipment(false);
-            setNotice({severity: "error", message: "Niepoprawny numer trackingowy przesyłki"});
+            setNotice({severity: "error", message: pl.shipments.messages.invalidTrackingNumber});
             return;
         }
 
         setLoadingShipment(true);
+        setLoadingRouteLog(true);
         try {
             const response = decodedTrackingNumber
-                ? await ShipmentService.getByTrackingNumber(decodedTrackingNumber)
-                : await ShipmentService.get(parsedShipmentId);
-            applyShipment(response.data);
-            await loadRouteLog(response.data);
+                ? await ShipmentService.getControlCenterByTrackingNumber(decodedTrackingNumber)
+                : await ShipmentService.getControlCenter(shipmentId || "");
+            applyShipment(response.data.shipment);
+            setRouteLog(response.data.routeLog);
         } catch (error) {
-            showError(error, "Nie udało się pobrać przesyłki");
+            showError(error, pl.shipments.messages.loadError);
         } finally {
             setLoadingShipment(false);
+            setLoadingRouteLog(false);
         }
     };
 
@@ -215,13 +201,13 @@ const ShipmentControlCenter: React.FC = () => {
             await ShipmentService.updatePerson(shipment.shipmentId.value, "RECIPIENT", recipient);
 
             const response = shipment.trackingNumber?.value
-                ? await ShipmentService.getByTrackingNumber(shipment.trackingNumber.value)
-                : await ShipmentService.get(shipment.shipmentId.value);
-            applyShipment(response.data);
-            await loadRouteLog(response.data);
-            setNotice({severity: "success", message: "Przesyłka została zapisana"});
+                ? await ShipmentService.getControlCenterByTrackingNumber(shipment.trackingNumber.value)
+                : await ShipmentService.getControlCenter(shipment.shipmentId.value);
+            applyShipment(response.data.shipment);
+            setRouteLog(response.data.routeLog);
+            setNotice({severity: "success", message: pl.shipments.messages.saveSuccess});
         } catch (error) {
-            showError(error, "Nie udało się zapisać przesyłki");
+            showError(error, pl.shipments.messages.saveError);
         } finally {
             setSaving(false);
         }
@@ -291,7 +277,7 @@ const ShipmentControlCenter: React.FC = () => {
             return (
                 <div className="shipment-cc-side-empty">
                     <CircularProgress size={24} />
-                    <span>Ładowanie historii...</span>
+                    <span>{pl.shipments.routeHistory.loading}</span>
                 </div>
             );
         }
@@ -300,7 +286,7 @@ const ShipmentControlCenter: React.FC = () => {
             return (
                 <div className="shipment-cc-side-empty">
                     <Route fontSize="small" />
-                    <span>Brak wpisów route trackera</span>
+                    <span>{pl.shipments.routeHistory.empty}</span>
                 </div>
             );
         }
@@ -315,15 +301,15 @@ const ShipmentControlCenter: React.FC = () => {
                             <div className="shipment-cc-timeline-dot" />
                             <div>
                                 <div className="shipment-cc-timeline-top">
-                                    <strong>{detail.processType || "Operacja"}</strong>
+                                    <strong>{detail.processType || pl.shipments.routeHistory.defaultOperation}</strong>
                                     <span>{formatDateTime(detail.timestamp)}</span>
                                 </div>
                                 <Chip className={`tm-status tm-status-${String(statusKey).toLowerCase()}`} label={detailStatusLabel(statusKey)} size="small" />
-                                <p>{detail.description || "Brak opisu operacji"}</p>
+                                <p>{detail.description || pl.shipments.routeHistory.noDescription}</p>
                                 <dl>
-                                    <div><dt>Oddział</dt><dd>{detailDepartment(detail)}</dd></div>
-                                    <div><dt>Użytkownik</dt><dd>{detail.username || "-"}</dd></div>
-                                    <div><dt>Terminal</dt><dd>{detailTerminal(detail)}</dd></div>
+                                    <div><dt>{pl.shipments.routeHistory.department}</dt><dd>{detailDepartment(detail)}</dd></div>
+                                    <div><dt>{pl.shipments.routeHistory.user}</dt><dd>{detail.username || pl.common.dash}</dd></div>
+                                    <div><dt>{pl.shipments.routeHistory.terminal}</dt><dd>{detailTerminal(detail)}</dd></div>
                                 </dl>
                             </div>
                         </article>
@@ -340,23 +326,23 @@ const ShipmentControlCenter: React.FC = () => {
                     <div className="shipments-title">
                         <span className="shipments-title-icon"><LocalShipping /></span>
                         <Box>
-                            <Typography variant="h4">ShipmentControlCenter</Typography>
+                            <Typography variant="h4">{pl.shipments.page.controlCenterTitle}</Typography>
                             <Typography variant="body2" color="text.secondary">
                                 {shipment
-                                    ? `${shipment.trackingNumber?.value || "-"} · ${fullName(shipment.sender)} → ${fullName(shipment.recipient)}`
-                                    : "Centrum kontroli i operacji na przesyłce"}
+                                    ? `${shipment.trackingNumber?.value || pl.common.dash} · ${fullName(shipment.sender)} → ${fullName(shipment.recipient)}`
+                                    : pl.shipments.page.controlCenterSubtitle}
                             </Typography>
                         </Box>
                     </div>
                     <div className="shipment-edit-header-actions">
                         <Button startIcon={<ArrowBack />} variant="outlined" onClick={() => navigate("/shipments/list")}>
-                            Lista przesyłek
+                            {pl.navigation.shipmentList}
                         </Button>
                         <Button disabled={loadingShipment} startIcon={<Refresh />} variant="outlined" onClick={loadShipment}>
-                            Odśwież
+                            {pl.common.refresh}
                         </Button>
                         <Button disabled={loadingShipment || saving || !shipment} startIcon={<Save />} variant="contained" onClick={saveShipment}>
-                            Zapisz zmiany
+                            {pl.common.saveChanges}
                         </Button>
                     </div>
                 </div>
@@ -364,30 +350,30 @@ const ShipmentControlCenter: React.FC = () => {
                 {loadingShipment ? (
                     <div className="shipments-panel shipment-edit-loader">
                         <CircularProgress size={30} />
-                        <span>Ładowanie przesyłki...</span>
+                        <span>{pl.shipments.page.editLoadingSubtitle}</span>
                     </div>
                 ) : shipment ? (
                     <div className="shipment-cc-layout">
                         <main className="shipments-panel shipment-edit-panel">
                             <section className="shipment-details-summary shipment-edit-summary">
                                 <div>
-                                    <span>Tracking</span>
-                                    <strong>{shipment.trackingNumber?.value || "-"}</strong>
+                                    <span>{pl.shipments.summary.tracking}</span>
+                                    <strong>{shipment.trackingNumber?.value || pl.common.dash}</strong>
                                 </div>
                                 <div>
-                                    <span>ID</span>
+                                    <span>{pl.shipments.summary.id}</span>
                                     <strong>#{shipment.shipmentId.value}</strong>
                                 </div>
                                 <div>
-                                    <span>Rozmiar</span>
+                                    <span>{pl.shipments.summary.size}</span>
                                     <strong>{pl.shipments.size[shipment.shipmentSize]}</strong>
                                 </div>
                                 <div>
-                                    <span>Cena</span>
+                                    <span>{pl.shipments.summary.price}</span>
                                     <strong>{formatPrice(shipment)}</strong>
                                 </div>
                                 <div>
-                                    <span>Status</span>
+                                    <span>{pl.shipments.summary.status}</span>
                                     <strong>{pl.shipments.status[shipment.shipmentStatus]}</strong>
                                 </div>
                             </section>
@@ -397,23 +383,25 @@ const ShipmentControlCenter: React.FC = () => {
                                     <PersonPinCircle />
                                 </div>
                                 <div>
-                                    <span>Aktualny kurier</span>
-                                    <strong>{currentCourierDetail?.supplierCode || currentCourierDetail?.username || "Nieprzypisany"}</strong>
+                                    <span>{pl.shipments.summary.currentCourier}</span>
+                                    <strong>{currentCourierDetail?.supplierCode || currentCourierDetail?.username || pl.shipments.table.unassigned}</strong>
                                     <p>
                                         {currentCourierDetail
-                                            ? `Ostatnia aktywność: ${formatDateTime(currentCourierDetail.timestamp)} · ${detailDepartment(currentCourierDetail)}`
-                                            : "Brak informacji o kurierze w route trackerze"}
+                                            ? pl.shipments.summary.lastActivity
+                                                .replace("{date}", formatDateTime(currentCourierDetail.timestamp))
+                                                .replace("{department}", detailDepartment(currentCourierDetail))
+                                            : pl.shipments.summary.noCourierInfo}
                                     </p>
                                 </div>
                             </section>
 
                             <section className="shipment-edit-section">
                                 <div className="shipment-edit-section-header">
-                                    <Typography variant="h6">Operacje na przesyłce</Typography>
+                                    <Typography variant="h6">{pl.shipments.form.sections.shipmentOperations}</Typography>
                                 </div>
                                 <TextField
                                     fullWidth
-                                    label="Status przesyłki"
+                                    label={pl.shipments.form.fields.shipmentStatus}
                                     select
                                     size="small"
                                     value={status}
@@ -427,15 +415,15 @@ const ShipmentControlCenter: React.FC = () => {
                                 </TextField>
                             </section>
 
-                            {personFields("Nadawca", "SENDER", sender)}
-                            {personFields("Odbiorca", "RECIPIENT", recipient)}
+                            {personFields(pl.shipments.form.sections.sender, "SENDER", sender)}
+                            {personFields(pl.shipments.form.sections.receiver, "RECIPIENT", recipient)}
                         </main>
 
                         <aside className="shipments-panel shipment-cc-side">
                             <div className="shipment-cc-side-header">
                                 <div>
-                                    <Typography variant="h6">Historia route trackera</Typography>
-                                    <span>{details.length} wpisów</span>
+                                    <Typography variant="h6">{pl.shipments.trackerlog}</Typography>
+                                    <span>{details.length} {pl.shipments.postCount}</span>
                                 </div>
                                 <Route fontSize="small" />
                             </div>
@@ -443,7 +431,7 @@ const ShipmentControlCenter: React.FC = () => {
                         </aside>
                     </div>
                 ) : (
-                    <Alert severity="error">Nie udało się załadować przesyłki.</Alert>
+                    <Alert severity="error">{pl.shipments.messages.loadViewError}</Alert>
                 )}
             </div>
 

@@ -11,7 +11,7 @@ import ShipmentList from "../Shipment/ShipmentList";
 import SoftwareConfigurationList from "../SoftwareConfiguration/SoftwareConfigurationList";
 import UserProfile from "../UserProfile/UserProfile";
 import {isPathAllowedForProfile, OperationalProfile} from "../../config/operationalProfile";
-import pl from "../../i18n/pl";
+import pl from "../../i18n/translate";
 import {AppTabDefinition} from "./types";
 
 type AppRoutesProps = {

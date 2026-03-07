@@ -14,6 +14,7 @@ export type CurrentUserDto = {
     email: string;
     role: string;
     departmentCode: string;
+    language: string;
     rolePermissions: RolePermissionApi[];
     deleted: boolean;
     createdAt: string;
@@ -23,4 +24,8 @@ export type CurrentUserDto = {
 export type ChangePasswordRequest = {
     currentPassword: string;
     newPassword: string;
+};
+
+export type ChangeLanguageRequest = {
+    language: string;
 };

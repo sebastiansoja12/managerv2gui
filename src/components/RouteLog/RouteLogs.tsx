@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react';
 import RouteLogService from "../../hooks/RouteLogService";
 import RouteLogRecordTable from "./RouteLogComponent";
 import RouteLogRecord from "./model/RouteLogRecord";
+import pl from "../../i18n/translate";
 
 const RouteLogs: React.FC = () =>  {
 
@@ -16,7 +17,7 @@ const RouteLogs: React.FC = () =>  {
                 console.log(response.data)
                 setRouteLogRecord(response.data);
             } catch (error) {
-                console.error('Error fetching route log record:', error);
+                console.error(pl.routeLogs.messages.loadError, error);
             }
         };
 
@@ -28,7 +29,7 @@ const RouteLogs: React.FC = () =>  {
             {routeLogRecord ? (
                 <RouteLogRecordTable data={routeLogRecord} />
             ) : (
-                <p>Loading...</p>
+                <p>{pl.routeLogs.loading}</p>
             )}
         </div>
     );

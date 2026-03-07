@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Button, createTheme, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, ThemeProvider } from '@mui/material';
 import Software from './model/Software';
+import pl from "../../i18n/translate";
 
 interface SoftwarePropertiesListProps {
     softwareProperties: Software[];
@@ -36,11 +37,11 @@ const SoftwarePropertiesList: React.FC<SoftwarePropertiesListProps> = ({ softwar
                 <Table>
                     <TableHead>
                         <TableRow>
-                            <TableCell>ID</TableCell>
-                            <TableCell>Name</TableCell>
-                            <TableCell>Category</TableCell>
-                            <TableCell>Value</TableCell>
-                            <TableCell>Action</TableCell>
+                            <TableCell>{pl.softwareConfiguration.columns.id}</TableCell>
+                            <TableCell>{pl.softwareConfiguration.columns.name}</TableCell>
+                            <TableCell>{pl.softwareConfiguration.columns.category}</TableCell>
+                            <TableCell>{pl.softwareConfiguration.columns.value}</TableCell>
+                            <TableCell>{pl.softwareConfiguration.columns.action}</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -71,7 +72,7 @@ const SoftwarePropertiesList: React.FC<SoftwarePropertiesListProps> = ({ softwar
                                         color="info"
                                         onClick={() => handleUpdateClick(property)}
                                     >
-                                        Update
+                                        {pl.softwareConfiguration.actions.update}
                                     </Button>
                                 </TableCell>
                             </TableRow>

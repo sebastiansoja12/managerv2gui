@@ -27,7 +27,8 @@ import {getAppEnvironment} from "../../config/appEnvironment";
 import {AppTabDefinition} from "../AppShell/types";
 import './styles/main.css';
 import {clearAuthToken} from "../../auth/AuthTokenStorage";
-import pl from "../../i18n/pl";
+import pl from "../../i18n/translate";
+import {Language} from "../../i18n";
 
 type NavbarItem = AppTabDefinition & {
     icon: React.ElementType;
@@ -42,57 +43,60 @@ type NavbarMenu = {
 type NavbarProps = {
     activePath: string;
     onOpenTab: (tab: AppTabDefinition) => void;
+    onLanguageChange: (language: Language) => void;
     onOperationalProfileChange: (profile: OperationalProfile) => void;
+    language: Language;
     operationalProfile: OperationalProfile;
 };
 
-const mainItems: NavbarItem[] = [
-    {label: pl.navigation.home, path: '/', icon: Dashboard},
-    {label: pl.navigation.tasks, path: '/processes', icon: TaskAlt},
-    {label: pl.navigation.analytics, path: '/analytics', icon: Analytics},
-];
+const languages: Language[] = ["pl", "en"];
 
-const menus: NavbarMenu[] = [
-    {
-        label: pl.navigation.shipments,
-        icon: ShoppingCart,
-        items: [
-            {label: pl.home.tiles.shipmentControlCenter.title, path: '/shipment-control-center', icon: LocalShipping},
-            {label: pl.navigation.shipmentList, path: '/shipments/list', icon: ShoppingCart},
-            {label: pl.navigation.shipmentCreate, path: '/shipments/create', icon: LocalShipping},
-            {label: pl.navigation.shipmentScanner, path: '/shipment-scanner', icon: Warehouse},
-            {label: pl.navigation.courierDeliveries, path: '/courier-deliveries', icon: LocalShipping},
-        ],
-    },
-    {
-        label: pl.navigation.users,
-        icon: Person,
-        items: [
-            {label: pl.navigation.suppliers, path: '/suppliers', icon: Storefront},
-            {label: pl.navigation.couriers, path: '/couriers', icon: Person},
-            {label: pl.navigation.vehicles, path: '/vehicles', icon: DirectionsCar},
-            {label: pl.navigation.pallets, path: '/pallets', icon: Inventory2},
-            {label: pl.navigation.devicePairing, path: '/device-pairing', icon: DevicesOther},
-        ],
-    },
-    {
-        label: pl.navigation.management,
-        icon: Settings,
-        items: [
-            {label: pl.navigation.deals, path: '/deals', icon: LocalOffer},
-            {label: pl.navigation.billing, path: '/billing', icon: AccountBalance},
-            {label: pl.navigation.admins, path: '/users', icon: AdminPanelSettings},
-            {label: pl.navigation.systemSettings, path: '/software-configurations', icon: SettingsSuggest},
-            {label: pl.navigation.support, path: '/support', icon: SupportAgent},
-        ],
-    },
-];
-
-function Navbar({activePath, onOpenTab, onOperationalProfileChange, operationalProfile}: NavbarProps) {
+function Navbar({activePath, onOpenTab, onLanguageChange, onOperationalProfileChange, language, operationalProfile}: NavbarProps) {
     const [openMenu, setOpenMenu] = React.useState<string | null>(null);
     const [profileMenuOpen, setProfileMenuOpen] = React.useState(false);
 
     const environment = getAppEnvironment();
+    const mainItems: NavbarItem[] = [
+        {label: pl.navigation.home, path: '/', icon: Dashboard},
+        {label: pl.navigation.tasks, path: '/processes', icon: TaskAlt},
+        {label: pl.navigation.analytics, path: '/analytics', icon: Analytics},
+    ];
+
+    const menus: NavbarMenu[] = [
+        {
+            label: pl.navigation.shipments,
+            icon: ShoppingCart,
+            items: [
+                {label: pl.home.tiles.shipmentControlCenter.title, path: '/shipment-control-center', icon: LocalShipping},
+                {label: pl.navigation.shipmentList, path: '/shipments/list', icon: ShoppingCart},
+                {label: pl.navigation.shipmentCreate, path: '/shipments/create', icon: LocalShipping},
+                {label: pl.navigation.shipmentScanner, path: '/shipment-scanner', icon: Warehouse},
+                {label: pl.navigation.courierDeliveries, path: '/courier-deliveries', icon: LocalShipping},
+            ],
+        },
+        {
+            label: pl.navigation.users,
+            icon: Person,
+            items: [
+                {label: pl.navigation.suppliers, path: '/suppliers', icon: Storefront},
+                {label: pl.navigation.couriers, path: '/couriers', icon: Person},
+                {label: pl.navigation.vehicles, path: '/vehicles', icon: DirectionsCar},
+                {label: pl.navigation.pallets, path: '/pallets', icon: Inventory2},
+                {label: pl.navigation.devicePairing, path: '/device-pairing', icon: DevicesOther},
+            ],
+        },
+        {
+            label: pl.navigation.management,
+            icon: Settings,
+            items: [
+                {label: pl.navigation.deals, path: '/deals', icon: LocalOffer},
+                {label: pl.navigation.billing, path: '/billing', icon: AccountBalance},
+                {label: pl.navigation.admins, path: '/users', icon: AdminPanelSettings},
+                {label: pl.navigation.systemSettings, path: '/software-configurations', icon: SettingsSuggest},
+                {label: pl.navigation.support, path: '/support', icon: SupportAgent},
+            ],
+        },
+    ];
 
     const logout = () => {
         clearAuthToken();
@@ -131,12 +135,12 @@ function Navbar({activePath, onOpenTab, onOperationalProfileChange, operationalP
         <header className="top-nav-shell" data-environment={environment}>
             <div className="top-nav-brand">
                 <span className="top-nav-brand-icon">
-                    <ShoppingCart fontSize="small" />
+                    <Inventory2 fontSize="small" />
                 </span>
-                <span>Manager 2.0</span>
+                <span>{pl.common.brand}</span>
             </div>
 
-            <nav className="top-nav-menu" aria-label="Main navigation">
+            <nav className="top-nav-menu" aria-label={pl.navigation.mainAriaLabel}>
                 {mainItems.map(renderTopItem)}
 
                 {menus.map((menu) => {
@@ -241,14 +245,30 @@ function Navbar({activePath, onOpenTab, onOperationalProfileChange, operationalP
                             <Person fontSize="small" />
                         </span>
                         <span>
-                            <strong>Admin</strong>
-                            <small>S. ADMIN</small>
+                            <strong>{pl.navigation.defaultUserName}</strong>
+                            <small>{pl.navigation.defaultUserRole}</small>
                         </span>
                         <ExpandMore fontSize="small" />
                     </button>
 
                     {profileMenuOpen ? (
                         <div className="top-nav-dropdown-panel top-nav-profile-panel">
+                            <div className="top-nav-language-switch">
+                                <span>{pl.common.language}</span>
+                                <div>
+                                    {languages.map((currentLanguage) => (
+                                        <button
+                                            className={currentLanguage === language ? "top-nav-language-active" : ""}
+                                            key={currentLanguage}
+                                            onClick={() => onLanguageChange(currentLanguage)}
+                                            type="button"
+                                        >
+                                            {pl.common.languages[currentLanguage]}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
                             <button
                                 className="top-nav-dropdown-item"
                                 onClick={() => openTab({label: pl.navigation.profile, path: "/profile"})}

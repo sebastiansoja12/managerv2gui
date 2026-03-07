@@ -1,11 +1,11 @@
 export default interface RouteLogRecord {
     processId: { value: string };
-    parcelId?: { value: number };
-    shipmentId?: { value: number };
+    parcelId?: { value: string };
+    shipmentId?: { value: string };
     routeLogRecordDetails: {
         routeLogRecordDetailSet: Array<{
-            id: number;
-            zebraId?: number;
+            id: number | string;
+            zebraId?: number | string;
             terminalId?: { value: string | number };
             version: string;
             username: string;

@@ -1589,24 +1589,56 @@
 }
 
 .shipment-cc-shell {
+    display: grid;
+    gap: 16px;
+    grid-template-rows: auto minmax(0, 1fr);
+    height: 100%;
     max-width: 1680px;
+    min-height: 0;
+}
+
+.shipment-cc-page {
+    --shipment-cc-footer-space: 16px;
+    box-sizing: border-box;
+    height: calc(100% - var(--shipment-cc-footer-space));
+    min-height: 0;
+    overflow: hidden;
+}
+
+.shipment-cc-page .shipments-header {
+    margin-bottom: 0;
+    min-height: 0;
 }
 
 .shipment-cc-layout {
-    align-items: start;
+    align-items: stretch;
     display: grid;
     gap: 18px;
     grid-template-columns: minmax(0, 1fr) 380px;
+    min-height: 0;
+    min-width: 0;
+    overflow: hidden;
 }
 
 .shipment-cc-side {
-    align-self: start;
+    align-self: stretch;
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    max-height: calc(100vh - 150px);
+    height: 100%;
+    min-height: 0;
+    min-width: 0;
     overflow: hidden;
-    position: sticky;
-    top: 88px;
+}
+
+.shipment-cc-layout .shipment-edit-panel {
+    box-sizing: border-box;
+    height: 100%;
+    min-height: 0;
+    min-width: 0;
+    overflow: auto;
+    padding-bottom: 24px;
+    scrollbar-gutter: stable;
 }
 
 .shipment-cc-side-header {
@@ -1645,8 +1677,10 @@
 }
 
 .shipment-cc-timeline {
+    flex: 1 1 auto;
+    min-height: 0;
     overflow: auto;
-    padding: 4px 2px 4px 14px;
+    padding: 4px 2px 18px 14px;
 }
 
 .shipment-cc-timeline-item {
@@ -1776,13 +1810,30 @@
 }
 
 @media (max-width: 1180px) {
+    .shipment-cc-page {
+        height: auto;
+        min-height: calc(100vh - 64px);
+        overflow: visible;
+    }
+
+    .shipment-cc-shell {
+        height: auto;
+    }
+
     .shipment-cc-layout {
         grid-template-columns: 1fr;
+        overflow: visible;
     }
 
     .shipment-cc-side {
+        height: auto;
         max-height: none;
-        position: static;
+        min-height: 360px;
+    }
+
+    .shipment-cc-layout .shipment-edit-panel {
+        height: auto;
+        overflow: visible;
     }
 
     .shipment-dashboard {

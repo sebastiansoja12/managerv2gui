@@ -33,7 +33,7 @@ import {useNavigate} from "react-router-dom";
 import ShipmentService from "../../hooks/ShipmentService";
 import {ApiErrorResponse} from "../../api/ApiResult";
 import {ShipmentDto, ShipmentStatusDto} from "./dto/ShipmentDto";
-import pl from "../../i18n/pl";
+import pl from "../../i18n/translate";
 import {AppTabDefinition} from "../AppShell/types";
 import "./styles/shipments.css";
 
@@ -75,7 +75,7 @@ const formatDeliveryDate = (date?: string | null) => {
         return date;
     }
 
-    return parsedDate.toLocaleDateString("pl-PL", {
+    return parsedDate.toLocaleDateString(pl.common.locale, {
         day: "2-digit",
         month: "short",
         year: "numeric",
@@ -87,17 +87,17 @@ const formatPrice = (shipment: ShipmentDto) => {
         return "-";
     }
 
-    return `${shipment.price.amount.toLocaleString("pl-PL")} ${shipment.price.currency}`;
+    return `${shipment.price.amount.toLocaleString(pl.common.locale)} ${shipment.price.currency}`;
 };
 
 const mapShipmentToRow = (shipment: ShipmentDto): ShipmentRow => ({
     id: `#${shipment.shipmentId.value}`,
     size: shipmentTranslations.size[shipment.shipmentSize] || shipment.shipmentSize,
-    sender: formatPersonName(shipment.sender?.firstName, shipment.sender?.lastName, "Nadawca"),
-    recipient: formatPersonName(shipment.recipient?.firstName, shipment.recipient?.lastName, "Odbiorca"),
+    sender: formatPersonName(shipment.sender?.firstName, shipment.sender?.lastName, shipmentTranslations.table.fallbackSender),
+    recipient: formatPersonName(shipment.recipient?.firstName, shipment.recipient?.lastName, shipmentTranslations.table.fallbackRecipient),
     deliveryDate: formatDeliveryDate(shipment.signature?.signedAt),
     price: formatPrice(shipment),
-    user: "Nieprzypisany",
+    user: shipmentTranslations.table.unassigned,
     destination: shipment.destination || shipment.recipient?.city || "-",
     status: shipment.shipmentStatus,
 });
@@ -146,18 +146,18 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
     const sentShipments = shipments.filter((shipment) => shipment.shipmentStatus === "SENT").length;
     const exceptionShipments = shipments.filter((shipment) => ["REROUTE", "REDIRECT", "RETURN"].includes(shipment.shipmentStatus)).length;
 
-    const numericShipmentId = (value: string): number => {
-        const parsed = Number(value);
-        if (!Number.isFinite(parsed) || parsed <= 0) {
+    const normalizeShipmentId = (value: string): string => {
+        const trimmedValue = value.trim();
+        if (!/^\d+$/.test(trimmedValue) || /^0+$/.test(trimmedValue)) {
             throw new Error(shipmentTranslations.table.invalidShipmentId);
         }
 
-        return parsed;
+        return trimmedValue;
     };
 
     const showError = (error: unknown) => {
         const apiError = error as ApiErrorResponse;
-        const message = apiError.message || (error as Error).message || "Operacja nie powiodła się";
+        const message = apiError.message || (error as Error).message || shipmentTranslations.messages.operationFailed;
         setNotice({severity: "error", message});
     };
 
@@ -178,9 +178,9 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
     };
 
     const findById = () => {
-        let shipmentId: number;
+        let shipmentId: string;
         try {
-            shipmentId = numericShipmentId(lookupId);
+            shipmentId = normalizeShipmentId(lookupId);
         } catch (error) {
             setNotice({severity: "error", message: (error as Error).message});
             return;
@@ -258,9 +258,9 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
 
         try {
             await navigator.clipboard.writeText(trackingNumber);
-            setNotice({severity: "success", message: "Numer trackingowy został skopiowany"});
+            setNotice({severity: "success", message: shipmentTranslations.messages.copyTrackingSuccess});
         } catch (error) {
-            setNotice({severity: "error", message: "Nie udało się skopiować numeru trackingowego"});
+            setNotice({severity: "error", message: shipmentTranslations.messages.copyTrackingError});
         }
     };
 
@@ -307,7 +307,7 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
             <div className="tm-content">
                 <div className="tm-top-row">
                     <div className="tm-page-heading">
-                        <span className="tm-heading-kicker">Manager 2.0</span>
+                        <span className="tm-heading-kicker">{pl.common.brand}</span>
                         <Typography variant="h4">
                             {variant === "controlCenter" ? pl.shipments.page.controlCenterTitle : pl.shipments.page.title}
                         </Typography>
@@ -319,30 +319,30 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
                         variant="contained"
                         onClick={() => navigate("/shipments/create")}
                     >
-                        Utwórz przesyłkę
+                        {shipmentTranslations.actions.create}
                     </Button>
                 </div>
 
                 <div className="tm-metrics-grid">
                     <section className="tm-card tm-order-overview">
                         <div className="tm-card-header">
-                            <Typography variant="h5">Podsumowanie przesyłek</Typography>
+                            <Typography variant="h5">{shipmentTranslations.metrics.summaryTitle}</Typography>
                             <div className="tm-card-actions">
-                                <Button size="small" variant="outlined">Tydzień</Button>
+                                <Button size="small" variant="outlined">{shipmentTranslations.metrics.week}</Button>
                                 <button type="button"><OpenInFull fontSize="small" /></button>
                             </div>
                         </div>
-                        <span className="tm-muted">Wszystkie przesyłki</span>
+                        <span className="tm-muted">{shipmentTranslations.metrics.allShipments}</span>
                         <div className="tm-total-line">
                             <strong>{totalShipments.toLocaleString()}</strong>
                             <b>↑ +10.5%</b>
-                            <span>względem poprzedniego tygodnia</span>
+                            <span>{shipmentTranslations.metrics.comparedToLastWeek}</span>
                         </div>
                         <div className="tm-order-stats">
-                            <span><i className="tm-violet" />Wysłane <strong>{sentShipments}</strong></span>
-                            <span><i className="tm-orange" />Utworzone <strong>{createdShipments}</strong></span>
-                            <span><i className="tm-green" />Dostarczone <strong>{deliveredShipments}</strong></span>
-                            <span><i className="tm-blue" />Obsługa <strong>{exceptionShipments}</strong></span>
+                            <span><i className="tm-violet" />{shipmentTranslations.metrics.sent} <strong>{sentShipments}</strong></span>
+                            <span><i className="tm-orange" />{shipmentTranslations.metrics.created} <strong>{createdShipments}</strong></span>
+                            <span><i className="tm-green" />{shipmentTranslations.metrics.delivered} <strong>{deliveredShipments}</strong></span>
+                            <span><i className="tm-blue" />{shipmentTranslations.metrics.handling} <strong>{exceptionShipments}</strong></span>
                         </div>
                         <div className="tm-progress-bar">
                             <span className="tm-progress-violet" />
@@ -354,19 +354,19 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
 
                     <section className="tm-card tm-revenue-card">
                         <div className="tm-card-header">
-                            <Typography variant="h5">Wartość przesyłek</Typography>
+                            <Typography variant="h5">{shipmentTranslations.metrics.valueTitle}</Typography>
                             <div className="tm-card-actions">
-                                <Button size="small" variant="outlined">Ostatni miesiąc</Button>
+                                <Button size="small" variant="outlined">{shipmentTranslations.metrics.lastMonth}</Button>
                                 <button type="button"><OpenInFull fontSize="small" /></button>
                             </div>
                         </div>
                         <div className="tm-revenue-layout">
                             <div>
-                                <span className="tm-muted">Łączna wartość</span>
-                                <strong>116K PLN</strong>
+                                <span className="tm-muted">{shipmentTranslations.metrics.totalValue}</span>
+                                <strong>{shipmentTranslations.metrics.totalValueAmount}</strong>
                                 <div className="tm-loss-line">
                                     <b>↓ -7.2%</b>
-                                    <span>względem poprzedniego tygodnia</span>
+                                    <span>{shipmentTranslations.metrics.comparedToLastWeek}</span>
                                 </div>
                             </div>
                             <div className="tm-gauge">
@@ -374,19 +374,19 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
                             </div>
                         </div>
                         <div className="tm-revenue-legend">
-                            <span><i className="tm-violet" />Standard <strong>74K</strong></span>
-                            <span><i className="tm-orange" />Ekspres <strong>42K</strong></span>
+                            <span><i className="tm-violet" />{shipmentTranslations.metrics.standard} <strong>{shipmentTranslations.metrics.standardAmount}</strong></span>
+                            <span><i className="tm-orange" />{shipmentTranslations.metrics.express} <strong>{shipmentTranslations.metrics.expressAmount}</strong></span>
                         </div>
                     </section>
                 </div>
 
                 <section className="tm-card tm-orders-card">
                     <div className="tm-orders-header">
-                        <Typography variant="h5">Lista przesyłek</Typography>
+                        <Typography variant="h5">{shipmentTranslations.table.title}</Typography>
                         <div className="tm-toolbar-actions">
-                            <Button startIcon={<FilterList />} variant="outlined">Filtry</Button>
-                            <Button startIcon={<Tune />} variant="outlined">Zarządzaj</Button>
-                            <Button startIcon={<FileDownload />} variant="outlined">Eksport</Button>
+                            <Button startIcon={<FilterList />} variant="outlined">{shipmentTranslations.actions.filters}</Button>
+                            <Button startIcon={<Tune />} variant="outlined">{shipmentTranslations.actions.manage}</Button>
+                            <Button startIcon={<FileDownload />} variant="outlined">{shipmentTranslations.actions.export}</Button>
                             <button className="tm-icon-button" type="button"><ViewList fontSize="small" /></button>
                             <button className="tm-icon-button" type="button"><GridView fontSize="small" /></button>
                         </div>
@@ -410,9 +410,9 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
 
                     <div className="tm-manual-load">
                         <TextField
-                            label="ID przesyłki"
+                            label={shipmentTranslations.table.shipmentId}
                             size="small"
-                            type="number"
+                            inputProps={{inputMode: "numeric", pattern: "[0-9]*"}}
                             value={lookupId}
                             onChange={(event: ChangeEvent<HTMLInputElement>) => setLookupId(event.target.value)}
                         />
@@ -420,7 +420,7 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
                             {shipmentTranslations.table.filterById}
                         </Button>
                         <TextField
-                            label="Numer trackingowy"
+                            label={shipmentTranslations.table.trackingNumber}
                             size="small"
                             value={lookupTrackingNumber}
                             onChange={(event: ChangeEvent<HTMLInputElement>) => setLookupTrackingNumber(event.target.value)}
@@ -437,15 +437,15 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
                         <table className="tm-orders-table">
                             <thead>
                             <tr>
-                                <th><span className="tm-checkbox" /> ID</th>
-                                <th><Category fontSize="small" /> Rozmiar</th>
-                                <th><Person fontSize="small" /> Nadawca</th>
-                                <th><Person fontSize="small" /> Odbiorca</th>
-                                <th><AccessTime fontSize="small" /> Data dostawy</th>
-                                <th><AttachMoney fontSize="small" /> Cena</th>
-                                <th><Person fontSize="small" /> Użytkownik</th>
-                                <th><Route fontSize="small" /> Oddział doręczający</th>
-                                <th>Status</th>
+                                <th><span className="tm-checkbox" /> {shipmentTranslations.table.columns.id}</th>
+                                <th><Category fontSize="small" /> {shipmentTranslations.table.columns.size}</th>
+                                <th><Person fontSize="small" /> {shipmentTranslations.table.columns.sender}</th>
+                                <th><Person fontSize="small" /> {shipmentTranslations.table.columns.recipient}</th>
+                                <th><AccessTime fontSize="small" /> {shipmentTranslations.table.columns.deliveryDate}</th>
+                                <th><AttachMoney fontSize="small" /> {shipmentTranslations.table.columns.price}</th>
+                                <th><Person fontSize="small" /> {shipmentTranslations.table.columns.user}</th>
+                                <th><Route fontSize="small" /> {shipmentTranslations.table.columns.destination}</th>
+                                <th>{shipmentTranslations.table.columns.status}</th>
                                 <th />
                             </tr>
                             </thead>
@@ -486,7 +486,7 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
                                         </td>
                                         <td className="tm-actions-cell">
                                             <button
-                                                aria-label={`Akcje przesyłki ${row.id}`}
+                                                aria-label={shipmentTranslations.table.rowActions.replace("{id}", row.id)}
                                                 className="tm-row-action-button"
                                                 type="button"
                                                 onClick={(event) => openActionMenu(event, shipment)}
@@ -499,7 +499,7 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
                             })}
                             {!loading && shipmentRows.length === 0 ? (
                                 <tr>
-                                    <td className="tm-empty-row" colSpan={10}>Brak przesyłek do wyświetlenia</td>
+                                    <td className="tm-empty-row" colSpan={10}>{shipmentTranslations.table.empty}</td>
                                 </tr>
                             ) : undefined}
                             </tbody>
@@ -528,19 +528,19 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
                     <ListItemIcon>
                         <InfoOutlined fontSize="small" />
                     </ListItemIcon>
-                    <ListItemText>Szczegóły</ListItemText>
+                    <ListItemText>{shipmentTranslations.actions.details}</ListItemText>
                 </MenuItem>
                 <MenuItem onClick={handleOpenActionShipment}>
                     <ListItemIcon>
                         <Edit fontSize="small" />
                     </ListItemIcon>
-                    <ListItemText>Edytuj</ListItemText>
+                    <ListItemText>{shipmentTranslations.actions.edit}</ListItemText>
                 </MenuItem>
                 <MenuItem onClick={copyTrackingNumber}>
                     <ListItemIcon>
                         <ContentCopy fontSize="small" />
                     </ListItemIcon>
-                    <ListItemText>Kopiuj tracking</ListItemText>
+                    <ListItemText>{shipmentTranslations.actions.copyTracking}</ListItemText>
                 </MenuItem>
             </Menu>
 

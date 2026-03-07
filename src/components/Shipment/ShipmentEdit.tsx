@@ -20,7 +20,7 @@ import {
     shipmentStatuses,
     ShipmentStatusDto,
 } from "./dto/ShipmentDto";
-import pl from "../../i18n/pl";
+import pl from "../../i18n/translate";
 import "./styles/shipments.css";
 
 type Notice = {
@@ -45,15 +45,15 @@ const clonePerson = (person?: PersonApi): PersonApi => ({
 
 const fullName = (person?: PersonApi) => {
     const value = `${person?.firstName || ""} ${person?.lastName || ""}`.trim();
-    return value || "-";
+    return value || pl.common.dash;
 };
 
 const formatPrice = (shipment?: ShipmentDto | null) => {
     if (!shipment?.price) {
-        return "-";
+        return pl.common.dash;
     }
 
-    return `${shipment.price.amount.toLocaleString("pl-PL")} ${shipment.price.currency}`;
+    return `${shipment.price.amount.toLocaleString(pl.common.locale)} ${shipment.price.currency}`;
 };
 
 const ShipmentEdit: React.FC = () => {
@@ -67,11 +67,10 @@ const ShipmentEdit: React.FC = () => {
     const [saving, setSaving] = useState<boolean>(false);
     const [notice, setNotice] = useState<Notice | null>(null);
 
-    const parsedShipmentId = Number(shipmentId);
-    const validShipmentId = Number.isFinite(parsedShipmentId) && parsedShipmentId > 0;
+    const validShipmentId = Boolean(shipmentId && /^\d+$/.test(shipmentId) && !/^0+$/.test(shipmentId));
     const decodedTrackingNumber = trackingNumber ? decodeURIComponent(trackingNumber) : "";
 
-    const showError = (error: unknown, fallback = "Operacja nie powiodła się") => {
+    const showError = (error: unknown, fallback = pl.shipments.messages.operationFailed) => {
         const apiError = error as ApiErrorResponse;
         setNotice({
             severity: "error",
@@ -89,7 +88,7 @@ const ShipmentEdit: React.FC = () => {
     const loadShipment = async () => {
         if (!decodedTrackingNumber && !validShipmentId) {
             setLoading(false);
-            setNotice({severity: "error", message: "Niepoprawny numer trackingowy przesyłki"});
+            setNotice({severity: "error", message: pl.shipments.messages.invalidTrackingNumber});
             return;
         }
 
@@ -97,10 +96,10 @@ const ShipmentEdit: React.FC = () => {
         try {
             const response = decodedTrackingNumber
                 ? await ShipmentService.getByTrackingNumber(decodedTrackingNumber)
-                : await ShipmentService.get(parsedShipmentId);
+                : await ShipmentService.get(shipmentId || "");
             applyShipment(response.data);
         } catch (error) {
-            showError(error, "Nie udało się pobrać przesyłki");
+            showError(error, pl.shipments.messages.loadError);
         } finally {
             setLoading(false);
         }
@@ -146,9 +145,9 @@ const ShipmentEdit: React.FC = () => {
                 ? await ShipmentService.getByTrackingNumber(shipment.trackingNumber.value)
                 : await ShipmentService.get(shipment.shipmentId.value);
             applyShipment(response.data);
-            setNotice({severity: "success", message: "Przesyłka została zapisana"});
+            setNotice({severity: "success", message: pl.shipments.messages.saveSuccess});
         } catch (error) {
-            showError(error, "Nie udało się zapisać przesyłki");
+            showError(error, pl.shipments.messages.saveError);
         } finally {
             setSaving(false);
         }
@@ -160,13 +159,13 @@ const ShipmentEdit: React.FC = () => {
                 <Typography variant="h6">{title}</Typography>
             </div>
             <div className="shipment-details-grid">
-                <TextField label="Imię" size="small" value={person.firstName} onChange={(event) => updatePersonField(personType, "firstName", event)} />
-                <TextField label="Nazwisko" size="small" value={person.lastName} onChange={(event) => updatePersonField(personType, "lastName", event)} />
-                <TextField label="E-mail" size="small" value={person.email} onChange={(event) => updatePersonField(personType, "email", event)} />
-                <TextField label="Telefon" size="small" value={person.telephoneNumber} onChange={(event) => updatePersonField(personType, "telephoneNumber", event)} />
-                <TextField label="Miasto" size="small" value={person.city} onChange={(event) => updatePersonField(personType, "city", event)} />
-                <TextField label="Kod pocztowy" size="small" value={person.postalCode} onChange={(event) => updatePersonField(personType, "postalCode", event)} />
-                <TextField className="shipment-details-wide" label="Ulica" size="small" value={person.street} onChange={(event) => updatePersonField(personType, "street", event)} />
+                <TextField label={pl.shipments.form.fields.firstName} size="small" value={person.firstName} onChange={(event) => updatePersonField(personType, "firstName", event)} />
+                <TextField label={pl.shipments.form.fields.lastName} size="small" value={person.lastName} onChange={(event) => updatePersonField(personType, "lastName", event)} />
+                <TextField label={pl.shipments.form.fields.email} size="small" value={person.email} onChange={(event) => updatePersonField(personType, "email", event)} />
+                <TextField label={pl.shipments.form.fields.phone} size="small" value={person.telephoneNumber} onChange={(event) => updatePersonField(personType, "telephoneNumber", event)} />
+                <TextField label={pl.shipments.form.fields.city} size="small" value={person.city} onChange={(event) => updatePersonField(personType, "city", event)} />
+                <TextField label={pl.shipments.form.fields.postalCode} size="small" value={person.postalCode} onChange={(event) => updatePersonField(personType, "postalCode", event)} />
+                <TextField className="shipment-details-wide" label={pl.shipments.form.fields.street} size="small" value={person.street} onChange={(event) => updatePersonField(personType, "street", event)} />
             </div>
         </section>
     );
@@ -179,24 +178,26 @@ const ShipmentEdit: React.FC = () => {
                         <span className="shipments-title-icon"><LocalShipping /></span>
                         <Box>
                             <Typography variant="h4">
-                                {shipment ? `Przesyłka ${shipment.trackingNumber?.value || `#${shipment.shipmentId.value}`}` : "Edycja przesyłki"}
+                                {shipment
+                                    ? pl.shipments.page.editTitleWithShipment.replace("{value}", shipment.trackingNumber?.value || `#${shipment.shipmentId.value}`)
+                                    : pl.shipments.page.editTitle}
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
                                 {shipment
-                                    ? `${shipment.trackingNumber?.value || "-"} · ${fullName(shipment.sender)} → ${fullName(shipment.recipient)}`
-                                    : "Ładowanie danych przesyłki"}
+                                    ? `${shipment.trackingNumber?.value || pl.common.dash} · ${fullName(shipment.sender)} → ${fullName(shipment.recipient)}`
+                                    : pl.shipments.page.editLoadingSubtitle}
                             </Typography>
                         </Box>
                     </div>
                     <div className="shipment-edit-header-actions">
                         <Button startIcon={<ArrowBack />} variant="outlined" onClick={() => navigate("/shipments/list")}>
-                            Lista przesyłek
+                            {pl.navigation.shipmentList}
                         </Button>
                         <Button disabled={loading} startIcon={<Refresh />} variant="outlined" onClick={loadShipment}>
-                            Odśwież
+                            {pl.common.refresh}
                         </Button>
                         <Button disabled={loading || saving || !shipment} startIcon={<Save />} variant="contained" onClick={saveShipment}>
-                            Zapisz zmiany
+                            {pl.common.saveChanges}
                         </Button>
                     </div>
                 </div>
@@ -205,40 +206,40 @@ const ShipmentEdit: React.FC = () => {
                     {loading ? (
                         <div className="shipment-edit-loader">
                             <CircularProgress size={30} />
-                            <span>Ładowanie przesyłki...</span>
+                            <span>{pl.shipments.page.editLoadingSubtitle}</span>
                         </div>
                     ) : shipment ? (
                         <>
                             <section className="shipment-details-summary shipment-edit-summary">
                                 <div>
-                                    <span>Tracking</span>
-                                    <strong>{shipment.trackingNumber?.value || "-"}</strong>
+                                    <span>{pl.shipments.summary.tracking}</span>
+                                    <strong>{shipment.trackingNumber?.value || pl.common.dash}</strong>
                                 </div>
                                 <div>
-                                    <span>Rozmiar</span>
+                                    <span>{pl.shipments.summary.size}</span>
                                     <strong>{pl.shipments.size[shipment.shipmentSize]}</strong>
                                 </div>
                                 <div>
-                                    <span>Oddział doręczający</span>
-                                    <strong>{shipment.destination || "-"}</strong>
+                                    <span>{pl.shipments.summary.destination}</span>
+                                    <strong>{shipment.destination || pl.common.dash}</strong>
                                 </div>
                                 <div>
-                                    <span>Cena</span>
+                                    <span>{pl.shipments.summary.price}</span>
                                     <strong>{formatPrice(shipment)}</strong>
                                 </div>
                                 <div>
-                                    <span>Priorytet</span>
-                                    <strong>{shipment.shipmentPriority}</strong>
+                                    <span>{pl.shipments.summary.priority}</span>
+                                    <strong>{pl.shipments.priority[shipment.shipmentPriority]}</strong>
                                 </div>
                             </section>
 
                             <section className="shipment-edit-section">
                                 <div className="shipment-edit-section-header">
-                                    <Typography variant="h6">Status</Typography>
+                                    <Typography variant="h6">{pl.shipments.form.sections.status}</Typography>
                                 </div>
                                 <TextField
                                     fullWidth
-                                    label="Status przesyłki"
+                                    label={pl.shipments.form.fields.shipmentStatus}
                                     select
                                     size="small"
                                     value={status}
@@ -252,11 +253,11 @@ const ShipmentEdit: React.FC = () => {
                                 </TextField>
                             </section>
 
-                            {personFields("Nadawca", "SENDER", sender)}
-                            {personFields("Odbiorca", "RECIPIENT", recipient)}
+                            {personFields(pl.shipments.form.sections.sender, "SENDER", sender)}
+                            {personFields(pl.shipments.form.sections.receiver, "RECIPIENT", recipient)}
                         </>
                     ) : (
-                        <Alert severity="error">Nie udało się załadować przesyłki.</Alert>
+                        <Alert severity="error">{pl.shipments.messages.loadViewError}</Alert>
                     )}
                 </div>
             </div>

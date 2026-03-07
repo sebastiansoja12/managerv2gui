@@ -4,6 +4,7 @@ import AuthService from '../../hooks/AuthService';
 import {LoginRequest} from "./model/LoginRequest";
 import { useNavigate } from 'react-router-dom';
 import {setAuthToken} from "../../auth/AuthTokenStorage";
+import pl from "../../i18n/translate";
 
 
 const Login: React.FC = () => {
@@ -25,7 +26,7 @@ const Login: React.FC = () => {
             navigate('/');
         } catch (error) {
             console.error('Login failed:', error);
-            setErrorMessage('Nie udało się zalogować. Sprawdź login i hasło.');
+            setErrorMessage(pl.login.error);
         } finally {
             setLoading(false);
         }
@@ -42,7 +43,7 @@ const Login: React.FC = () => {
                 }}
             >
                 <Typography component="h1" variant="h5">
-                    Logowanie
+                    {pl.login.title}
                 </Typography>
                 <Box component="form" noValidate sx={{ mt: 1 }}>
                     {errorMessage ? <Alert severity="error" sx={{mb: 2}}>{errorMessage}</Alert> : null}
@@ -51,7 +52,7 @@ const Login: React.FC = () => {
                         required
                         fullWidth
                         id="username"
-                        label="Username"
+                        label={pl.login.username}
                         name="username"
                         autoComplete="username"
                         autoFocus
@@ -64,7 +65,7 @@ const Login: React.FC = () => {
                         required
                         fullWidth
                         name="password"
-                        label="Password"
+                        label={pl.login.password}
                         type="password"
                         id="password"
                         autoComplete="current-password"
@@ -80,7 +81,7 @@ const Login: React.FC = () => {
                         sx={{ mt: 3, mb: 2 }}
                         onClick={handleLogin}
                     >
-                        Zaloguj
+                        {pl.login.submit}
                     </Button>
                 </Box>
             </Box>

@@ -12,16 +12,85 @@ import {
     OperationalProfile,
     setOperationalProfile,
 } from "../../config/operationalProfile";
-import pl from "../../i18n/pl";
+import pl from "../../i18n/translate";
+import {Language} from "../../i18n";
+import {
+    clearCurrentUserLanguageContext,
+    getLanguage,
+    setCurrentUserLanguageContext,
+    setLanguage,
+    subscribeLanguage,
+} from "../../i18n/languageStore";
+import AuthService from "../../hooks/AuthService";
+
+const OPEN_TABS_STORAGE_KEY = "manager.openTabs";
+
+const homeTab = (): AppTabDefinition => ({
+    label: pl.navigation.home,
+    path: "/",
+});
+
+const buildTab = (path: string): AppTabDefinition => {
+    const normalizedPath = normalizePath(path);
+
+    return {
+        label: getTabTitle(normalizedPath),
+        path: normalizedPath,
+    };
+};
+
+const normalizeTabs = (tabs: AppTabDefinition[]): AppTabDefinition[] => {
+    const visitedPaths = new Set<string>();
+
+    return tabs
+        .map((tab) => buildTab(tab.path))
+        .filter((tab) => {
+            if (tab.path === "/login" || visitedPaths.has(tab.path)) {
+                return false;
+            }
+
+            visitedPaths.add(tab.path);
+            return true;
+        });
+};
+
+const readStoredTabs = (): AppTabDefinition[] => {
+    try {
+        const storedTabs = window.localStorage.getItem(OPEN_TABS_STORAGE_KEY);
+        if (!storedTabs) {
+            return [homeTab()];
+        }
+
+        const parsedTabs = JSON.parse(storedTabs) as Array<string | AppTabDefinition>;
+        if (!Array.isArray(parsedTabs)) {
+            return [homeTab()];
+        }
+
+        const tabs = normalizeTabs(parsedTabs
+            .map((tab) => typeof tab === "string" ? {label: "", path: tab} : tab)
+            .filter((tab): tab is AppTabDefinition => Boolean(tab?.path)));
+
+        return tabs.length ? tabs : [homeTab()];
+    } catch {
+        return [homeTab()];
+    }
+};
+
+const persistTabs = (tabs: AppTabDefinition[]) => {
+    try {
+        window.localStorage.setItem(OPEN_TABS_STORAGE_KEY, JSON.stringify(normalizeTabs(tabs)));
+    } catch {
+        // Browser storage can be unavailable in private mode; tabs still work for the current session.
+    }
+};
 
 function AppShell() {
     const location = useLocation();
     const navigate = useNavigate();
-    const [openTabs, setOpenTabs] = React.useState<AppTabDefinition[]>([
-        {label: pl.navigation.home, path: "/"},
-    ]);
+    const [openTabs, setOpenTabs] = React.useState<AppTabDefinition[]>(readStoredTabs);
     const [operationalProfile, updateOperationalProfile] = React.useState<OperationalProfile>(getOperationalProfile);
     const [pendingOperationalProfile, setPendingOperationalProfile] = React.useState<OperationalProfile | null>(null);
+    const [language, updateLanguage] = React.useState<Language>(getLanguage);
 
     const activePath = normalizePath(location.pathname);
     const loginRoute = location.pathname === "/login";
@@ -46,8 +115,21 @@ function AppShell() {
     const applyOperationalProfile = (profile: OperationalProfile) => {
         setOperationalProfile(profile);
         updateOperationalProfile(profile);
-        setOpenTabs([{label: pl.navigation.home, path: "/"}]);
+        setOpenTabs([homeTab()]);
         navigate("/");
+    };
+
+    const changeLanguage = async (nextLanguage: Language) => {
+        const previousLanguage = getLanguage();
+        setLanguage(nextLanguage);
+
+        try {
+            const response = await AuthService.changeLanguage({language: nextLanguage});
+            setCurrentUserLanguageContext(response.data.username || String(response.data.userId?.value), response.data.language);
+        } catch (error) {
+            setLanguage(previousLanguage);
+            console.error(pl.userProfile.messages.languageChangeError, error);
+        }
     };
 
     const changeOperationalProfile = (profile: OperationalProfile) => {
@@ -86,6 +168,43 @@ function AppShell() {
         });
     }, [activePath, loginRoute]);
 
+    React.useEffect(() => subscribeLanguage(updateLanguage), []);
+
+    React.useEffect(() => {
+        if (!authenticated || loginRoute) {
+            clearCurrentUserLanguageContext();
+            return;
+        }
+
+        let active = true;
+        AuthService.me()
+            .then((response) => {
+                if (active) {
+                    setCurrentUserLanguageContext(response.data.username || String(response.data.userId?.value), response.data.language);
+                }
+            })
+            .catch((error) => {
+                console.error(pl.userProfile.messages.languageChangeError, error);
+            });
+
+        return () => {
+            active = false;
+        };
+    }, [authenticated, loginRoute]);
+
+    React.useEffect(() => {
+        setOpenTabs((currentTabs) => currentTabs.map((tab) => ({
+            ...tab,
+            label: getTabTitle(tab.path),
+        })));
+    }, [language]);
+
+    React.useEffect(() => {
+        if (!loginRoute) {
+            persistTabs(openTabs);
+        }
+    }, [loginRoute, openTabs]);
+
     const closeTab = (path: string) => {
         setOpenTabs((currentTabs) => {
             const nextTabs = currentTabs.filter((tab) => tab.path !== path);
@@ -119,6 +238,8 @@ function AppShell() {
         <>
             <Navbar
                 activePath={activePath}
+                language={language}
+                onLanguageChange={changeLanguage}
                 onOpenTab={openTab}
                 onOperationalProfileChange={changeOperationalProfile}
                 operationalProfile={operationalProfile}

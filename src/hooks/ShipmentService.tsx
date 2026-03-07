@@ -6,6 +6,7 @@ import {
     PersonType,
     ShipmentCreateRequestApi,
     ShipmentCreateResponseDto,
+    ShipmentControlCenterDto,
     ShipmentDeliveryRequestApiDto,
     ShipmentDto,
     ShipmentResponseInformation,
@@ -31,7 +32,7 @@ const search = (data: ShipmentSearchRequestApi) => {
     return client.post<ShipmentSearchRequestApi, ShipmentDto[]>("/shipments/search", data);
 };
 
-const get = async (shipmentId: number) => {
+const get = async (shipmentId: string) => {
     try {
         return await client.get<ShipmentDto>(`/shipments/${shipmentId}`);
     } catch (error) {
@@ -61,6 +62,14 @@ const getByTrackingNumber = (trackingNumber: string) => {
     return client.get<ShipmentDto>(`/shipments/tracking-numbers/${trackingNumber}`);
 };
 
+const getControlCenter = (shipmentId: string) => {
+    return client.get<ShipmentControlCenterDto>(`/shipments/${shipmentId}/control-center`);
+};
+
+const getControlCenterByTrackingNumber = (trackingNumber: string) => {
+    return client.get<ShipmentControlCenterDto>(`/shipments/tracking-numbers/${trackingNumber}/control-center`);
+};
+
 const update = (data: ShipmentUpdateRequestApi) => {
     return client.put<ShipmentUpdateRequestApi, void>("/shipments", data);
 };
@@ -83,24 +92,24 @@ const changeSignature = (data: SignatureChangeRequestApi, signatureMethod: Signa
     });
 };
 
-const exists = (shipmentId: number) => {
+const exists = (shipmentId: string) => {
     return client.get<boolean>(`/shipments/exists/${shipmentId}`);
 };
 
-const updatePerson = (shipmentId: number, personType: PersonType, data: PersonApi) => {
+const updatePerson = (shipmentId: string, personType: PersonType, data: PersonApi) => {
     return client.put<PersonApi, ShipmentResponseInformation>("/shipments/person", data, {
         shipmentId,
         personType,
     });
 };
 
-const updateCountries = (shipmentId: number, data: CountryRequestApi) => {
+const updateCountries = (shipmentId: string, data: CountryRequestApi) => {
     return client.put<CountryRequestApi, ShipmentResponseInformation>("/shipments/countries", data, {
         shipmentId,
     });
 };
 
-const changeShipmentType = (shipmentId: number, shipmentType: ShipmentTypeDto) => {
+const changeShipmentType = (shipmentId: string, shipmentType: ShipmentTypeDto) => {
     return client.put<undefined, ShipmentResponseInformation>("/shipments/shipment-type", undefined, {
         shipmentId,
         shipmentType,
@@ -112,6 +121,8 @@ const ShipmentService = {
     get,
     search,
     getByTrackingNumber,
+    getControlCenter,
+    getControlCenterByTrackingNumber,
     update,
     returnShipment,
     deliverShipment,

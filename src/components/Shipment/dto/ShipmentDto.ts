@@ -1,5 +1,7 @@
+import RouteLogRecord from "../../RouteLog/model/RouteLogRecord";
+
 export interface ShipmentIdDto {
-    value: number;
+    value: string;
 }
 
 export interface MoneyApi {
@@ -82,6 +84,11 @@ export interface ShipmentDto {
     dangerousGood?: DangerousGoodApi | null;
 }
 
+export interface ShipmentControlCenterDto {
+    shipment: ShipmentDto;
+    routeLog: RouteLogRecord | null;
+}
+
 export interface TrackingNumberDto {
     value: string;
 }
@@ -124,7 +131,7 @@ export interface ShipmentStatusRequestApi {
 }
 
 export interface ShipmentSearchRequestApi {
-    shipmentId?: number | null;
+    shipmentId?: string | null;
     trackingNumber?: string | null;
     shipmentStatuses?: ShipmentStatusDto[];
     shipmentSizes?: ShipmentSizeDto[];

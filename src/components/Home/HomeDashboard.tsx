@@ -15,7 +15,7 @@ import {
 } from "@mui/icons-material";
 import {useNavigate} from "react-router-dom";
 import {isPathAllowedForProfile, OperationalProfile} from "../../config/operationalProfile";
-import pl from "../../i18n/pl";
+import pl from "../../i18n/translate";
 import {AppTabDefinition} from "../AppShell/types";
 import "./styles/home-dashboard.css";
 
@@ -72,7 +72,7 @@ function HomeDashboard({onOpenTab, operationalProfile}: HomeDashboardProps) {
         <main className="home-dashboard-page">
             <section className="home-dashboard-hero">
                 <div className="home-dashboard-heading">
-                    <span className="home-dashboard-kicker">Manager 2.0</span>
+                    <span className="home-dashboard-kicker">{pl.common.brand}</span>
                     <h1>{pl.home.title}</h1>
                     <p>{pl.home.subtitle}</p>
                 </div>
