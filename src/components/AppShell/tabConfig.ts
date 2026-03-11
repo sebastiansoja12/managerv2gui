@@ -35,9 +35,24 @@ export const getTabTitle = (path: string) => {
         return `ShipmentControlCenter ${decodeURIComponent(shipmentTrackingEditMatch[1])}`;
     }
 
+    const shipmentTrackingHistoryMatch = normalizedPath.match(/^\/shipments\/tracking\/([^/]+)\/history$/);
+    if (shipmentTrackingHistoryMatch) {
+        return `${pl.shipments.trackerlog} ${decodeURIComponent(shipmentTrackingHistoryMatch[1])}`;
+    }
+
     const shipmentEditMatch = normalizedPath.match(/^\/shipments\/(\d+)\/edit$/);
     if (shipmentEditMatch) {
         return `ShipmentControlCenter #${shipmentEditMatch[1]}`;
+    }
+
+    const shipmentHistoryMatch = normalizedPath.match(/^\/shipments\/(\d+)\/history$/);
+    if (shipmentHistoryMatch) {
+        return `${pl.shipments.trackerlog} #${shipmentHistoryMatch[1]}`;
+    }
+
+    const processMatch = normalizedPath.match(/^\/processes\/([^/]+)$/);
+    if (processMatch) {
+        return `${pl.processes.details.title} ${decodeURIComponent(processMatch[1])}`;
     }
 
     return tabTitles()[normalizedPath] || pl.app.tabs.fallbackTitle;
