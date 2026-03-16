@@ -7,7 +7,7 @@ test('renders manager navigation', async () => {
   (http.request as jest.Mock).mockResolvedValue({data: [], status: 200});
   localStorage.setItem('authToken', 'test-token');
   render(<App />);
-  await screen.findByRole('button', {name: /ShipmentControlCenter/i});
+  await screen.findByRole('button', {name: /Szczegóły przesyłki/i});
   const brandElements = screen.getAllByText(/manager 2.0/i);
   expect(brandElements.length).toBeGreaterThan(0);
   localStorage.removeItem('authToken');

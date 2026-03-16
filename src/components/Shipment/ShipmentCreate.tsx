@@ -63,6 +63,13 @@ const emptyDangerousGood: DangerousGoodApi = {
     safetyDataSheet: "",
 };
 
+const initialShipmentSize: ShipmentSizeDto = "SMALL";
+const initialShipmentPriority: ShipmentPriorityDto = "MEDIUM";
+const initialPriceAmount = "15";
+const initialCurrency = "PLN";
+const initialIssuerCountryCode = "PL";
+const initialReceiverCountryCode = "DE";
+
 const ShipmentCreate: React.FC = () => {
     const navigate = useNavigate();
     const shipmentTranslations = pl.shipments;
@@ -70,12 +77,12 @@ const ShipmentCreate: React.FC = () => {
     const [loading, setLoading] = useState<boolean>(false);
     const [sender, setSender] = useState<PersonApi>({...emptyPerson});
     const [recipient, setRecipient] = useState<PersonApi>({...emptyPerson});
-    const [shipmentSize, setShipmentSize] = useState<ShipmentSizeDto>("SMALL");
-    const [shipmentPriority, setShipmentPriority] = useState<ShipmentPriorityDto>("MEDIUM");
-    const [priceAmount, setPriceAmount] = useState<string>("15");
-    const [currency, setCurrency] = useState<string>("PLN");
-    const [issuerCountryCode, setIssuerCountryCode] = useState<string>("PL");
-    const [receiverCountryCode, setReceiverCountryCode] = useState<string>("DE");
+    const [shipmentSize, setShipmentSize] = useState<ShipmentSizeDto>(initialShipmentSize);
+    const [shipmentPriority, setShipmentPriority] = useState<ShipmentPriorityDto>(initialShipmentPriority);
+    const [priceAmount, setPriceAmount] = useState<string>(initialPriceAmount);
+    const [currency, setCurrency] = useState<string>(initialCurrency);
+    const [issuerCountryCode, setIssuerCountryCode] = useState<string>(initialIssuerCountryCode);
+    const [receiverCountryCode, setReceiverCountryCode] = useState<string>(initialReceiverCountryCode);
     const [carrierOperator, setCarrierOperator] = useState<string>("");
     const [dangerousEnabled, setDangerousEnabled] = useState<boolean>(false);
     const [dangerousGood, setDangerousGood] = useState<DangerousGoodApi>({...emptyDangerousGood});
@@ -133,8 +140,9 @@ const ShipmentCreate: React.FC = () => {
         title: string,
         person: PersonApi,
         setPerson: React.Dispatch<React.SetStateAction<PersonApi>>,
+        tone: "sender" | "receiver",
     ) => (
-        <div className="shipments-section">
+        <div className={`shipments-section shipments-create-section shipments-create-section-${tone}`}>
             <div className="shipments-section-title">{title}</div>
             <div className="shipments-form-grid">
                 {textField(shipmentTranslations.form.fields.firstName, person.firstName, (value) => handlePersonChange(person, setPerson, "firstName", value))}
@@ -163,6 +171,20 @@ const ShipmentCreate: React.FC = () => {
         carrierOperator,
     });
 
+    const resetForm = () => {
+        setSender({...emptyPerson});
+        setRecipient({...emptyPerson});
+        setShipmentSize(initialShipmentSize);
+        setShipmentPriority(initialShipmentPriority);
+        setPriceAmount(initialPriceAmount);
+        setCurrency(initialCurrency);
+        setIssuerCountryCode(initialIssuerCountryCode);
+        setReceiverCountryCode(initialReceiverCountryCode);
+        setCarrierOperator("");
+        setDangerousEnabled(false);
+        setDangerousGood({...emptyDangerousGood});
+    };
+
     const showError = (error: unknown) => {
         const apiError = error as ApiErrorResponse;
         const message = apiError.message || (error as Error).message || shipmentTranslations.messages.createError;
@@ -179,6 +201,8 @@ const ShipmentCreate: React.FC = () => {
                     .replace("{shipmentId}", String(response.data.shipmentId))
                     .replace("{trackingNumber}", String(response.data.trackingNumber)),
             });
+            resetForm();
+            navigate(`/shipments/tracking/${encodeURIComponent(response.data.trackingNumber)}/edit`);
         } catch (error) {
             showError(error);
         } finally {
@@ -187,8 +211,8 @@ const ShipmentCreate: React.FC = () => {
     };
 
     return (
-        <div className="shipments-page">
-            <div className="shipments-shell">
+        <div className="shipments-page shipments-create-page">
+            <div className="shipments-shell shipments-create-shell">
                 <div className="shipments-header">
                     <div className="shipments-title">
                         <span className="shipments-title-icon"><LocalShipping /></span>
@@ -210,7 +234,7 @@ const ShipmentCreate: React.FC = () => {
                         <Typography variant="h6">{shipmentTranslations.form.sections.shipmentData}</Typography>
                     </div>
 
-                    <div className="shipments-form-grid-three">
+                    <div className="shipments-form-grid-three shipments-create-data-grid">
                         {selectField(shipmentTranslations.form.fields.size, shipmentSize, shipmentSizes, setShipmentSize, (option) => shipmentTranslations.size[option])}
                         {selectField(shipmentTranslations.form.fields.priority, shipmentPriority, shipmentPriorities, setShipmentPriority, (option) => shipmentTranslations.priority[option])}
                         {textField(shipmentTranslations.form.fields.operator, carrierOperator, setCarrierOperator)}
@@ -220,10 +244,10 @@ const ShipmentCreate: React.FC = () => {
                         {selectField(shipmentTranslations.form.fields.receiverCountry, receiverCountryCode, countryCodes, setReceiverCountryCode)}
                     </div>
 
-                    {personFields(shipmentTranslations.form.sections.sender, sender, setSender)}
-                    {personFields(shipmentTranslations.form.sections.receiver, recipient, setRecipient)}
+                    {personFields(shipmentTranslations.form.sections.sender, sender, setSender, "sender")}
+                    {personFields(shipmentTranslations.form.sections.receiver, recipient, setRecipient, "receiver")}
 
-                    <div className="shipments-section">
+                    <div className="shipments-section shipments-create-section shipments-create-section-dangerous">
                         <Stack direction="row" alignItems="center" justifyContent="space-between" gap={2}>
                             <div className="shipments-section-title">{shipmentTranslations.form.sections.dangerousGood}</div>
                             <FormControlLabel

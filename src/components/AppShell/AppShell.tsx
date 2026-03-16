@@ -22,8 +22,7 @@ import {
     subscribeLanguage,
 } from "../../i18n/languageStore";
 import AuthService from "../../hooks/AuthService";
-
-const OPEN_TABS_STORAGE_KEY = "manager.openTabs";
+import {clearStoredTabs, OPEN_TABS_STORAGE_KEY} from "./tabStorage";
 
 const homeTab = (): AppTabDefinition => ({
     label: pl.navigation.home,
@@ -171,7 +170,19 @@ function AppShell() {
     React.useEffect(() => subscribeLanguage(updateLanguage), []);
 
     React.useEffect(() => {
+        const clearTabsBeforeExit = () => {
+            clearStoredTabs();
+        };
+
+        window.addEventListener("beforeunload", clearTabsBeforeExit);
+        return () => {
+            window.removeEventListener("beforeunload", clearTabsBeforeExit);
+        };
+    }, []);
+
+    React.useEffect(() => {
         if (!authenticated || loginRoute) {
+            clearStoredTabs();
             clearCurrentUserLanguageContext();
             return;
         }

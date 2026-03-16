@@ -32,6 +32,7 @@ export const isPathAllowedForProfile = (path: string, profile: OperationalProfil
 
     const courierPaths = [
         "/shipment-control-center",
+        "/shipment-details",
         "/shipments/list",
         "/courier-deliveries",
         "/vehicles",
@@ -40,13 +41,17 @@ export const isPathAllowedForProfile = (path: string, profile: OperationalProfil
 
     const warehousePaths = [
         "/shipment-control-center",
+        "/shipment-details",
         "/shipments/list",
         "/shipments/create",
         "/shipment-scanner",
         "/depots",
         "/pallets",
+        "/couriers",
         "/processes",
         "/analytics",
+        "/global-configuration",
+        "/microservices",
         "/software-configurations",
         "/device-pairing",
     ];

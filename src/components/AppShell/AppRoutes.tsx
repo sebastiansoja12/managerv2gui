@@ -1,14 +1,17 @@
 import React from "react";
 import {Route, Routes} from "react-router-dom";
+import Couriers from "../Couriers/Couriers";
 import Departments from "../Departments";
 import DevicePairing from "../Devices/DevicePairing";
+import GlobalConfiguration from "../GlobalConfiguration/GlobalConfiguration";
 import HomeDashboard from "../Home/HomeDashboard";
 import ModulePlaceholder from "../Home/ModulePlaceholder";
 import LoginPage from "../LoginPage/LoginPage";
+import MicroserviceStatus from "../MicroserviceStatus/MicroserviceStatus";
 import ProcessDetails from "../Process/ProcessDetails";
 import Processes from "../Process/Processes";
 import ShipmentCreate from "../Shipment/ShipmentCreate";
-import ShipmentControlCenter from "../Shipment/ShipmentControlCenter";
+import ShipmentDetails from "../Shipment/ShipmentDetails";
 import ShipmentHistoryDetails from "../Shipment/ShipmentHistoryDetails";
 import ShipmentList from "../Shipment/ShipmentList";
 import SoftwareConfigurationList from "../SoftwareConfiguration/SoftwareConfigurationList";
@@ -34,18 +37,19 @@ function AppRoutes({onOpenTab, operationalProfile = "warehouse"}: AppRoutesProps
             <Route path="/" element={<HomeDashboard onOpenTab={onOpenTab} operationalProfile={operationalProfile}/>}/>
             <Route path="depots" element={guarded("/depots", <Departments/>)}/>
             <Route path="parcels" element={guarded("/shipments/list", <ShipmentList onOpenTab={onOpenTab}/>)}/>
-            <Route path="shipment-control-center" element={guarded("/shipment-control-center", <ShipmentList onOpenTab={onOpenTab} variant="controlCenter"/>)}/>
+            <Route path="shipment-details" element={guarded("/shipment-details", <ShipmentList onOpenTab={onOpenTab} variant="details"/>)}/>
+            <Route path="shipment-control-center" element={guarded("/shipment-details", <ShipmentList onOpenTab={onOpenTab} variant="details"/>)}/>
             <Route path="shipments" element={guarded("/shipments/list", <ShipmentList onOpenTab={onOpenTab}/>)}/>
             <Route path="shipments/list" element={guarded("/shipments/list", <ShipmentList onOpenTab={onOpenTab}/>)}/>
             <Route path="shipments/create" element={guarded("/shipments/create", <ShipmentCreate/>)}/>
-            <Route path="shipments/tracking/:trackingNumber/edit" element={guarded("/shipments/tracking/:trackingNumber/edit", <ShipmentControlCenter/>)}/>
+            <Route path="shipments/tracking/:trackingNumber/edit" element={guarded("/shipments/tracking/:trackingNumber/edit", <ShipmentDetails/>)}/>
             <Route path="shipments/tracking/:trackingNumber/history" element={guarded("/shipments/tracking/:trackingNumber/history", <ShipmentHistoryDetails/>)}/>
-            <Route path="shipments/:shipmentId/edit" element={guarded("/shipments/1/edit", <ShipmentControlCenter/>)}/>
+            <Route path="shipments/:shipmentId/edit" element={guarded("/shipments/1/edit", <ShipmentDetails/>)}/>
             <Route path="shipments/:shipmentId/history" element={guarded("/shipments/1/history", <ShipmentHistoryDetails/>)}/>
             <Route path="analytics" element={guarded("/analytics", <ModulePlaceholder title={pl.home.tiles.analytics.title}/>)}/>
             <Route path="processes" element={guarded("/processes", <Processes/>)}/>
             <Route path="processes/:processId" element={guarded("/processes/1", <ProcessDetails/>)}/>
-            <Route path="couriers" element={guarded("/couriers", <ModulePlaceholder title={pl.home.tiles.couriers.title}/>)}/>
+            <Route path="couriers" element={guarded("/couriers", <Couriers/>)}/>
             <Route path="vehicles" element={guarded("/vehicles", <ModulePlaceholder title={pl.home.tiles.vehicles.title}/>)}/>
             <Route path="pallets" element={guarded("/pallets", <ModulePlaceholder title={pl.home.tiles.pallets.title}/>)}/>
             <Route path="shipment-scanner" element={guarded("/shipment-scanner", <ModulePlaceholder title={pl.home.tiles.shipmentScanner.title}/>)}/>
@@ -54,10 +58,12 @@ function AppRoutes({onOpenTab, operationalProfile = "warehouse"}: AppRoutesProps
             <Route path="users" element={guarded("/users", <ModulePlaceholder title={pl.navigation.users}/>)}/>
             <Route path="deals" element={guarded("/deals", <ModulePlaceholder title={pl.navigation.deals}/>)}/>
             <Route path="billing" element={guarded("/billing", <ModulePlaceholder title={pl.navigation.billing}/>)}/>
+            <Route path="microservices" element={guarded("/microservices", <MicroserviceStatus/>)}/>
             <Route path="support" element={guarded("/support", <ModulePlaceholder title={pl.navigation.support}/>)}/>
             <Route path="login" element={<LoginPage/>}/>
             <Route path="profile" element={<UserProfile/>}/>
             <Route path="device-pairing" element={guarded("/device-pairing", <DevicePairing/>)}/>
+            <Route path="global-configuration" element={guarded("/global-configuration", <GlobalConfiguration/>)}/>
             <Route path="software-configurations" element={guarded("/software-configurations", <SoftwareConfigurationList/>)}/>
         </Routes>
     );

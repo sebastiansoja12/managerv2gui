@@ -110,7 +110,7 @@ const DEFAULT_STATUS_FILTER: ShipmentStatusDto = "CREATED";
 
 type ShipmentListProps = {
     onOpenTab?: (tab: AppTabDefinition) => void;
-    variant?: "list" | "controlCenter";
+    variant?: "list" | "details";
 };
 
 const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}) => {
@@ -211,8 +211,8 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
         const shipmentId = shipment.shipmentId.value;
         const trackingNumber = shipment.trackingNumber?.value;
         const label = trackingNumber
-            ? `${pl.home.tiles.shipmentControlCenter.title} ${trackingNumber}`
-            : `${pl.home.tiles.shipmentControlCenter.title} #${shipmentId}`;
+            ? `${pl.home.tiles.shipmentDetails.title} ${trackingNumber}`
+            : `${pl.home.tiles.shipmentDetails.title} #${shipmentId}`;
         const path = trackingNumber
             ? `/shipments/tracking/${encodeURIComponent(trackingNumber)}/edit`
             : `/shipments/${shipmentId}/edit`;
@@ -309,9 +309,9 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
                     <div className="tm-page-heading">
                         <span className="tm-heading-kicker">{pl.common.brand}</span>
                         <Typography variant="h4">
-                            {variant === "controlCenter" ? pl.shipments.page.controlCenterTitle : pl.shipments.page.title}
+                            {variant === "details" ? pl.shipments.page.detailsTitle : pl.shipments.page.title}
                         </Typography>
-                        <p>{variant === "controlCenter" ? pl.shipments.page.controlCenterSubtitle : pl.shipments.page.subtitle}</p>
+                        <p>{variant === "details" ? pl.shipments.page.detailsSubtitle : pl.shipments.page.subtitle}</p>
                     </div>
                     <Button
                         className="tm-add-new"

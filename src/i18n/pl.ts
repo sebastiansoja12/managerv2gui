@@ -1,4 +1,4 @@
-import {ShipmentPriorityDto, ShipmentSizeDto, ShipmentStatusDto} from "../components/Shipment/dto/ShipmentDto";
+import {ShipmentPriorityDto, ShipmentSizeDto, ShipmentStatusDto, ShipmentTypeDto} from "../components/Shipment/dto/ShipmentDto";
 
 export const pl = {
     common: {
@@ -15,6 +15,7 @@ export const pl = {
         languages: {
             pl: "Polski",
             en: "Angielski",
+            de: "Niemiecki",
         },
     },
     app: {
@@ -84,6 +85,8 @@ export const pl = {
         deals: "Promocje",
         billing: "Płatności",
         admins: "Administratorzy",
+        globalConfiguration: "Konfiguracja globalna",
+        microservices: "Status serwisów",
         systemSettings: "Ustawienia systemu",
         support: "Support",
         profile: "Mój profil",
@@ -113,9 +116,20 @@ export const pl = {
         subtitle: "Szybki dostęp do najważniejszych modułów systemu.",
         openTile: "Otwórz",
         moduleCountLabel: "modułów",
+        trackingLookup: {
+            ariaLabel: "Szybkie wyszukiwanie przesyłki",
+            kicker: "Tracking",
+            title: "Znajdź przesyłkę",
+            inputLabel: "Numer trackingowy przesyłki",
+            placeholder: "Wpisz numer przesyłki",
+            search: "Wyszukaj",
+            showHistory: "Wyświetl historię",
+            detailsTabLabel: "Szczegóły przesyłki {trackingNumber}",
+            historyTabLabel: "Historia przesyłki {trackingNumber}",
+        },
         tiles: {
-            shipmentControlCenter: {
-                title: "ShipmentControlCenter",
+            shipmentDetails: {
+                title: "Szczegóły przesyłki",
                 description: "Aktualizacja danych przesyłki, historia route trackera i operacje na wybranej przesyłce.",
             },
             shipmentList: {
@@ -217,6 +231,72 @@ export const pl = {
             SUSPENDED: "Zawieszony",
         },
     },
+    couriers: {
+        page: {
+            kicker: "Operacje",
+            title: "Kurierzy",
+            subtitle: "Lista kurierów przypisanych do aktualnego oddziału.",
+            listTitle: "Lista kurierów",
+            detailsTitle: "Widok kuriera",
+            emptyDetails: "Wybierz kuriera z tabeli, żeby zobaczyć szczegóły.",
+            loading: "Ładowanie kurierów...",
+            empty: "Brak kurierów do wyświetlenia",
+            loadError: "Nie udało się pobrać listy kurierów",
+            saveError: "Nie udało się zapisać zmian",
+            actionError: "Nie udało się wykonać akcji",
+            certificationSaved: "Certyfikat został zapisany",
+            basicDataSaved: "Dane kuriera zostały zapisane",
+        },
+        columns: {
+            code: "Kod kuriera",
+            name: "Imię i nazwisko",
+            phone: "Telefon",
+            department: "Oddział",
+            status: "Status",
+            license: "Prawo jazdy",
+            certification: "Certyfikaty",
+            vehicle: "Pojazd",
+            actions: "Akcje",
+        },
+        fields: {
+            firstName: "Imię",
+            lastName: "Nazwisko",
+            telephoneNumber: "Telefon",
+            certificateNumber: "Numer certyfikatu",
+            issueDate: "Data wydania",
+            expiryDate: "Data ważności",
+            authority: "Organ wydający",
+            valid: "Certyfikat ważny",
+            driverLicenseNumber: "Numer prawa jazdy",
+            device: "Urządzenie",
+            deliveryArea: "Obszar dostaw",
+            packageTypes: "Obsługiwane typy paczek",
+        },
+        actions: {
+            refresh: "Odśwież",
+            edit: "Edytuj",
+            activate: "Aktywuj",
+            deactivate: "Dezaktywuj",
+            saveBasicData: "Zapisz dane",
+            addCertification: "Dodaj certyfikat na przewożenie niebezpiecznych przedmiotów",
+            saveCertification: "Zapisz certyfikat",
+            cancelEdit: "Anuluj edycję",
+        },
+        status: {
+            ACTIVE: "Aktywny",
+            INACTIVE: "Nieaktywny",
+            SUSPENDED: "Zawieszony",
+            DELETED: "Usunięty",
+            USER_CREATED: "Użytkownik utworzony",
+            USER_NOT_CREATED: "Użytkownik nieutworzony",
+        },
+        checks: {
+            validLicense: "Ważne prawo jazdy",
+            invalidLicense: "Brak ważnego prawa jazdy",
+            validCertification: "Ważny certyfikat na przewożenie niebezpiecznych przedmiotów",
+            invalidCertification: "Brak ważnego certyfikatu na przewożenie niebezpiecznych przedmiotów",
+        },
+    },
     softwareConfiguration: {
         title: "Lista właściwości systemu",
         columns: {
@@ -232,6 +312,83 @@ export const pl = {
         messages: {
             loadError: "Nie udało się pobrać właściwości systemu",
             updateError: "Nie udało się zaktualizować właściwości",
+        },
+    },
+    globalConfiguration: {
+        page: {
+            kicker: "Ustawienia",
+            moduleTitle: "Konfiguracja",
+            title: "Konfiguracja globalna",
+            subtitle: "Centralne parametry dla dostawców, przesyłek i konfiguracji systemu.",
+            sectionsTitle: "Sekcje konfiguracji",
+            propertiesCount: "Właściwości",
+            loading: "Ładowanie konfiguracji...",
+            emptySection: "Brak właściwości w tej sekcji",
+        },
+        sections: {
+            suppliers: {
+                title: "Dostawcy",
+                description: "Parametry dotyczące dostawców, kurierów i ich operacyjnych uprawnień.",
+            },
+            shipments: {
+                title: "Przesyłki",
+                description: "Reguły obsługi, walidacji i przepływu przesyłek.",
+            },
+            configuration: {
+                title: "Konfiguracja",
+                description: "Globalne ustawienia techniczne oraz zachowanie aplikacji.",
+            },
+        },
+        columns: {
+            name: "Właściwość",
+            category: "Kategoria",
+            value: "Wartość",
+        },
+        courierConfiguration: {
+            title: "Edycja kurierów",
+            fields: {
+                copyDepartmentCodeFromDevice: "Przepisuj kod oddziału z urządzenia",
+                skipInvalidShipments: "Pomijaj nieprawidłowe przesyłki",
+                generateNewReturnCodes: "Generuj nowe kody zwrotu",
+                editDeliveryArea: "Edytuj rejon dowożenia",
+                substituteCourier: "Kurier zastępczy",
+                autoGenerateLabels: "Automatycznie generuj etykiety",
+            },
+            messages: {
+                saved: "Konfiguracja edycji kurierów została zapisana w GUI",
+            },
+        },
+        messages: {
+            loadError: "Nie udało się pobrać konfiguracji globalnej",
+            updateError: "Nie udało się zapisać właściwości",
+            updateSuccess: "Właściwość została zapisana",
+        },
+    },
+    microservices: {
+        page: {
+            kicker: "Zarządzanie",
+            title: "Status serwisów",
+            subtitle: "Podgląd dostępności usług uruchomionych w środowisku aplikacji.",
+            listTitle: "Serwisy",
+            servicesCount: "Usługi",
+            loading: "Sprawdzanie serwisów...",
+            empty: "Brak serwisów do sprawdzenia",
+        },
+        columns: {
+            name: "Nazwa",
+            url: "URL",
+            status: "Status",
+            latency: "Czas odpowiedzi",
+            lastCheck: "Ostatnie sprawdzenie",
+            message: "Komunikat",
+        },
+        status: {
+            online: "Działa",
+            offline: "Nie działa",
+            unknown: "Nie skonfigurowano",
+        },
+        messages: {
+            loadError: "Nie udało się sprawdzić mikroserwisów",
         },
     },
     routeLogs: {
@@ -381,8 +538,8 @@ export const pl = {
         page: {
             title: "Przesyłki",
             subtitle: "Lista przesyłek z oddziału oraz szybkie operacje na backendzie.",
-            controlCenterTitle: "ShipmentControlCenter",
-            controlCenterSubtitle: "Wybierz przesyłkę z listy, aby otworzyć centrum kontroli i operacji.",
+            detailsTitle: "Szczegóły przesyłki",
+            detailsSubtitle: "Wybierz przesyłkę z listy, aby otworzyć jej szczegóły i operacje.",
             createTitle: "Utwórz przesyłkę",
             createSubtitle: "Formularz tworzenia nowej przesyłki",
             editTitle: "Edycja przesyłki",
@@ -456,6 +613,7 @@ export const pl = {
             },
             fields: {
                 shipmentStatus: "Status przesyłki",
+                shipmentType: "Typ przesyłki",
                 firstName: "Imię",
                 lastName: "Nazwisko",
                 email: "E-mail",
@@ -496,24 +654,34 @@ export const pl = {
             price: "Cena",
             priority: "Priorytet",
             status: "Status",
+            type: "Typ",
+            relatedShipment: "Przesyłka nadrzędna",
             currentCourier: "Aktualny kurier",
             lastActivity: "Ostatnia aktywność: {date} · {department}",
             noCourierInfo: "Brak informacji o kurierze w route trackerze",
         },
         routeHistory: {
+            title: "Historia przesyłki",
             loading: "Ładowanie historii...",
-            empty: "Brak wpisów route trackera",
+            empty: "Brak wpisów historii przesyłki",
             openDetails: "Otwórz szczegółową historię",
             detailsTitle: "Szczegółowa historia przesyłki",
-            detailsSubtitle: "Mapa zdarzeń, punkty obsługi i pełny zapis route trackera.",
+            detailsSubtitle: "Mapa zdarzeń, punkty obsługi i pełny zapis historii przesyłki.",
             mapTitle: "Mapa historii przesyłki",
-            mapSubtitle: "Poglądowa trasa na podstawie zdarzeń z route trackera",
+            mapSubtitle: "Poglądowa trasa na podstawie zdarzeń przesyłki",
             timelineTitle: "Oś zdarzeń",
             defaultOperation: "Operacja",
             noDescription: "Brak opisu operacji",
             department: "Oddział",
             user: "Użytkownik",
             terminal: "Terminal",
+        },
+        dangerousGood: {
+            active: "Aktywny",
+            emptyStatus: "Brak",
+            empty: "Ta przesyłka nie ma przypisanego towaru niebezpiecznego.",
+            yes: "Tak",
+            no: "Nie",
         },
         messages: {
             operationFailed: "Operacja nie powiodła się",
@@ -552,6 +720,10 @@ export const pl = {
             HIGH: "Wysoki",
             EXPRESS: "Ekspres",
         } satisfies Record<ShipmentPriorityDto, string>,
+        type: {
+            PARENT: "Nadrzędna",
+            CHILD: "Podrzędna",
+        } satisfies Record<ShipmentTypeDto, string>,
         statusTabs: [
             "CREATED",
             "SENT",

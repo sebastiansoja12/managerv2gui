@@ -1,7 +1,8 @@
-import React from "react";
+import React, {FormEvent, useState} from "react";
 import {
     AccountTree,
     Analytics,
+    History,
     Business,
     ChevronRight,
     DevicesOther,
@@ -9,6 +10,7 @@ import {
     Inventory2,
     LocalShipping,
     Person,
+    Search,
     SettingsSuggest,
     TableRows,
     Warehouse,
@@ -34,7 +36,7 @@ type HomeDashboardProps = {
 };
 
 const homeTiles: HomeTile[] = [
-    {key: "shipmentControlCenter", path: "/shipment-control-center", icon: Warehouse, accent: "blue"},
+    {key: "shipmentDetails", path: "/shipment-details", icon: Warehouse, accent: "blue"},
     {key: "shipmentList", path: "/shipments/list", icon: TableRows, accent: "cyan"},
     {key: "shipmentScanner", path: "/shipment-scanner", icon: Warehouse, accent: "teal"},
     {key: "courierDeliveries", path: "/courier-deliveries", icon: LocalShipping, accent: "emerald"},
@@ -51,21 +53,49 @@ const homeTiles: HomeTile[] = [
 
 function HomeDashboard({onOpenTab, operationalProfile}: HomeDashboardProps) {
     const navigate = useNavigate();
+    const [trackingNumber, setTrackingNumber] = useState("");
     const visibleTiles = homeTiles.filter((tile) => isPathAllowedForProfile(tile.path, operationalProfile));
+    const trimmedTrackingNumber = trackingNumber.trim();
 
-    const openTile = (tile: HomeTile) => {
-        const translation = pl.home.tiles[tile.key];
-        const tab = {
-            label: translation.title,
-            path: tile.path,
-        };
-
+    const openTab = (tab: AppTabDefinition) => {
         if (onOpenTab) {
             onOpenTab(tab);
             return;
         }
 
         navigate(tab.path);
+    };
+
+    const openTile = (tile: HomeTile) => {
+        const translation = pl.home.tiles[tile.key];
+        openTab({
+            label: translation.title,
+            path: tile.path,
+        });
+    };
+
+    const openShipmentByTrackingNumber = (view: "details" | "history") => {
+        if (!trimmedTrackingNumber) {
+            return;
+        }
+
+        const encodedTrackingNumber = encodeURIComponent(trimmedTrackingNumber);
+        const tabLabelTemplate = view === "details"
+            ? pl.home.trackingLookup.detailsTabLabel
+            : pl.home.trackingLookup.historyTabLabel;
+        const path = view === "details"
+            ? `/shipments/tracking/${encodedTrackingNumber}/edit`
+            : `/shipments/tracking/${encodedTrackingNumber}/history`;
+
+        openTab({
+            label: tabLabelTemplate.replace("{trackingNumber}", trimmedTrackingNumber),
+            path,
+        });
+    };
+
+    const searchShipment = (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        openShipmentByTrackingNumber("details");
     };
 
     return (
@@ -80,6 +110,41 @@ function HomeDashboard({onOpenTab, operationalProfile}: HomeDashboardProps) {
                     <strong>{visibleTiles.length}</strong>
                     <span>{pl.home.moduleCountLabel}</span>
                 </div>
+            </section>
+
+            <section className="home-tracking-lookup" aria-label={pl.home.trackingLookup.ariaLabel}>
+                <div className="home-tracking-lookup-intro">
+                    <span className="home-tracking-lookup-icon">
+                        <LocalShipping fontSize="small" />
+                    </span>
+                    <div>
+                        <span>{pl.home.trackingLookup.kicker}</span>
+                        <strong>{pl.home.trackingLookup.title}</strong>
+                    </div>
+                </div>
+
+                <form className="home-tracking-lookup-form" onSubmit={searchShipment}>
+                    <input
+                        aria-label={pl.home.trackingLookup.inputLabel}
+                        placeholder={pl.home.trackingLookup.placeholder}
+                        type="text"
+                        value={trackingNumber}
+                        onChange={(event) => setTrackingNumber(event.target.value)}
+                    />
+                    <button className="home-tracking-primary" disabled={!trimmedTrackingNumber} type="submit">
+                        <Search fontSize="small" />
+                        <span>{pl.home.trackingLookup.search}</span>
+                    </button>
+                    <button
+                        className="home-tracking-secondary"
+                        disabled={!trimmedTrackingNumber}
+                        type="button"
+                        onClick={() => openShipmentByTrackingNumber("history")}
+                    >
+                        <History fontSize="small" />
+                        <span>{pl.home.trackingLookup.showHistory}</span>
+                    </button>
+                </form>
             </section>
 
             <section className="home-tile-grid" aria-label={pl.home.title}>

@@ -287,7 +287,51 @@
 }
 
 .shipments-create-panel {
+    border-color: #dbeafe;
+    box-shadow: 0 18px 46px rgba(15, 23, 42, 0.08);
     margin-bottom: 16px;
+    overflow: hidden;
+    position: relative;
+}
+
+.shipments-create-page {
+    background: #f4f7fb;
+}
+
+.shipments-create-shell {
+    max-width: 1880px;
+}
+
+.shipments-create-panel::before {
+    background: linear-gradient(90deg, #2563eb 0%, #0f766e 34%, #b45309 68%, #be123c 100%);
+    content: "";
+    height: 6px;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+
+.shipments-create-panel .shipments-panel-title {
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 8px;
+    color: #1d4ed8;
+    margin: 4px 0 18px;
+    padding: 12px 14px;
+}
+
+.shipments-create-panel .shipments-panel-title .MuiTypography-root {
+    color: #0f172a;
+    font-weight: 900;
+}
+
+.shipments-create-data-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.shipments-create-data-grid .MuiTextField-root:nth-child(3) {
+    grid-column: span 2;
 }
 
 .shipments-sticky-panel {
@@ -319,6 +363,89 @@
     border-top: 1px solid #eef1f4;
     margin-top: 22px;
     padding-top: 20px;
+}
+
+.shipments-create-section {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    margin-top: 18px;
+    padding: 18px;
+}
+
+.shipments-create-section .shipments-section-title {
+    align-items: center;
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.shipments-create-section .shipments-section-title::before {
+    border-radius: 999px;
+    content: "";
+    height: 10px;
+    width: 10px;
+}
+
+.shipments-create-section-sender {
+    background: #f8fbff;
+    border-color: #bfdbfe;
+}
+
+.shipments-create-section-sender .shipments-section-title,
+.shipments-create-section-sender .shipments-section-title::before {
+    color: #1d4ed8;
+}
+
+.shipments-create-section-sender .shipments-section-title::before {
+    background: #2563eb;
+}
+
+.shipments-create-section-receiver {
+    background: #f5fffb;
+    border-color: #99f6e4;
+}
+
+.shipments-create-section-receiver .shipments-section-title,
+.shipments-create-section-receiver .shipments-section-title::before {
+    color: #0f766e;
+}
+
+.shipments-create-section-receiver .shipments-section-title::before {
+    background: #0f766e;
+}
+
+.shipments-create-section-dangerous {
+    background: #fff8f1;
+    border-color: #fed7aa;
+}
+
+.shipments-create-section-dangerous .shipments-section-title,
+.shipments-create-section-dangerous .shipments-section-title::before {
+    color: #b45309;
+}
+
+.shipments-create-section-dangerous .shipments-section-title::before {
+    background: #f97316;
+}
+
+.shipments-create-section .shipments-form-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.shipments-create-section .shipments-form-grid .MuiTextField-root:nth-child(7) {
+    grid-column: span 2;
+}
+
+@media (max-width: 1280px) {
+    .shipments-create-data-grid,
+    .shipments-create-section .shipments-form-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .shipments-create-data-grid .MuiTextField-root:nth-child(3),
+    .shipments-create-section .shipments-form-grid .MuiTextField-root:nth-child(7) {
+        grid-column: auto;
+    }
 }
 
 .shipments-section-title {
@@ -359,12 +486,13 @@
 }
 
 .shipments-actions .MuiButton-contained {
-    background: #2563eb;
-    box-shadow: 0 12px 20px rgba(37, 99, 235, 0.18);
+    background: #1d4ed8;
+    box-shadow: 0 14px 28px rgba(37, 99, 235, 0.24);
+    min-width: 210px;
 }
 
 .shipments-actions .MuiButton-contained:hover {
-    background: #1d4ed8;
+    background: #0f766e;
 }
 
 .shipments-page .MuiTextField-root {
@@ -1690,13 +1818,14 @@
     display: grid;
     gap: 12px;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    margin-bottom: 18px;
+    margin-bottom: 14px;
 }
 
 .shipment-details-summary div {
-    border: 1px solid #e5e7eb;
+    background: #ffffff;
+    border: 1px solid #dbe3ef;
     border-radius: 8px;
-    padding: 12px;
+    padding: 13px 14px;
 }
 
 .shipment-details-summary span {
@@ -1762,7 +1891,7 @@
 
 .shipment-edit-panel {
     display: grid;
-    gap: 18px;
+    gap: 14px;
 }
 
 .shipment-edit-summary {
@@ -1770,8 +1899,8 @@
 }
 
 .shipment-edit-section {
-    border-top: 1px solid #eef1f4;
-    padding-top: 18px;
+    border-top: 0;
+    padding-top: 0;
 }
 
 .shipment-edit-section-header {
@@ -1802,7 +1931,7 @@
     gap: 16px;
     grid-template-rows: auto minmax(0, 1fr);
     height: 100%;
-    max-width: 1680px;
+    max-width: 1880px;
     min-height: 0;
 }
 
@@ -1823,7 +1952,7 @@
     align-items: stretch;
     display: grid;
     gap: 18px;
-    grid-template-columns: minmax(0, 1fr) 380px;
+    grid-template-columns: minmax(0, 1fr) minmax(420px, 0.32fr);
     min-height: 0;
     min-width: 0;
     overflow: hidden;
@@ -1841,13 +1970,209 @@
 }
 
 .shipment-cc-layout .shipment-edit-panel {
+    background: transparent;
+    border: 0;
     box-sizing: border-box;
+    box-shadow: none;
     height: 100%;
     min-height: 0;
     min-width: 0;
     overflow: auto;
-    padding-bottom: 24px;
+    padding: 0 4px 24px 0;
     scrollbar-gutter: stable;
+}
+
+.shipment-details-segment {
+    background: #ffffff;
+    border: 1px solid #dfe7f2;
+    border-radius: 8px;
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.045);
+    overflow: hidden;
+    padding: 18px;
+    position: relative;
+}
+
+.shipment-details-segment::before {
+    content: "";
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+
+.shipment-details-info-segment {
+    background: #f8fbff;
+    border-color: #bfdbfe;
+}
+
+.shipment-details-info-segment::before {
+    background: linear-gradient(90deg, #2563eb, #0f766e);
+    height: 5px;
+}
+
+.shipment-details-info-segment .shipment-edit-section-header {
+    margin-top: 4px;
+}
+
+.shipment-details-operations-grid {
+    border-top: 1px solid #dbe7f8;
+    padding-top: 14px;
+}
+
+.shipment-details-person-sender {
+    background: #f8fbff;
+    border-color: #bfdbfe;
+}
+
+.shipment-details-person-recipient {
+    background: #f5fffb;
+    border-color: #99f6e4;
+}
+
+.shipment-details-person-sender::before,
+.shipment-details-person-recipient::before {
+    height: 4px;
+}
+
+.shipment-details-person-sender::before {
+    background: #2563eb;
+}
+
+.shipment-details-person-recipient::before {
+    background: #0f766e;
+}
+
+.shipment-details-person-sender .shipment-edit-section-header,
+.shipment-details-person-recipient .shipment-edit-section-header {
+    margin-top: 2px;
+}
+
+.shipment-details-person-sender .shipment-edit-section-header .MuiTypography-root {
+    color: #1d4ed8;
+}
+
+.shipment-details-person-recipient .shipment-edit-section-header .MuiTypography-root {
+    color: #0f766e;
+}
+
+.shipment-details-person-sender .shipment-details-grid,
+.shipment-details-person-recipient .shipment-details-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.shipment-details-person-sender .shipment-details-wide,
+.shipment-details-person-recipient .shipment-details-wide {
+    grid-column: span 2;
+}
+
+.shipment-details-dangerous-good {
+    background: #fff8f1;
+    border-color: #fed7aa;
+}
+
+.shipment-details-dangerous-good::before {
+    background: #f97316;
+    height: 4px;
+}
+
+.shipment-details-dangerous-good .shipment-edit-section-header {
+    margin-top: 2px;
+}
+
+.shipment-details-dangerous-good .shipment-edit-section-header .MuiTypography-root {
+    color: #b45309;
+}
+
+.shipment-dangerous-chip-active {
+    background: #ffedd5 !important;
+    color: #c2410c !important;
+    font-weight: 900 !important;
+}
+
+.shipment-dangerous-chip-empty {
+    background: #f1f5f9 !important;
+    color: #475569 !important;
+    font-weight: 900 !important;
+}
+
+.shipment-dangerous-good-grid {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.shipment-dangerous-good-grid div {
+    background: #ffffff;
+    border: 1px solid #fed7aa;
+    border-radius: 8px;
+    min-width: 0;
+    padding: 12px;
+}
+
+.shipment-dangerous-good-grid span,
+.shipment-dangerous-good-notes span {
+    color: #9a3412;
+    display: block;
+    font-size: 0.76rem;
+    font-weight: 850;
+    margin-bottom: 6px;
+}
+
+.shipment-dangerous-good-grid strong {
+    color: #111827;
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 900;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.shipment-dangerous-good-flags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.shipment-dangerous-good-flags .MuiChip-root {
+    background: #ffffff;
+    border: 1px solid #fed7aa;
+    color: #7c2d12;
+    font-weight: 850;
+}
+
+.shipment-dangerous-good-notes {
+    display: grid;
+    gap: 10px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-top: 12px;
+}
+
+.shipment-dangerous-good-notes div {
+    background: #ffffff;
+    border: 1px solid #fed7aa;
+    border-radius: 8px;
+    min-width: 0;
+    padding: 12px;
+}
+
+.shipment-dangerous-good-notes p {
+    color: #374151;
+    font-size: 0.86rem;
+    font-weight: 700;
+    line-height: 1.45;
+    margin: 0;
+}
+
+.shipment-dangerous-good-empty {
+    background: #ffffff;
+    border: 1px dashed #fdba74;
+    border-radius: 8px;
+    color: #9a3412;
+    font-size: 0.9rem;
+    font-weight: 800;
+    padding: 14px;
 }
 
 .shipment-cc-side-header {
@@ -2111,6 +2436,15 @@
         grid-template-columns: 1fr;
     }
 
+    .shipments-create-data-grid,
+    .shipments-create-section .shipments-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .shipments-create-section {
+        padding: 14px;
+    }
+
     .shipment-board {
         padding: 14px;
     }
@@ -2175,6 +2509,21 @@
 
     .shipment-details-summary,
     .shipment-details-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .shipment-details-person-sender .shipment-details-grid,
+    .shipment-details-person-recipient .shipment-details-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .shipment-details-person-sender .shipment-details-wide,
+    .shipment-details-person-recipient .shipment-details-wide {
+        grid-column: 1 / -1;
+    }
+
+    .shipment-dangerous-good-grid,
+    .shipment-dangerous-good-notes {
         grid-template-columns: 1fr;
     }
 

@@ -1,5 +1,6 @@
 import {AxiosError, AxiosInstance, AxiosRequestConfig} from "axios";
 import {ApiErrorResponse, ApiResult, QueryParams} from "./ApiResult";
+import {getBackendErrorMessage} from "./errorMessage";
 
 class BackendClient {
     private readonly http: AxiosInstance;
@@ -81,15 +82,10 @@ class BackendClient {
             };
         }
 
-        const responseData = axiosError.response.data;
-        const message = typeof responseData === "string"
-            ? responseData
-            : axiosError.message || "Backend request failed";
-
         return {
             status: axiosError.response.status,
-            message,
-            details: responseData,
+            message: getBackendErrorMessage(error, "Backend request failed"),
+            details: axiosError.response.data,
         };
     }
 }

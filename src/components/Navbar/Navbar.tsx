@@ -14,13 +14,14 @@ import {
     LocalShipping,
     NotificationsNone,
     Person,
+    Radar,
     Settings,
     SettingsSuggest,
     ShoppingCart,
     Storefront,
     SupportAgent,
     TaskAlt,
-    Warehouse,
+    WarehouseRounded,
 } from '@mui/icons-material';
 import {isPathAllowedForProfile, operationalProfiles, OperationalProfile} from "../../config/operationalProfile";
 import {getAppEnvironment} from "../../config/appEnvironment";
@@ -28,7 +29,8 @@ import {AppTabDefinition} from "../AppShell/types";
 import './styles/main.css';
 import {clearAuthToken} from "../../auth/AuthTokenStorage";
 import pl from "../../i18n/translate";
-import {Language} from "../../i18n";
+import {Language, translations} from "../../i18n";
+import {clearStoredTabs} from "../AppShell/tabStorage";
 
 type NavbarItem = AppTabDefinition & {
     icon: React.ElementType;
@@ -49,7 +51,7 @@ type NavbarProps = {
     operationalProfile: OperationalProfile;
 };
 
-const languages: Language[] = ["pl", "en"];
+const languages = Object.keys(translations) as Language[];
 
 function Navbar({activePath, onOpenTab, onLanguageChange, onOperationalProfileChange, language, operationalProfile}: NavbarProps) {
     const [openMenu, setOpenMenu] = React.useState<string | null>(null);
@@ -67,10 +69,10 @@ function Navbar({activePath, onOpenTab, onLanguageChange, onOperationalProfileCh
             label: pl.navigation.shipments,
             icon: ShoppingCart,
             items: [
-                {label: pl.home.tiles.shipmentControlCenter.title, path: '/shipment-control-center', icon: LocalShipping},
+                {label: pl.home.tiles.shipmentDetails.title, path: '/shipment-details', icon: LocalShipping},
                 {label: pl.navigation.shipmentList, path: '/shipments/list', icon: ShoppingCart},
                 {label: pl.navigation.shipmentCreate, path: '/shipments/create', icon: LocalShipping},
-                {label: pl.navigation.shipmentScanner, path: '/shipment-scanner', icon: Warehouse},
+                {label: pl.navigation.shipmentScanner, path: '/shipment-scanner', icon: WarehouseRounded},
                 {label: pl.navigation.courierDeliveries, path: '/courier-deliveries', icon: LocalShipping},
             ],
         },
@@ -92,6 +94,8 @@ function Navbar({activePath, onOpenTab, onLanguageChange, onOperationalProfileCh
                 {label: pl.navigation.deals, path: '/deals', icon: LocalOffer},
                 {label: pl.navigation.billing, path: '/billing', icon: AccountBalance},
                 {label: pl.navigation.admins, path: '/users', icon: AdminPanelSettings},
+                {label: pl.navigation.globalConfiguration, path: '/global-configuration', icon: SettingsSuggest},
+                {label: pl.navigation.microservices, path: '/microservices', icon: Radar},
                 {label: pl.navigation.systemSettings, path: '/software-configurations', icon: SettingsSuggest},
                 {label: pl.navigation.support, path: '/support', icon: SupportAgent},
             ],
@@ -99,6 +103,7 @@ function Navbar({activePath, onOpenTab, onLanguageChange, onOperationalProfileCh
     ];
 
     const logout = () => {
+        clearStoredTabs();
         clearAuthToken();
         setProfileMenuOpen(false);
         window.location.assign("/login");
