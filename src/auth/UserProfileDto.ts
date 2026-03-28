@@ -6,6 +6,10 @@ export type UserIdDto = {
     value: number;
 };
 
+export type OperatorIdDto = {
+    value: number;
+};
+
 export type CurrentUserDto = {
     userId: UserIdDto;
     username: string;
@@ -17,6 +21,7 @@ export type CurrentUserDto = {
     language: string;
     rolePermissions: RolePermissionApi[];
     deleted: boolean;
+    operatorId?: OperatorIdDto | null;
     createdAt: string;
     updatedAt: string;
 };
