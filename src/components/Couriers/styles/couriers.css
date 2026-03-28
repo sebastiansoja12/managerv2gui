@@ -6,6 +6,7 @@
 }
 
 .couriers-header,
+.couriers-create-panel,
 .couriers-table-panel,
 .couriers-details-panel {
     background: #ffffff;
@@ -73,6 +74,27 @@
 .couriers-summary strong {
     color: #111827;
     font-size: 22px;
+}
+
+.couriers-create-panel {
+    overflow: hidden;
+}
+
+.couriers-create-title {
+    align-items: center;
+    display: flex;
+    gap: 10px;
+}
+
+.couriers-create-title svg {
+    color: #315a9f;
+}
+
+.couriers-create-grid {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: repeat(4, minmax(150px, 1fr));
+    padding: 18px 20px;
 }
 
 .couriers-grid {
@@ -343,6 +365,10 @@
     .couriers-details-panel {
         position: static;
     }
+
+    .couriers-create-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
 }
 
 @media (max-width: 720px) {
@@ -352,6 +378,7 @@
 
     .couriers-summary,
     .couriers-check-grid,
+    .couriers-create-grid,
     .couriers-form-grid,
     .couriers-meta {
         grid-template-columns: 1fr;
