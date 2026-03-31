@@ -90,6 +90,51 @@
     overflow: hidden;
 }
 
+.departments-create-panel {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.05);
+    margin-bottom: 18px;
+    padding: 18px 22px;
+}
+
+.departments-create-header {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 16px;
+}
+
+.departments-create-header > div {
+    align-items: center;
+    display: flex;
+    gap: 10px;
+}
+
+.departments-create-header svg {
+    color: #1d4ed8;
+}
+
+.departments-create-header .MuiTypography-root {
+    color: #111827;
+    font-size: 1.15rem;
+    font-weight: 900;
+}
+
+.departments-create-header .MuiButton-root {
+    border-radius: 8px;
+    font-weight: 800;
+    text-transform: none;
+}
+
+.departments-create-grid {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: repeat(5, minmax(150px, 1fr));
+}
+
 .departments-table-header {
     align-items: center;
     border-bottom: 1px solid #eef1f4;
@@ -199,5 +244,14 @@
     .departments-table-header {
         align-items: stretch;
         flex-direction: column;
+    }
+
+    .departments-create-header {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .departments-create-grid {
+        grid-template-columns: 1fr;
     }
 }
