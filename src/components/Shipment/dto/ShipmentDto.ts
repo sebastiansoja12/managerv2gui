@@ -4,6 +4,10 @@ export interface ShipmentIdDto {
     value: string;
 }
 
+export interface OperatorIdDto {
+    value: number;
+}
+
 export interface MoneyApi {
     amount: number;
     currency: string;
@@ -69,6 +73,7 @@ export interface SignatureDto {
 
 export interface ShipmentDto {
     shipmentId: ShipmentIdDto;
+    operatorId?: OperatorIdDto | null;
     sender: PersonApi;
     recipient: PersonApi;
     shipmentSize: ShipmentSizeDto;
