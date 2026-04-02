@@ -1,27 +1,38 @@
-import React, {ChangeEvent, useEffect, useMemo, useState} from "react";
+import React, {ChangeEvent, useEffect, useMemo, useRef, useState} from "react";
 import {
     Alert,
     Box,
     Button,
     Chip,
     CircularProgress,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    Menu,
     MenuItem,
     Snackbar,
     TextField,
     Typography,
 } from "@mui/material";
 import {
+    ArrowDropDown,
     ArrowBack,
+    Download,
     LocalShipping,
     Map,
     PersonPinCircle,
+    QrCode2,
     Refresh,
     Route,
     Save,
+    TableView,
+    Print,
 } from "@mui/icons-material";
 import {useNavigate, useParams} from "react-router-dom";
 import ShipmentService from "../../hooks/ShipmentService";
-import {ApiErrorResponse} from "../../api/ApiResult";
+import DocumentService from "../../hooks/DocumentService";
+import {getBackendErrorMessage} from "../../api/errorMessage";
 import RouteLogRecord from "../RouteLog/model/RouteLogRecord";
 import {
     PersonApi,
@@ -39,6 +50,8 @@ type Notice = {
     severity: "success" | "error" | "info";
     message: string;
 };
+
+type DocumentAction = "qr" | "excel";
 
 type RouteDetail = RouteLogRecord["routeLogRecordDetails"]["routeLogRecordDetailSet"][number];
 
@@ -124,7 +137,11 @@ const ShipmentDetails: React.FC = () => {
     const [loadingShipment, setLoadingShipment] = useState<boolean>(true);
     const [loadingRouteLog, setLoadingRouteLog] = useState<boolean>(false);
     const [saving, setSaving] = useState<boolean>(false);
+    const [downloadingDocument, setDownloadingDocument] = useState<DocumentAction | null>(null);
+    const [qrMenuAnchor, setQrMenuAnchor] = useState<HTMLElement | null>(null);
+    const [qrPreviewUrl, setQrPreviewUrl] = useState<string | null>(null);
     const [notice, setNotice] = useState<Notice | null>(null);
+    const qrPreviewRef = useRef<HTMLIFrameElement | null>(null);
 
     const validShipmentId = Boolean(shipmentId && /^\d+$/.test(shipmentId) && !/^0+$/.test(shipmentId));
     const decodedTrackingNumber = trackingNumber ? decodeURIComponent(trackingNumber) : "";
@@ -136,11 +153,62 @@ const ShipmentDetails: React.FC = () => {
         : `/shipments/${shipmentId || shipment?.shipmentId.value || ""}/history`;
 
     const showError = (error: unknown, fallback = pl.shipments.messages.operationFailed) => {
-        const apiError = error as ApiErrorResponse;
         setNotice({
             severity: "error",
-            message: apiError.message || (error as Error).message || fallback,
+            message: getBackendErrorMessage(error, fallback),
         });
+    };
+
+    useEffect(() => () => {
+        if (qrPreviewUrl) {
+            URL.revokeObjectURL(qrPreviewUrl);
+        }
+    }, [qrPreviewUrl]);
+
+    const downloadDocument = async (documentType: DocumentAction) => {
+        if (!shipment) {
+            return;
+        }
+
+        setDownloadingDocument(documentType);
+        try {
+            if (documentType === "qr") {
+                await DocumentService.downloadQrLabel(shipment.shipmentId.value);
+            } else {
+                await DocumentService.exportToExcel(shipment.shipmentId.value);
+            }
+            setNotice({severity: "success", message: pl.shipments.messages.documentDownloadSuccess});
+        } catch (error) {
+            showError(error, documentType === "qr"
+                ? pl.shipments.messages.qrCodeDownloadError
+                : pl.shipments.messages.excelExportError);
+        } finally {
+            setDownloadingDocument(null);
+        }
+    };
+
+    const openQrPrintPreview = async () => {
+        if (!shipment) {
+            return;
+        }
+
+        setQrMenuAnchor(null);
+        setDownloadingDocument("qr");
+        try {
+            const label = await DocumentService.getQrLabel(shipment.shipmentId.value);
+            setQrPreviewUrl(URL.createObjectURL(label.blob));
+        } catch (error) {
+            showError(error, pl.shipments.messages.qrCodeDownloadError);
+        } finally {
+            setDownloadingDocument(null);
+        }
+    };
+
+    const closeQrPreview = () => setQrPreviewUrl(null);
+
+    const printQrLabel = () => {
+        qrPreviewRef.current?.contentWindow?.focus();
+        qrPreviewRef.current?.contentWindow?.print();
     };
 
     const applyShipment = (data: ShipmentDto) => {
@@ -436,6 +504,40 @@ const ShipmentDetails: React.FC = () => {
                         <Button disabled={loadingShipment} startIcon={<Refresh />} variant="outlined" onClick={loadShipment}>
                             {pl.common.refresh}
                         </Button>
+                        <Button
+                            disabled={loadingShipment || Boolean(downloadingDocument) || !shipment}
+                            startIcon={downloadingDocument === "qr" ? <CircularProgress size={18} /> : <QrCode2 />}
+                            endIcon={<ArrowDropDown />}
+                            variant="outlined"
+                            onClick={(event) => setQrMenuAnchor(event.currentTarget)}
+                        >
+                            {pl.shipments.actions.qrLabel}
+                        </Button>
+                        <Menu
+                            anchorEl={qrMenuAnchor}
+                            open={Boolean(qrMenuAnchor)}
+                            onClose={() => setQrMenuAnchor(null)}
+                        >
+                            <MenuItem className="shipment-document-menu-item" onClick={() => {
+                                setQrMenuAnchor(null);
+                                downloadDocument("qr");
+                            }}>
+                                <Download fontSize="small" />
+                                {pl.shipments.actions.downloadLabel}
+                            </MenuItem>
+                            <MenuItem className="shipment-document-menu-item" onClick={openQrPrintPreview}>
+                                <Print fontSize="small" />
+                                {pl.shipments.actions.printLabel}
+                            </MenuItem>
+                        </Menu>
+                        <Button
+                            disabled={loadingShipment || Boolean(downloadingDocument) || !shipment}
+                            startIcon={downloadingDocument === "excel" ? <CircularProgress size={18} /> : <TableView />}
+                            variant="outlined"
+                            onClick={() => downloadDocument("excel")}
+                        >
+                            {pl.shipments.actions.exportToExcel}
+                        </Button>
                         <Button disabled={loadingShipment || saving || !shipment} startIcon={<Save />} variant="contained" onClick={saveShipment}>
                             {pl.common.saveChanges}
                         </Button>
@@ -569,6 +671,31 @@ const ShipmentDetails: React.FC = () => {
                     <Alert severity="error">{pl.shipments.messages.loadViewError}</Alert>
                 )}
             </div>
+
+            <Dialog
+                fullWidth
+                maxWidth="md"
+                open={Boolean(qrPreviewUrl)}
+                onClose={closeQrPreview}
+            >
+                <DialogTitle>{pl.shipments.qrLabel.previewTitle}</DialogTitle>
+                <DialogContent className="shipment-qr-preview-content">
+                    {qrPreviewUrl ? (
+                        <iframe
+                            className="shipment-qr-preview-frame"
+                            ref={qrPreviewRef}
+                            src={qrPreviewUrl}
+                            title={pl.shipments.qrLabel.previewTitle}
+                        />
+                    ) : null}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={closeQrPreview}>{pl.common.close}</Button>
+                    <Button startIcon={<Print />} variant="contained" onClick={printQrLabel}>
+                        {pl.shipments.actions.printLabel}
+                    </Button>
+                </DialogActions>
+            </Dialog>
 
             <Snackbar open={Boolean(notice)} autoHideDuration={4500} onClose={() => setNotice(null)}>
                 {notice ? <Alert severity={notice.severity} onClose={() => setNotice(null)}>{notice.message}</Alert> : undefined}
