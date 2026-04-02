@@ -1889,6 +1889,21 @@
     text-transform: none;
 }
 
+.shipment-qr-preview-content {
+    height: 70vh;
+    padding: 0 !important;
+}
+
+.shipment-document-menu-item {
+    gap: 10px;
+}
+
+.shipment-qr-preview-frame {
+    border: 0;
+    height: 100%;
+    width: 100%;
+}
+
 .shipment-edit-panel {
     display: grid;
     gap: 14px;
