@@ -2,12 +2,16 @@ export interface SupplierCodeDto {
     value: string;
 }
 
+export interface SupplierIdDto {
+    value: number;
+}
+
 export interface DepartmentCodeDto {
     value: string;
 }
 
 export interface VehicleIdDto {
-    value: string;
+    value: number;
 }
 
 export interface DeviceIdDto {
@@ -44,6 +48,7 @@ export interface UserIdDto {
 }
 
 export interface CourierDto {
+    supplierId?: number | SupplierIdDto | null;
     supplierCode: SupplierCodeDto;
     firstName: string;
     lastName: string;
@@ -80,4 +85,48 @@ export interface CourierCreateRequest {
 export interface CertificationUpdateRequest {
     supplierCode: SupplierCodeDto;
     dangerousGoodCertification: DangerousGoodCertificationDto;
+}
+
+export interface DriverLicenseUpdateRequest {
+    supplierCode: SupplierCodeDto;
+    driverLicense: DriverLicenseDto;
+}
+
+export interface CourierUpdateRequest {
+    supplierCode: SupplierCodeDto;
+    firstName: string;
+    lastName: string;
+    telephoneNumber: string;
+    departmentCode: DepartmentCodeDto;
+    vehicleId: VehicleIdDto;
+    deviceId: DeviceIdDto;
+    dangerousGoodCertification: DangerousGoodCertificationDto;
+    driverLicense: DriverLicenseDto;
+    deliveryArea: DeliveryAreaDto;
+    supportedPackageTypes: string[];
+}
+
+export interface CourierDepartmentUpdateRequest {
+    supplierCode: SupplierCodeDto;
+    departmentCode: DepartmentCodeDto;
+}
+
+export interface CourierDeviceUpdateRequest {
+    supplierCode: SupplierCodeDto;
+    deviceId: DeviceIdDto;
+}
+
+export interface CourierVehicleUpdateRequest {
+    supplierCode: SupplierCodeDto;
+    vehicleId: VehicleIdDto;
+}
+
+export interface CourierDeliveryAreaUpdateRequest {
+    supplierCode: SupplierCodeDto;
+    deliveryArea: DeliveryAreaDto;
+}
+
+export interface CourierPackageTypesUpdateRequest {
+    supplierCode: SupplierCodeDto;
+    supportedPackageTypes: string[];
 }
