@@ -1,6 +1,7 @@
 import React from "react";
 import {Route, Routes} from "react-router-dom";
 import Couriers from "../Couriers/Couriers";
+import CourierDetails from "../Couriers/CourierDetails";
 import Departments from "../Departments";
 import DevicePairing from "../Devices/DevicePairing";
 import GlobalConfiguration from "../GlobalConfiguration/GlobalConfiguration";
@@ -50,6 +51,7 @@ function AppRoutes({onOpenTab, operationalProfile = "warehouse"}: AppRoutesProps
             <Route path="processes" element={guarded("/processes", <Processes/>)}/>
             <Route path="processes/:processId" element={guarded("/processes/1", <ProcessDetails/>)}/>
             <Route path="couriers" element={guarded("/couriers", <Couriers/>)}/>
+            <Route path="couriers/:supplierCode" element={guarded("/couriers", <CourierDetails/>)}/>
             <Route path="vehicles" element={guarded("/vehicles", <ModulePlaceholder title={pl.home.tiles.vehicles.title}/>)}/>
             <Route path="pallets" element={guarded("/pallets", <ModulePlaceholder title={pl.home.tiles.pallets.title}/>)}/>
             <Route path="shipment-scanner" element={guarded("/shipment-scanner", <ModulePlaceholder title={pl.home.tiles.shipmentScanner.title}/>)}/>
