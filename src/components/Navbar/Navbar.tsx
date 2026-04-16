@@ -27,7 +27,7 @@ import {isPathAllowedForProfile, operationalProfiles, OperationalProfile} from "
 import {getAppEnvironment} from "../../config/appEnvironment";
 import {AppTabDefinition} from "../AppShell/types";
 import './styles/main.css';
-import {clearAuthToken} from "../../auth/AuthTokenStorage";
+import {logoutAuthSession} from "../../auth/AuthSession";
 import pl from "../../i18n/translate";
 import {Language, translations} from "../../i18n";
 import {clearStoredTabs} from "../AppShell/tabStorage";
@@ -102,11 +102,14 @@ function Navbar({activePath, onOpenTab, onLanguageChange, onOperationalProfileCh
         },
     ];
 
-    const logout = () => {
+    const logout = async () => {
         clearStoredTabs();
-        clearAuthToken();
         setProfileMenuOpen(false);
-        window.location.assign("/login");
+        try {
+            await logoutAuthSession();
+        } finally {
+            window.location.assign("/login");
+        }
     };
 
     const openTab = (tab: AppTabDefinition) => {
