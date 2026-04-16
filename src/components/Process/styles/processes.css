@@ -1,6 +1,6 @@
 .processes-page {
-    background: #f7f8fa;
-    color: #090b12;
+    background: var(--brand-surface-warm);
+    color: var(--brand-ink);
     min-height: calc(100vh - 64px);
     padding: 24px;
     text-align: left;
@@ -40,9 +40,9 @@
 .processes-title-icon,
 .process-communication-icon {
     align-items: center;
-    background: #1e3a8a;
+    background: var(--brand-accent-deep);
     border-radius: 8px;
-    color: #fff;
+    color: var(--brand-surface);
     display: inline-flex;
     justify-content: center;
 }
@@ -54,7 +54,7 @@
 }
 
 .processes-header .MuiTypography-h4 {
-    color: #05070d;
+    color: var(--brand-ink);
     font-size: 1.5rem;
     font-weight: 900;
     letter-spacing: 0;
@@ -68,29 +68,29 @@
 }
 
 .processes-panel {
-    background: #fff;
-    border: 1px solid #e5e7eb;
+    background: var(--brand-surface);
+    border: 1px solid var(--brand-border);
     border-radius: 8px;
-    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.03);
+    box-shadow: 0 8px 22px var(--brand-shadow);
     overflow: hidden;
 }
 
 .processes-panel-header {
-    border-bottom: 1px solid #edf0f4;
+    border-bottom: 1px solid var(--brand-border);
     justify-content: space-between;
     padding: 22px 24px;
 }
 
 .processes-panel-header .MuiTypography-root,
 .process-section-heading .MuiTypography-root {
-    color: #111827;
+    color: var(--brand-ink);
     font-weight: 900;
 }
 
 .processes-panel-header span,
 .process-section-heading span,
 .process-total-request span {
-    color: #667085;
+    color: var(--brand-muted);
     font-size: 0.86rem;
 }
 
@@ -107,8 +107,8 @@
 
 .processes-table th,
 .processes-table td {
-    border-bottom: 1px solid #edf0f4;
-    color: #111827;
+    border-bottom: 1px solid var(--brand-border);
+    color: var(--brand-ink);
     padding: 14px 16px;
     text-align: left;
     vertical-align: middle;
@@ -140,14 +140,14 @@
 }
 
 .processes-service {
-    color: #172033;
+    color: var(--brand-ink-soft);
     gap: 8px;
     font-weight: 800;
 }
 
 .processes-empty {
     align-items: center;
-    color: #667085;
+    color: var(--brand-muted);
     display: flex;
     gap: 10px;
     justify-content: center;
@@ -172,8 +172,8 @@
 
 .process-status-in_progress,
 .process-status-null {
-    background: #dbeafe !important;
-    color: #1d4ed8 !important;
+    background: var(--brand-accent-border) !important;
+    color: var(--brand-accent-strong) !important;
 }
 
 .process-details-layout {
@@ -192,15 +192,15 @@
 }
 
 .process-summary-grid > div {
-    background: #f8fafc;
-    border: 1px solid #edf0f4;
+    background: var(--brand-accent-wash);
+    border: 1px solid var(--brand-border);
     border-radius: 8px;
     padding: 14px;
 }
 
 .process-summary-grid span,
 .process-communication-meta dt {
-    color: #667085;
+    color: var(--brand-muted);
     display: block;
     font-size: 0.78rem;
     font-weight: 800;
@@ -210,7 +210,7 @@
 
 .process-summary-grid strong,
 .process-communication-meta dd {
-    color: #111827;
+    color: var(--brand-ink);
     font-weight: 900;
     margin: 0;
 }
@@ -223,8 +223,8 @@
 }
 
 .process-total-request {
-    border-bottom: 1px solid #edf0f4;
-    border-top: 1px solid #edf0f4;
+    border-bottom: 1px solid var(--brand-border);
+    border-top: 1px solid var(--brand-border);
     gap: 16px;
     margin: 22px 0;
     padding: 18px 0;
@@ -236,7 +236,7 @@
 }
 
 .process-communication-card {
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--brand-border);
     border-radius: 8px;
     display: grid;
     gap: 14px;
@@ -248,17 +248,17 @@
 }
 
 .process-communication-main strong {
-    color: #111827;
+    color: var(--brand-ink);
     font-size: 1rem;
 }
 
 .process-communication-main p {
-    color: #667085;
+    color: var(--brand-muted);
     margin: 4px 0 0;
 }
 
 .process-communication-icon {
-    background: #2563eb;
+    background: var(--brand-accent);
     height: 34px;
     width: 34px;
 }
@@ -271,9 +271,9 @@
 }
 
 .process-payload {
-    background: #0f172a;
+    background: var(--brand-ink);
     border-radius: 8px;
-    color: #dbeafe;
+    color: var(--brand-accent-border);
     font-size: 0.86rem;
     margin: 0;
     max-height: 62vh;
