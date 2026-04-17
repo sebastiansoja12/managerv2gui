@@ -1,6 +1,6 @@
 .super-admin-app {
-    background: #f5f6f8;
-    color: #171a21;
+    background: var(--brand-surface-warm);
+    color: var(--brand-ink);
     display: grid;
     grid-template-columns: 252px minmax(0, 1fr);
     height: 100vh;
@@ -9,8 +9,8 @@
 }
 
 .super-admin-sidebar {
-    background: #ffffff;
-    border-right: 1px solid #ebeef3;
+    background: var(--brand-surface);
+    border-right: 1px solid var(--brand-border);
     display: flex;
     flex-direction: column;
     gap: 28px;
@@ -27,10 +27,10 @@
 
 .super-admin-brand span {
     align-items: center;
-    background: #2563eb;
+    background: var(--brand-accent);
     border-radius: 8px;
-    box-shadow: 0 14px 30px rgba(37, 99, 235, 0.24);
-    color: #ffffff;
+    box-shadow: 0 14px 30px rgba(63, 134, 217, 0.24);
+    color: var(--brand-surface);
     display: inline-flex;
     height: 32px;
     justify-content: center;
@@ -47,7 +47,7 @@
     background: transparent;
     border: 1px solid transparent;
     border-radius: 8px;
-    color: #667085;
+    color: var(--brand-muted);
     cursor: pointer;
     display: flex;
     font: inherit;
@@ -60,17 +60,17 @@
 
 .super-admin-nav-item:hover,
 .super-admin-nav-item-active {
-    background: #eff6ff;
-    border-color: #dbeafe;
-    color: #1d4ed8;
+    background: var(--brand-accent-soft);
+    border-color: var(--brand-accent-border);
+    color: var(--brand-accent-strong);
 }
 
 .super-admin-sidebar-note {
     align-items: flex-start;
-    background: #f8fafc;
-    border: 1px solid #edf0f5;
+    background: var(--brand-accent-wash);
+    border: 1px solid var(--brand-border);
     border-radius: 8px;
-    color: #64748b;
+    color: var(--brand-muted);
     display: flex;
     font-size: 0.82rem;
     font-weight: 760;
@@ -96,7 +96,7 @@
 }
 
 .super-admin-kicker {
-    color: #7b8290;
+    color: var(--brand-muted);
     display: block;
     font-size: 0.78rem;
     font-weight: 900;
@@ -118,10 +118,10 @@
 }
 
 .super-admin-offline {
-    background: #fff7ed;
-    border: 1px solid #fed7aa;
+    background: var(--brand-accent-soft);
+    border: 1px solid var(--brand-accent-border);
     border-radius: 8px;
-    color: #c2410c;
+    color: var(--brand-accent-deep);
     font-size: 0.78rem;
     font-weight: 900;
     padding: 8px 10px;
@@ -144,19 +144,19 @@
 }
 
 .super-admin-icon-button {
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
-    color: #4b5563;
+    background: var(--brand-surface);
+    border: 1px solid var(--brand-border);
+    color: var(--brand-ink-soft);
     justify-content: center;
     padding: 0;
     width: 42px;
 }
 
 .super-admin-primary-button {
-    background: #2563eb;
-    border: 1px solid #2563eb;
-    box-shadow: 0 16px 30px rgba(37, 99, 235, 0.18);
-    color: #ffffff;
+    background: var(--brand-accent);
+    border: 1px solid var(--brand-accent);
+    box-shadow: 0 16px 30px rgba(63, 134, 217, 0.18);
+    color: var(--brand-surface);
 }
 
 .super-admin-primary-button:disabled {
@@ -168,9 +168,9 @@
 
 .super-admin-secondary-button,
 .super-admin-ghost-button {
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
-    color: #374151;
+    background: var(--brand-surface);
+    border: 1px solid var(--brand-border);
+    color: var(--brand-ink-soft);
 }
 
 .super-admin-icon-button:hover,
@@ -188,10 +188,10 @@
 }
 
 .super-admin-metric-card {
-    background: #ffffff;
-    border: 1px solid #edf0f5;
+    background: var(--brand-surface);
+    border: 1px solid var(--brand-border);
     border-radius: 8px;
-    box-shadow: 0 14px 34px rgba(15, 23, 42, 0.05);
+    box-shadow: 0 14px 34px var(--brand-shadow);
     display: grid;
     gap: 12px;
     min-height: 134px;
@@ -204,7 +204,7 @@
 }
 
 .super-admin-metric-card small {
-    color: #8a92a3;
+    color: var(--brand-muted);
     font-weight: 760;
 }
 
@@ -218,9 +218,9 @@
 }
 
 .super-admin-metric-icon-green { background: #ecfdf5; color: #16a34a; }
-.super-admin-metric-icon-blue { background: #eff6ff; color: #2563eb; }
-.super-admin-metric-icon-orange { background: #fff7ed; color: #ea580c; }
-.super-admin-metric-icon-slate { background: #f1f5f9; color: #475569; }
+.super-admin-metric-icon-blue { background: var(--brand-accent-soft); color: var(--brand-accent); }
+.super-admin-metric-icon-orange { background: var(--brand-accent-soft); color: var(--brand-accent-strong); }
+.super-admin-metric-icon-slate { background: var(--brand-surface-warm); color: var(--brand-ink-soft); }
 
 .super-admin-grid {
     align-items: start;
@@ -230,10 +230,10 @@
 }
 
 .super-admin-panel {
-    background: #ffffff;
-    border: 1px solid #edf0f5;
+    background: var(--brand-surface);
+    border: 1px solid var(--brand-border);
     border-radius: 8px;
-    box-shadow: 0 16px 42px rgba(15, 23, 42, 0.06);
+    box-shadow: 0 16px 42px var(--brand-shadow);
     min-width: 0;
     padding: 20px;
 }
@@ -252,7 +252,7 @@
 }
 
 .super-admin-panel-header span {
-    color: #8a92a3;
+    color: var(--brand-muted);
     font-size: 0.84rem;
     font-weight: 760;
 }
@@ -260,7 +260,7 @@
 .super-admin-search {
     align-items: center;
     background: #fbfcfe;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--brand-border);
     border-radius: 8px;
     color: #94a3b8;
     display: flex;
@@ -273,7 +273,7 @@
 .super-admin-search input {
     background: transparent;
     border: 0;
-    color: #111827;
+    color: var(--brand-ink);
     font: inherit;
     min-width: 0;
     outline: none;
@@ -289,7 +289,7 @@
     background: transparent;
     border: 0;
     border-bottom: 1px solid #f0f2f5;
-    color: #374151;
+    color: var(--brand-ink-soft);
     display: grid;
     font: inherit;
     gap: 14px;
@@ -312,8 +312,8 @@ button.super-admin-table-row {
 }
 
 .super-admin-table-row-active {
-    background: #f8fbff;
-    box-shadow: inset 3px 0 #2563eb;
+    background: var(--brand-accent-wash);
+    box-shadow: inset 3px 0 var(--brand-accent);
 }
 
 .super-admin-operator-cell,
@@ -326,9 +326,9 @@ button.super-admin-table-row {
 
 .super-admin-avatar {
     align-items: center;
-    background: #eff6ff;
+    background: var(--brand-accent-soft);
     border-radius: 8px;
-    color: #2563eb;
+    color: var(--brand-accent);
     display: inline-flex;
     flex: 0 0 auto;
     font-size: 0.76rem;
@@ -353,10 +353,10 @@ button.super-admin-table-row {
 }
 
 .super-admin-chip-group small {
-    background: #f8fafc;
-    border: 1px solid #e5e7eb;
+    background: var(--brand-accent-wash);
+    border: 1px solid var(--brand-border);
     border-radius: 7px;
-    color: #64748b;
+    color: var(--brand-muted);
     font-size: 0.72rem;
     font-weight: 850;
     padding: 5px 7px;
@@ -376,8 +376,8 @@ button.super-admin-table-row {
 }
 
 .super-admin-status.is-inactive {
-    background: #f1f5f9;
-    color: #64748b;
+    background: var(--brand-surface-warm);
+    color: var(--brand-muted);
 }
 
 .super-admin-row-action {
@@ -396,16 +396,16 @@ button.super-admin-table-row {
 }
 
 .super-admin-form-grid label span {
-    color: #64748b;
+    color: var(--brand-muted);
     font-size: 0.78rem;
     font-weight: 880;
 }
 
 .super-admin-form-grid input {
     background: #fbfcfe;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--brand-border);
     border-radius: 8px;
-    color: #111827;
+    color: var(--brand-ink);
     font: inherit;
     min-height: 40px;
     outline: none;
@@ -414,9 +414,9 @@ button.super-admin-table-row {
 
 .super-admin-form-grid select {
     background: #fbfcfe;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--brand-border);
     border-radius: 8px;
-    color: #111827;
+    color: var(--brand-ink);
     font: inherit;
     min-height: 40px;
     outline: none;
@@ -425,7 +425,7 @@ button.super-admin-table-row {
 
 .super-admin-form-grid input:focus,
 .super-admin-form-grid select:focus {
-    border-color: #93c5fd;
+    border-color: var(--brand-accent-border);
     box-shadow: 0 0 0 3px rgba(147, 197, 253, 0.25);
 }
 
@@ -442,7 +442,7 @@ button.super-admin-table-row {
 }
 
 .super-admin-section-title span {
-    color: #8a92a3;
+    color: var(--brand-muted);
     font-size: 0.82rem;
     font-weight: 720;
 }
@@ -456,9 +456,9 @@ button.super-admin-table-row {
 .super-admin-feature {
     align-items: center;
     background: #fbfcfe;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--brand-border);
     border-radius: 8px;
-    color: #475569;
+    color: var(--brand-ink-soft);
     cursor: pointer;
     display: flex;
     font: inherit;
@@ -486,9 +486,9 @@ button.super-admin-table-row {
 }
 
 .super-admin-feature-enabled {
-    background: #eff6ff;
-    border-color: #bfdbfe;
-    color: #1d4ed8;
+    background: var(--brand-accent-soft);
+    border-color: var(--brand-accent-border);
+    color: var(--brand-accent-strong);
 }
 
 .super-admin-editor-footer {
