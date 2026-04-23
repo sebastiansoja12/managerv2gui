@@ -1,5 +1,5 @@
 import {MicroserviceDefinition, MicroserviceStatusResult} from "../components/MicroserviceStatus/model/MicroserviceStatusDto";
-import {getAuthToken} from "../auth/AuthTokenStorage";
+import gatewayHttp from "../http-gateway";
 
 const REQUEST_TIMEOUT_MS = 3500;
 const GATEWAY_URL = process.env.REACT_APP_GATEWAY_URL;
@@ -48,12 +48,7 @@ const readGatewayHealth = async () => {
     const startedAt = performance.now();
 
     try {
-        const token = getAuthToken();
-        const response = await fetch(buildUrl(GATEWAY_URL, "/services/health"), {
-            cache: "no-store",
-            headers: token ? {
-                Authorization: `Bearer ${token}`,
-            } : undefined,
+        const response = await gatewayHttp.get<GatewayServicesHealthResponse>("/services/health", {
             signal: controller.signal,
         });
         const latencyMs = Math.round(performance.now() - startedAt);
@@ -104,12 +99,7 @@ const checkAll = async (): Promise<MicroserviceStatusResult[]> => {
     }
 
     const {response} = await readGatewayHealth();
-    if (!response.ok) {
-        throw new Error(`Gateway status request failed: HTTP ${response.status}`);
-    }
-
-    const healthResponse = await response.json() as GatewayServicesHealthResponse;
-    return healthResponse.services.map(mapGatewayService);
+    return response.data.services.map(mapGatewayService);
 };
 
 const MicroserviceStatusService = {
