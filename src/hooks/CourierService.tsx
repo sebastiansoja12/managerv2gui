@@ -3,7 +3,14 @@ import {
     CertificationUpdateRequest,
     CourierBasicDataUpdateRequest,
     CourierCreateRequest,
+    CourierDeliveryAreaUpdateRequest,
+    CourierDepartmentUpdateRequest,
+    CourierDeviceUpdateRequest,
     CourierDto,
+    CourierPackageTypesUpdateRequest,
+    CourierUpdateRequest,
+    CourierVehicleUpdateRequest,
+    DriverLicenseUpdateRequest,
 } from "../components/Couriers/dto/CourierDto";
 
 const getAll = () => {
@@ -18,8 +25,36 @@ const create = (data: CourierCreateRequest) => {
     return http.post("/suppliers", data);
 };
 
+const update = (data: CourierUpdateRequest) => {
+    return http.put("/suppliers", data);
+};
+
 const updateCertification = (data: CertificationUpdateRequest) => {
     return http.put("/suppliers/certifications", data);
+};
+
+const updateDriverLicense = (data: DriverLicenseUpdateRequest) => {
+    return http.put("/suppliers/driver-licenses", data);
+};
+
+const updateDepartment = (data: CourierDepartmentUpdateRequest) => {
+    return http.put("/suppliers/department-codes", data);
+};
+
+const updateDevice = (data: CourierDeviceUpdateRequest) => {
+    return http.put("/suppliers/devices", data);
+};
+
+const updateVehicle = (data: CourierVehicleUpdateRequest) => {
+    return http.put("/suppliers/vehicles", data);
+};
+
+const updateDeliveryArea = (data: CourierDeliveryAreaUpdateRequest) => {
+    return http.put("/suppliers/delivery-areas", data);
+};
+
+const updatePackageTypes = (data: CourierPackageTypesUpdateRequest) => {
+    return http.put("/suppliers/supported-package-types", data);
 };
 
 const activate = (supplierCode: string) => {
@@ -33,8 +68,15 @@ const deactivate = (supplierCode: string) => {
 const CourierService = {
     getAll,
     create,
+    update,
     updateBasicData,
     updateCertification,
+    updateDriverLicense,
+    updateDepartment,
+    updateDevice,
+    updateVehicle,
+    updateDeliveryArea,
+    updatePackageTypes,
     activate,
     deactivate,
 };
