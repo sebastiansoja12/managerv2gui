@@ -1,6 +1,6 @@
 import axios from "axios";
 import JSONBig from "json-bigint";
-import {getSuperAdminAuthToken} from "./auth/SuperAdminAuthTokenStorage";
+import {configureAuthenticatedClient} from "./auth/configureAuthenticatedClient";
 
 const jsonBig = JSONBig({storeAsString: true});
 
@@ -22,15 +22,7 @@ const http = axios.create({
         "Content-type": "application/json",
     },
     transformResponse: [parseJsonWithBigIntegers],
+    withCredentials: true,
 });
 
-http.interceptors.request.use((config) => {
-    const token = getSuperAdminAuthToken();
-    if (token) {
-        config.headers.set("Authorization", `Bearer ${token}`);
-    }
-
-    return config;
-});
-
-export default http;
+export default configureAuthenticatedClient(http);
