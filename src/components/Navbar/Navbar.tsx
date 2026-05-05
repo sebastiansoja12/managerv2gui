@@ -93,7 +93,7 @@ function Navbar({activePath, onOpenTab, onLanguageChange, onOperationalProfileCh
             items: [
                 {label: pl.navigation.deals, path: '/deals', icon: LocalOffer},
                 {label: pl.navigation.billing, path: '/billing', icon: AccountBalance},
-                {label: pl.navigation.admins, path: '/users', icon: AdminPanelSettings},
+                {label: pl.navigation.users, path: '/users', icon: AdminPanelSettings},
                 {label: pl.navigation.globalConfiguration, path: '/global-configuration', icon: SettingsSuggest},
                 {label: pl.navigation.microservices, path: '/microservices', icon: Radar},
                 {label: pl.navigation.systemSettings, path: '/software-configurations', icon: SettingsSuggest},
