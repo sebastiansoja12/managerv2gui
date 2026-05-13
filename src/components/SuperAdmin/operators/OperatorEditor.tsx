@@ -1,5 +1,6 @@
-import React from "react";
-import {Close, MoreHoriz, ToggleOff, ToggleOn} from "@mui/icons-material";
+import React, {useState} from "react";
+import {Close, MoreHoriz, PersonAddAlt, ToggleOff, ToggleOn} from "@mui/icons-material";
+import {Snackbar} from "@mui/material";
 import pl from "../../../i18n/translate";
 import {
     DeliveryTimeConfiguration,
@@ -10,6 +11,7 @@ import {
     ShippingCapabilities,
 } from "../../Operators/model/Operator";
 import {getCapabilityLabels} from "./capabilityLabels";
+import OperatorUserDialog from "./OperatorUserDialog";
 
 type OperatorEditorProps = {
     createMode: boolean;
@@ -34,6 +36,8 @@ function OperatorEditor({
     onToggleStatus,
     onUpdateDraft,
 }: OperatorEditorProps) {
+    const [userDialogOpen, setUserDialogOpen] = useState(false);
+    const [userCreated, setUserCreated] = useState(false);
     const capabilityLabels = getCapabilityLabels();
     const updateShipmentLimit = (key: keyof ShipmentLimits, value: string) => {
         onUpdateDraft("configuration", {
@@ -81,10 +85,18 @@ function OperatorEditor({
                     <h2>{createMode ? pl.superAdmin.editor.newOperator : selectedOperator?.companyName || pl.superAdmin.editor.fallbackOperator}</h2>
                     <span>{createMode ? pl.superAdmin.editor.generatedId : `ID #${draft.operatorId}`}</span>
                 </div>
-                <button className="super-admin-ghost-button" onClick={onToggleStatus} type="button">
-                    {draft.status === "ACTIVE" ? <ToggleOn fontSize="small"/> : <ToggleOff fontSize="small"/>}
-                    <span>{draft.status === "ACTIVE" ? pl.superAdmin.editor.active : pl.superAdmin.editor.inactive}</span>
-                </button>
+                <div className="super-admin-editor-header-actions">
+                    {!createMode && selectedOperator ? (
+                        <button className="super-admin-primary-button super-admin-compact-button" onClick={() => setUserDialogOpen(true)} type="button">
+                            <PersonAddAlt fontSize="small"/>
+                            <span>{pl.superAdmin.userDialog.open}</span>
+                        </button>
+                    ) : null}
+                    <button className="super-admin-ghost-button super-admin-compact-button" onClick={onToggleStatus} type="button">
+                        {draft.status === "ACTIVE" ? <ToggleOn fontSize="small"/> : <ToggleOff fontSize="small"/>}
+                        <span>{draft.status === "ACTIVE" ? pl.superAdmin.editor.active : pl.superAdmin.editor.inactive}</span>
+                    </button>
+                </div>
             </div>
 
             <div className="super-admin-section-title">
@@ -280,6 +292,22 @@ function OperatorEditor({
                     <span>{saving ? pl.superAdmin.editor.saving : createMode ? pl.superAdmin.editor.create : pl.superAdmin.editor.save}</span>
                 </button>
             </div>
+
+            {selectedOperator ? (
+                <OperatorUserDialog
+                    onClose={() => setUserDialogOpen(false)}
+                    onCreated={() => setUserCreated(true)}
+                    open={userDialogOpen}
+                    operatorId={String(selectedOperator.operatorId.value)}
+                    operatorName={selectedOperator.companyName}
+                />
+            ) : null}
+            <Snackbar
+                autoHideDuration={4000}
+                message={pl.superAdmin.userDialog.success}
+                onClose={() => setUserCreated(false)}
+                open={userCreated}
+            />
         </article>
     );
 }
