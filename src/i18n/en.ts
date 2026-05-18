@@ -15,6 +15,7 @@ export const en: typeof pl = {
         loading: "Loading...",
         actions: "Actions",
         language: "Language",
+        version: "Version",
         languages: {
             pl: "Polish",
             en: "English",

@@ -25,6 +25,7 @@ import {
 } from '@mui/icons-material';
 import {isPathAllowedForProfile, operationalProfiles, OperationalProfile} from "../../config/operationalProfile";
 import {getAppEnvironment} from "../../config/appEnvironment";
+import {getAppVersion} from "../../config/appVersion";
 import {AppTabDefinition} from "../AppShell/types";
 import './styles/main.css';
 import {logoutAuthSession} from "../../auth/AuthSession";
@@ -58,6 +59,7 @@ function Navbar({activePath, onOpenTab, onLanguageChange, onOperationalProfileCh
     const [profileMenuOpen, setProfileMenuOpen] = React.useState(false);
 
     const environment = getAppEnvironment();
+    const appVersion = getAppVersion();
     const mainItems: NavbarItem[] = [
         {label: pl.navigation.home, path: '/', icon: Dashboard},
         {label: pl.navigation.tasks, path: '/processes', icon: TaskAlt},
@@ -285,6 +287,11 @@ function Navbar({activePath, onOpenTab, onLanguageChange, onOperationalProfileCh
                                 <Person fontSize="small" />
                                 <span>{pl.navigation.profile}</span>
                             </button>
+
+                            <div className="top-nav-version">
+                                <span>{pl.common.version}</span>
+                                <strong>{appVersion}</strong>
+                            </div>
 
                             <button
                                 className="top-nav-dropdown-item top-nav-logout-item"
