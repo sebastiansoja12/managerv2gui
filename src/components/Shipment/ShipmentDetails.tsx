@@ -19,6 +19,7 @@ import {
     ArrowDropDown,
     ArrowBack,
     Download,
+    Edit,
     LocalShipping,
     Map,
     PersonPinCircle,
@@ -137,6 +138,8 @@ const ShipmentDetails: React.FC = () => {
     const [loadingShipment, setLoadingShipment] = useState<boolean>(true);
     const [loadingRouteLog, setLoadingRouteLog] = useState<boolean>(false);
     const [saving, setSaving] = useState<boolean>(false);
+    const [savingStatus, setSavingStatus] = useState<boolean>(false);
+    const [statusDialogOpen, setStatusDialogOpen] = useState<boolean>(false);
     const [downloadingDocument, setDownloadingDocument] = useState<DocumentAction | null>(null);
     const [qrMenuAnchor, setQrMenuAnchor] = useState<HTMLElement | null>(null);
     const [qrPreviewUrl, setQrPreviewUrl] = useState<string | null>(null);
@@ -261,6 +264,47 @@ const ShipmentDetails: React.FC = () => {
         setRecipient((current) => ({...current, [field]: value}));
     };
 
+    const openStatusDialog = () => {
+        if (!shipment) {
+            return;
+        }
+
+        setStatus(shipment.shipmentStatus);
+        setStatusDialogOpen(true);
+    };
+
+    const closeStatusDialog = () => {
+        if (!savingStatus) {
+            setStatusDialogOpen(false);
+        }
+    };
+
+    const saveShipmentStatus = async () => {
+        if (!shipment) {
+            return;
+        }
+
+        setSavingStatus(true);
+        try {
+            await ShipmentService.updateStatus({
+                shipmentId: shipment.shipmentId,
+                shipmentStatus: status,
+            });
+
+            const response = shipment.trackingNumber?.value
+                ? await ShipmentService.getControlCenterByTrackingNumber(shipment.trackingNumber.value)
+                : await ShipmentService.getControlCenter(shipment.shipmentId.value);
+            applyShipment(response.data.shipment);
+            setRouteLog(response.data.routeLog);
+            setStatusDialogOpen(false);
+            setNotice({severity: "success", message: pl.shipments.messages.statusSaveSuccess});
+        } catch (error) {
+            showError(error, pl.shipments.messages.statusSaveError);
+        } finally {
+            setSavingStatus(false);
+        }
+    };
+
     const saveShipment = async () => {
         if (!shipment) {
             return;
@@ -268,13 +312,6 @@ const ShipmentDetails: React.FC = () => {
 
         setSaving(true);
         try {
-            if (status !== shipment.shipmentStatus) {
-                await ShipmentService.updateStatus({
-                    shipmentId: shipment.shipmentId,
-                    shipmentStatus: status,
-                });
-            }
-
             if (shipmentType !== shipment.shipmentType) {
                 await ShipmentService.changeShipmentType(shipment.shipmentId.value, shipmentType);
             }
@@ -594,20 +631,25 @@ const ShipmentDetails: React.FC = () => {
                                 </div>
 
                                 <div className="shipment-details-grid shipment-details-operations-grid">
-                                    <TextField
-                                        fullWidth
-                                        label={pl.shipments.form.fields.shipmentStatus}
-                                        select
-                                        size="small"
-                                        value={status}
-                                        onChange={(event) => setStatus(event.target.value as ShipmentStatusDto)}
-                                    >
-                                        {shipmentStatuses.map((shipmentStatus) => (
-                                            <MenuItem key={shipmentStatus} value={shipmentStatus}>
-                                                {pl.shipments.status[shipmentStatus]}
-                                            </MenuItem>
-                                        ))}
-                                    </TextField>
+                                    <div className="shipment-status-control">
+                                        <span>{pl.shipments.form.fields.shipmentStatus}</span>
+                                        <div>
+                                            <Chip
+                                                className={`tm-status tm-status-${shipment.shipmentStatus.toLowerCase()}`}
+                                                label={pl.shipments.status[shipment.shipmentStatus]}
+                                                size="small"
+                                            />
+                                            <Button
+                                                disabled={savingStatus}
+                                                size="small"
+                                                startIcon={<Edit fontSize="small" />}
+                                                variant="outlined"
+                                                onClick={openStatusDialog}
+                                            >
+                                                {pl.shipments.actions.changeStatus}
+                                            </Button>
+                                        </div>
+                                    </div>
 
                                     <TextField
                                         fullWidth
@@ -693,6 +735,43 @@ const ShipmentDetails: React.FC = () => {
                     <Button onClick={closeQrPreview}>{pl.common.close}</Button>
                     <Button startIcon={<Print />} variant="contained" onClick={printQrLabel}>
                         {pl.shipments.actions.printLabel}
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            <Dialog
+                fullWidth
+                maxWidth="xs"
+                open={statusDialogOpen}
+                onClose={closeStatusDialog}
+            >
+                <DialogTitle>{pl.shipments.statusDialog.title}</DialogTitle>
+                <DialogContent>
+                    <TextField
+                        autoFocus
+                        fullWidth
+                        label={pl.shipments.form.fields.shipmentStatus}
+                        margin="dense"
+                        select
+                        size="small"
+                        value={status}
+                        onChange={(event) => setStatus(event.target.value as ShipmentStatusDto)}
+                    >
+                        {shipmentStatuses.map((shipmentStatus) => (
+                            <MenuItem key={shipmentStatus} value={shipmentStatus}>
+                                {pl.shipments.status[shipmentStatus]}
+                            </MenuItem>
+                        ))}
+                    </TextField>
+                </DialogContent>
+                <DialogActions>
+                    <Button disabled={savingStatus} onClick={closeStatusDialog}>{pl.common.cancel}</Button>
+                    <Button
+                        startIcon={savingStatus ? <CircularProgress size={18} /> : <Save />}
+                        variant="contained"
+                        onClick={saveShipmentStatus}
+                    >
+                        {pl.common.saveChanges}
                     </Button>
                 </DialogActions>
             </Dialog>

@@ -956,6 +956,7 @@ export const de: typeof pl = {
             downloadLabel: "Etikett herunterladen",
             printLabel: "Drucken",
             exportToExcel: "Nach Excel exportieren",
+            changeStatus: "Status ändern",
         },
         metrics: {
             summaryTitle: "Sendungsübersicht",
@@ -1088,6 +1089,9 @@ export const de: typeof pl = {
         qrLabel: {
             previewTitle: "Vorschau des Sendungsetiketts",
         },
+        statusDialog: {
+            title: "Sendungsstatus ändern",
+        },
         messages: {
             operationFailed: "Vorgang fehlgeschlagen",
             createError: "Sendung konnte nicht erstellt werden",
@@ -1097,6 +1101,8 @@ export const de: typeof pl = {
             loadViewError: "Sendung konnte nicht geladen werden.",
             saveSuccess: "Sendung wurde gespeichert",
             saveError: "Sendung konnte nicht gespeichert werden",
+            statusSaveSuccess: "Sendungsstatus wurde gespeichert",
+            statusSaveError: "Sendungsstatus konnte nicht gespeichert werden",
             copyTrackingSuccess: "Trackingnummer wurde kopiert",
             copyTrackingError: "Trackingnummer konnte nicht kopiert werden",
             documentDownloadSuccess: "Der Dokumentdownload wurde gestartet",

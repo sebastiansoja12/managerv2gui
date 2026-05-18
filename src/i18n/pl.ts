@@ -955,6 +955,7 @@ export const pl = {
             downloadLabel: "Pobierz etykietę",
             printLabel: "Drukuj",
             exportToExcel: "Eksportuj do Excela",
+            changeStatus: "Zmień status",
         },
         metrics: {
             summaryTitle: "Podsumowanie przesyłek",
@@ -1087,6 +1088,9 @@ export const pl = {
         qrLabel: {
             previewTitle: "Podgląd etykiety przesyłki",
         },
+        statusDialog: {
+            title: "Zmiana statusu przesyłki",
+        },
         messages: {
             operationFailed: "Operacja nie powiodła się",
             createError: "Nie udało się utworzyć przesyłki",
@@ -1096,6 +1100,8 @@ export const pl = {
             loadViewError: "Nie udało się załadować przesyłki.",
             saveSuccess: "Przesyłka została zapisana",
             saveError: "Nie udało się zapisać przesyłki",
+            statusSaveSuccess: "Status przesyłki został zapisany",
+            statusSaveError: "Nie udało się zapisać statusu przesyłki",
             copyTrackingSuccess: "Numer trackingowy został skopiowany",
             copyTrackingError: "Nie udało się skopiować numeru trackingowego",
             documentDownloadSuccess: "Rozpoczęto pobieranie dokumentu",
