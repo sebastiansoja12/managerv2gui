@@ -16,6 +16,7 @@ import ProcessLogService from "../../hooks/ProcessLogService";
 import {ApiErrorResponse} from "../../api/ApiResult";
 import pl from "../../i18n/translate";
 import {CommunicationLogDto, ProcessLogDto} from "./dto/ProcessLogDto";
+import {valueObjectValue} from "../../utils/valueObject";
 import "./styles/processes.css";
 
 type PayloadDialog = {
@@ -68,6 +69,12 @@ const serviceLabel = (communication: CommunicationLogDto) => {
     const target = communication.targetService || pl.common.dash;
     return `${source} → ${target}`;
 };
+
+const departmentLabel = (departmentCode: CommunicationLogDto["departmentCode"]) =>
+    valueObjectValue(departmentCode) || pl.common.dash;
+
+const processDepartmentLabel = (processLog: ProcessLogDto, communications: CommunicationLogDto[]) =>
+    valueObjectValue(processLog.deviceInformation?.departmentCode) || valueObjectValue(communications[0]?.departmentCode) || pl.common.dash;
 
 const ProcessDetails: React.FC = () => {
     const navigate = useNavigate();
@@ -146,7 +153,7 @@ const ProcessDetails: React.FC = () => {
                                 </div>
                                 <div>
                                     <span>{pl.processes.details.fields.department}</span>
-                                    <strong>{processLog.deviceInformation?.departmentCode || communications[0]?.departmentCode || pl.common.dash}</strong>
+                                    <strong>{processDepartmentLabel(processLog, communications)}</strong>
                                 </div>
                                 <div>
                                     <span>{pl.processes.details.fields.status}</span>
@@ -209,7 +216,7 @@ const ProcessDetails: React.FC = () => {
                                         </div>
                                         <dl className="process-communication-meta">
                                             <div><dt>{pl.processes.details.fields.user}</dt><dd>{communication.createdBy ? `#${communication.createdBy}` : pl.common.dash}</dd></div>
-                                            <div><dt>{pl.processes.details.fields.department}</dt><dd>{communication.departmentCode || pl.common.dash}</dd></div>
+                                            <div><dt>{pl.processes.details.fields.department}</dt><dd>{departmentLabel(communication.departmentCode)}</dd></div>
                                             <div><dt>{pl.processes.details.fields.device}</dt><dd>{communication.deviceId || processLog.deviceInformation?.deviceId || pl.common.dash}</dd></div>
                                         </dl>
                                         <div className="process-communication-actions">

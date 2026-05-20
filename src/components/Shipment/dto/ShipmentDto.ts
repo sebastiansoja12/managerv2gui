@@ -1,4 +1,5 @@
 import RouteLogRecord from "../../RouteLog/model/RouteLogRecord";
+import {valueObjectValue, ValueObject} from "../../../utils/valueObject";
 
 export interface ShipmentIdDto {
     value: string;
@@ -40,6 +41,12 @@ export interface DepartmentCodeDto {
     value: string;
 }
 
+export type DepartmentCodeValue = ValueObject<string>;
+
+export const departmentCodeValue = (departmentCode: DepartmentCodeValue): string => {
+    return valueObjectValue(departmentCode);
+};
+
 export interface DangerousGoodApi {
     name: string;
     description: string;
@@ -77,7 +84,7 @@ export interface ShipmentDto {
     sender: PersonApi;
     recipient: PersonApi;
     shipmentSize: ShipmentSizeDto;
-    destination: string;
+    destination: DepartmentCodeValue;
     shipmentStatus: ShipmentStatusDto;
     shipmentType: ShipmentTypeDto;
     shipmentRelatedId?: ShipmentIdDto | null;
@@ -119,7 +126,7 @@ export interface ShipmentUpdateRequestApi {
     shipmentId: ShipmentIdDto;
     sender: PersonApi;
     recipient: PersonApi;
-    destination: string;
+    destination: DepartmentCodeDto;
     shipmentSize: ShipmentSizeDto;
     price: MoneyApi;
     dangerousGood: DangerousGoodApi | null;

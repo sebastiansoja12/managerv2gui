@@ -1,6 +1,8 @@
+import {ValueObject} from "../../../utils/valueObject";
+
 export interface DeviceInformationDto {
     deviceId?: string | null;
-    departmentCode?: string | null;
+    departmentCode?: ValueObject<string>;
     userId?: number | null;
     deviceType?: string | null;
     deviceUserType?: string | null;
@@ -14,7 +16,7 @@ export interface CommunicationLogDto {
     serviceType?: string | null;
     createdBy?: number | null;
     updatedBy?: number | null;
-    departmentCode?: string | null;
+    departmentCode?: ValueObject<string>;
     sourceService?: string | null;
     targetService?: string | null;
     request?: string | null;

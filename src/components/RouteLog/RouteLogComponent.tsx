@@ -16,6 +16,7 @@ import {
 import { KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
 import RouteLogRecord from './model/RouteLogRecord';
 import pl from "../../i18n/translate";
+import {valueObjectValue} from "../../utils/valueObject";
 
 const recordShipmentId = (record: RouteLogRecord) => record.parcelId?.value || record.shipmentId?.value || pl.common.dash;
 
@@ -59,7 +60,7 @@ const Row: React.FC<{ record: RouteLogRecord }> = ({ record }) => {
                                         <TableCell>{detail.zebraId || detail.terminalId?.value || pl.common.dash}</TableCell>
                                         <TableCell>{detail.version}</TableCell>
                                         <TableCell>{detail.username}</TableCell>
-                                        <TableCell>{detail.depotCode}</TableCell>
+                                        <TableCell>{valueObjectValue(detail.depotCode) || pl.common.dash}</TableCell>
                                         <TableCell>{detail.parcelStatus || detail.shipmentStatus}</TableCell>
                                         <TableCell>{detail.description}</TableCell>
                                         <TableCell>{detail.timestamp}</TableCell>

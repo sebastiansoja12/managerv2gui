@@ -1,3 +1,5 @@
+import {ValueObject} from "../../../utils/valueObject";
+
 export default interface RouteLogRecord {
     processId: { value: string };
     parcelId?: { value: string };
@@ -9,9 +11,9 @@ export default interface RouteLogRecord {
             terminalId?: { value: string | number };
             version: string;
             username: string;
-            supplierCode?: string;
-            depotCode: string;
-            departmentCode?: string;
+            supplierCode?: ValueObject<string>;
+            depotCode: ValueObject<string>;
+            departmentCode?: ValueObject<string>;
             parcelStatus: string;
             shipmentStatus?: string;
             description: string;

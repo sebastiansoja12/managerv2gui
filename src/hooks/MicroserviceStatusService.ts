@@ -2,7 +2,9 @@ import {MicroserviceDefinition, MicroserviceStatusResult} from "../components/Mi
 import gatewayHttp from "../http-gateway";
 
 const REQUEST_TIMEOUT_MS = 3500;
-const GATEWAY_URL = process.env.REACT_APP_GATEWAY_URL;
+const GATEWAY_URL = process.env.REACT_APP_GATEWAY_URL || process.env.REACT_APP_SERVER_URL;
+const GATEWAY_ENVIRONMENT = process.env.REACT_APP_GATEWAY_URL ? "REACT_APP_GATEWAY_URL" : "REACT_APP_SERVER_URL";
+const GATEWAY_ENVIRONMENT_FALLBACK = "REACT_APP_GATEWAY_URL or REACT_APP_SERVER_URL";
 
 const trimTrailingSlash = (value: string) => value.replace(/\/+$/, "");
 
@@ -32,7 +34,7 @@ const serviceNames: Record<string, string> = {
 
 const fallbackServices: MicroserviceDefinition[] = Object.entries(serviceNames).map(([id, name]) => ({
     baseUrl: GATEWAY_URL ? buildUrl(GATEWAY_URL, `/${id}`) : undefined,
-    environmentVariable: "REACT_APP_GATEWAY_URL",
+    environmentVariable: GATEWAY_ENVIRONMENT,
     healthPaths: ["/actuator/health"],
     id,
     name,
@@ -40,7 +42,7 @@ const fallbackServices: MicroserviceDefinition[] = Object.entries(serviceNames).
 
 const readGatewayHealth = async () => {
     if (!GATEWAY_URL) {
-        throw new Error("Missing REACT_APP_GATEWAY_URL");
+        throw new Error(`Missing ${GATEWAY_ENVIRONMENT_FALLBACK}`);
     }
 
     const controller = new AbortController();
@@ -75,7 +77,7 @@ const mapGatewayService = (gatewayService: GatewayServiceHealth): MicroserviceSt
     return {
         checkedAt,
         baseUrl: serviceUrl,
-        environmentVariable: "REACT_APP_GATEWAY_URL",
+        environmentVariable: GATEWAY_ENVIRONMENT,
         healthPaths: ["/actuator/health"],
         id: gatewayService.id,
         latencyMs: gatewayService.responseTimeMillis,
@@ -89,7 +91,7 @@ const mapGatewayService = (gatewayService: GatewayServiceHealth): MicroserviceSt
 const missingGatewayResults = (): MicroserviceStatusResult[] => fallbackServices.map((service) => ({
     ...service,
     checkedAt: new Date().toISOString(),
-    message: `Missing ${service.environmentVariable}`,
+    message: `Missing ${GATEWAY_ENVIRONMENT_FALLBACK}`,
     state: "unknown",
 }));
 

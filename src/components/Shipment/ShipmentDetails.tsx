@@ -18,6 +18,7 @@ import {
 import {
     ArrowDropDown,
     ArrowBack,
+    Close,
     Download,
     Edit,
     LocalShipping,
@@ -36,6 +37,7 @@ import DocumentService from "../../hooks/DocumentService";
 import {getBackendErrorMessage} from "../../api/errorMessage";
 import RouteLogRecord from "../RouteLog/model/RouteLogRecord";
 import {
+    departmentCodeValue,
     PersonApi,
     PersonType,
     ShipmentDto,
@@ -45,6 +47,7 @@ import {
     ShipmentTypeDto,
 } from "./dto/ShipmentDto";
 import pl from "../../i18n/translate";
+import {valueObjectValue} from "../../utils/valueObject";
 import "./styles/shipments.css";
 
 type Notice = {
@@ -74,6 +77,19 @@ const clonePerson = (person?: PersonApi): PersonApi => ({
 const fullName = (person?: PersonApi) => {
     const value = `${person?.firstName || ""} ${person?.lastName || ""}`.trim();
     return value || pl.common.dash;
+};
+
+const personsEqual = (left?: PersonApi, right?: PersonApi) => {
+    const first = clonePerson(left);
+    const second = clonePerson(right);
+
+    return first.firstName === second.firstName
+        && first.lastName === second.lastName
+        && first.email === second.email
+        && first.telephoneNumber === second.telephoneNumber
+        && first.city === second.city
+        && first.postalCode === second.postalCode
+        && first.street === second.street;
 };
 
 const formatPrice = (shipment?: ShipmentDto | null) => {
@@ -120,9 +136,11 @@ const detailStatus = (detail: RouteDetail) => detail.shipmentStatus || detail.pa
 
 const detailStatusLabel = (status: string) => pl.shipments.status[status as ShipmentStatusDto] || status;
 
-const detailDepartment = (detail: RouteDetail) => detail.departmentCode || detail.depotCode || pl.common.dash;
+const detailDepartment = (detail: RouteDetail) => valueObjectValue(detail.departmentCode) || valueObjectValue(detail.depotCode) || pl.common.dash;
 
 const detailTerminal = (detail: RouteDetail) => detail.terminalId?.value || detail.zebraId || pl.common.dash;
+
+const detailCourier = (detail?: RouteDetail | null) => valueObjectValue(detail?.supplierCode) || detail?.username || pl.shipments.table.unassigned;
 
 const formatBoolean = (value: boolean) => value ? pl.shipments.dangerousGood.yes : pl.shipments.dangerousGood.no;
 
@@ -139,6 +157,9 @@ const ShipmentDetails: React.FC = () => {
     const [loadingRouteLog, setLoadingRouteLog] = useState<boolean>(false);
     const [saving, setSaving] = useState<boolean>(false);
     const [savingStatus, setSavingStatus] = useState<boolean>(false);
+    const [savingPersonType, setSavingPersonType] = useState<PersonType | null>(null);
+    const [personDialogType, setPersonDialogType] = useState<PersonType | null>(null);
+    const [personDraft, setPersonDraft] = useState<PersonApi>({...emptyPerson});
     const [statusDialogOpen, setStatusDialogOpen] = useState<boolean>(false);
     const [downloadingDocument, setDownloadingDocument] = useState<DocumentAction | null>(null);
     const [qrMenuAnchor, setQrMenuAnchor] = useState<HTMLElement | null>(null);
@@ -148,6 +169,8 @@ const ShipmentDetails: React.FC = () => {
 
     const validShipmentId = Boolean(shipmentId && /^\d+$/.test(shipmentId) && !/^0+$/.test(shipmentId));
     const decodedTrackingNumber = trackingNumber ? decodeURIComponent(trackingNumber) : "";
+    const personDialogSource = personDialogType === "SENDER" ? shipment?.sender : shipment?.recipient;
+    const personDialogChanged = personDialogType ? !personsEqual(personDialogSource, personDraft) : false;
 
     const details = useMemo(() => routeDetails(routeLog), [routeLog]);
     const currentCourierDetail = details.find((detail) => detail.supplierCode || detail.username) || null;
@@ -220,6 +243,8 @@ const ShipmentDetails: React.FC = () => {
         setShipmentType(data.shipmentType);
         setSender(clonePerson(data.sender));
         setRecipient(clonePerson(data.recipient));
+        setPersonDialogType(null);
+        setPersonDraft({...emptyPerson});
     };
 
     const loadShipment = async () => {
@@ -250,18 +275,12 @@ const ShipmentDetails: React.FC = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [shipmentId, trackingNumber]);
 
-    const updatePersonField = (
-        personType: PersonType,
+    const updatePersonDraftField = (
         field: keyof PersonApi,
         event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
     ) => {
         const value = event.target.value;
-        if (personType === "SENDER") {
-            setSender((current) => ({...current, [field]: value}));
-            return;
-        }
-
-        setRecipient((current) => ({...current, [field]: value}));
+        setPersonDraft((current) => ({...current, [field]: value}));
     };
 
     const openStatusDialog = () => {
@@ -316,9 +335,6 @@ const ShipmentDetails: React.FC = () => {
                 await ShipmentService.changeShipmentType(shipment.shipmentId.value, shipmentType);
             }
 
-            await ShipmentService.updatePerson(shipment.shipmentId.value, "SENDER", sender);
-            await ShipmentService.updatePerson(shipment.shipmentId.value, "RECIPIENT", recipient);
-
             const response = shipment.trackingNumber?.value
                 ? await ShipmentService.getControlCenterByTrackingNumber(shipment.trackingNumber.value)
                 : await ShipmentService.getControlCenter(shipment.shipmentId.value);
@@ -332,60 +348,121 @@ const ShipmentDetails: React.FC = () => {
         }
     };
 
+    const savePerson = async () => {
+        const personType = personDialogType;
+        if (!shipment || !personType) {
+            return;
+        }
+
+        setSavingPersonType(personType);
+        try {
+            if (personType === "SENDER") {
+                await ShipmentService.updateSender(shipment.shipmentId.value, personDraft);
+            } else {
+                await ShipmentService.updateRecipient(shipment.shipmentId.value, personDraft);
+            }
+
+            const response = shipment.trackingNumber?.value
+                ? await ShipmentService.getControlCenterByTrackingNumber(shipment.trackingNumber.value)
+                : await ShipmentService.getControlCenter(shipment.shipmentId.value);
+            applyShipment(response.data.shipment);
+            setRouteLog(response.data.routeLog);
+            setNotice({
+                severity: "success",
+                message: personType === "SENDER"
+                    ? pl.shipments.messages.senderSaveSuccess
+                    : pl.shipments.messages.recipientSaveSuccess,
+            });
+        } catch (error) {
+            showError(error, personType === "SENDER"
+                ? pl.shipments.messages.senderSaveError
+                : pl.shipments.messages.recipientSaveError);
+        } finally {
+            setSavingPersonType(null);
+        }
+    };
+
+    const openPersonDialog = (personType: PersonType) => {
+        setPersonDraft(clonePerson(personType === "SENDER" ? shipment?.sender : shipment?.recipient));
+        setPersonDialogType(personType);
+    };
+
+    const closePersonDialog = () => {
+        if (savingPersonType) {
+            return;
+        }
+        setPersonDialogType(null);
+        setPersonDraft({...emptyPerson});
+    };
+
     const personFields = (title: string, personType: PersonType, person: PersonApi) => (
         <section className={`shipment-edit-section shipment-details-segment shipment-details-person-${personType.toLowerCase()}`}>
             <div className="shipment-edit-section-header">
                 <Typography variant="h6">{title}</Typography>
+                <div className="shipment-edit-section-actions">
+                    <Button
+                        className="shipment-edit-section-action"
+                        disabled={loadingShipment || !shipment || savingPersonType !== null || saving}
+                        onClick={() => openPersonDialog(personType)}
+                        size="small"
+                        startIcon={<Edit />}
+                        variant="outlined"
+                    >
+                        {personType === "SENDER"
+                            ? pl.shipments.form.actions.editSender
+                            : pl.shipments.form.actions.editRecipient}
+                    </Button>
+                </div>
             </div>
             <div className="shipment-details-grid">
                 <TextField
+                    InputProps={{readOnly: true}}
                     label={pl.shipments.form.fields.firstName}
                     size="small"
                     value={person.firstName}
-                    onChange={(event) => updatePersonField(personType, "firstName", event)}
                 />
 
                 <TextField
+                    InputProps={{readOnly: true}}
                     label={pl.shipments.form.fields.lastName}
                     size="small"
                     value={person.lastName}
-                    onChange={(event) => updatePersonField(personType, "lastName", event)}
                 />
 
                 <TextField
+                    InputProps={{readOnly: true}}
                     label={pl.shipments.form.fields.email}
                     size="small"
                     value={person.email}
-                    onChange={(event) => updatePersonField(personType, "email", event)}
                 />
 
                 <TextField
+                    InputProps={{readOnly: true}}
                     label={pl.shipments.form.fields.phone}
                     size="small"
                     value={person.telephoneNumber}
-                    onChange={(event) => updatePersonField(personType, "telephoneNumber", event)}
                 />
 
                 <TextField
+                    InputProps={{readOnly: true}}
                     label={pl.shipments.form.fields.city}
                     size="small"
                     value={person.city}
-                    onChange={(event) => updatePersonField(personType, "city", event)}
                 />
 
                 <TextField
+                    InputProps={{readOnly: true}}
                     label={pl.shipments.form.fields.postalCode}
                     size="small"
                     value={person.postalCode}
-                    onChange={(event) => updatePersonField(personType, "postalCode", event)}
                 />
 
                 <TextField
                     className="shipment-details-wide"
+                    InputProps={{readOnly: true}}
                     label={pl.shipments.form.fields.street}
                     size="small"
                     value={person.street}
-                    onChange={(event) => updatePersonField(personType, "street", event)}
                 />
             </div>
         </section>
@@ -618,7 +695,7 @@ const ShipmentDetails: React.FC = () => {
                                     </div>
                                     <div>
                                         <span>{pl.shipments.summary.destination}</span>
-                                        <strong>{shipment.destination || pl.common.dash}</strong>
+                                        <strong>{departmentCodeValue(shipment.destination) || pl.common.dash}</strong>
                                     </div>
                                     <div>
                                         <span>{pl.shipments.summary.price}</span>
@@ -674,7 +751,7 @@ const ShipmentDetails: React.FC = () => {
                                 </div>
                                 <div>
                                     <span>{pl.shipments.summary.currentCourier}</span>
-                                    <strong>{currentCourierDetail?.supplierCode || currentCourierDetail?.username || pl.shipments.table.unassigned}</strong>
+                                    <strong>{detailCourier(currentCourierDetail)}</strong>
                                     <p>
                                         {currentCourierDetail
                                             ? pl.shipments.summary.lastActivity
@@ -772,6 +849,86 @@ const ShipmentDetails: React.FC = () => {
                         onClick={saveShipmentStatus}
                     >
                         {pl.common.saveChanges}
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            <Dialog
+                fullWidth
+                maxWidth="md"
+                onClose={closePersonDialog}
+                open={Boolean(personDialogType)}
+            >
+                <DialogTitle>
+                    {personDialogType === "SENDER"
+                        ? pl.shipments.form.actions.editSender
+                        : pl.shipments.form.actions.editRecipient}
+                </DialogTitle>
+                <DialogContent>
+                    <div className="shipment-person-dialog-grid">
+                        <TextField
+                            label={pl.shipments.form.fields.firstName}
+                            onChange={(event) => updatePersonDraftField("firstName", event)}
+                            size="small"
+                            value={personDraft.firstName}
+                        />
+                        <TextField
+                            label={pl.shipments.form.fields.lastName}
+                            onChange={(event) => updatePersonDraftField("lastName", event)}
+                            size="small"
+                            value={personDraft.lastName}
+                        />
+                        <TextField
+                            label={pl.shipments.form.fields.email}
+                            onChange={(event) => updatePersonDraftField("email", event)}
+                            size="small"
+                            value={personDraft.email}
+                        />
+                        <TextField
+                            label={pl.shipments.form.fields.phone}
+                            onChange={(event) => updatePersonDraftField("telephoneNumber", event)}
+                            size="small"
+                            value={personDraft.telephoneNumber}
+                        />
+                        <TextField
+                            label={pl.shipments.form.fields.city}
+                            onChange={(event) => updatePersonDraftField("city", event)}
+                            size="small"
+                            value={personDraft.city}
+                        />
+                        <TextField
+                            label={pl.shipments.form.fields.postalCode}
+                            onChange={(event) => updatePersonDraftField("postalCode", event)}
+                            size="small"
+                            value={personDraft.postalCode}
+                        />
+                        <TextField
+                            className="shipment-person-dialog-wide"
+                            label={pl.shipments.form.fields.street}
+                            onChange={(event) => updatePersonDraftField("street", event)}
+                            size="small"
+                            value={personDraft.street}
+                        />
+                    </div>
+                </DialogContent>
+                <DialogActions>
+                    <Button
+                        disabled={savingPersonType !== null}
+                        onClick={closePersonDialog}
+                        startIcon={<Close />}
+                        variant="outlined"
+                    >
+                        {pl.common.cancel}
+                    </Button>
+                    <Button
+                        disabled={!personDialogChanged || savingPersonType !== null}
+                        onClick={savePerson}
+                        startIcon={savingPersonType ? <CircularProgress color="inherit" size={16} /> : <Save />}
+                        variant="contained"
+                    >
+                        {personDialogType === "SENDER"
+                            ? pl.shipments.form.actions.saveSender
+                            : pl.shipments.form.actions.saveRecipient}
                     </Button>
                 </DialogActions>
             </Dialog>

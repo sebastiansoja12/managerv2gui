@@ -1014,6 +1014,12 @@ export const de: typeof pl = {
                 dangerousGood: "Gefahrgut",
                 status: "Status",
             },
+            actions: {
+                editSender: "Absender bearbeiten",
+                editRecipient: "Empfänger bearbeiten",
+                saveSender: "Absender speichern",
+                saveRecipient: "Empfänger speichern",
+            },
             fields: {
                 shipmentStatus: "Sendungsstatus",
                 shipmentType: "Sendungstyp",
@@ -1061,7 +1067,7 @@ export const de: typeof pl = {
             relatedShipment: "Übergeordnete Sendung",
             currentCourier: "Aktueller Kurier",
             lastActivity: "Letzte Aktivität: {date} · {department}",
-            noCourierInfo: "Keine Kurierinformationen im Route Tracker",
+            noCourierInfo: "Keine Kurierinformationen",
         },
         routeHistory: {
             title: "Sendungshistorie",
@@ -1101,6 +1107,10 @@ export const de: typeof pl = {
             loadViewError: "Sendung konnte nicht geladen werden.",
             saveSuccess: "Sendung wurde gespeichert",
             saveError: "Sendung konnte nicht gespeichert werden",
+            senderSaveSuccess: "Absenderdaten wurden gespeichert",
+            senderSaveError: "Absenderdaten konnten nicht gespeichert werden",
+            recipientSaveSuccess: "Empfängerdaten wurden gespeichert",
+            recipientSaveError: "Empfängerdaten konnten nicht gespeichert werden",
             statusSaveSuccess: "Sendungsstatus wurde gespeichert",
             statusSaveError: "Sendungsstatus konnte nicht gespeichert werden",
             copyTrackingSuccess: "Trackingnummer wurde kopiert",
