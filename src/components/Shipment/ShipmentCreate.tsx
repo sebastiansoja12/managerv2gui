@@ -26,6 +26,7 @@ import {
     ShipmentSizeDto,
 } from "./dto/ShipmentDto";
 import pl from "../../i18n/translate";
+import DangerousGoodForm, {createEmptyDangerousGood, isDangerousGoodValid} from "./DangerousGoodForm";
 import "./styles/shipments.css";
 
 type Notice = {
@@ -41,26 +42,6 @@ const emptyPerson: PersonApi = {
     city: "",
     postalCode: "",
     street: "",
-};
-
-const emptyDangerousGood: DangerousGoodApi = {
-    name: "",
-    description: "",
-    classificationCode: "",
-    hazardSymbols: [],
-    storageRequirements: "",
-    handlingInstructions: "",
-    weight: {
-        value: 0,
-        unit: "KG",
-    },
-    packaging: "",
-    flammable: false,
-    corosive: false,
-    toxic: false,
-    emergencyContact: "",
-    countryOfOrigin: "PL",
-    safetyDataSheet: "",
 };
 
 const initialShipmentSize: ShipmentSizeDto = "SMALL";
@@ -85,7 +66,7 @@ const ShipmentCreate: React.FC = () => {
     const [receiverCountryCode, setReceiverCountryCode] = useState<string>(initialReceiverCountryCode);
     const [carrierOperator, setCarrierOperator] = useState<string>("");
     const [dangerousEnabled, setDangerousEnabled] = useState<boolean>(false);
-    const [dangerousGood, setDangerousGood] = useState<DangerousGoodApi>({...emptyDangerousGood});
+    const [dangerousGood, setDangerousGood] = useState<DangerousGoodApi>(createEmptyDangerousGood());
 
     const textField = (
         label: string,
@@ -164,7 +145,7 @@ const ShipmentCreate: React.FC = () => {
             amount: Number(priceAmount) || 0,
             currency,
         },
-        dangerousGood: dangerousEnabled ? dangerousGood : null,
+        ...(dangerousEnabled ? {dangerousGood} : {}),
         shipmentPriority,
         issuerCountryCode,
         receiverCountryCode,
@@ -182,7 +163,7 @@ const ShipmentCreate: React.FC = () => {
         setReceiverCountryCode(initialReceiverCountryCode);
         setCarrierOperator("");
         setDangerousEnabled(false);
-        setDangerousGood({...emptyDangerousGood});
+        setDangerousGood(createEmptyDangerousGood());
     };
 
     const showError = (error: unknown) => {
@@ -192,6 +173,10 @@ const ShipmentCreate: React.FC = () => {
     };
 
     const createShipment = async () => {
+        if (dangerousEnabled && !isDangerousGoodValid(dangerousGood)) {
+            setNotice({severity: "error", message: shipmentTranslations.dangerousGood.invalid});
+            return;
+        }
         setLoading(true);
         try {
             const response = await ShipmentService.create(createRequest());
@@ -251,28 +236,17 @@ const ShipmentCreate: React.FC = () => {
                         <Stack direction="row" alignItems="center" justifyContent="space-between" gap={2}>
                             <div className="shipments-section-title">{shipmentTranslations.form.sections.dangerousGood}</div>
                             <FormControlLabel
-                                control={<Checkbox checked={dangerousEnabled} onChange={(event) => setDangerousEnabled(event.target.checked)} />}
-                                label={shipmentTranslations.form.fields.active}
+                                control={<Checkbox checked={dangerousEnabled} onChange={(event) => {
+                                    setDangerousEnabled(event.target.checked);
+                                    if (!event.target.checked) {
+                                        setDangerousGood(createEmptyDangerousGood());
+                                    }
+                                }} />}
+                                label={shipmentTranslations.form.fields.containsDangerousGoods}
                             />
                         </Stack>
                         {dangerousEnabled ? (
-                            <div className="shipments-form-grid">
-                                {textField(shipmentTranslations.form.fields.name, dangerousGood.name, (value) => setDangerousGood({...dangerousGood, name: value}))}
-                                {textField(shipmentTranslations.form.fields.description, dangerousGood.description, (value) => setDangerousGood({...dangerousGood, description: value}))}
-                                {textField(shipmentTranslations.form.fields.classification, dangerousGood.classificationCode, (value) => setDangerousGood({...dangerousGood, classificationCode: value}))}
-                                {textField(shipmentTranslations.form.fields.hazardSymbols, dangerousGood.hazardSymbols.join(","), (value) => setDangerousGood({...dangerousGood, hazardSymbols: value.split(",").map((item) => item.trim()).filter(Boolean)}))}
-                                {textField(shipmentTranslations.form.fields.storageRequirements, dangerousGood.storageRequirements, (value) => setDangerousGood({...dangerousGood, storageRequirements: value}))}
-                                {textField(shipmentTranslations.form.fields.handlingInstructions, dangerousGood.handlingInstructions, (value) => setDangerousGood({...dangerousGood, handlingInstructions: value}))}
-                                {textField(shipmentTranslations.form.fields.weight, dangerousGood.weight.value.toString(), (value) => setDangerousGood({...dangerousGood, weight: {...dangerousGood.weight, value: Number(value) || 0}}), "number")}
-                                {textField(shipmentTranslations.form.fields.unit, dangerousGood.weight.unit, (value) => setDangerousGood({...dangerousGood, weight: {...dangerousGood.weight, unit: value}}))}
-                                {textField(shipmentTranslations.form.fields.packaging, dangerousGood.packaging, (value) => setDangerousGood({...dangerousGood, packaging: value}))}
-                                {textField(shipmentTranslations.form.fields.emergencyContact, dangerousGood.emergencyContact, (value) => setDangerousGood({...dangerousGood, emergencyContact: value}))}
-                                {selectField(shipmentTranslations.form.fields.countryOfOrigin, dangerousGood.countryOfOrigin, countryCodes, (value) => setDangerousGood({...dangerousGood, countryOfOrigin: value}))}
-                                {textField(shipmentTranslations.form.fields.safetyDataSheet, dangerousGood.safetyDataSheet, (value) => setDangerousGood({...dangerousGood, safetyDataSheet: value}))}
-                                <FormControlLabel control={<Checkbox checked={dangerousGood.flammable} onChange={(event) => setDangerousGood({...dangerousGood, flammable: event.target.checked})} />} label={shipmentTranslations.form.fields.flammable} />
-                                <FormControlLabel control={<Checkbox checked={dangerousGood.corosive} onChange={(event) => setDangerousGood({...dangerousGood, corosive: event.target.checked})} />} label={shipmentTranslations.form.fields.corrosive} />
-                                <FormControlLabel control={<Checkbox checked={dangerousGood.toxic} onChange={(event) => setDangerousGood({...dangerousGood, toxic: event.target.checked})} />} label={shipmentTranslations.form.fields.toxic} />
-                            </div>
+                            <DangerousGoodForm value={dangerousGood} onChange={setDangerousGood} />
                         ) : null}
                     </div>
 
