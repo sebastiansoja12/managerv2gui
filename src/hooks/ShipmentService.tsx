@@ -2,6 +2,7 @@ import BackendClient from "../api/BackendClient";
 import http from "../http-common";
 import {
     CountryRequestApi,
+    DangerousGoodApi,
     PersonApi,
     PersonType,
     ShipmentCreateRequestApi,
@@ -124,6 +125,25 @@ const changeShipmentType = (shipmentId: string, shipmentType: ShipmentTypeDto) =
     });
 };
 
+const getDangerousGood = (shipmentId: string) => {
+    return client.get<DangerousGoodApi>(`/shipments/${shipmentId}/dangerous-good`);
+};
+
+const putDangerousGood = (shipmentId: string, data: DangerousGoodApi) => {
+    return client.put<DangerousGoodApi, DangerousGoodApi>(`/shipments/${shipmentId}/dangerous-good`, data);
+};
+
+const patchDangerousGood = (shipmentId: string, data: Partial<DangerousGoodApi>) => {
+    return client.patch<Partial<DangerousGoodApi>, DangerousGoodApi>(
+        `/shipments/${shipmentId}/dangerous-good`,
+        data
+    );
+};
+
+const deleteDangerousGood = (shipmentId: string) => {
+    return client.delete<undefined, void>(`/shipments/${shipmentId}/dangerous-good`, undefined);
+};
+
 const ShipmentService = {
     create,
     get,
@@ -142,6 +162,10 @@ const ShipmentService = {
     updateRecipient,
     updateCountries,
     changeShipmentType,
+    getDangerousGood,
+    putDangerousGood,
+    patchDangerousGood,
+    deleteDangerousGood,
 };
 
 export default ShipmentService;

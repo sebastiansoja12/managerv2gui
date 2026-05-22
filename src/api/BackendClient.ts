@@ -59,6 +59,14 @@ class BackendClient {
         });
     }
 
+    async patch<TRequest, TResponse>(url: string, data: TRequest): Promise<ApiResult<TResponse>> {
+        return this.request<TResponse>({
+            method: "PATCH",
+            url,
+            data,
+        });
+    }
+
     private async request<TResponse>(config: AxiosRequestConfig): Promise<ApiResult<TResponse>> {
         try {
             const response = await this.http.request<TResponse>(config);
