@@ -78,7 +78,6 @@ export interface DangerousGoodApi {
 
 export interface ShipmentConfigurationApi {
     forceUpdate: boolean;
-    publishInRouteTracker: boolean;
     publishInReturnManager: boolean;
     customRerouteDepartment: boolean;
 }
