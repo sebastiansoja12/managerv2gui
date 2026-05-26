@@ -224,7 +224,7 @@ const Departments: React.FC = () => {
                             </thead>
                             <tbody>
                             {departments.map((department) => (
-                                <tr key={department.departmentCode.value}>
+                                <tr key={department.departmentId}>
                                     <td><strong>{department.departmentCode.value}</strong></td>
                                     <td>{valueOrDash(department.address?.city)}</td>
                                     <td>{valueOrDash(department.address?.street)}</td>

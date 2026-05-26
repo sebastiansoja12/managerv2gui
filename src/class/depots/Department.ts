@@ -7,9 +7,16 @@ export interface Address {
     countryCode: string;
 }
 
+export interface Coordinates {
+    latitude: number;
+    longitude: number;
+}
+
 export default interface Department {
+    departmentId: number;
     departmentCode: DepartmentCode;
     address: Address;
+    coordinates?: Coordinates | null;
     taxId: string;
     telephoneNumber: string;
     openingHours: string;
