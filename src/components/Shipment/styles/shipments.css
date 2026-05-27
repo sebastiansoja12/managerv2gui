@@ -34,11 +34,7 @@
 }
 
 .shipment-history-map {
-    background:
-        linear-gradient(90deg, rgba(148, 163, 184, 0.15) 1px, transparent 1px),
-        linear-gradient(rgba(148, 163, 184, 0.15) 1px, transparent 1px),
-        linear-gradient(135deg, #eef6ff, var(--brand-accent-wash));
-    background-size: 42px 42px, 42px 42px, auto;
+    background: var(--brand-accent-wash);
     border: 1px solid var(--brand-border);
     border-radius: 8px;
     height: min(52vh, 520px);
@@ -47,74 +43,57 @@
     position: relative;
 }
 
-.shipment-history-map::before,
-.shipment-history-map::after {
-    background: rgba(96, 165, 250, 0.42);
-    border-radius: 999px;
-    content: "";
-    height: 72px;
-    left: -20px;
-    position: absolute;
-    top: 58%;
-    transform: rotate(-8deg);
-    width: 115%;
+.shipment-history-leaflet-map {
+    height: 100%;
+    width: 100%;
 }
 
-.shipment-history-map::after {
-    background: rgba(134, 239, 172, 0.5);
-    height: 84px;
-    left: 62%;
-    top: 8%;
-    transform: rotate(20deg);
-    width: 34%;
-}
-
-.shipment-history-map-line {
-    border-top: 4px dashed var(--brand-accent-deep);
-    left: 12%;
-    position: absolute;
-    right: 12%;
-    top: 49%;
-    transform: rotate(8deg);
-    z-index: 2;
-}
-
-.shipment-history-map-point {
+.shipment-history-map-state {
     align-items: center;
-    background: var(--brand-surface);
-    border: 2px solid var(--brand-accent);
-    border-radius: 999px;
-    box-shadow: 0 14px 28px var(--brand-shadow);
+    color: var(--brand-muted);
     display: flex;
-    flex-direction: column;
-    gap: 4px;
-    min-width: 86px;
-    padding: 10px 12px;
-    position: absolute;
-    transform: translate(-50%, -50%);
-    z-index: 3;
+    font-weight: 750;
+    height: 100%;
+    justify-content: center;
+    padding: 24px;
+    text-align: center;
 }
 
-.shipment-history-map-point span {
-    align-items: center;
-    background: var(--brand-accent-deep);
-    border-radius: 999px;
-    color: var(--brand-surface);
-    display: inline-flex;
+.shipment-history-map-state-error {
+    color: var(--brand-danger, #b42318);
+}
+
+.shipment-history-map-marker-number.leaflet-tooltip {
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    color: #ffffff;
     font-size: 0.78rem;
     font-weight: 900;
-    height: 24px;
-    justify-content: center;
-    width: 24px;
+    line-height: 1;
+    padding: 0;
+    pointer-events: none;
 }
 
-.shipment-history-map-point strong {
+.shipment-history-map-marker-number.leaflet-tooltip::before {
+    display: none;
+}
+
+.shipment-history-map-popup {
+    display: grid;
+    gap: 2px;
+    min-width: 150px;
+}
+
+.shipment-history-map-popup strong {
     color: var(--brand-ink);
+    font-size: 0.95rem;
+    margin-bottom: 4px;
+}
+
+.shipment-history-map-popup span {
+    color: var(--brand-ink-soft);
     font-size: 0.82rem;
-    max-width: 110px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
 }
 
 .shipment-history-timeline-panel {
