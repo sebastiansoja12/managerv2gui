@@ -8,9 +8,14 @@ import RouteLogRecord from "../RouteLog/model/RouteLogRecord";
 import {ShipmentDto, ShipmentStatusDto} from "./dto/ShipmentDto";
 import pl from "../../i18n/translate";
 import {valueObjectValue} from "../../utils/valueObject";
+import {shipmentEventDescription} from "./shipmentEventDescription";
+import Department from "../../class/depots/Department";
+import DepartmentService from "../../hooks/DepartmentService";
 import "./styles/shipments.css";
 
 type RouteDetail = RouteLogRecord["routeLogRecordDetails"]["routeLogRecordDetailSet"][number];
+
+const ShipmentRouteMap = React.lazy(() => import("./ShipmentRouteMap"));
 
 const formatDateTime = (date?: string) => {
     if (!date) {
@@ -46,7 +51,8 @@ const routeDetails = (routeLog: RouteLogRecord | null): RouteDetail[] => {
 
 const detailStatus = (detail: RouteDetail) => detail.shipmentStatus || detail.parcelStatus || pl.common.dash;
 const detailStatusLabel = (status: string) => pl.shipments.status[status as ShipmentStatusDto] || status;
-const detailDepartment = (detail: RouteDetail) => valueObjectValue(detail.departmentCode) || valueObjectValue(detail.depotCode) || pl.common.dash;
+const detailDepartment = (detail: RouteDetail) => valueObjectValue(detail.departmentId) || valueObjectValue(detail.departmentCode) || valueObjectValue(detail.depotCode) || pl.common.dash;
+const detailUser = (detail: RouteDetail) => detail.username || pl.common.dash;
 const detailTerminal = (detail: RouteDetail) => detail.terminalId?.value || detail.zebraId || pl.common.dash;
 
 const fullName = (person?: ShipmentDto["sender"]) => {
@@ -59,6 +65,9 @@ const ShipmentHistoryDetails: React.FC = () => {
     const {shipmentId, trackingNumber} = useParams();
     const [shipment, setShipment] = useState<ShipmentDto | null>(null);
     const [routeLog, setRouteLog] = useState<RouteLogRecord | null>(null);
+    const [departments, setDepartments] = useState<Department[]>([]);
+    const [mapLoading, setMapLoading] = useState<boolean>(false);
+    const [mapError, setMapError] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -68,12 +77,26 @@ const ShipmentHistoryDetails: React.FC = () => {
     const loadHistory = async () => {
         setLoading(true);
         setError(null);
+        setMapError(null);
         try {
             const response = decodedTrackingNumber
                 ? await ShipmentService.getControlCenterByTrackingNumber(decodedTrackingNumber)
                 : await ShipmentService.getControlCenter(shipmentId || "");
             setShipment(response.data.shipment);
             setRouteLog(response.data.routeLog);
+
+            if (routeDetails(response.data.routeLog).length && !departments.length) {
+                setMapLoading(true);
+                try {
+                    const departmentResponse = await DepartmentService.getAll();
+                    setDepartments(departmentResponse.data);
+                } catch (departmentError) {
+                    const apiError = departmentError as ApiErrorResponse;
+                    setMapError(apiError.message || pl.shipments.routeHistory.mapLoadError);
+                } finally {
+                    setMapLoading(false);
+                }
+            }
         } catch (loadError) {
             const apiError = loadError as ApiErrorResponse;
             setError(apiError.message || pl.shipments.messages.loadError);
@@ -134,18 +157,14 @@ const ShipmentHistoryDetails: React.FC = () => {
                                 <Route />
                             </div>
                             <div className="shipment-history-map">
-                                <div className="shipment-history-map-line" />
-                                {(details.length ? details : [undefined, undefined, undefined]).map((detail, index, source) => {
-                                    const left = source.length <= 1 ? 50 : 12 + (index * (76 / (source.length - 1)));
-                                    const top = index % 2 === 0 ? 34 : 62;
-
-                                    return (
-                                        <div className="shipment-history-map-point" style={{left: `${left}%`, top: `${top}%`}} key={detail ? `${detail.id}-${index}` : index}>
-                                            <span>{index + 1}</span>
-                                            <strong>{detail ? detailDepartment(detail) : pl.common.dash}</strong>
-                                        </div>
-                                    );
-                                })}
+                                <React.Suspense fallback={<div className="shipment-history-map-state">{pl.shipments.routeHistory.mapLoading}</div>}>
+                                    <ShipmentRouteMap
+                                        departments={departments}
+                                        details={details}
+                                        error={mapError}
+                                        loading={mapLoading}
+                                    />
+                                </React.Suspense>
                             </div>
                         </section>
 
@@ -173,10 +192,10 @@ const ShipmentHistoryDetails: React.FC = () => {
                                                     <span className={`shipment-history-status tm-status tm-status-${String(statusKey).toLowerCase()}`}>
                                                         {detailStatusLabel(statusKey)}
                                                     </span>
-                                                    <p>{detail.description || pl.shipments.routeHistory.noDescription}</p>
+                                                    <p>{shipmentEventDescription(detail.description)}</p>
                                                     <dl>
                                                         <div><dt>{pl.shipments.routeHistory.department}</dt><dd>{detailDepartment(detail)}</dd></div>
-                                                        <div><dt>{pl.shipments.routeHistory.user}</dt><dd>{detail.username || pl.common.dash}</dd></div>
+                                                        <div><dt>{pl.shipments.routeHistory.user}</dt><dd>{detailUser(detail)}</dd></div>
                                                         <div><dt>{pl.shipments.routeHistory.terminal}</dt><dd>{detailTerminal(detail)}</dd></div>
                                                     </dl>
                                                 </div>
