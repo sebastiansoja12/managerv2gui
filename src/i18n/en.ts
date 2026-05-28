@@ -109,6 +109,7 @@ export const en: typeof pl = {
         shipmentScanner: "Shipment scanning",
         courierDeliveries: "Shipment delivery",
         devicePairing: "My device",
+        integrations: "Integrations",
         mainAriaLabel: "Main navigation",
         defaultUserName: "Admin",
         defaultUserRole: "S. ADMIN",
@@ -131,10 +132,19 @@ export const en: typeof pl = {
             title: "Find shipment",
             inputLabel: "Shipment tracking number",
             placeholder: "Enter shipment number",
+            criterionLabel: "Search by",
+            shipmentIdInputLabel: "Shipment ID",
+            shipmentIdPlaceholder: "Enter shipment ID",
+            criteria: {
+                trackingNumber: "Tracking number",
+                shipmentId: "Shipment ID",
+            },
             search: "Search",
             showHistory: "Show history",
             detailsTabLabel: "Shipment details {trackingNumber}",
             historyTabLabel: "Shipment history {trackingNumber}",
+            detailsByIdTabLabel: "Shipment details #{shipmentId}",
+            historyByIdTabLabel: "Shipment history #{shipmentId}",
         },
         tiles: {
             shipmentDetails: {
@@ -180,6 +190,10 @@ export const en: typeof pl = {
             analytics: {
                 title: "Analytics",
                 description: "Reports, indicators, and operational health view.",
+            },
+            integrations: {
+                title: "Integrations",
+                description: "Configure external shipment tracking providers.",
             },
             shipmentScanner: {
                 title: "Shipment scanning",
@@ -679,6 +693,10 @@ export const en: typeof pl = {
                 title: "Geolocation",
                 description: "Geocoding provider connections and API credentials.",
             },
+            integrations: {
+                title: "Integrations",
+                description: "Connections to external services unrelated to geolocation.",
+            },
         },
         columns: {
             name: "Property",
@@ -938,6 +956,56 @@ export const en: typeof pl = {
             FAILURE: "Failed",
         },
     },
+    integrations: {
+        title: "Integrations",
+        subtitle: "Add and configure connections to external services.",
+        loading: "Loading integrations...",
+        emptyTitle: "No configured integrations",
+        emptyDescription: "Add an integration and provide the fields required by the selected provider.",
+        inPost: {
+            title: "InPost Global Tracking",
+            subtitle: "Configure OAuth and the InPost tracking environment.",
+            description: "Global shipment tracking through the InPost API.",
+        },
+        fields: {
+            environment: "Environment",
+            enabled: "Integration enabled",
+            clientId: "Client ID",
+            clientSecret: "Client Secret",
+            apiKey: "API key",
+            secretConfigured: "A secret is saved. Leave empty to keep it.",
+            secretRequired: "Enter the client secret.",
+        },
+        environments: {stage: "Stage", production: "Production"},
+        status: {enabled: "Enabled", disabled: "Disabled"},
+        columns: {status: "Status", integration: "Integration", credentials: "Credentials"},
+        credentials: {configured: "Secret credentials configured", notRequired: "No secret credentials"},
+        dialog: {
+            title: "Add integration",
+            editTitle: "Edit integration",
+            description: "Select an integration. The form automatically shows the fields required by its provider.",
+            editDescription: "Change the integration settings or test the connection before saving.",
+            providerLabel: "Integration",
+            noAvailableProviders: "All available integrations are already configured.",
+            enabledHint: "The integration will be available to system operations.",
+        },
+        actions: {
+            add: "Add integration",
+            addFirst: "Add first integration",
+            edit: "Edit",
+            testConnection: "Test connection",
+            testing: "Testing...",
+            saving: "Saving...",
+            saveChanges: "Save changes",
+        },
+        messages: {
+            loadError: "Could not load the integration configuration",
+            saved: "Configuration saved",
+            saveError: "Could not save the configuration",
+            connectionSuccess: "Connection successful",
+            connectionError: "Connection test failed",
+        },
+    },
     shipments: {
         ...pl.shipments,
         page: {
@@ -1014,6 +1082,20 @@ export const en: typeof pl = {
                 status: "Status",
                 dangerousGoods: "Dangerous goods",
             },
+        },
+        externalSearch: {
+            source: "Search source",
+            system: "System",
+            external: "External provider",
+            provider: "Provider",
+            search: "Check tracking",
+            providerLoadError: "Could not load available providers",
+            noProviders: "No enabled and configured providers",
+            resultTitle: "External status",
+            currentStatus: "Current status",
+            updatedAt: "Last updated",
+            events: "Event history",
+            noEvents: "No events to display",
         },
         form: {
             sections: {

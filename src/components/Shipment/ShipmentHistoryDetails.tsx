@@ -51,7 +51,7 @@ const routeDetails = (routeLog: RouteLogRecord | null): RouteDetail[] => {
 
 const detailStatus = (detail: RouteDetail) => detail.shipmentStatus || detail.parcelStatus || pl.common.dash;
 const detailStatusLabel = (status: string) => pl.shipments.status[status as ShipmentStatusDto] || status;
-const detailDepartment = (detail: RouteDetail) => valueObjectValue(detail.departmentId) || valueObjectValue(detail.departmentCode) || valueObjectValue(detail.depotCode) || pl.common.dash;
+const detailDepartment = (detail: RouteDetail) => valueObjectValue(detail.departmentCode) || valueObjectValue(detail.depotCode) || pl.common.dash;
 const detailUser = (detail: RouteDetail) => detail.username || pl.common.dash;
 const detailTerminal = (detail: RouteDetail) => detail.terminalId?.value || detail.zebraId || pl.common.dash;
 

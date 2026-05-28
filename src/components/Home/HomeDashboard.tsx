@@ -15,6 +15,7 @@ import {
     TableRows,
     Warehouse,
 } from "@mui/icons-material";
+import {MenuItem, TextField} from "@mui/material";
 import {useNavigate} from "react-router-dom";
 import {isPathAllowedForProfile, OperationalProfile} from "../../config/operationalProfile";
 import pl from "../../i18n/translate";
@@ -35,6 +36,8 @@ type HomeDashboardProps = {
     operationalProfile: OperationalProfile;
 };
 
+type ShipmentLookupCriterion = "TRACKING_NUMBER" | "SHIPMENT_ID";
+
 const homeTiles: HomeTile[] = [
     {key: "shipmentDetails", path: "/shipment-details", icon: Warehouse, accent: "blue"},
     {key: "shipmentList", path: "/shipments/list", icon: TableRows, accent: "cyan"},
@@ -53,9 +56,12 @@ const homeTiles: HomeTile[] = [
 
 function HomeDashboard({onOpenTab, operationalProfile}: HomeDashboardProps) {
     const navigate = useNavigate();
-    const [trackingNumber, setTrackingNumber] = useState("");
+    const [lookupCriterion, setLookupCriterion] = useState<ShipmentLookupCriterion>("TRACKING_NUMBER");
+    const [lookupValue, setLookupValue] = useState("");
     const visibleTiles = homeTiles.filter((tile) => isPathAllowedForProfile(tile.path, operationalProfile));
-    const trimmedTrackingNumber = trackingNumber.trim();
+    const trimmedLookupValue = lookupValue.trim();
+    const validLookupValue = Boolean(trimmedLookupValue)
+        && (lookupCriterion === "TRACKING_NUMBER" || /^\d+$/.test(trimmedLookupValue));
 
     const openTab = (tab: AppTabDefinition) => {
         if (onOpenTab) {
@@ -74,28 +80,39 @@ function HomeDashboard({onOpenTab, operationalProfile}: HomeDashboardProps) {
         });
     };
 
-    const openShipmentByTrackingNumber = (view: "details" | "history") => {
-        if (!trimmedTrackingNumber) {
+    const openShipment = (view: "details" | "history") => {
+        if (!validLookupValue) {
             return;
         }
 
-        const encodedTrackingNumber = encodeURIComponent(trimmedTrackingNumber);
-        const tabLabelTemplate = view === "details"
-            ? pl.home.trackingLookup.detailsTabLabel
-            : pl.home.trackingLookup.historyTabLabel;
-        const path = view === "details"
-            ? `/shipments/tracking/${encodedTrackingNumber}/edit`
-            : `/shipments/tracking/${encodedTrackingNumber}/history`;
+        const encodedValue = encodeURIComponent(trimmedLookupValue);
+        const searchingByTrackingNumber = lookupCriterion === "TRACKING_NUMBER";
+        const tabLabelTemplate = searchingByTrackingNumber
+            ? (view === "details"
+                ? pl.home.trackingLookup.detailsTabLabel
+                : pl.home.trackingLookup.historyTabLabel)
+            : (view === "details"
+                ? pl.home.trackingLookup.detailsByIdTabLabel
+                : pl.home.trackingLookup.historyByIdTabLabel);
+        const path = searchingByTrackingNumber
+            ? (view === "details"
+                ? `/shipments/tracking/${encodedValue}/edit`
+                : `/shipments/tracking/${encodedValue}/history`)
+            : (view === "details"
+                ? `/shipments/${encodedValue}/edit`
+                : `/shipments/${encodedValue}/history`);
 
         openTab({
-            label: tabLabelTemplate.replace("{trackingNumber}", trimmedTrackingNumber),
+            label: tabLabelTemplate
+                .replace("{trackingNumber}", trimmedLookupValue)
+                .replace("{shipmentId}", trimmedLookupValue),
             path,
         });
     };
 
     const searchShipment = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        openShipmentByTrackingNumber("details");
+        openShipment("details");
     };
 
     return (
@@ -124,22 +141,46 @@ function HomeDashboard({onOpenTab, operationalProfile}: HomeDashboardProps) {
                 </div>
 
                 <form className="home-tracking-lookup-form" onSubmit={searchShipment}>
+                    <TextField
+                        className="home-tracking-criterion"
+                        label={pl.home.trackingLookup.criterionLabel}
+                        select
+                        size="small"
+                        value={lookupCriterion}
+                        onChange={(event) => {
+                            setLookupCriterion(event.target.value as ShipmentLookupCriterion);
+                            setLookupValue("");
+                        }}
+                    >
+                        <MenuItem value="TRACKING_NUMBER">
+                            {pl.home.trackingLookup.criteria.trackingNumber}
+                        </MenuItem>
+                        <MenuItem value="SHIPMENT_ID">
+                            {pl.home.trackingLookup.criteria.shipmentId}
+                        </MenuItem>
+                    </TextField>
                     <input
-                        aria-label={pl.home.trackingLookup.inputLabel}
-                        placeholder={pl.home.trackingLookup.placeholder}
+                        aria-label={lookupCriterion === "TRACKING_NUMBER"
+                            ? pl.home.trackingLookup.inputLabel
+                            : pl.home.trackingLookup.shipmentIdInputLabel}
+                        inputMode={lookupCriterion === "SHIPMENT_ID" ? "numeric" : "text"}
+                        pattern={lookupCriterion === "SHIPMENT_ID" ? "[0-9]*" : undefined}
+                        placeholder={lookupCriterion === "TRACKING_NUMBER"
+                            ? pl.home.trackingLookup.placeholder
+                            : pl.home.trackingLookup.shipmentIdPlaceholder}
                         type="text"
-                        value={trackingNumber}
-                        onChange={(event) => setTrackingNumber(event.target.value)}
+                        value={lookupValue}
+                        onChange={(event) => setLookupValue(event.target.value)}
                     />
-                    <button className="home-tracking-primary" disabled={!trimmedTrackingNumber} type="submit">
+                    <button className="home-tracking-primary" disabled={!validLookupValue} type="submit">
                         <Search fontSize="small" />
                         <span>{pl.home.trackingLookup.search}</span>
                     </button>
                     <button
                         className="home-tracking-secondary"
-                        disabled={!trimmedTrackingNumber}
+                        disabled={!validLookupValue}
                         type="button"
-                        onClick={() => openShipmentByTrackingNumber("history")}
+                        onClick={() => openShipment("history")}
                     >
                         <History fontSize="small" />
                         <span>{pl.home.trackingLookup.showHistory}</span>

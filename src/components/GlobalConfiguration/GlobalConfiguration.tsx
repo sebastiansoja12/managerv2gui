@@ -17,6 +17,7 @@ import SoftwareConfigurationService from "../../hooks/SoftwareConfigurationServi
 import pl from "../../i18n/translate";
 import Software from "../SoftwareConfiguration/model/Software";
 import GeocodingConfigurationPanel from "./GeocodingConfigurationPanel";
+import IntegrationsConfigurationPanel from "./IntegrationsConfigurationPanel";
 import {GlobalConfigurationSection, GlobalConfigurationSectionKey} from "./model/GlobalConfigurationSection";
 import "./styles/global-configuration.css";
 
@@ -62,7 +63,15 @@ const sections: GlobalConfigurationSection[] = [
         key: "geocoding",
         categoryAliases: [],
     },
+    {
+        key: "integrations",
+        categoryAliases: [],
+    },
 ];
+
+const isDedicatedConfigurationSection = (sectionKey: GlobalConfigurationSectionKey) => (
+    sectionKey === "geocoding" || sectionKey === "integrations"
+);
 
 const normalizeCategory = (value?: string) => (value || "").trim().toLowerCase();
 
@@ -233,15 +242,19 @@ function GlobalConfiguration() {
                 </div>
             </nav>
 
-            {activeSection.key !== "geocoding" && error ? <Alert severity="error">{error}</Alert> : undefined}
-            {activeSection.key !== "geocoding" && success ? <Alert severity="success">{success}</Alert> : undefined}
+            {!isDedicatedConfigurationSection(activeSection.key) && error
+                ? <Alert severity="error">{error}</Alert>
+                : undefined}
+            {!isDedicatedConfigurationSection(activeSection.key) && success
+                ? <Alert severity="success">{success}</Alert>
+                : undefined}
 
             <section className="global-configuration-toolbar">
                 <div>
                     <h2>{activeSectionTranslation.title}</h2>
                     <p>{activeSectionTranslation.description}</p>
                 </div>
-                {activeSection.key !== "geocoding" ? (
+                {!isDedicatedConfigurationSection(activeSection.key) ? (
                     <Button disabled={loading} startIcon={<Refresh />} variant="outlined" onClick={retrieveProperties}>
                         {pl.common.refresh}
                     </Button>
@@ -250,6 +263,8 @@ function GlobalConfiguration() {
 
             {activeSection.key === "geocoding" ? (
                 <GeocodingConfigurationPanel />
+            ) : activeSection.key === "integrations" ? (
+                <IntegrationsConfigurationPanel />
             ) : loading ? (
                 <div className="global-configuration-loader">
                     <CircularProgress size={28} />

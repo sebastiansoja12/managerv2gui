@@ -3,6 +3,7 @@ import {
     Alert,
     Button,
     Chip,
+    CircularProgress,
     ListItemIcon,
     ListItemText,
     Menu,
@@ -31,7 +32,13 @@ import {
 } from "@mui/icons-material";
 import {useNavigate} from "react-router-dom";
 import ShipmentService from "../../hooks/ShipmentService";
+import TrackingService from "../../hooks/TrackingService";
 import {ApiErrorResponse} from "../../api/ApiResult";
+import {
+    ExternalTrackingResult,
+    TrackingProvider,
+    TrackingProviderId,
+} from "../GlobalConfiguration/model/TrackingIntegration";
 import {departmentCodeValue, ShipmentDto, ShipmentStatusDto} from "./dto/ShipmentDto";
 import pl from "../../i18n/translate";
 import {AppTabDefinition} from "../AppShell/types";
@@ -58,6 +65,10 @@ const shipmentTranslations = pl.shipments;
 const shipmentListCache: {loaded: boolean; shipments: ShipmentDto[]} = {
     loaded: false,
     shipments: [],
+};
+const trackingProviderCache: {loaded: boolean; providers: TrackingProvider[]} = {
+    loaded: false,
+    providers: [],
 };
 
 const formatPersonName = (firstName?: string, lastName?: string, fallback = "-") => {
@@ -126,6 +137,11 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
     const [shipments, setShipments] = useState<ShipmentDto[]>(shipmentListCache.shipments);
     const [notice, setNotice] = useState<Notice | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
+    const [searchSource, setSearchSource] = useState<"SYSTEM" | "EXTERNAL">("SYSTEM");
+    const [trackingProviders, setTrackingProviders] = useState<TrackingProvider[]>(trackingProviderCache.providers);
+    const [trackingProvider, setTrackingProvider] = useState<TrackingProviderId | "">("");
+    const [externalLoading, setExternalLoading] = useState(false);
+    const [externalResult, setExternalResult] = useState<ExternalTrackingResult | null>(null);
     const [actionMenuAnchor, setActionMenuAnchor] = useState<HTMLElement | null>(null);
     const [actionShipment, setActionShipment] = useState<ShipmentDto | null>(null);
 
@@ -180,6 +196,28 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
 
     const findByTrackingNumber = () => {
         const trackingNumber = lookupTrackingNumber.trim();
+        if (searchSource === "EXTERNAL") {
+            if (!trackingProvider) {
+                setNotice({severity: "error", message: shipmentTranslations.externalSearch.noProviders});
+                return;
+            }
+
+            setExternalLoading(true);
+            setExternalResult(null);
+            TrackingService.search(trackingProvider, [trackingNumber])
+                .then((response) => {
+                    const result = response.data[0];
+                    if (!result) {
+                        setNotice({severity: "error", message: shipmentTranslations.table.localFilterNotFound});
+                        return;
+                    }
+                    setExternalResult(result);
+                })
+                .catch(showError)
+                .finally(() => setExternalLoading(false));
+            return;
+        }
+
         const shipment = shipments.find((current) => current.trackingNumber?.value?.toLowerCase().includes(trackingNumber.toLowerCase()));
         if (!shipment) {
             setNotice({severity: "error", message: shipmentTranslations.table.localFilterNotFound});
@@ -222,7 +260,33 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
         setLookupTrackingNumber("");
         setAppliedLookupId("");
         setAppliedLookupTrackingNumber("");
+        setExternalResult(null);
     };
+
+    useEffect(() => {
+        if (searchSource !== "EXTERNAL") {
+            setExternalResult(null);
+            return;
+        }
+
+        if (trackingProviderCache.loaded) {
+            setTrackingProviders([...trackingProviderCache.providers]);
+            setTrackingProvider((current) => current || trackingProviderCache.providers[0]?.id || "");
+            return;
+        }
+
+        TrackingService.getAvailableProviders()
+            .then((response) => {
+                trackingProviderCache.loaded = true;
+                trackingProviderCache.providers = response.data;
+                setTrackingProviders([...response.data]);
+                setTrackingProvider(response.data[0]?.id || "");
+            })
+            .catch(() => setNotice({
+                severity: "error",
+                message: shipmentTranslations.externalSearch.providerLoadError,
+            }));
+    }, [searchSource]);
 
     const openShipmentDetails = (shipment: ShipmentDto) => {
         const shipmentId = shipment.shipmentId.value;
@@ -427,25 +491,51 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
 
                     <div className="tm-manual-load">
                         <TextField
-                            label={shipmentTranslations.table.shipmentId}
+                            label={shipmentTranslations.externalSearch.source}
+                            select
                             size="small"
-                            inputProps={{inputMode: "numeric", pattern: "[0-9]*"}}
-                            value={lookupId}
-                            onChange={(event: ChangeEvent<HTMLInputElement>) => setLookupId(event.target.value)}
-                        />
-                        <Button disabled={loading || !lookupId} variant="outlined" onClick={findById}>
-                            {shipmentTranslations.table.filterById}
-                        </Button>
+                            value={searchSource}
+                            onChange={(event) => setSearchSource(event.target.value as "SYSTEM" | "EXTERNAL")}
+                        >
+                            <MenuItem value="SYSTEM">{shipmentTranslations.externalSearch.system}</MenuItem>
+                            <MenuItem value="EXTERNAL">{shipmentTranslations.externalSearch.external}</MenuItem>
+                        </TextField>
+                        {searchSource === "SYSTEM" ? (<>
+                            <TextField
+                                label={shipmentTranslations.table.shipmentId}
+                                size="small"
+                                inputProps={{inputMode: "numeric", pattern: "[0-9]*"}}
+                                value={lookupId}
+                                onChange={(event: ChangeEvent<HTMLInputElement>) => setLookupId(event.target.value)}
+                            />
+                            <Button disabled={loading || !lookupId} variant="outlined" onClick={findById}>
+                                {shipmentTranslations.table.filterById}
+                            </Button>
+                        </>) : (
+                            <TextField
+                                label={shipmentTranslations.externalSearch.provider}
+                                select
+                                size="small"
+                                value={trackingProvider}
+                                onChange={(event) => setTrackingProvider(event.target.value as TrackingProviderId)}
+                            >
+                                {trackingProviders.map((provider) => (
+                                    <MenuItem key={provider.id} value={provider.id}>{provider.displayName}</MenuItem>
+                                ))}
+                            </TextField>
+                        )}
                         <TextField
                             label={shipmentTranslations.table.trackingNumber}
                             size="small"
                             value={lookupTrackingNumber}
                             onChange={(event: ChangeEvent<HTMLInputElement>) => setLookupTrackingNumber(event.target.value)}
                         />
-                        <Button disabled={loading || !lookupTrackingNumber} variant="outlined" onClick={findByTrackingNumber}>
-                            {shipmentTranslations.table.filterByTracking}
+                        <Button disabled={loading || externalLoading || !lookupTrackingNumber || (searchSource === "EXTERNAL" && !trackingProvider)} variant="outlined" onClick={findByTrackingNumber}>
+                            {externalLoading ? <CircularProgress size={18}/> : searchSource === "EXTERNAL"
+                                ? shipmentTranslations.externalSearch.search
+                                : shipmentTranslations.table.filterByTracking}
                         </Button>
-                        <Button disabled={!appliedLookupId && !appliedLookupTrackingNumber} variant="text" onClick={clearLocalFilters}>
+                        <Button disabled={!appliedLookupId && !appliedLookupTrackingNumber && !externalResult} variant="text" onClick={clearLocalFilters}>
                             {shipmentTranslations.table.clearFilters}
                         </Button>
                         <TextField
@@ -472,6 +562,42 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
                             onChange={(event) => setHazardClassFilter(event.target.value)}
                         />
                     </div>
+
+                    {searchSource === "EXTERNAL" && !trackingProviders.length ? (
+                        <Alert severity="info" className="tm-external-empty">
+                            {shipmentTranslations.externalSearch.noProviders}
+                        </Alert>
+                    ) : undefined}
+
+                    {externalResult ? (
+                        <section className="tm-external-result" aria-label={shipmentTranslations.externalSearch.resultTitle}>
+                            <div className="tm-external-result-header">
+                                <div>
+                                    <span>{externalResult.provider}</span>
+                                    <Typography variant="h6">{externalResult.trackingNumber}</Typography>
+                                </div>
+                                <Chip label={externalResult.currentStatus || pl.common.dash} color="primary"/>
+                            </div>
+                            <dl className="tm-external-summary">
+                                <div><dt>{shipmentTranslations.externalSearch.currentStatus}</dt><dd>{externalResult.currentStatus || pl.common.dash}</dd></div>
+                                <div><dt>{shipmentTranslations.externalSearch.updatedAt}</dt><dd>{externalResult.updatedAt ? new Date(externalResult.updatedAt).toLocaleString(pl.common.locale) : pl.common.dash}</dd></div>
+                            </dl>
+                            <Typography variant="subtitle1">{shipmentTranslations.externalSearch.events}</Typography>
+                            <ol className="tm-external-events">
+                                {externalResult.events.map((event, index) => (
+                                    <li key={`${event.eventCode || "event"}-${event.timestamp || index}`}>
+                                        <time>{event.timestamp ? new Date(event.timestamp).toLocaleString(pl.common.locale) : pl.common.dash}</time>
+                                        <strong>{event.name || event.eventCode || pl.common.dash}</strong>
+                                        {event.description ? <p>{event.description}</p> : undefined}
+                                        {event.location?.name || event.location?.city ? (
+                                            <small>{[event.location.name, event.location.city, event.location.country].filter(Boolean).join(", ")}</small>
+                                        ) : undefined}
+                                    </li>
+                                ))}
+                                {!externalResult.events.length ? <li>{shipmentTranslations.externalSearch.noEvents}</li> : undefined}
+                            </ol>
+                        </section>
+                    ) : undefined}
 
                     <div className="tm-table-wrap">
                         <table className="tm-orders-table">
