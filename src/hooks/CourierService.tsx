@@ -3,6 +3,7 @@ import {
     CertificationUpdateRequest,
     CourierBasicDataUpdateRequest,
     CourierCreateRequest,
+    CourierCreateResponse,
     CourierDeliveryAreaUpdateRequest,
     CourierDepartmentUpdateRequest,
     CourierDeviceUpdateRequest,
@@ -22,7 +23,7 @@ const updateBasicData = (data: CourierBasicDataUpdateRequest) => {
 };
 
 const create = (data: CourierCreateRequest) => {
-    return http.post("/suppliers", data);
+    return http.post<CourierCreateResponse>("/suppliers", data);
 };
 
 const update = (data: CourierUpdateRequest) => {

@@ -5,7 +5,6 @@ import {initializeAuthSession} from "../../auth/AuthSession";
 import {useAuthState} from "../../auth/AuthState";
 import Navbar from "../Navbar/Navbar";
 import AppRoutes from "./AppRoutes";
-import AppTabs from "./AppTabs";
 import {getTabTitle, normalizePath} from "./tabConfig";
 import {AppTabDefinition} from "./types";
 import {
@@ -250,17 +249,14 @@ function AppShell() {
             <Navbar
                 activePath={activePath}
                 language={language}
+                onCloseAllTabs={closeAllTabs}
+                onCloseTab={closeTab}
                 onLanguageChange={changeLanguage}
                 onOpenTab={openTab}
                 onOperationalProfileChange={changeOperationalProfile}
-                operationalProfile={operationalProfile}
-            />
-            <AppTabs
-                activePath={activePath}
-                openTabs={openTabs}
-                onCloseAllTabs={closeAllTabs}
-                onCloseTab={closeTab}
                 onSelectTab={navigate}
+                operationalProfile={operationalProfile}
+                openTabs={openTabs}
             />
             <div className="app-main-content">
                 <AppRoutes onOpenTab={openTab} operationalProfile={operationalProfile}/>

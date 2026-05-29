@@ -15,6 +15,7 @@ import ShipmentCreate from "../Shipment/ShipmentCreate";
 import ShipmentDetails from "../Shipment/ShipmentDetails";
 import ShipmentHistoryDetails from "../Shipment/ShipmentHistoryDetails";
 import ShipmentList from "../Shipment/ShipmentList";
+import ShipmentScanner from "../ShipmentScanner/ShipmentScanner";
 import SoftwareConfigurationList from "../SoftwareConfiguration/SoftwareConfigurationList";
 import UserProfile from "../UserProfile/UserProfile";
 import UsersPage from "../Users/UsersPage";
@@ -55,7 +56,7 @@ function AppRoutes({onOpenTab, operationalProfile = "warehouse"}: AppRoutesProps
             <Route path="couriers/:supplierCode" element={guarded("/couriers", <CourierDetails/>)}/>
             <Route path="vehicles" element={guarded("/vehicles", <ModulePlaceholder title={pl.home.tiles.vehicles.title}/>)}/>
             <Route path="pallets" element={guarded("/pallets", <ModulePlaceholder title={pl.home.tiles.pallets.title}/>)}/>
-            <Route path="shipment-scanner" element={guarded("/shipment-scanner", <ModulePlaceholder title={pl.home.tiles.shipmentScanner.title}/>)}/>
+            <Route path="shipment-scanner" element={guarded("/shipment-scanner", <ShipmentScanner/>)}/>
             <Route path="courier-deliveries" element={guarded("/courier-deliveries", <ModulePlaceholder title={pl.home.tiles.courierDeliveries.title}/>)}/>
             <Route path="suppliers" element={guarded("/suppliers", <ModulePlaceholder title={pl.navigation.suppliers}/>)}/>
             <Route path="users" element={guarded("/users", <UsersPage/>)}/>
