@@ -1,0 +1,669 @@
+/*
+ * Legacy feature sheets still contain a few light-only surface declarations.
+ * Keep the feature markup unchanged, but route those declarations through the
+ * active semantic theme tokens so dark themes remain usable across the app.
+ */
+:root[data-theme="operations-dark"] .departments-filter-bar,
+:root[data-theme="warehouse"] .departments-filter-bar,
+:root[data-theme="dispatch-teal"] .departments-filter-bar,
+:root[data-theme="operations-dark"] .couriers-filter-bar,
+:root[data-theme="warehouse"] .couriers-filter-bar,
+:root[data-theme="dispatch-teal"] .couriers-filter-bar,
+:root[data-theme="operations-dark"] .users-search,
+:root[data-theme="warehouse"] .users-search,
+:root[data-theme="dispatch-teal"] .users-search,
+:root[data-theme="operations-dark"] .shipment-scanner-input-shell,
+:root[data-theme="warehouse"] .shipment-scanner-input-shell,
+:root[data-theme="dispatch-teal"] .shipment-scanner-input-shell,
+:root[data-theme="operations-dark"] .shipment-scanner-feedback,
+:root[data-theme="warehouse"] .shipment-scanner-feedback,
+:root[data-theme="dispatch-teal"] .shipment-scanner-feedback,
+:root[data-theme="operations-dark"] .shipment-scanner-result-grid > div,
+:root[data-theme="warehouse"] .shipment-scanner-result-grid > div,
+:root[data-theme="dispatch-teal"] .shipment-scanner-result-grid > div,
+:root[data-theme="operations-dark"] .shipment-scanner-record,
+:root[data-theme="warehouse"] .shipment-scanner-record,
+:root[data-theme="dispatch-teal"] .shipment-scanner-record,
+:root[data-theme="operations-dark"] .shipment-scanner-help,
+:root[data-theme="warehouse"] .shipment-scanner-help,
+:root[data-theme="dispatch-teal"] .shipment-scanner-help {
+    background: var(--surface);
+    border-color: var(--border);
+    color: var(--foreground);
+}
+
+:root[data-theme="operations-dark"] .departments-table th,
+:root[data-theme="warehouse"] .departments-table th,
+:root[data-theme="dispatch-teal"] .departments-table th,
+:root[data-theme="operations-dark"] .departments-table td,
+:root[data-theme="warehouse"] .departments-table td,
+:root[data-theme="dispatch-teal"] .departments-table td,
+:root[data-theme="operations-dark"] .couriers-table th,
+:root[data-theme="warehouse"] .couriers-table th,
+:root[data-theme="dispatch-teal"] .couriers-table th,
+:root[data-theme="operations-dark"] .couriers-table td,
+:root[data-theme="warehouse"] .couriers-table td,
+:root[data-theme="dispatch-teal"] .couriers-table td,
+:root[data-theme="operations-dark"] .users-table th,
+:root[data-theme="warehouse"] .users-table th,
+:root[data-theme="dispatch-teal"] .users-table th,
+:root[data-theme="operations-dark"] .users-table td,
+:root[data-theme="warehouse"] .users-table td,
+:root[data-theme="dispatch-teal"] .users-table td,
+:root[data-theme="operations-dark"] .processes-table th,
+:root[data-theme="warehouse"] .processes-table th,
+:root[data-theme="dispatch-teal"] .processes-table th,
+:root[data-theme="operations-dark"] .processes-table td,
+:root[data-theme="warehouse"] .processes-table td,
+:root[data-theme="dispatch-teal"] .processes-table td,
+:root[data-theme="operations-dark"] .microservice-status-table th,
+:root[data-theme="warehouse"] .microservice-status-table th,
+:root[data-theme="dispatch-teal"] .microservice-status-table th,
+:root[data-theme="operations-dark"] .microservice-status-table td,
+:root[data-theme="warehouse"] .microservice-status-table td,
+:root[data-theme="dispatch-teal"] .microservice-status-table td,
+:root[data-theme="operations-dark"] .device-pairing-table th,
+:root[data-theme="warehouse"] .device-pairing-table th,
+:root[data-theme="dispatch-teal"] .device-pairing-table th {
+    background: var(--surface);
+    border-color: var(--border);
+    color: var(--foreground);
+}
+
+:root[data-theme="operations-dark"] .departments-table th,
+:root[data-theme="warehouse"] .departments-table th,
+:root[data-theme="dispatch-teal"] .departments-table th,
+:root[data-theme="operations-dark"] .couriers-table th,
+:root[data-theme="warehouse"] .couriers-table th,
+:root[data-theme="dispatch-teal"] .couriers-table th,
+:root[data-theme="operations-dark"] .users-table th,
+:root[data-theme="warehouse"] .users-table th,
+:root[data-theme="dispatch-teal"] .users-table th,
+:root[data-theme="operations-dark"] .processes-table th,
+:root[data-theme="warehouse"] .processes-table th,
+:root[data-theme="dispatch-teal"] .processes-table th,
+:root[data-theme="operations-dark"] .microservice-status-table th,
+:root[data-theme="warehouse"] .microservice-status-table th,
+:root[data-theme="dispatch-teal"] .microservice-status-table th,
+:root[data-theme="operations-dark"] .device-pairing-table th,
+:root[data-theme="warehouse"] .device-pairing-table th,
+:root[data-theme="dispatch-teal"] .device-pairing-table th {
+    background: var(--surface-secondary);
+    color: var(--muted-foreground);
+}
+
+:root[data-theme="operations-dark"] .departments-table tbody tr:hover td,
+:root[data-theme="warehouse"] .departments-table tbody tr:hover td,
+:root[data-theme="dispatch-teal"] .departments-table tbody tr:hover td,
+:root[data-theme="operations-dark"] .couriers-table tbody tr:hover td,
+:root[data-theme="warehouse"] .couriers-table tbody tr:hover td,
+:root[data-theme="dispatch-teal"] .couriers-table tbody tr:hover td,
+:root[data-theme="operations-dark"] .users-table tbody tr:hover td,
+:root[data-theme="warehouse"] .users-table tbody tr:hover td,
+:root[data-theme="dispatch-teal"] .users-table tbody tr:hover td,
+:root[data-theme="operations-dark"] .processes-table tbody tr:hover,
+:root[data-theme="warehouse"] .processes-table tbody tr:hover,
+:root[data-theme="dispatch-teal"] .processes-table tbody tr:hover {
+    background: var(--surface-secondary);
+}
+
+:root[data-theme="operations-dark"] .departments-table tbody tr.departments-row-selected td,
+:root[data-theme="warehouse"] .departments-table tbody tr.departments-row-selected td,
+:root[data-theme="dispatch-teal"] .departments-table tbody tr.departments-row-selected td,
+:root[data-theme="operations-dark"] .couriers-table tbody tr.couriers-row-selected td,
+:root[data-theme="warehouse"] .couriers-table tbody tr.couriers-row-selected td,
+:root[data-theme="dispatch-teal"] .couriers-table tbody tr.couriers-row-selected td,
+:root[data-theme="operations-dark"] .users-table tbody tr.users-row-selected td,
+:root[data-theme="warehouse"] .users-table tbody tr.users-row-selected td,
+:root[data-theme="dispatch-teal"] .users-table tbody tr.users-row-selected td {
+    background: color-mix(in srgb, var(--primary) 18%, var(--card));
+    box-shadow: inset 0 1px 0 var(--border-strong), inset 0 -1px 0 var(--border-strong);
+}
+
+:root[data-theme="operations-dark"] .departments-table tbody tr.departments-row-selected,
+:root[data-theme="warehouse"] .departments-table tbody tr.departments-row-selected,
+:root[data-theme="dispatch-teal"] .departments-table tbody tr.departments-row-selected,
+:root[data-theme="operations-dark"] .couriers-table tbody tr.couriers-row-selected,
+:root[data-theme="warehouse"] .couriers-table tbody tr.couriers-row-selected,
+:root[data-theme="dispatch-teal"] .couriers-table tbody tr.couriers-row-selected,
+:root[data-theme="operations-dark"] .users-table tbody tr.users-row-selected,
+:root[data-theme="warehouse"] .users-table tbody tr.users-row-selected,
+:root[data-theme="dispatch-teal"] .users-table tbody tr.users-row-selected {
+    background: color-mix(in srgb, var(--primary) 18%, var(--card));
+}
+
+:root[data-theme="operations-dark"] .departments-side-actions-title,
+:root[data-theme="warehouse"] .departments-side-actions-title,
+:root[data-theme="dispatch-teal"] .departments-side-actions-title,
+:root[data-theme="operations-dark"] .couriers-side-actions-title,
+:root[data-theme="warehouse"] .couriers-side-actions-title,
+:root[data-theme="dispatch-teal"] .couriers-side-actions-title,
+:root[data-theme="operations-dark"] .users-side-actions-title,
+:root[data-theme="warehouse"] .users-side-actions-title,
+:root[data-theme="dispatch-teal"] .users-side-actions-title {
+    background: var(--surface-secondary);
+    border-color: var(--border);
+    color: var(--foreground);
+}
+
+:root[data-theme="operations-dark"] .departments-actions-table button,
+:root[data-theme="warehouse"] .departments-actions-table button,
+:root[data-theme="dispatch-teal"] .departments-actions-table button,
+:root[data-theme="operations-dark"] .couriers-actions-table button,
+:root[data-theme="warehouse"] .couriers-actions-table button,
+:root[data-theme="dispatch-teal"] .couriers-actions-table button,
+:root[data-theme="operations-dark"] .users-actions-table button,
+:root[data-theme="warehouse"] .users-actions-table button,
+:root[data-theme="dispatch-teal"] .users-actions-table button,
+:root[data-theme="operations-dark"] .users-secondary-button,
+:root[data-theme="warehouse"] .users-secondary-button,
+:root[data-theme="dispatch-teal"] .users-secondary-button {
+    background: var(--surface-elevated);
+    border-color: var(--border);
+    color: var(--foreground);
+}
+
+:root[data-theme="operations-dark"] .departments-status-active,
+:root[data-theme="warehouse"] .departments-status-active,
+:root[data-theme="dispatch-teal"] .departments-status-active,
+:root[data-theme="operations-dark"] .couriers-status-active,
+:root[data-theme="warehouse"] .couriers-status-active,
+:root[data-theme="dispatch-teal"] .couriers-status-active,
+:root[data-theme="operations-dark"] .microservice-status-badge-online,
+:root[data-theme="warehouse"] .microservice-status-badge-online,
+:root[data-theme="dispatch-teal"] .microservice-status-badge-online,
+:root[data-theme="operations-dark"] .shipment-scanner-record-success .shipment-scanner-record-icon,
+:root[data-theme="warehouse"] .shipment-scanner-record-success .shipment-scanner-record-icon,
+:root[data-theme="dispatch-teal"] .shipment-scanner-record-success .shipment-scanner-record-icon {
+    background: color-mix(in srgb, var(--success) 18%, var(--card));
+    color: var(--success);
+}
+
+:root[data-theme="operations-dark"] .departments-status-inactive,
+:root[data-theme="operations-dark"] .departments-status-suspended,
+:root[data-theme="warehouse"] .departments-status-inactive,
+:root[data-theme="warehouse"] .departments-status-suspended,
+:root[data-theme="dispatch-teal"] .departments-status-inactive,
+:root[data-theme="dispatch-teal"] .departments-status-suspended,
+:root[data-theme="operations-dark"] .couriers-status-inactive,
+:root[data-theme="warehouse"] .couriers-status-inactive,
+:root[data-theme="dispatch-teal"] .couriers-status-inactive,
+:root[data-theme="operations-dark"] .microservice-status-badge-unknown,
+:root[data-theme="warehouse"] .microservice-status-badge-unknown,
+:root[data-theme="dispatch-teal"] .microservice-status-badge-unknown {
+    background: color-mix(in srgb, var(--info) 18%, var(--card));
+    color: var(--info);
+}
+
+:root[data-theme="operations-dark"] .microservice-status-badge-offline,
+:root[data-theme="warehouse"] .microservice-status-badge-offline,
+:root[data-theme="dispatch-teal"] .microservice-status-badge-offline,
+:root[data-theme="operations-dark"] .shipment-scanner-record-error .shipment-scanner-record-icon,
+:root[data-theme="warehouse"] .shipment-scanner-record-error .shipment-scanner-record-icon,
+:root[data-theme="dispatch-teal"] .shipment-scanner-record-error .shipment-scanner-record-icon {
+    background: color-mix(in srgb, var(--danger) 18%, var(--card));
+    color: var(--danger);
+}
+
+:root[data-theme="operations-dark"] .shipment-scanner-record-duplicate .shipment-scanner-record-icon,
+:root[data-theme="warehouse"] .shipment-scanner-record-duplicate .shipment-scanner-record-icon,
+:root[data-theme="dispatch-teal"] .shipment-scanner-record-duplicate .shipment-scanner-record-icon {
+    background: color-mix(in srgb, var(--warning) 18%, var(--card));
+    color: var(--warning);
+}
+
+:root[data-theme="operations-dark"] .global-configuration-header,
+:root[data-theme="warehouse"] .global-configuration-header,
+:root[data-theme="dispatch-teal"] .global-configuration-header,
+:root[data-theme="operations-dark"] .global-configuration-tabs,
+:root[data-theme="warehouse"] .global-configuration-tabs,
+:root[data-theme="dispatch-teal"] .global-configuration-tabs,
+:root[data-theme="operations-dark"] .global-configuration-toolbar,
+:root[data-theme="warehouse"] .global-configuration-toolbar,
+:root[data-theme="dispatch-teal"] .global-configuration-toolbar,
+:root[data-theme="operations-dark"] .global-configuration-section,
+:root[data-theme="warehouse"] .global-configuration-section,
+:root[data-theme="dispatch-teal"] .global-configuration-section,
+:root[data-theme="operations-dark"] .microservice-status-header,
+:root[data-theme="warehouse"] .microservice-status-header,
+:root[data-theme="dispatch-teal"] .microservice-status-header,
+:root[data-theme="operations-dark"] .microservice-status-panel,
+:root[data-theme="warehouse"] .microservice-status-panel,
+:root[data-theme="dispatch-teal"] .microservice-status-panel {
+    border-color: var(--border);
+}
+
+:root[data-theme="operations-dark"] .global-configuration-header h4,
+:root[data-theme="warehouse"] .global-configuration-header h4,
+:root[data-theme="dispatch-teal"] .global-configuration-header h4,
+:root[data-theme="operations-dark"] .global-configuration-toolbar h2,
+:root[data-theme="warehouse"] .global-configuration-toolbar h2,
+:root[data-theme="dispatch-teal"] .global-configuration-toolbar h2,
+:root[data-theme="operations-dark"] .global-configuration-panel-header h3,
+:root[data-theme="warehouse"] .global-configuration-panel-header h3,
+:root[data-theme="dispatch-teal"] .global-configuration-panel-header h3,
+:root[data-theme="operations-dark"] .microservice-status-header h4,
+:root[data-theme="warehouse"] .microservice-status-header h4,
+:root[data-theme="dispatch-teal"] .microservice-status-header h4,
+:root[data-theme="operations-dark"] .microservice-status-panel-header h5,
+:root[data-theme="warehouse"] .microservice-status-panel-header h5,
+:root[data-theme="dispatch-teal"] .microservice-status-panel-header h5,
+:root[data-theme="operations-dark"] .user-profile-details strong,
+:root[data-theme="warehouse"] .user-profile-details strong,
+:root[data-theme="dispatch-teal"] .user-profile-details strong {
+    color: var(--foreground);
+}
+
+:root[data-theme="operations-dark"] .global-configuration-tab,
+:root[data-theme="warehouse"] .global-configuration-tab,
+:root[data-theme="dispatch-teal"] .global-configuration-tab,
+:root[data-theme="operations-dark"] .global-configuration-category,
+:root[data-theme="warehouse"] .global-configuration-category,
+:root[data-theme="dispatch-teal"] .global-configuration-category {
+    background: var(--surface-secondary);
+    border-color: var(--border);
+    color: var(--foreground);
+}
+
+:root[data-theme="operations-dark"] .global-configuration-tab-active,
+:root[data-theme="warehouse"] .global-configuration-tab-active,
+:root[data-theme="dispatch-teal"] .global-configuration-tab-active {
+    background: color-mix(in srgb, var(--primary) 18%, var(--card));
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+:root[data-theme="operations-dark"] .tm-page-heading p,
+:root[data-theme="warehouse"] .tm-page-heading p,
+:root[data-theme="dispatch-teal"] .tm-page-heading p,
+:root[data-theme="operations-dark"] .tm-muted,
+:root[data-theme="warehouse"] .tm-muted,
+:root[data-theme="dispatch-teal"] .tm-muted,
+:root[data-theme="operations-dark"] .tm-total-line span,
+:root[data-theme="warehouse"] .tm-total-line span,
+:root[data-theme="dispatch-teal"] .tm-total-line span,
+:root[data-theme="operations-dark"] .tm-loss-line span,
+:root[data-theme="warehouse"] .tm-loss-line span,
+:root[data-theme="dispatch-teal"] .tm-loss-line span,
+:root[data-theme="operations-dark"] .tm-tabs button,
+:root[data-theme="warehouse"] .tm-tabs button,
+:root[data-theme="dispatch-teal"] .tm-tabs button {
+    color: var(--muted-foreground);
+}
+
+:root[data-theme="operations-dark"] .tm-orders-table th,
+:root[data-theme="warehouse"] .tm-orders-table th,
+:root[data-theme="dispatch-teal"] .tm-orders-table th,
+:root[data-theme="operations-dark"] .tm-orders-table td,
+:root[data-theme="warehouse"] .tm-orders-table td,
+:root[data-theme="dispatch-teal"] .tm-orders-table td,
+:root[data-theme="operations-dark"] .tm-muted-cell,
+:root[data-theme="warehouse"] .tm-muted-cell,
+:root[data-theme="dispatch-teal"] .tm-muted-cell {
+    border-color: var(--border);
+    color: var(--foreground);
+}
+
+:root[data-theme="operations-dark"] .tm-orders-table th,
+:root[data-theme="warehouse"] .tm-orders-table th,
+:root[data-theme="dispatch-teal"] .tm-orders-table th {
+    background: var(--surface-secondary);
+    color: var(--muted-foreground);
+}
+
+:root[data-theme="operations-dark"] .device-pairing-pair-details,
+:root[data-theme="warehouse"] .device-pairing-pair-details,
+:root[data-theme="dispatch-teal"] .device-pairing-pair-details {
+    background: var(--surface);
+    border-color: var(--border);
+}
+
+:root[data-theme="operations-dark"] .user-profile-title p,
+:root[data-theme="warehouse"] .user-profile-title p,
+:root[data-theme="dispatch-teal"] .user-profile-title p,
+:root[data-theme="operations-dark"] .user-profile-details span,
+:root[data-theme="warehouse"] .user-profile-details span,
+:root[data-theme="dispatch-teal"] .user-profile-details span,
+:root[data-theme="operations-dark"] .device-pairing-table th,
+:root[data-theme="warehouse"] .device-pairing-table th,
+:root[data-theme="dispatch-teal"] .device-pairing-table th {
+    color: var(--muted-foreground);
+}
+
+:root[data-theme="operations-dark"] .users-role-admin,
+:root[data-theme="warehouse"] .users-role-admin,
+:root[data-theme="dispatch-teal"] .users-role-admin,
+:root[data-theme="operations-dark"] .users-role-manager,
+:root[data-theme="warehouse"] .users-role-manager,
+:root[data-theme="dispatch-teal"] .users-role-manager,
+:root[data-theme="operations-dark"] .users-role-supplier,
+:root[data-theme="warehouse"] .users-role-supplier,
+:root[data-theme="dispatch-teal"] .users-role-supplier,
+:root[data-theme="operations-dark"] .users-role-user,
+:root[data-theme="warehouse"] .users-role-user,
+:root[data-theme="dispatch-teal"] .users-role-user {
+    background: color-mix(in srgb, var(--primary) 18%, var(--card));
+    color: var(--primary);
+}
+
+:root[data-theme="operations-dark"] .users-create-dialog-title,
+:root[data-theme="warehouse"] .users-create-dialog-title,
+:root[data-theme="dispatch-teal"] .users-create-dialog-title,
+:root[data-theme="operations-dark"] .users-edit-dialog-title,
+:root[data-theme="warehouse"] .users-edit-dialog-title,
+:root[data-theme="dispatch-teal"] .users-edit-dialog-title,
+:root[data-theme="operations-dark"] .users-create-dialog-content,
+:root[data-theme="warehouse"] .users-create-dialog-content,
+:root[data-theme="dispatch-teal"] .users-create-dialog-content,
+:root[data-theme="operations-dark"] .users-edit-dialog-content,
+:root[data-theme="warehouse"] .users-edit-dialog-content,
+:root[data-theme="dispatch-teal"] .users-edit-dialog-content,
+:root[data-theme="operations-dark"] .users-create-dialog .users-dialog-actions,
+:root[data-theme="warehouse"] .users-create-dialog .users-dialog-actions,
+:root[data-theme="dispatch-teal"] .users-create-dialog .users-dialog-actions,
+:root[data-theme="operations-dark"] .users-edit-dialog .users-dialog-actions,
+:root[data-theme="warehouse"] .users-edit-dialog .users-dialog-actions,
+:root[data-theme="dispatch-teal"] .users-edit-dialog .users-dialog-actions {
+    background: var(--surface);
+    border-color: var(--border);
+    color: var(--foreground);
+}
+
+:root[data-theme="operations-dark"] .users-create-dialog-title [data-ui="icon-button"],
+:root[data-theme="warehouse"] .users-create-dialog-title [data-ui="icon-button"],
+:root[data-theme="dispatch-teal"] .users-create-dialog-title [data-ui="icon-button"],
+:root[data-theme="operations-dark"] .users-edit-dialog-title [data-ui="icon-button"],
+:root[data-theme="warehouse"] .users-edit-dialog-title [data-ui="icon-button"],
+:root[data-theme="dispatch-teal"] .users-edit-dialog-title [data-ui="icon-button"] {
+    background: var(--surface-elevated);
+    border-color: var(--border);
+    color: var(--foreground);
+}
+
+/* The integrations workspace is shared by every theme. Its legacy feature
+ * sheet used fixed light colors, so keep the same hierarchy but derive every
+ * surface, border and text color from the active theme tokens. */
+:root[data-theme] .integration-provider-panel,
+:root[data-theme] .integration-status-panel,
+:root[data-theme] .integration-option-group {
+    background: var(--card);
+    border-color: var(--border);
+    color: var(--foreground);
+}
+
+:root[data-theme] .integration-provider-status-section,
+:root[data-theme] .integration-provider-actions,
+:root[data-theme] .integration-configuration-dialog [data-ui="dialog-title"],
+:root[data-theme] .integration-configuration-dialog [data-ui="dialog-actions"] {
+    border-color: var(--border);
+}
+
+:root[data-theme] .integration-provider-panel-heading h4,
+:root[data-theme] .integration-provider-menu-copy strong,
+:root[data-theme] .integration-status-copy h4,
+:root[data-theme] .integration-option-heading h5,
+:root[data-theme] .integration-enabled-control strong,
+:root[data-theme] .integration-configuration-dialog [data-ui="dialog-title"] {
+    color: var(--foreground);
+}
+
+:root[data-theme] .integration-provider-panel-heading p,
+:root[data-theme] .integration-provider-menu-copy small,
+:root[data-theme] .integration-status-copy p,
+:root[data-theme] .integration-option-heading p,
+:root[data-theme] .integration-dialog-description,
+:root[data-theme] .integration-enabled-control small,
+:root[data-theme] .integrations-configuration-empty p {
+    color: var(--muted-foreground);
+}
+
+:root[data-theme] .integration-provider-menu-item {
+    background: var(--surface);
+    border-color: var(--border);
+    color: var(--foreground);
+}
+
+:root[data-theme] .integration-provider-menu-item:hover,
+:root[data-theme] .integration-provider-menu-item:focus-visible,
+:root[data-theme] .integration-provider-menu-item-active {
+    background: color-mix(in srgb, var(--primary) 14%, var(--card));
+    border-color: var(--primary);
+    box-shadow: 0 8px 18px rgba(4, 17, 31, 0.16);
+}
+
+:root[data-theme] .integration-provider-icon {
+    background: color-mix(in srgb, var(--primary) 16%, var(--surface));
+    color: var(--primary);
+}
+
+:root[data-theme] .integration-provider-dot {
+    background: var(--muted-foreground);
+}
+
+:root[data-theme] .integration-provider-dot-active {
+    background: var(--success);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--success) 18%, transparent);
+}
+
+:root[data-theme] .integration-status-icon {
+    background: color-mix(in srgb, var(--primary) 16%, var(--surface));
+    color: var(--primary);
+}
+
+:root[data-theme] .integration-option-heading > svg {
+    color: var(--primary);
+}
+
+:root[data-theme] .integration-option-group [data-ui="form-control-label-text"],
+:root[data-theme] .integration-switch-list .integration-switch-row > span {
+    color: var(--foreground);
+}
+
+:root[data-theme] .integration-switch-list .integration-switch-row,
+:root[data-theme] .integration-enabled-control {
+    background: var(--surface);
+    border-color: var(--border);
+    color: var(--foreground);
+}
+
+:root[data-theme] .integrations-configuration-empty h4 {
+    color: var(--foreground);
+}
+
+:root[data-theme] .integrations-configuration-empty > svg {
+    color: var(--primary);
+}
+
+:root[data-theme] .integration-configuration-dialog [data-ui="dialog-content"] {
+    color: var(--foreground);
+}
+
+:root[data-theme] .integration-configuration-dialog [data-ui="dialog-actions"] {
+    background: var(--card);
+}
+
+:root[data-theme] .geocoding-provider-list-header,
+:root[data-theme] .geocoding-provider-card,
+:root[data-theme] .geocoding-enabled-control {
+    background: var(--surface);
+    border-color: var(--border);
+    color: var(--foreground);
+}
+
+:root[data-theme] .geocoding-provider-list-header,
+:root[data-theme] .geocoding-provider-code,
+:root[data-theme] .geocoding-provider-credential,
+:root[data-theme] .geocoding-dialog-description,
+:root[data-theme] .geocoding-enabled-control small,
+:root[data-theme] .geocoding-configuration-empty p {
+    color: var(--muted-foreground);
+}
+
+:root[data-theme] .geocoding-configuration-heading h3,
+:root[data-theme] .geocoding-provider-main h4,
+:root[data-theme] .geocoding-configuration-empty h4,
+:root[data-theme] .geocoding-enabled-control strong,
+:root[data-theme] .geocoding-configuration-dialog [data-ui="dialog-title"] {
+    color: var(--foreground);
+}
+
+:root[data-theme] .geocoding-provider-card:hover {
+    border-color: var(--primary);
+    box-shadow: 0 10px 24px rgba(4, 17, 31, 0.16);
+}
+
+:root[data-theme] .geocoding-provider-icon {
+    background: color-mix(in srgb, var(--primary) 16%, var(--surface));
+    color: var(--primary);
+}
+
+:root[data-theme] .geocoding-provider-endpoint a {
+    color: var(--primary);
+}
+
+:root[data-theme] .geocoding-provider-actions [data-ui="icon-button"] {
+    border-color: var(--border);
+    color: var(--foreground);
+}
+
+:root[data-theme] .geocoding-configuration-empty > svg {
+    color: var(--primary);
+}
+
+:root[data-theme] .geocoding-configuration-dialog [data-ui="dialog-title"],
+:root[data-theme] .geocoding-configuration-dialog [data-ui="dialog-actions"] {
+    border-color: var(--border);
+}
+
+:root[data-theme] .geocoding-configuration-dialog [data-ui="dialog-actions"] {
+    background: var(--card);
+}
+
+/* Shared dialog language: feature styles may add layout, but surfaces and
+ * controls always follow the active theme instead of legacy light colors. */
+:root[data-theme] [data-ui="dialog-backdrop"] {
+    /* Keep the application visible behind dialogs. The dialog itself should
+     * carry the visual weight; the overlay only separates it from the page. */
+    background: color-mix(in srgb, var(--background) 12%, transparent) !important;
+    backdrop-filter: blur(3px) saturate(0.98);
+}
+
+:root[data-theme] [data-ui="dialog"] {
+    background: var(--card) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 20px !important;
+    box-shadow: var(--shadow-floating) !important;
+    color: var(--card-foreground) !important;
+}
+
+:root[data-theme] [data-ui="dialog-title"] {
+    background:
+        linear-gradient(135deg, rgba(var(--primary-rgb), 0.12), rgba(var(--accent-rgb), 0.08)),
+        var(--surface-elevated) !important;
+    border-color: var(--border) !important;
+    color: var(--foreground) !important;
+}
+
+:root[data-theme] [data-ui="dialog-content"] {
+    background: var(--surface) !important;
+    border-color: var(--border) !important;
+    color: var(--foreground) !important;
+}
+
+:root[data-theme] [data-ui="dialog-content-text"] {
+    color: var(--muted-foreground) !important;
+}
+
+:root[data-theme] [data-ui="dialog-actions"] {
+    background: var(--surface-elevated) !important;
+    border-color: var(--border) !important;
+    color: var(--foreground) !important;
+}
+
+:root[data-theme] [data-ui="dialog"] [data-ui="input-label"],
+:root[data-theme] [data-ui="dialog"] [data-ui="form-control-label-text"],
+:root[data-theme] [data-ui="dialog"] label,
+:root[data-theme] [data-ui="dialog"] small {
+    color: var(--muted-foreground);
+}
+
+:root[data-theme] [data-ui="dialog"] input:not([type="checkbox"]),
+:root[data-theme] [data-ui="dialog"] select,
+:root[data-theme] [data-ui="dialog"] textarea {
+    background: var(--input) !important;
+    border-color: var(--border) !important;
+    color: var(--foreground) !important;
+}
+
+:root[data-theme] [data-ui="dialog"] input:not([type="checkbox"])::placeholder,
+:root[data-theme] [data-ui="dialog"] textarea::placeholder {
+    color: var(--muted-foreground) !important;
+}
+
+:root[data-theme] [data-ui="dialog"] input:not([type="checkbox"]):focus,
+:root[data-theme] [data-ui="dialog"] select:focus,
+:root[data-theme] [data-ui="dialog"] textarea:focus {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.18) !important;
+}
+
+:root[data-theme] [data-ui="dialog"] [data-ui="form-control-label"] {
+    background: color-mix(in srgb, var(--surface-elevated) 72%, transparent) !important;
+    border-color: var(--border) !important;
+    color: var(--foreground) !important;
+}
+
+:root[data-theme] [data-ui="dialog"] [data-ui="icon-button"] {
+    background: var(--surface-secondary) !important;
+    border-color: var(--border) !important;
+    color: var(--foreground) !important;
+}
+
+:root[data-theme] [data-ui="dialog"] [data-ui="icon-button"]:hover:not(:disabled) {
+    background: var(--muted) !important;
+    color: var(--foreground) !important;
+}
+
+:root[data-theme] [data-ui="dialog"] [data-ui="button"][data-variant="contained"]:not([data-color="error"]) {
+    background: var(--primary) !important;
+    border-color: var(--primary) !important;
+    color: var(--primary-foreground) !important;
+}
+
+:root[data-theme] [data-ui="dialog"] [data-ui="button"][data-variant="contained"]:not([data-color="error"]):hover:not(:disabled) {
+    background: var(--primary-hover) !important;
+}
+
+:root[data-theme] [data-ui="dialog"] [data-ui="button"][data-color="error"] {
+    background: color-mix(in srgb, var(--danger) 86%, var(--surface)) !important;
+    border-color: var(--danger) !important;
+    color: var(--danger-foreground) !important;
+}
+
+:root[data-theme] [data-ui="dialog"] [data-ui="button"][data-color="error"]:hover:not(:disabled) {
+    background: var(--danger) !important;
+}
+
+:root[data-theme] [data-ui="dialog"] [data-ui="button"][data-variant="outlined"] {
+    background: transparent !important;
+    border-color: var(--border-strong) !important;
+    color: var(--foreground) !important;
+}
+
+:root[data-theme] [data-ui="dialog"] [data-ui="button"][data-variant="outlined"]:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--primary) 10%, transparent) !important;
+    border-color: var(--primary) !important;
+}
+
+:root[data-theme] [data-ui="dialog"] [data-ui="button"][data-variant="text"] {
+    color: var(--primary) !important;
+}
+
+:root[data-theme] .departments-status-dialog [data-ui="dialog-title"] {
+    background: color-mix(in srgb, var(--warning) 13%, var(--surface-elevated)) !important;
+    border-bottom-color: color-mix(in srgb, var(--warning) 38%, var(--border)) !important;
+}
+
+:root[data-theme] .departments-status-dialog [data-ui="dialog-title"] svg {
+    color: var(--warning) !important;
+}

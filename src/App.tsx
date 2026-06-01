@@ -1,14 +1,13 @@
 import React from 'react';
-import { ThemeProvider } from '@mui/material';
 import {BrowserRouter, Route, Routes} from 'react-router-dom';
 import './App.css';
 import AppShell from "./components/AppShell/AppShell";
 import SuperAdminApplication from "./components/SuperAdmin/SuperAdminApplication";
-import appTheme from "./theme/appTheme";
+import {AppThemeProvider} from "./theme/ThemeProvider";
 
 function App() {
     return (
-        <ThemeProvider theme={appTheme}>
+        <AppThemeProvider>
             <div className="App">
                 <div className="page-container">
                     <div className="content-wrapper">
@@ -21,7 +20,7 @@ function App() {
                     </div>
                 </div>
             </div>
-        </ThemeProvider>
+        </AppThemeProvider>
     );
 }
 
