@@ -1,9 +1,10 @@
 import React from "react";
 import {Navigate, useLocation, useNavigate} from "react-router-dom";
-import {Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography} from "@mui/material";
+import {Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography} from "components/ui";
 import {initializeAuthSession} from "../../auth/AuthSession";
 import {useAuthState} from "../../auth/AuthState";
 import Navbar from "../Navbar/Navbar";
+import AnnouncementBanner from "../Announcements/AnnouncementBanner";
 import AppRoutes from "./AppRoutes";
 import {getTabTitle, normalizePath} from "./tabConfig";
 import {AppTabDefinition} from "./types";
@@ -246,6 +247,7 @@ function AppShell() {
 
     return (
         <>
+            <AnnouncementBanner />
             <Navbar
                 activePath={activePath}
                 language={language}

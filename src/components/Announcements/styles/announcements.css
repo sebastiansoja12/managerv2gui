@@ -1,0 +1,60 @@
+.global-announcement-banner {
+    align-items: center;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--primary) 18%, var(--surface-elevated)), var(--surface));
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: var(--shadow-panel);
+    color: var(--foreground);
+    display: flex;
+    gap: 12px;
+    margin: 12px 22px 0;
+    min-height: 48px;
+    padding: 8px 10px 8px 14px;
+    position: relative;
+    z-index: 40;
+}
+
+.global-announcement-banner p {
+    flex: 1;
+    font-size: 0.9rem;
+    font-weight: 750;
+    margin: 0;
+}
+
+.global-announcement-icon {
+    align-items: center;
+    background: color-mix(in srgb, var(--primary) 18%, transparent);
+    border: 1px solid color-mix(in srgb, var(--primary) 38%, var(--border));
+    border-radius: 9px;
+    color: var(--primary);
+    display: inline-flex;
+    flex: 0 0 auto;
+    height: 32px;
+    justify-content: center;
+    width: 32px;
+}
+
+.global-announcement-banner button {
+    align-items: center;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    color: var(--muted-foreground);
+    cursor: pointer;
+    display: inline-flex;
+    height: 32px;
+    justify-content: center;
+    width: 32px;
+}
+
+.global-announcement-banner button:hover {
+    background: var(--surface-secondary);
+    border-color: var(--border);
+    color: var(--foreground);
+}
+
+@media (max-width: 760px) {
+    .global-announcement-banner {
+        margin: 10px 12px 0;
+    }
+}
