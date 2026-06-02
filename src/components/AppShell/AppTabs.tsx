@@ -29,7 +29,9 @@ function AppTabs({activePath, openTabs, onCloseAllTabs, onCloseTab, onSelectTab}
     React.useLayoutEffect(() => {
         const animationFrame = window.requestAnimationFrame(updateActiveIndicator);
         const dock = tabDockRef.current;
-        const resizeObserver = dock ? new ResizeObserver(updateActiveIndicator) : null;
+        const resizeObserver = dock && typeof ResizeObserver !== "undefined"
+            ? new ResizeObserver(updateActiveIndicator)
+            : null;
         if (dock && resizeObserver) {
             resizeObserver.observe(dock);
         }
@@ -42,9 +44,26 @@ function AppTabs({activePath, openTabs, onCloseAllTabs, onCloseTab, onSelectTab}
         };
     }, [activePath, openTabs, updateActiveIndicator]);
 
+    React.useEffect(() => {
+        const activeTab = tabDockRef.current?.querySelector<HTMLElement>(".app-tab-active");
+        if (activeTab && typeof activeTab.scrollIntoView === "function") {
+            activeTab.scrollIntoView({behavior: "smooth", block: "nearest", inline: "nearest"});
+        }
+    }, [activePath, openTabs.length]);
+
+    const handleTabWheel = (event: React.WheelEvent<HTMLDivElement>) => {
+        const dock = tabDockRef.current;
+        if (!dock || dock.scrollWidth <= dock.clientWidth || event.deltaY === 0) {
+            return;
+        }
+
+        event.preventDefault();
+        dock.scrollLeft += event.deltaY;
+    };
+
     return (
         <nav className="app-tab-strip" aria-label={pl.navigation.mainAriaLabel}>
-            <div className="app-tab-dock" ref={tabDockRef}>
+            <div className="app-tab-dock" onWheel={handleTabWheel} ref={tabDockRef}>
                 <span aria-hidden="true" className="app-tab-active-indicator" />
                 {openTabs.map((tab) => (
                     <div className={`app-tab${tab.path === activePath ? ' app-tab-active' : ''}`} key={tab.path}>

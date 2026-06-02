@@ -4,9 +4,9 @@ import {
     Add,
     AdminPanelSettings,
     Analytics,
+    AccountTree,
     Dashboard,
     DevicesOther,
-    DirectionsCar,
     ExpandMore,
     Inventory2,
     Logout,
@@ -17,11 +17,10 @@ import {
     Settings,
     SettingsSuggest,
     ShoppingCart,
-    Storefront,
     SupportAgent,
     TaskAlt,
     WarehouseRounded,
-} from '@mui/icons-material';
+} from "components/ui/icons";
 import {isPathAllowedForProfile, operationalProfiles, OperationalProfile} from "../../config/operationalProfile";
 import {getAppEnvironment} from "../../config/appEnvironment";
 import {getAppVersion} from "../../config/appVersion";
@@ -33,6 +32,7 @@ import {useAuthState} from "../../auth/AuthState";
 import pl from "../../i18n/translate";
 import {Language, translations} from "../../i18n";
 import {clearStoredTabs} from "../AppShell/tabStorage";
+import {AppTheme, useAppTheme} from "../../theme/ThemeProvider";
 
 type NavbarItem = AppTabDefinition & {
     icon: React.ElementType;
@@ -78,6 +78,7 @@ function Navbar({
     const navbarRef = React.useRef<HTMLElement>(null);
     const quickNavRef = React.useRef<HTMLElement>(null);
     const {user} = useAuthState();
+    const {theme, setTheme} = useAppTheme();
 
     const environment = getAppEnvironment();
     const appVersion = getAppVersion();
@@ -93,8 +94,7 @@ function Navbar({
         .toUpperCase() || user?.username.slice(0, 2).toUpperCase() || "?";
     const mainItems: NavbarItem[] = [
         {label: pl.navigation.home, path: '/', icon: Dashboard},
-        {label: pl.navigation.tasks, path: '/processes', icon: TaskAlt},
-        {label: pl.navigation.analytics, path: '/analytics', icon: Analytics},
+        {label: pl.navigation.processes, path: '/processes', icon: TaskAlt},
     ];
     const menus: NavbarMenu[] = [
         {
@@ -109,14 +109,14 @@ function Navbar({
             ],
         },
         {
-            label: pl.navigation.users,
-            icon: Person,
+            label: pl.navigation.organization,
+            icon: AccountTree,
             items: [
-                {label: pl.navigation.suppliers, path: '/suppliers', icon: Storefront},
+                {label: pl.navigation.users, path: '/users', icon: AdminPanelSettings},
+                {label: pl.navigation.departments, path: '/depots', icon: WarehouseRounded},
                 {label: pl.navigation.couriers, path: '/couriers', icon: Person},
-                {label: pl.navigation.vehicles, path: '/vehicles', icon: DirectionsCar},
-                {label: pl.navigation.pallets, path: '/pallets', icon: Inventory2},
                 {label: pl.navigation.devicePairing, path: '/device-pairing', icon: DevicesOther},
+                {label: pl.navigation.analytics, path: '/analytics', icon: Analytics},
             ],
         },
         {
@@ -125,7 +125,6 @@ function Navbar({
             items: [
                 {label: pl.navigation.deals, path: '/deals', icon: LocalOffer},
                 {label: pl.navigation.billing, path: '/billing', icon: AccountBalance},
-                {label: pl.navigation.users, path: '/users', icon: AdminPanelSettings},
                 {label: pl.navigation.globalConfiguration, path: '/global-configuration', icon: SettingsSuggest},
                 {label: pl.navigation.microservices, path: '/microservices', icon: Radar},
                 {label: pl.navigation.systemSettings, path: '/software-configurations', icon: SettingsSuggest},
@@ -153,7 +152,9 @@ function Navbar({
     React.useLayoutEffect(() => {
         const animationFrame = window.requestAnimationFrame(updateDockIndicator);
         const navigation = quickNavRef.current;
-        const resizeObserver = navigation ? new ResizeObserver(updateDockIndicator) : null;
+        const resizeObserver = navigation && typeof ResizeObserver !== "undefined"
+            ? new ResizeObserver(updateDockIndicator)
+            : null;
         if (navigation && resizeObserver) {
             resizeObserver.observe(navigation);
         }
@@ -323,6 +324,29 @@ function Navbar({
 
     const renderProfilePanel = () => (
         <section aria-label={pl.navigation.profile} className="top-nav-profile-panel">
+            <div className="top-nav-theme-switch">
+                <span>Motyw aplikacji</span>
+                <div role="group" aria-label="Wybierz motyw aplikacji">
+                    {([
+                        ["system", pl.common.themes.system],
+                        ["logistics-light", pl.common.themes.logisticsLight],
+                        ["operations-dark", pl.common.themes.operationsDark],
+                        ["warehouse", pl.common.themes.warehouse],
+                        ["courier-blue", pl.common.themes.courierBlue],
+                        ["dispatch-teal", pl.common.themes.dispatchTeal],
+                    ] as Array<[AppTheme, string]>).map(([value, label]) => (
+                        <button
+                            aria-pressed={theme === value}
+                            className={theme === value ? "top-nav-theme-active" : ""}
+                            key={value}
+                            onClick={() => setTheme(value)}
+                            type="button"
+                        >
+                            {label}
+                        </button>
+                    ))}
+                </div>
+            </div>
             <div className="top-nav-language-switch">
                 <span>{pl.common.language}</span>
                 <div>
@@ -368,6 +392,7 @@ function Navbar({
     const islandClassName = [
         "top-nav-island",
         expandedPanel ? "top-nav-island-expanded" : "",
+        expandedPanel === NAVIGATION_PANEL ? "top-nav-island-expanded-from-package" : "",
         isScrolled ? "top-nav-island-scrolled" : "",
     ].filter(Boolean).join(" ");
 
@@ -393,6 +418,7 @@ function Navbar({
                         <span className="top-nav-package-mark" aria-hidden="true">
                             <Inventory2 fontSize="small" />
                         </span>
+                        <span className="top-nav-brand">Manager 2.0</span>
                     </button>
                 </div>
 
