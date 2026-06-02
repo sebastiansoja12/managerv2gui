@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Alert, Box, Button, Container, TextField, Typography } from '@mui/material';
+import { Alert, Box, Button, Container, TextField, Typography } from "components/ui";
 import AuthService from '../../hooks/AuthService';
 import {LoginRequest} from "./model/LoginRequest";
 import { useNavigate } from 'react-router-dom';
@@ -31,22 +31,18 @@ const Login: React.FC = () => {
     };
 
     return (
-        <Container component="main" maxWidth="xs">
-            <Box
-                sx={{
-                    marginTop: 8,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                }}
-            >
-                <Typography component="h1" variant="h5">
-                    {pl.login.title}
-                </Typography>
-                <Box component="form" noValidate sx={{ mt: 1 }}>
-                    {errorMessage ? <Alert severity="error" sx={{mb: 2}}>{errorMessage}</Alert> : null}
+        <main className="grid min-h-screen place-items-center bg-background px-4 py-10">
+            <Container maxWidth="xs" className="max-w-md px-0">
+                <section className="rounded-3xl border border-border bg-card p-6 text-left shadow-floating sm:p-8">
+                    <div className="mb-7 text-center">
+                        <span className="mx-auto mb-4 flex size-12 items-center justify-center rounded-2xl bg-primary text-lg font-black text-primary-foreground shadow-panel">M</span>
+                        <Typography component="h1" variant="h4" className="text-card-foreground">
+                            {pl.login.title}
+                        </Typography>
+                    </div>
+                    <Box component="form" noValidate className="grid gap-4">
+                    {errorMessage ? <Alert severity="error">{errorMessage}</Alert> : null}
                     <TextField
-                        margin="normal"
                         required
                         fullWidth
                         id="username"
@@ -59,7 +55,6 @@ const Login: React.FC = () => {
                     />
 
                     <TextField
-                        margin="normal"
                         required
                         fullWidth
                         name="password"
@@ -76,14 +71,14 @@ const Login: React.FC = () => {
                         disabled={loading}
                         fullWidth
                         variant="contained"
-                        sx={{ mt: 3, mb: 2 }}
                         onClick={handleLogin}
                     >
                         {pl.login.submit}
                     </Button>
                 </Box>
-            </Box>
-        </Container>
+                </section>
+            </Container>
+        </main>
     );
 };
 
