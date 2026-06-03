@@ -10,8 +10,8 @@ import {
     Stack,
     TextField,
     Typography,
-} from "@mui/material";
-import {ArrowBack, LocalShipping, Save} from "@mui/icons-material";
+} from "components/ui";
+import {ArrowBack, LocalShipping, Save} from "components/ui/icons";
 import {useNavigate} from "react-router-dom";
 import ShipmentService from "../../hooks/ShipmentService";
 import {ApiErrorResponse} from "../../api/ApiResult";
