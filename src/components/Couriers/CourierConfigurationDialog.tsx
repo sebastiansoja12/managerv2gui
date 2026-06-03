@@ -12,8 +12,8 @@ import {
     IconButton,
     MenuItem,
     TextField,
-} from "@mui/material";
-import {Close, Save} from "@mui/icons-material";
+} from "components/ui";
+import {Close, Save} from "components/ui/icons";
 import {getBackendErrorMessage} from "../../api/errorMessage";
 import CourierService from "../../hooks/CourierService";
 import pl from "../../i18n/translate";

@@ -13,7 +13,7 @@ import {
     MenuItem,
     TextField,
     Typography,
-} from "@mui/material";
+} from "components/ui";
 import {
     ArrowBack,
     Badge,
@@ -24,7 +24,7 @@ import {
     Save,
     Settings,
     WorkspacePremium,
-} from "@mui/icons-material";
+} from "components/ui/icons";
 import {useNavigate, useParams} from "react-router-dom";
 import {getBackendErrorMessage} from "../../api/errorMessage";
 import Department from "../../class/depots/Department";
