@@ -12,7 +12,7 @@ import {
     MenuItem,
     TextField,
     Typography,
-} from "@mui/material";
+} from "components/ui";
 import {
     AddBusiness,
     ArchiveOutlined,
@@ -30,7 +30,7 @@ import {
     Tag,
     UnarchiveOutlined,
     WarningAmberOutlined,
-} from "@mui/icons-material";
+} from "components/ui/icons";
 import {getBackendErrorMessage} from "../api/errorMessage";
 import {useAuthState} from "../auth/AuthState";
 import Department from "../class/depots/Department";
