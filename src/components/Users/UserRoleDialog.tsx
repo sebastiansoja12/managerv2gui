@@ -1,5 +1,5 @@
 import React, {FormEvent, useEffect, useState} from "react";
-import {Alert, Dialog, DialogActions, DialogContent, DialogTitle, MenuItem, TextField} from "@mui/material";
+import {Alert, Dialog, DialogActions, DialogContent, DialogTitle, MenuItem, TextField} from "components/ui";
 import pl from "../../i18n/translate";
 import {User, UserRole} from "./model/User";
 

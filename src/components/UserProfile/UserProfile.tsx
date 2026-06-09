@@ -1,6 +1,6 @@
 import React, {ChangeEvent, useEffect, useMemo, useState} from "react";
-import {Alert, Button, Chip, Snackbar, TextField, Typography} from "@mui/material";
-import {Key, Person, Refresh} from "@mui/icons-material";
+import {Alert, Button, Chip, Snackbar, TextField, Typography} from "components/ui";
+import {Key, Person, Refresh} from "components/ui/icons";
 import AuthService from "../../hooks/AuthService";
 import {ApiErrorResponse} from "../../api/ApiResult";
 import {CurrentUserDto} from "../../auth/UserProfileDto";

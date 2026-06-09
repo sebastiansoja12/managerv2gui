@@ -1,6 +1,6 @@
 import React, {useEffect, useMemo, useState} from "react";
-import {Add, AdminPanelSettings, Edit, ManageAccounts, PeopleAlt, Refresh, Search, VpnKey} from "@mui/icons-material";
-import {Alert, CircularProgress, Typography} from "@mui/material";
+import {Add, AdminPanelSettings, Edit, ManageAccounts, PeopleAlt, Refresh, Search, VpnKey} from "components/ui/icons";
+import {Alert, CircularProgress, Typography} from "components/ui";
 import {useAuthState} from "../../auth/AuthState";
 import pl from "../../i18n/translate";
 import Department from "../../class/depots/Department";

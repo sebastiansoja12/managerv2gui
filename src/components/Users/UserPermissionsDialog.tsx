@@ -1,5 +1,5 @@
 import React, {FormEvent, useEffect, useState} from "react";
-import {Alert, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle} from "@mui/material";
+import {Alert, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle} from "components/ui";
 import pl from "../../i18n/translate";
 import {permissionDefinitions, User, UserPermission} from "./model/User";
 

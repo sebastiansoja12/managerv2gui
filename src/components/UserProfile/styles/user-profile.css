@@ -38,7 +38,7 @@
     width: 44px;
 }
 
-.user-profile-title .MuiTypography-root {
+.user-profile-title [data-ui="typography"] {
     color: var(--brand-ink);
     font-size: 1.5rem;
     font-weight: 900;
@@ -64,7 +64,7 @@
     padding: 24px;
 }
 
-.user-profile-card .MuiTypography-h5 {
+.user-profile-card [data-ui="typography"][data-variant="h5"] {
     font-size: 1.12rem;
     font-weight: 850;
     margin-bottom: 18px;
@@ -100,20 +100,20 @@
     gap: 14px;
 }
 
-.user-profile-password .MuiButton-contained,
-.user-profile-header .MuiButton-root {
+.user-profile-password [data-ui="button"][data-variant="contained"],
+.user-profile-header [data-ui="button"] {
     border-radius: 8px;
     font-weight: 800;
     min-height: 40px;
     text-transform: none;
 }
 
-.user-profile-password .MuiButton-contained {
+.user-profile-password [data-ui="button"][data-variant="contained"] {
     background: var(--brand-accent);
     box-shadow: 0 12px 20px rgba(63, 134, 217, 0.18);
 }
 
-.user-profile-password .MuiButton-contained:hover {
+.user-profile-password [data-ui="button"][data-variant="contained"]:hover {
     background: var(--brand-accent-strong);
 }
 
@@ -123,7 +123,7 @@
     gap: 10px;
 }
 
-.user-profile-permissions .MuiChip-root {
+.user-profile-permissions [data-ui="chip"] {
     background: var(--brand-accent-soft);
     border: 1px solid var(--brand-accent-border);
     color: var(--brand-accent-strong);
