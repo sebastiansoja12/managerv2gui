@@ -77,19 +77,19 @@
     margin-top: 18px;
 }
 
-.device-pairing-form .MuiButton-root,
-.device-pairing-header .MuiButton-root {
+.device-pairing-form [data-ui="button"],
+.device-pairing-header [data-ui="button"] {
     border-radius: 8px;
     font-weight: 800;
     min-height: 40px;
     text-transform: none;
 }
 
-.device-pairing-form .MuiButton-contained {
+.device-pairing-form [data-ui="button"][data-variant="contained"] {
     background: var(--brand-accent-strong);
 }
 
-.device-pairing-form .MuiButton-contained:hover {
+.device-pairing-form [data-ui="button"][data-variant="contained"]:hover {
     background: var(--brand-accent-deep);
 }
 

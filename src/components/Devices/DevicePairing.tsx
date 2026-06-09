@@ -1,7 +1,7 @@
 import React, {ChangeEvent, useEffect, useMemo, useState} from "react";
 import QRCode from "qrcode";
-import {Alert, Button, Chip, Snackbar, TextField, Typography} from "@mui/material";
-import {DevicesOther, QrCode2, Refresh} from "@mui/icons-material";
+import {Alert, Button, Chip, Snackbar, TextField, Typography} from "components/ui";
+import {DevicesOther, QrCode2, Refresh} from "components/ui/icons";
 import AuthService from "../../hooks/AuthService";
 import DeviceService from "../../hooks/DeviceService";
 import {CurrentUserDto} from "../../auth/UserProfileDto";
