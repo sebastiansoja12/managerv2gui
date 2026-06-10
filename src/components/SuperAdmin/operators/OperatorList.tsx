@@ -1,6 +1,6 @@
 import React from "react";
-import {Add, Business, Edit, Search} from "@mui/icons-material";
-import {Alert} from "@mui/material";
+import {Add, Business, Edit, Search} from "components/ui/icons";
+import {Alert} from "components/ui";
 import pl from "../../../i18n/translate";
 import {Operator} from "../../Operators/model/Operator";
 import {getOperatorIdValue} from "./operatorPanelUtils";
