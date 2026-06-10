@@ -5,11 +5,11 @@ import {
     CircularProgress,
     TextField,
     Typography,
-} from "@mui/material";
+} from "components/ui";
 import {
     Refresh,
     Save,
-} from "@mui/icons-material";
+} from "components/ui/icons";
 import {getBackendErrorMessage} from "../../api/errorMessage";
 import SoftwareConfigurationService from "../../hooks/SoftwareConfigurationService";
 import pl from "../../i18n/translate";

@@ -18,7 +18,7 @@ import {
     TuneOutlined,
     VpnKey,
     WebhookOutlined,
-} from "@mui/icons-material";
+} from "components/ui/icons";
 import {
     Alert,
     Button,
@@ -28,7 +28,7 @@ import {
     FormControlLabel,
     Switch,
     TextField,
-} from "@mui/material";
+} from "components/ui";
 import {getBackendErrorMessage} from "../../api/errorMessage";
 import TrackingService from "../../hooks/TrackingService";
 import pl from "../../i18n/translate";
@@ -296,18 +296,18 @@ function IntegrationsConfigurationPanel() {
                                 </div>
                             </div>
                             <div className="integration-switch-list">
-                                <label>
+                                <div className="integration-switch-row">
                                     <span>{pl.integrations.options.notifications.failures}</span>
                                     <Switch defaultChecked size="small" />
-                                </label>
-                                <label>
+                                </div>
+                                <div className="integration-switch-row">
                                     <span>{pl.integrations.options.notifications.delays}</span>
                                     <Switch defaultChecked size="small" />
-                                </label>
-                                <label>
+                                </div>
+                                <div className="integration-switch-row">
                                     <span>{pl.integrations.options.notifications.dailyReport}</span>
                                     <Switch size="small" />
-                                </label>
+                                </div>
                             </div>
                         </section>
 
@@ -428,18 +428,18 @@ function IntegrationsConfigurationPanel() {
                                 </div>
                             </div>
                             <div className="integration-switch-list">
-                                <label>
+                                <div className="integration-switch-row">
                                     <span>{pl.integrations.options.webhooks.statusChanges}</span>
                                     <Switch defaultChecked size="small" />
-                                </label>
-                                <label>
+                                </div>
+                                <div className="integration-switch-row">
                                     <span>{pl.integrations.options.webhooks.deliveryFailures}</span>
                                     <Switch defaultChecked size="small" />
-                                </label>
-                                <label>
+                                </div>
+                                <div className="integration-switch-row">
                                     <span>{pl.integrations.options.webhooks.testEvents}</span>
                                     <Switch size="small" />
-                                </label>
+                                </div>
                             </div>
                         </section>
 

@@ -177,7 +177,7 @@
     min-width: 0;
 }
 
-.global-configuration-courier-grid .MuiFormControlLabel-root {
+.global-configuration-courier-grid [data-ui="form-control-label"] {
     background: var(--brand-accent-wash);
     border: 1px solid #e6ebf2;
     border-radius: 8px;
@@ -187,7 +187,7 @@
     padding: 4px 10px;
 }
 
-.global-configuration-courier-grid .MuiFormControlLabel-label {
+.global-configuration-courier-grid [data-ui="form-control-label-text"] {
     color: #344054;
     font-size: 14px;
     font-weight: 700;
@@ -388,7 +388,7 @@
     justify-content: flex-end;
 }
 
-.geocoding-provider-actions .MuiIconButton-root {
+.geocoding-provider-actions [data-ui="icon-button"] {
     border: 1px solid #e1e7ef;
     border-radius: 7px;
     padding: 5px;
@@ -425,11 +425,11 @@
     margin: 6px 0 16px;
 }
 
-.geocoding-configuration-dialog .MuiDialog-paper {
+.geocoding-configuration-dialog [data-ui="dialog"] {
     border-radius: 14px;
 }
 
-.geocoding-configuration-dialog .MuiDialogTitle-root {
+.geocoding-configuration-dialog [data-ui="dialog-title"] {
     border-bottom: 1px solid #eaecf0;
     color: #101828;
     font-size: 22px;
@@ -437,11 +437,11 @@
     padding: 22px 24px 16px;
 }
 
-.geocoding-configuration-dialog .MuiDialogContent-root {
+.geocoding-configuration-dialog [data-ui="dialog-content"] {
     padding: 14px 24px 8px;
 }
 
-.geocoding-configuration-dialog .MuiDialogActions-root {
+.geocoding-configuration-dialog [data-ui="dialog-actions"] {
     border-top: 1px solid #eaecf0;
     gap: 8px;
     padding: 16px 24px 20px;
@@ -667,7 +667,7 @@
     padding: 9px 0 0;
 }
 
-.integration-provider-actions .MuiButton-root {
+.integration-provider-actions [data-ui="button"] {
     border-radius: 7px;
     font-size: 11px;
     font-weight: 800;
@@ -787,19 +787,19 @@
     gap: 8px;
 }
 
-.integration-option-group .MuiFormControlLabel-root {
+.integration-option-group [data-ui="form-control-label"] {
     margin-left: -6px;
     margin-right: 0;
 }
 
-.integration-option-group .MuiFormControlLabel-label,
-.integration-switch-list label {
+.integration-option-group [data-ui="form-control-label-text"],
+.integration-switch-list .integration-switch-row > span {
     color: #344054;
     font-size: 14px;
     font-weight: 700;
 }
 
-.integration-switch-list label {
+.integration-switch-row {
     align-items: center;
     background: #f8fafc;
     border: 1px solid #edf1f7;
@@ -808,6 +808,10 @@
     justify-content: space-between;
     min-height: 42px;
     padding: 7px 10px 7px 12px;
+}
+
+.integration-switch-row > span {
+    min-width: 0;
 }
 
 .integration-field-grid {
@@ -867,11 +871,11 @@
     margin: 4px 0 0;
 }
 
-.integration-configuration-dialog .MuiDialog-paper {
+.integration-configuration-dialog [data-ui="dialog"] {
     border-radius: 14px;
 }
 
-.integration-configuration-dialog .MuiDialogTitle-root {
+.integration-configuration-dialog [data-ui="dialog-title"] {
     border-bottom: 1px solid #eaecf0;
     color: #101828;
     font-size: 22px;
@@ -879,11 +883,11 @@
     padding: 22px 24px 16px;
 }
 
-.integration-configuration-dialog .MuiDialogContent-root {
+.integration-configuration-dialog [data-ui="dialog-content"] {
     padding: 14px 24px 8px;
 }
 
-.integration-configuration-dialog .MuiDialogActions-root {
+.integration-configuration-dialog [data-ui="dialog-actions"] {
     border-top: 1px solid #eaecf0;
     gap: 8px;
     padding: 16px 24px 20px;
@@ -976,7 +980,7 @@
         grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
-    .integration-provider-actions .MuiButton-root {
+    .integration-provider-actions [data-ui="button"] {
         justify-content: center;
         min-width: 0;
     }
@@ -1034,11 +1038,11 @@
         grid-template-columns: minmax(0, 1fr) auto;
     }
 
-    .integration-provider-card > .MuiChip-root {
+    .integration-provider-card > [data-ui="chip"] {
         grid-column: 1;
     }
 
-    .integration-provider-card > .MuiIconButton-root {
+    .integration-provider-card > [data-ui="icon-button"] {
         grid-column: 2;
         grid-row: 1;
     }

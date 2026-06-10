@@ -16,8 +16,8 @@ import {
     Switch,
     TextField,
     Tooltip,
-} from "@mui/material";
-import {Add, DeleteOutline, EditOutlined, LocationOn, VpnKey} from "@mui/icons-material";
+} from "components/ui";
+import {Add, DeleteOutline, EditOutlined, LocationOn, VpnKey} from "components/ui/icons";
 import {getBackendErrorMessage} from "../../api/errorMessage";
 import GeocodingConfigurationService from "../../hooks/GeocodingConfigurationService";
 import pl from "../../i18n/translate";
