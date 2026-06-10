@@ -53,15 +53,15 @@
     width: 44px;
 }
 
-.processes-header .MuiTypography-h4 {
+.processes-header [data-ui="typography"][data-variant="h4"] {
     color: var(--brand-ink);
     font-size: 1.5rem;
     font-weight: 900;
     letter-spacing: 0;
 }
 
-.processes-header .MuiButton-root,
-.processes-panel .MuiButton-root {
+.processes-header [data-ui="button"],
+.processes-panel [data-ui="button"] {
     border-radius: 8px;
     font-weight: 800;
     text-transform: none;
@@ -81,8 +81,8 @@
     padding: 22px 24px;
 }
 
-.processes-panel-header .MuiTypography-root,
-.process-section-heading .MuiTypography-root {
+.processes-panel-header [data-ui="typography"],
+.process-section-heading [data-ui="typography"] {
     color: var(--brand-ink);
     font-weight: 900;
 }

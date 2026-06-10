@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField } from '@mui/material';
+import { Button, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField } from "components/ui";
 import Software from './model/Software';
 import pl from "../../i18n/translate";
 

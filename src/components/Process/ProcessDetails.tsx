@@ -9,8 +9,8 @@ import {
     DialogContent,
     DialogTitle,
     Typography,
-} from "@mui/material";
-import {AccountTree, ArrowBack, Code, DataObject, Refresh, SyncAlt} from "@mui/icons-material";
+} from "components/ui";
+import {AccountTree, ArrowBack, Code, DataObject, Refresh, SyncAlt} from "components/ui/icons";
 import {useNavigate, useParams} from "react-router-dom";
 import ProcessLogService from "../../hooks/ProcessLogService";
 import {ApiErrorResponse} from "../../api/ApiResult";

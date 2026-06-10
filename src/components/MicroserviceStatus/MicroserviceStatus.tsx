@@ -1,6 +1,6 @@
 import React, {useCallback, useEffect, useMemo, useState} from "react";
-import {Alert, Button, CircularProgress, Typography} from "@mui/material";
-import {CheckCircle, ErrorOutline, Refresh, Storage} from "@mui/icons-material";
+import {Alert, Button, CircularProgress, Typography} from "components/ui";
+import {CheckCircle, ErrorOutline, Refresh, Storage} from "components/ui/icons";
 import MicroserviceStatusService from "../../hooks/MicroserviceStatusService";
 import pl from "../../i18n/translate";
 import {MicroserviceStatusResult} from "./model/MicroserviceStatusDto";

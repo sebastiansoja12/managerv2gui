@@ -1,6 +1,6 @@
 import React, {useEffect, useMemo, useState} from "react";
-import {Alert, Button, CircularProgress, Chip, IconButton, TablePagination, Tooltip, Typography} from "@mui/material";
-import {AccountTree, MoreVert, Refresh, SyncAlt, Visibility} from "@mui/icons-material";
+import {Alert, Button, CircularProgress, Chip, IconButton, TablePagination, Tooltip, Typography} from "components/ui";
+import {AccountTree, MoreVert, Refresh, SyncAlt, Visibility} from "components/ui/icons";
 import {useNavigate} from "react-router-dom";
 import ProcessLogService from "../../hooks/ProcessLogService";
 import {ApiErrorResponse} from "../../api/ApiResult";
