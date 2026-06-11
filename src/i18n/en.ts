@@ -1313,6 +1313,12 @@ export const en: typeof pl = {
             exportToExcel: "Export to Excel",
             changeStatus: "Change status",
         },
+        detailTabs: {
+            overview: "Overview",
+            sender: "Sender",
+            recipient: "Recipient",
+            history: "Event history",
+        },
         metrics: {
             summaryTitle: "Shipment summary",
             week: "Week",
@@ -1460,6 +1466,9 @@ export const en: typeof pl = {
             type: "Type",
             relatedShipment: "Parent shipment",
             currentCourier: "Current courier",
+            courierCode: "Courier code",
+            lastOperation: "Last operation",
+            departmentDetailsUnavailable: "No department address details",
             lastActivity: "Last activity: {date} · {department}",
             noCourierInfo: "No courier information",
         },
@@ -1512,7 +1521,7 @@ export const en: typeof pl = {
         dangerousGood: {
             active: "Active",
             emptyStatus: "None",
-            empty: "This shipment has no dangerous good assigned.",
+            empty: "This shipment does not contain dangerous goods.",
             yes: "Yes",
             no: "No",
             invalid: "Complete all required dangerous goods fields and use a UN number such as UN1203.",

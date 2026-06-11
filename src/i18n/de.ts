@@ -1309,6 +1309,12 @@ export const de: typeof pl = {
             exportToExcel: "Nach Excel exportieren",
             changeStatus: "Status ändern",
         },
+        detailTabs: {
+            overview: "Übersicht",
+            sender: "Absender",
+            recipient: "Empfänger",
+            history: "Ereignisverlauf",
+        },
         metrics: {
             summaryTitle: "Sendungsübersicht",
             week: "Woche",
@@ -1456,6 +1462,9 @@ export const de: typeof pl = {
             type: "Typ",
             relatedShipment: "Übergeordnete Sendung",
             currentCourier: "Aktueller Kurier",
+            courierCode: "Kuriercode",
+            lastOperation: "Letzte Operation",
+            departmentDetailsUnavailable: "Keine Adressdaten der Niederlassung",
             lastActivity: "Letzte Aktivität: {date} · {department}",
             noCourierInfo: "Keine Kurierinformationen",
         },
@@ -1508,7 +1517,7 @@ export const de: typeof pl = {
         dangerousGood: {
             active: "Aktiv",
             emptyStatus: "Keine",
-            empty: "Dieser Sendung ist kein Gefahrgut zugeordnet.",
+            empty: "Diese Sendung enthält kein Gefahrgut.",
             yes: "Ja",
             no: "Nein",
             invalid: "Füllen Sie alle Pflichtfelder aus und verwenden Sie eine UN-Nummer wie UN1203.",

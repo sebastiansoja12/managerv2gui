@@ -1308,6 +1308,12 @@ export const pl = {
             exportToExcel: "Eksportuj do Excela",
             changeStatus: "Zmień status",
         },
+        detailTabs: {
+            overview: "Przegląd",
+            sender: "Nadawca",
+            recipient: "Odbiorca",
+            history: "Historia zdarzeń",
+        },
         metrics: {
             summaryTitle: "Podsumowanie przesyłek",
             week: "Tydzień",
@@ -1455,6 +1461,9 @@ export const pl = {
             type: "Typ",
             relatedShipment: "Przesyłka nadrzędna",
             currentCourier: "Aktualny kurier",
+            courierCode: "Kod kuriera",
+            lastOperation: "Ostatnia operacja",
+            departmentDetailsUnavailable: "Brak danych adresowych oddziału",
             lastActivity: "Ostatnia aktywność: {date} · {department}",
             noCourierInfo: "Brak informacji o aktualnym kurierze",
         },
@@ -1507,7 +1516,7 @@ export const pl = {
         dangerousGood: {
             active: "Aktywny",
             emptyStatus: "Brak",
-            empty: "Ta przesyłka nie ma przypisanego towaru niebezpiecznego.",
+            empty: "Ta przesyłka nie zawiera towarów niebezpiecznych.",
             yes: "Tak",
             no: "Nie",
             invalid: "Uzupełnij wymagane dane dangerous goods i podaj numer w formacie UN1203.",
