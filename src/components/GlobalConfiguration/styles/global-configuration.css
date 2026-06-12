@@ -241,6 +241,84 @@
     text-align: center !important;
 }
 
+.global-configuration-shipment-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 14px 16px 0;
+}
+
+.global-configuration-preview-note {
+    align-items: center;
+    background: #f2f6ff;
+    border: 1px solid #d7e3ff;
+    border-radius: 8px;
+    color: #315a9f;
+    display: flex;
+    font-size: 13px;
+    font-weight: 700;
+    gap: 8px;
+    padding: 10px 12px;
+}
+
+.global-configuration-preview-note svg {
+    flex: 0 0 auto;
+}
+
+.global-configuration-settings-table th:first-child,
+.global-configuration-settings-table td:first-child {
+    width: 36%;
+}
+
+.global-configuration-settings-table th:nth-child(2),
+.global-configuration-settings-table td:nth-child(2) {
+    width: 16%;
+}
+
+.global-configuration-settings-table th:nth-child(3),
+.global-configuration-settings-table td:nth-child(3) {
+    width: 28%;
+}
+
+.global-configuration-settings-table td:last-child {
+    width: 1%;
+    white-space: nowrap;
+}
+
+.global-configuration-setting-name,
+.global-configuration-setting-hint {
+    display: block;
+}
+
+.global-configuration-setting-name {
+    color: var(--brand-ink);
+    font-weight: 800;
+}
+
+.global-configuration-setting-hint {
+    color: var(--brand-muted);
+    font-size: 12px;
+    line-height: 1.45;
+    margin-top: 4px;
+}
+
+.global-configuration-settings-table [data-ui="form-control-label"] {
+    font-weight: 700;
+}
+
+.global-configuration-compact-control {
+    align-items: center;
+    display: flex;
+    gap: 8px;
+    max-width: 180px;
+}
+
+.global-configuration-compact-control > span {
+    color: var(--brand-muted);
+    font-size: 13px;
+    font-weight: 800;
+}
+
 .geocoding-configuration-panel {
     padding: 14px 16px;
 }

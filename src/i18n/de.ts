@@ -817,6 +817,53 @@ export const de: typeof pl = {
             category: "Kategorie",
             value: "Wert",
         },
+        shipmentConfiguration: {
+            previewNote: "GUI-Vorschau — die Einstellungen werden nur in diesem Browser gespeichert und sind nicht mit dem Backend verbunden.",
+            categories: {
+                validation: "Validierung",
+                labels: "Etiketten",
+                limits: "Grenzwerte",
+                workflow: "Ablauf",
+            },
+            fields: {
+                validateAddressData: {
+                    label: "Automatische Adressvalidierung",
+                    hint: "Prüft vor dem Erstellen einer Sendung die Vollständigkeit der Absender- und Empfängeradresse.",
+                },
+                requireRecipientPhone: {
+                    label: "Telefonnummer des Empfängers verlangen",
+                    hint: "Vor dem Speichern der Sendung muss eine Telefonnummer angegeben werden.",
+                },
+                preventDuplicateTracking: {
+                    label: "Doppelte Trackingnummern blockieren",
+                    hint: "Warnt vor dem Erstellen einer Sendung mit einer bereits vorhandenen Trackingnummer.",
+                },
+                autoGenerateLabels: {
+                    label: "Etiketten automatisch erzeugen",
+                    hint: "Erstellt direkt nach erfolgreichem Anlegen einer Sendung ein Etikett.",
+                },
+                maximumWeightKg: {
+                    label: "Maximales Sendungsgewicht",
+                    hint: "Obere Gewichtsgrenze, die im Sendungsformular akzeptiert wird.",
+                },
+                defaultStatus: {
+                    label: "Standardstatus neuer Sendungen",
+                    hint: "Status, der nach dem Erstellen einer Sendung automatisch vergeben wird.",
+                },
+            },
+            values: {
+                enabled: "Aktiviert",
+                disabled: "Deaktiviert",
+            },
+            statuses: {
+                created: "Erstellt",
+                prepared: "Vorbereitet",
+                accepted: "Angenommen",
+            },
+            messages: {
+                saved: "Die Sendungseinstellungen wurden lokal in der GUI gespeichert.",
+            },
+        },
         courierConfiguration: {
             title: "Kurierbearbeitung",
             fields: {
