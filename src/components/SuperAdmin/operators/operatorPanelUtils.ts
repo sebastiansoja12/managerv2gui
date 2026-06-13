@@ -20,6 +20,7 @@ export const toCreateRequest = (draft: OperatorDraft): CreateOperatorRequest => 
     contractEndDate: draft.contractEndDate,
     foundedDate: draft.foundedDate,
     configuration: draft.configuration,
+    geocodingConfiguration: draft.geocodingConfiguration,
     firstDepartment: draft.firstDepartment,
 });
 

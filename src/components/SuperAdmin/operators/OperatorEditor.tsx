@@ -7,15 +7,21 @@ import {
     FirstDepartmentDraft,
     Operator,
     OperatorDraft,
+    OperatorGeocodingConfigurationDraft,
     ShipmentLimits,
     ShippingCapabilities,
 } from "../../Operators/model/Operator";
+import {
+    GeocodingConfigurationField,
+    GeocodingProviderDefinition,
+} from "../../GlobalConfiguration/model/GeocodingConfiguration";
 import {getCapabilityLabels} from "./capabilityLabels";
 import OperatorUserDialog from "./OperatorUserDialog";
 
 type OperatorEditorProps = {
     createMode: boolean;
     draft: OperatorDraft;
+    geocodingProviders: GeocodingProviderDefinition[];
     saving: boolean;
     selectedOperator?: Operator;
     onCreate: () => void;
@@ -25,9 +31,37 @@ type OperatorEditorProps = {
     onUpdateDraft: <K extends keyof OperatorDraft>(key: K, value: OperatorDraft[K]) => void;
 };
 
+type OperatorGeocodingCredentialKey = Exclude<
+    keyof OperatorGeocodingConfigurationDraft,
+    "enabled" | "provider"
+>;
+
+const geocodingFieldKeys: Record<GeocodingConfigurationField, OperatorGeocodingCredentialKey> = {
+    API_USER_NAME: "apiUserName",
+    API_PASSWORD: "apiPassword",
+    API_KEY: "apiKey",
+    CLIENT_NUMBER: "clientNumber",
+    ACCESS_TOKEN: "accessToken",
+    REFRESH_TOKEN: "refreshToken",
+};
+
+const sensitiveGeocodingFields = new Set<GeocodingConfigurationField>([
+    "API_PASSWORD",
+    "API_KEY",
+    "ACCESS_TOKEN",
+    "REFRESH_TOKEN",
+]);
+
+const getProviderLabel = (provider: string) => provider === "POSITION_STACK"
+    ? pl.superAdmin.editor.geocodingProviders.POSITION_STACK
+    : provider.toLowerCase().split("_").map((part) => (
+        part.charAt(0).toUpperCase() + part.slice(1)
+    )).join(" ");
+
 function OperatorEditor({
     createMode,
     draft,
+    geocodingProviders,
     saving,
     selectedOperator,
     onCreate,
@@ -39,6 +73,9 @@ function OperatorEditor({
     const [userDialogOpen, setUserDialogOpen] = useState(false);
     const [userCreated, setUserCreated] = useState(false);
     const capabilityLabels = getCapabilityLabels();
+    const selectedGeocodingProvider = geocodingProviders.find((definition) => (
+        definition.provider === draft.geocodingConfiguration.provider
+    ));
     const updateShipmentLimit = (key: keyof ShipmentLimits, value: string) => {
         onUpdateDraft("configuration", {
             ...draft.configuration,
@@ -65,12 +102,38 @@ function OperatorEditor({
             [key]: value,
         });
     };
+    const updateGeocodingConfiguration = (
+        key: OperatorGeocodingCredentialKey,
+        value: string,
+    ) => {
+        onUpdateDraft("geocodingConfiguration", {
+            ...draft.geocodingConfiguration,
+            [key]: value,
+        });
+    };
+    const selectGeocodingProvider = (provider: string) => {
+        onUpdateDraft("geocodingConfiguration", {
+            apiUserName: "",
+            apiPassword: "",
+            apiKey: "",
+            clientNumber: "",
+            accessToken: "",
+            refreshToken: "",
+            enabled: true,
+            provider,
+        });
+    };
+    const geocodingRequirementsMissing = !selectedGeocodingProvider
+        || selectedGeocodingProvider.activeFields.some((field) => (
+            !String(draft.geocodingConfiguration[geocodingFieldKeys[field]] ?? "").trim()
+        ));
     const createRequirementsMissing = createMode && (
         !draft.userFirstName
         || !draft.userLastName
         || !draft.username
         || !draft.password
         || !draft.email
+        || geocodingRequirementsMissing
         || !draft.firstDepartment.departmentCode
         || !draft.firstDepartment.city
         || !draft.firstDepartment.street
@@ -172,6 +235,43 @@ function OperatorEditor({
                                 <span>{pl.superAdmin.editor.fields.email}</span>
                                 <input type="email" value={draft.email} onChange={(event) => onUpdateDraft("email", event.target.value)}/>
                             </label>
+                        </div>
+                    </div>
+
+                    <div className="super-admin-editor-section">
+                        <div className="super-admin-section-title">
+                            <strong>{pl.superAdmin.editor.geocodingTitle}</strong>
+                            <span>{pl.superAdmin.editor.geocodingSubtitle}</span>
+                        </div>
+                        <div className="super-admin-form-grid">
+                            <label>
+                                <span>{pl.superAdmin.editor.fields.geocodingProvider}</span>
+                                <select
+                                    value={draft.geocodingConfiguration.provider}
+                                    onChange={(event) => selectGeocodingProvider(event.target.value)}
+                                >
+                                    <option value="">{pl.superAdmin.editor.selectGeocodingProvider}</option>
+                                    {geocodingProviders.map((definition) => (
+                                        <option key={definition.provider} value={definition.provider}>
+                                            {getProviderLabel(definition.provider)}
+                                        </option>
+                                    ))}
+                                </select>
+                            </label>
+                            {selectedGeocodingProvider?.activeFields.map((field) => {
+                                const key = geocodingFieldKeys[field];
+                                return (
+                                    <label key={field}>
+                                        <span>{pl.superAdmin.editor.geocodingFields[field]}</span>
+                                        <input
+                                            autoComplete="off"
+                                            type={sensitiveGeocodingFields.has(field) ? "password" : "text"}
+                                            value={String(draft.geocodingConfiguration[key] ?? "")}
+                                            onChange={(event) => updateGeocodingConfiguration(key, event.target.value)}
+                                        />
+                                    </label>
+                                );
+                            })}
                         </div>
                     </div>
 

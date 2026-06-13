@@ -1,9 +1,11 @@
 import React, {useEffect, useMemo, useState} from "react";
 import OperatorService from "../../../hooks/OperatorService";
 import OperatorDirectoryService from "../../../hooks/OperatorDirectoryService";
+import GeocodingConfigurationService from "../../../hooks/GeocodingConfigurationService";
 import pl from "../../../i18n/translate";
 import {createEmptyOperatorDraft, Operator, OperatorDraft, operatorToDraft, ShippingCapabilities} from "../../Operators/model/Operator";
 import {CourierDto} from "../../Couriers/dto/CourierDto";
+import {GeocodingProviderDefinition} from "../../GlobalConfiguration/model/GeocodingConfiguration";
 import Department from "../../../class/depots/Department";
 import {User} from "../../Users/model/User";
 import SuperAdminLayout from "../layout/SuperAdminLayout";
@@ -18,6 +20,7 @@ import {getOperatorIdValue, toCreateRequest, toUpdateRequest} from "./operatorPa
 
 function SuperAdminOperatorsPage() {
     const [operators, setOperators] = useState<Operator[]>([]);
+    const [geocodingProviders, setGeocodingProviders] = useState<GeocodingProviderDefinition[]>([]);
     const [selectedOperatorId, setSelectedOperatorId] = useState<string>("");
     const [draft, setDraft] = useState<OperatorDraft>(createEmptyOperatorDraft());
     const [query, setQuery] = useState("");
@@ -35,21 +38,26 @@ function SuperAdminOperatorsPage() {
 
     useEffect(() => {
         let active = true;
-        OperatorService.getAll()
-            .then((response) => {
-                if (!active || !Array.isArray(response.data)) {
+        Promise.all([
+            OperatorService.getAll(),
+            GeocodingConfigurationService.getProviders(),
+        ])
+            .then(([operatorResponse, geocodingProviderResponse]) => {
+                if (!active || !Array.isArray(operatorResponse.data) || !Array.isArray(geocodingProviderResponse.data)) {
                     return;
                 }
 
-                const loadedOperators = response.data;
+                const loadedOperators = operatorResponse.data;
+                const loadedGeocodingProviders = geocodingProviderResponse.data;
                 setOperators(loadedOperators);
+                setGeocodingProviders(loadedGeocodingProviders);
                 if (loadedOperators.length) {
                     setSelectedOperatorId(getOperatorIdValue(loadedOperators[0]));
                     setDraft(operatorToDraft(loadedOperators[0]));
                     setCreateMode(false);
                 } else {
                     setSelectedOperatorId("");
-                    setDraft(createEmptyOperatorDraft());
+                    setDraft(createEmptyOperatorDraft(loadedGeocodingProviders[0]?.provider));
                     setCreateMode(true);
                 }
                 setError("");
@@ -125,7 +133,7 @@ function SuperAdminOperatorsPage() {
     const startCreate = () => {
         setCreateMode(true);
         setSelectedOperatorId("");
-        setDraft(createEmptyOperatorDraft());
+        setDraft(createEmptyOperatorDraft(geocodingProviders[0]?.provider));
         setUserDialogOpen(false);
         setDirectoryDialogMode(null);
     };
@@ -221,6 +229,7 @@ function SuperAdminOperatorsPage() {
                     <OperatorEditor
                         createMode={createMode}
                         draft={draft}
+                        geocodingProviders={geocodingProviders}
                         onCreate={startCreate}
                         onSave={saveDraft}
                         onToggleCapability={toggleCapability}
