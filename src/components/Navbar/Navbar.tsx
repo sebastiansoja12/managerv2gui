@@ -28,6 +28,7 @@ import {AppTabDefinition} from "../AppShell/types";
 import AppTabs from "../AppShell/AppTabs";
 import './styles/main.css';
 import {logoutAuthSession} from "../../auth/AuthSession";
+import {clearAnnouncementDismissal} from "../Announcements/announcementStorage";
 import {useAuthState} from "../../auth/AuthState";
 import pl from "../../i18n/translate";
 import {Language, translations} from "../../i18n";
@@ -203,6 +204,7 @@ function Navbar({
 
     const logout = async () => {
         clearStoredTabs();
+        clearAnnouncementDismissal();
         setExpandedPanel(null);
         setProfileMenuOpen(false);
         try {
