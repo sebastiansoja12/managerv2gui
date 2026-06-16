@@ -66,11 +66,11 @@
     gap: 0 8px;
     grid-template-areas:
         "menu dock";
-    grid-template-columns: auto minmax(0, auto);
-    inline-size: max-content;
+    grid-template-columns: max-content minmax(0, max-content);
+    inline-size: fit-content;
     justify-self: center;
     max-inline-size: calc(100vw - 150px);
-    min-inline-size: min(1140px, calc(100vw - 150px));
+    min-inline-size: 0;
     overflow: visible;
     padding: 8px 10px;
     position: relative;
