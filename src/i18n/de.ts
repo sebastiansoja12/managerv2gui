@@ -1529,6 +1529,8 @@ export const de: typeof pl = {
             currentCourier: "Aktueller Kurier",
             courierCode: "Kuriercode",
             lastOperation: "Letzte Operation",
+            departmentDetailsTitle: "Informationen zur Niederlassung",
+            showDepartmentDetails: "Informationen zur Niederlassung anzeigen",
             departmentDetailsUnavailable: "Keine Adressdaten der Niederlassung",
             lastActivity: "Letzte Aktivität: {date} · {department}",
             noCourierInfo: "Keine Kurierinformationen",

@@ -9,19 +9,20 @@ import {
     DialogActions,
     DialogContent,
     DialogTitle,
+    IconButton,
     Menu,
     MenuItem,
     Snackbar,
-    Tooltip,
     Typography,
 } from "components/ui";
 import {
     ArrowDropDown,
     ArrowBack,
     Close,
+    Delete,
     Download,
     Edit,
-    Delete,
+    InfoOutlined,
     LocalShipping,
     Map,
     PersonPinCircle,
@@ -189,6 +190,7 @@ const ShipmentDetails: React.FC = () => {
     const [savingDangerousGood, setSavingDangerousGood] = useState<boolean>(false);
     const [downloadingDocument, setDownloadingDocument] = useState<DocumentAction | null>(null);
     const [qrMenuAnchor, setQrMenuAnchor] = useState<HTMLElement | null>(null);
+    const [destinationInfoAnchor, setDestinationInfoAnchor] = useState<HTMLElement | null>(null);
     const [qrPreviewUrl, setQrPreviewUrl] = useState<string | null>(null);
     const [notice, setNotice] = useState<Notice | null>(null);
     const qrPreviewRef = useRef<HTMLIFrameElement | null>(null);
@@ -209,9 +211,6 @@ const ShipmentDetails: React.FC = () => {
         const destinationCode = shipment ? departmentCodeValue(shipment.destination) : "";
         return departments.find((department) => department.departmentCode?.value === destinationCode) || null;
     }, [departments, shipment]);
-    const destinationTooltip = destinationDepartment
-        ? `${pl.shipments.form.fields.city}: ${destinationDepartment.address.city}\n${pl.shipments.form.fields.street}: ${destinationDepartment.address.street}`
-        : pl.shipments.summary.departmentDetailsUnavailable;
     const historyPath = decodedTrackingNumber
         ? `/shipments/tracking/${encodeURIComponent(decodedTrackingNumber)}/history`
         : `/shipments/${shipmentId || shipment?.shipmentId.value || ""}/history`;
@@ -840,11 +839,52 @@ const ShipmentDetails: React.FC = () => {
                                     </div>
                                     <div>
                                         <span>{pl.shipments.summary.destination}</span>
-                                        <Tooltip title={destinationTooltip}>
+                                        <div className="shipment-destination-control">
                                             <strong className="shipment-destination-value">
                                                 {departmentCodeValue(shipment.destination) || pl.common.dash}
                                             </strong>
-                                        </Tooltip>
+                                            <IconButton
+                                                aria-expanded={Boolean(destinationInfoAnchor)}
+                                                aria-haspopup="dialog"
+                                                aria-label={pl.shipments.summary.showDepartmentDetails}
+                                                className="shipment-destination-info-button"
+                                                size="small"
+                                                onClick={(event) => setDestinationInfoAnchor((currentAnchor) => (
+                                                    currentAnchor ? null : event.currentTarget
+                                                ))}
+                                            >
+                                                <InfoOutlined fontSize="small" />
+                                            </IconButton>
+                                            <Menu
+                                                anchorEl={destinationInfoAnchor}
+                                                aria-label={pl.shipments.summary.departmentDetailsTitle}
+                                                className="shipment-department-popover"
+                                                open={Boolean(destinationInfoAnchor)}
+                                                role="dialog"
+                                                onClose={() => setDestinationInfoAnchor(null)}
+                                            >
+                                                <div className="shipment-department-popover-header">
+                                                    <InfoOutlined fontSize="small" />
+                                                    <strong>{pl.shipments.summary.departmentDetailsTitle}</strong>
+                                                </div>
+                                                {destinationDepartment ? (
+                                                    <dl className="shipment-department-popover-details">
+                                                        <div>
+                                                            <dt>{pl.shipments.form.fields.city}</dt>
+                                                            <dd>{destinationDepartment.address.city || pl.common.dash}</dd>
+                                                        </div>
+                                                        <div>
+                                                            <dt>{pl.shipments.form.fields.street}</dt>
+                                                            <dd>{destinationDepartment.address.street || pl.common.dash}</dd>
+                                                        </div>
+                                                    </dl>
+                                                ) : (
+                                                    <p className="shipment-department-popover-empty">
+                                                        {pl.shipments.summary.departmentDetailsUnavailable}
+                                                    </p>
+                                                )}
+                                            </Menu>
+                                        </div>
                                     </div>
                                     <div>
                                         <span>{pl.shipments.summary.price}</span>
