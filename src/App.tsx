@@ -3,9 +3,10 @@ import './App.css';
 import Departments from "./components/Departments";
 import {BrowserRouter, Route, Routes} from 'react-router-dom';
 import Navbar from "./components/Navbar/Navbar";
-import RouteLogs from "./components/RouteLog/RouteLogs";
 import LoginPage from "./components/LoginPage/LoginPage";
 import SoftwareConfigurationList from "./components/SoftwareConfiguration/SoftwareConfigurationList";
+import ShipmentList from "./components/Shipment/ShipmentList";
+import ShipmentCreate from "./components/Shipment/ShipmentCreate";
 
 
 function App() {
@@ -17,9 +18,12 @@ function App() {
                         <Navbar/>
                         <div>
                             <Routes>
-                                <Route path="/"/>
+                                <Route path="/" element={<ShipmentList/>}/>
                                 <Route path="depots" element={<Departments/>}/>
-                                <Route path="parcels" element={<RouteLogs/>} />
+                                <Route path="parcels" element={<ShipmentList/>} />
+                                <Route path="shipments" element={<ShipmentList/>} />
+                                <Route path="shipments/list" element={<ShipmentList/>} />
+                                <Route path="shipments/create" element={<ShipmentCreate/>} />
                                 <Route path="login" element={<LoginPage/>} />
                                 <Route path="software-configurations" element={<SoftwareConfigurationList/>} />
                             </Routes>
