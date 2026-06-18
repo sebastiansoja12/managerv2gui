@@ -11,6 +11,7 @@ import LoginPage from "../LoginPage/LoginPage";
 import MicroserviceStatus from "../MicroserviceStatus/MicroserviceStatus";
 import ProcessDetails from "../Process/ProcessDetails";
 import Processes from "../Process/Processes";
+import Returns from "../Returns/Returns";
 import ShipmentCreate from "../Shipment/ShipmentCreate";
 import ShipmentDetails from "../Shipment/ShipmentDetails";
 import ShipmentHistoryDetails from "../Shipment/ShipmentHistoryDetails";
@@ -52,6 +53,7 @@ function AppRoutes({onOpenTab, operationalProfile = "warehouse"}: AppRoutesProps
             <Route path="analytics" element={guarded("/analytics", <ModulePlaceholder title={pl.home.tiles.analytics.title}/>)}/>
             <Route path="processes" element={guarded("/processes", <Processes/>)}/>
             <Route path="processes/:processId" element={guarded("/processes/1", <ProcessDetails/>)}/>
+            <Route path="returns" element={guarded("/returns", <Returns/>)}/>
             <Route path="couriers" element={guarded("/couriers", <Couriers/>)}/>
             <Route path="couriers/:supplierCode" element={guarded("/couriers", <CourierDetails/>)}/>
             <Route path="vehicles" element={guarded("/vehicles", <ModulePlaceholder title={pl.home.tiles.vehicles.title}/>)}/>

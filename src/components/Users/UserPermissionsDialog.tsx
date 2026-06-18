@@ -32,7 +32,7 @@ function UserPermissionsDialog({open, saving, error, user, onClose, onSave}: Use
     };
 
     return (
-        <Dialog fullWidth maxWidth="sm" open={open} onClose={saving ? undefined : onClose}>
+        <Dialog className="users-permissions-dialog" fullWidth maxWidth="sm" open={open} onClose={saving ? undefined : onClose}>
             <form onSubmit={submit}>
                 <DialogTitle>{pl.usersManagement.permissionsDialog.title}</DialogTitle>
                 <DialogContent>
@@ -41,10 +41,18 @@ function UserPermissionsDialog({open, saving, error, user, onClose, onSave}: Use
                     <div className="users-permissions-grid">
                         {permissionDefinitions.map((permission) => {
                             const adminPermissionDisabled = permission.key.startsWith("ROLE_ADMIN_") && user?.role !== "ADMIN";
+                            const permissionSelected = selected.includes(permission.key);
                             return (
-                                <label className={adminPermissionDisabled ? "is-disabled" : ""} key={permission.key}>
+                                <label
+                                    aria-disabled={adminPermissionDisabled || saving}
+                                    className={[
+                                        adminPermissionDisabled ? "is-disabled" : "",
+                                        permissionSelected ? "is-selected" : "",
+                                    ].filter(Boolean).join(" ")}
+                                    key={permission.key}
+                                >
                                     <Checkbox
-                                        checked={selected.includes(permission.key)}
+                                        checked={permissionSelected}
                                         disabled={adminPermissionDisabled || saving}
                                         onChange={() => toggle(permission.key)}
                                         size="small"

@@ -670,6 +670,19 @@
     color: var(--primary) !important;
 }
 
+:root[data-theme] .users-permissions-dialog [data-ui="dialog-title"] {
+    background: var(--surface-elevated) !important;
+    border-color: var(--border) !important;
+}
+
+:root[data-theme] .users-permissions-dialog .users-permissions-grid label {
+    color: var(--foreground) !important;
+}
+
+:root[data-theme] .users-permissions-dialog .users-permissions-grid label.is-disabled {
+    color: var(--muted-foreground) !important;
+}
+
 :root[data-theme] .departments-status-dialog [data-ui="dialog-title"] {
     background: color-mix(in srgb, var(--warning) 13%, var(--surface-elevated)) !important;
     border-bottom-color: color-mix(in srgb, var(--warning) 38%, var(--border)) !important;
