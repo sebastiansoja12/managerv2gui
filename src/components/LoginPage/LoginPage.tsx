@@ -1,28 +1,34 @@
 import React, { useState } from 'react';
-import { Box, Button, Container, TextField, Typography } from '@mui/material';
+import { Alert, Box, Button, Container, TextField, Typography } from '@mui/material';
 import AuthService from '../../hooks/AuthService';
 import {LoginRequest} from "./model/LoginRequest";
 import { useNavigate } from 'react-router-dom';
+import {setAuthToken} from "../../auth/AuthTokenStorage";
 
 
 const Login: React.FC = () => {
     const [username, setUsername] = useState<string>('');
     const [password, setPassword] = useState<string>('');
+    const [loading, setLoading] = useState<boolean>(false);
+    const [errorMessage, setErrorMessage] = useState<string>('');
     const navigate = useNavigate();
 
     const handleLogin = async () => {
+        setLoading(true);
+        setErrorMessage('');
         try {
             const loginData: LoginRequest = { username, password };
             const response = await AuthService.login(loginData);
 
             const authToken = response.data.authenticationToken;
-            localStorage.setItem('authToken', authToken);
+            setAuthToken(authToken);
+            navigate('/');
         } catch (error) {
             console.error('Login failed:', error);
+            setErrorMessage('Nie udało się zalogować. Sprawdź login i hasło.');
+        } finally {
+            setLoading(false);
         }
-
-        localStorage.setItem('logged', String(true));
-        navigate('/');
     };
 
     return (
@@ -36,10 +42,10 @@ const Login: React.FC = () => {
                 }}
             >
                 <Typography component="h1" variant="h5">
-                    Login
+                    Logowanie
                 </Typography>
                 <Box component="form" noValidate sx={{ mt: 1 }}>
-                    {/* Username Input */}
+                    {errorMessage ? <Alert severity="error" sx={{mb: 2}}>{errorMessage}</Alert> : null}
                     <TextField
                         margin="normal"
                         required
@@ -53,7 +59,6 @@ const Login: React.FC = () => {
                         onChange={(e) => setUsername(e.target.value)}
                     />
 
-                    {/* Password Input */}
                     <TextField
                         margin="normal"
                         required
@@ -67,15 +72,15 @@ const Login: React.FC = () => {
                         onChange={(e) => setPassword(e.target.value)}
                     />
 
-                    {/* Login Button */}
                     <Button
                         type="button"
+                        disabled={loading}
                         fullWidth
                         variant="contained"
                         sx={{ mt: 3, mb: 2 }}
                         onClick={handleLogin}
                     >
-                        Login
+                        Zaloguj
                     </Button>
                 </Box>
             </Box>

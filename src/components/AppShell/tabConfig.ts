@@ -6,6 +6,7 @@ export const tabTitles: Record<string, string> = {
     "/depots": "Oddziały",
     "/parcels": "Lista przesyłek",
     "/login": "Logowanie",
+    "/profile": "Mój profil",
     "/software-configurations": "Software",
 };
 

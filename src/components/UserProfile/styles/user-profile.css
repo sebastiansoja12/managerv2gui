@@ -1,0 +1,143 @@
+.user-profile-page {
+    background: #f7f8fa;
+    color: #090b12;
+    min-height: calc(100vh - 72px);
+    padding: 24px;
+    text-align: left;
+}
+
+.user-profile-shell {
+    display: grid;
+    gap: 16px;
+    margin: 0 auto;
+    max-width: 1400px;
+}
+
+.user-profile-header {
+    align-items: center;
+    display: flex;
+    gap: 16px;
+    justify-content: space-between;
+}
+
+.user-profile-title {
+    align-items: center;
+    display: flex;
+    gap: 12px;
+}
+
+.user-profile-title-icon {
+    align-items: center;
+    background: #2563eb;
+    border-radius: 8px;
+    box-shadow: 0 12px 22px rgba(37, 99, 235, 0.18);
+    color: #ffffff;
+    display: inline-flex;
+    height: 44px;
+    justify-content: center;
+    width: 44px;
+}
+
+.user-profile-title .MuiTypography-root {
+    color: #05070d;
+    font-size: 1.5rem;
+    font-weight: 900;
+    letter-spacing: 0;
+}
+
+.user-profile-title p {
+    color: #6c737f;
+    margin: 2px 0 0;
+}
+
+.user-profile-grid {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
+}
+
+.user-profile-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.03);
+    padding: 24px;
+}
+
+.user-profile-card .MuiTypography-h5 {
+    font-size: 1.12rem;
+    font-weight: 850;
+    margin-bottom: 18px;
+}
+
+.user-profile-details {
+    display: grid;
+    gap: 0;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.user-profile-details div {
+    border-top: 1px solid #eef1f4;
+    display: grid;
+    gap: 6px;
+    min-height: 70px;
+    padding: 14px 16px 14px 0;
+}
+
+.user-profile-details span {
+    color: #6c737f;
+    font-size: 0.84rem;
+    font-weight: 700;
+}
+
+.user-profile-details strong {
+    color: #101827;
+    font-weight: 850;
+}
+
+.user-profile-password {
+    display: grid;
+    gap: 14px;
+}
+
+.user-profile-password .MuiButton-contained,
+.user-profile-header .MuiButton-root {
+    border-radius: 8px;
+    font-weight: 800;
+    min-height: 40px;
+    text-transform: none;
+}
+
+.user-profile-password .MuiButton-contained {
+    background: #2563eb;
+    box-shadow: 0 12px 20px rgba(37, 99, 235, 0.18);
+}
+
+.user-profile-password .MuiButton-contained:hover {
+    background: #1d4ed8;
+}
+
+.user-profile-permissions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.user-profile-permissions .MuiChip-root {
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    color: #1d4ed8;
+    font-weight: 800;
+}
+
+@media (max-width: 900px) {
+    .user-profile-grid,
+    .user-profile-details {
+        grid-template-columns: 1fr;
+    }
+
+    .user-profile-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
