@@ -839,12 +839,20 @@ export const en: typeof pl = {
             value: "Value",
         },
         shipmentConfiguration: {
-            previewNote: "GUI preview — settings are stored only in this browser and are not connected to the backend.",
+            previewNote: "GUI preview — settings are stored only in this browser.",
             categories: {
                 validation: "Validation",
                 labels: "Labels",
                 limits: "Limits",
                 workflow: "Workflow",
+                notifications: "Notifications",
+            },
+            categoryDescriptions: {
+                validation: "Required data and quality checks before a shipment is created.",
+                labels: "Generation of labels and transport documents.",
+                limits: "Default shipment weight and dimension restrictions.",
+                workflow: "Automated steps performed while a shipment is processed.",
+                notifications: "Events that trigger messages to recipients or senders.",
             },
             fields: {
                 validateAddressData: {
@@ -855,21 +863,101 @@ export const en: typeof pl = {
                     label: "Require recipient phone number",
                     hint: "A phone number must be provided before the shipment can be saved.",
                 },
+                requireRecipientEmail: {
+                    label: "Require recipient email",
+                    hint: "The recipient email address must be provided before the shipment can be saved.",
+                },
                 preventDuplicateTracking: {
                     label: "Block duplicate tracking numbers",
                     hint: "Warns before creating a shipment with an existing tracking number.",
+                },
+                requireSenderReference: {
+                    label: "Require sender reference",
+                    hint: "Makes the sender's internal reference number mandatory.",
+                },
+                validatePostalCode: {
+                    label: "Validate postal code format",
+                    hint: "Checks the postal code format against the delivery address country.",
                 },
                 autoGenerateLabels: {
                     label: "Generate labels automatically",
                     hint: "Creates a label immediately after a shipment is created successfully.",
                 },
+                includeReturnLabel: {
+                    label: "Include return label",
+                    hint: "Generates an additional label that can be used to return the shipment.",
+                },
+                attachPackingSlip: {
+                    label: "Attach packing slip",
+                    hint: "Adds a content summary document to the set of generated documents.",
+                },
+                labelFormat: {
+                    label: "Default label format",
+                    hint: "Document format used when a label is generated automatically.",
+                },
                 maximumWeightKg: {
                     label: "Maximum shipment weight",
                     hint: "Upper weight limit accepted by the shipment form.",
                 },
+                maximumLengthCm: {
+                    label: "Maximum length",
+                    hint: "Maximum permitted length of a single package.",
+                },
+                maximumWidthCm: {
+                    label: "Maximum width",
+                    hint: "Maximum permitted width of a single package.",
+                },
+                maximumHeightCm: {
+                    label: "Maximum height",
+                    hint: "Maximum permitted height of a single package.",
+                },
+                allowOversized: {
+                    label: "Allow oversized shipments",
+                    hint: "Allows a shipment to exceed the standard dimension limits.",
+                },
                 defaultStatus: {
                     label: "Default new shipment status",
                     hint: "Status assigned automatically after a shipment is created.",
+                },
+                defaultServiceLevel: {
+                    label: "Default service level",
+                    hint: "Service selected automatically in the new shipment form.",
+                },
+                autoAssignCourier: {
+                    label: "Assign courier automatically",
+                    hint: "Attempts to assign an available courier after the shipment is accepted.",
+                },
+                autoCloseDelivered: {
+                    label: "Close delivered shipments automatically",
+                    hint: "Completes the shipment process after successful delivery is confirmed.",
+                },
+                cancellationWindowMinutes: {
+                    label: "Shipment cancellation window",
+                    hint: "Time after creation during which a shipment can be cancelled without additional handling.",
+                },
+                pickupCutoffTime: {
+                    label: "Pickup cutoff time",
+                    hint: "Orders created later are scheduled for the next business day.",
+                },
+                notifyRecipientOnCreated: {
+                    label: "Notify recipient when created",
+                    hint: "Sends a message after a new shipment is saved successfully.",
+                },
+                notifyRecipientOnDispatched: {
+                    label: "Notify recipient when dispatched",
+                    hint: "Sends a message when the shipment leaves the origin department.",
+                },
+                notifyRecipientOnDelivered: {
+                    label: "Notify recipient when delivered",
+                    hint: "Sends a confirmation after delivery is completed.",
+                },
+                notifySenderOnException: {
+                    label: "Notify sender about exceptions",
+                    hint: "Informs the sender when shipment processing is interrupted or fails.",
+                },
+                notificationChannel: {
+                    label: "Default notification channel",
+                    hint: "Channel used when the recipient has not provided a preference.",
                 },
             },
             values: {
@@ -880,6 +968,21 @@ export const en: typeof pl = {
                 created: "Created",
                 prepared: "Prepared",
                 accepted: "Accepted",
+            },
+            labelFormats: {
+                pdfA6: "PDF A6",
+                pdfA4: "PDF A4",
+                zpl: "ZPL",
+            },
+            serviceLevels: {
+                economy: "Economy",
+                standard: "Standard",
+                express: "Express",
+            },
+            notificationChannels: {
+                sms: "SMS",
+                email: "Email",
+                both: "SMS and email",
             },
             messages: {
                 saved: "Shipment settings have been saved locally in the GUI.",

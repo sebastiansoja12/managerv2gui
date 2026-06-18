@@ -898,6 +898,21 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.courier-edit-dialog-grid-license {
+    align-items: end;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.courier-edit-dialog-grid-license [data-ui="text-field"] {
+    min-width: 0;
+}
+
+.courier-edit-dialog-grid-license [data-ui="input-label"] {
+    align-items: flex-end;
+    display: flex;
+    min-height: 2.15em;
+}
+
 .courier-edit-dialog-stack {
     display: grid;
     gap: 16px;
@@ -1498,7 +1513,32 @@
     min-width: 0;
 }
 
-.courier-details-page .couriers-detail-heading > div {
+.courier-details-title {
+    align-items: center;
+    display: flex;
+    gap: 12px;
+    min-width: 0;
+}
+
+.courier-details-title-icon {
+    align-items: center;
+    background: color-mix(in srgb, var(--primary) 14%, var(--surface-elevated));
+    border: 1px solid color-mix(in srgb, var(--primary) 34%, var(--border));
+    border-radius: 12px;
+    color: var(--primary);
+    display: inline-flex;
+    flex: 0 0 auto;
+    height: 46px;
+    justify-content: center;
+    width: 46px;
+}
+
+.courier-details-title-icon svg {
+    height: 23px;
+    width: 23px;
+}
+
+.courier-details-title > div {
     min-width: 0;
 }
 
@@ -1551,9 +1591,14 @@
     border-color: var(--border);
     border-radius: 16px;
     box-shadow: var(--shadow-panel);
+    position: static;
 }
 
 .courier-details-main-panel {
+    align-items: center;
+    display: grid;
+    gap: 22px;
+    grid-template-columns: minmax(220px, 0.42fr) minmax(0, 1fr);
     padding: 24px;
     position: relative;
 }
@@ -1568,7 +1613,7 @@
 }
 
 .couriers-person {
-    margin-bottom: 22px;
+    margin-bottom: 0;
     padding-top: 2px;
 }
 
@@ -1645,8 +1690,10 @@
 }
 
 .courier-details-summary-card {
+    align-self: stretch;
     gap: 16px;
     padding: 22px;
+    position: static;
 }
 
 .courier-summary-card-header {
@@ -1698,7 +1745,7 @@
     line-height: 1.35;
 }
 
-.courier-details-side-panel {
+.courier-details-page .courier-details-side-panel {
     background: color-mix(in srgb, var(--surface) 90%, var(--surface-elevated)) !important;
     overflow: hidden;
     position: sticky;
@@ -1727,23 +1774,39 @@
 }
 
 .courier-operational-list {
-    gap: 12px;
-    padding: 18px;
+    gap: 0;
+    padding: 8px 18px 14px;
 }
 
 .courier-operational-card {
-    background: var(--input);
-    border-color: var(--border);
-    border-radius: 12px;
-    min-height: 84px;
-    padding: 15px 14px;
+    align-items: center;
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--border);
+    border-radius: 0;
+    grid-template-columns: minmax(0, 1fr) auto;
+    justify-items: start;
+    min-height: 70px;
+    padding: 12px 2px;
+    text-align: left;
+}
+
+.courier-operational-card:last-child {
+    border-bottom: 0;
 }
 
 .courier-operational-card-header {
-    align-items: center;
+    display: contents;
 }
 
 .courier-operational-card-header dt {
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: start;
+    padding-left: 0;
+}
+
+.courier-operational-card dt {
     color: var(--muted-foreground);
     font-size: 0.68rem;
     letter-spacing: 0.08em;
@@ -1759,6 +1822,9 @@
     background: color-mix(in srgb, var(--primary) 9%, var(--surface));
     border-color: color-mix(in srgb, var(--primary) 38%, var(--border));
     color: var(--primary);
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    justify-self: end;
 }
 
 .courier-operational-card-header [data-ui="icon-button"]:hover {
@@ -1767,8 +1833,12 @@
 
 .courier-operational-card dd {
     color: var(--foreground);
+    grid-column: 1;
+    grid-row: 2;
     font-size: 0.96rem;
+    justify-self: start;
     line-height: 1.35;
+    text-align: left;
 }
 
 .courier-operational-card:first-child dd {
@@ -1869,6 +1939,10 @@
     .courier-details-layout {
         grid-template-columns: minmax(0, 1fr) 340px;
     }
+
+    .courier-details-main-panel {
+        grid-template-columns: 1fr;
+    }
 }
 
 @media (max-width: 900px) {
@@ -1876,7 +1950,7 @@
         grid-template-columns: 1fr;
     }
 
-    .courier-details-side-panel {
+    .courier-details-page .courier-details-side-panel {
         position: static;
     }
 }

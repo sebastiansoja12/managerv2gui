@@ -508,17 +508,18 @@
 }
 
 :root[data-theme] .geocoding-provider-card:hover {
-    border-color: var(--primary);
-    box-shadow: 0 10px 24px rgba(4, 17, 31, 0.16);
+    background: color-mix(in srgb, var(--surface-secondary) 46%, var(--surface));
+    border-color: var(--border-strong);
+    box-shadow: none;
 }
 
 :root[data-theme] .geocoding-provider-icon {
-    background: color-mix(in srgb, var(--primary) 16%, var(--surface));
-    color: var(--primary);
+    background: var(--surface-secondary);
+    color: var(--muted-foreground);
 }
 
 :root[data-theme] .geocoding-provider-endpoint a {
-    color: var(--primary);
+    color: var(--foreground);
 }
 
 :root[data-theme] .geocoding-provider-actions [data-ui="icon-button"] {
@@ -527,7 +528,7 @@
 }
 
 :root[data-theme] .geocoding-configuration-empty > svg {
-    color: var(--primary);
+    color: var(--muted-foreground);
 }
 
 :root[data-theme] .geocoding-configuration-dialog [data-ui="dialog-title"],
@@ -535,8 +536,12 @@
     border-color: var(--border);
 }
 
+:root[data-theme] .geocoding-configuration-dialog [data-ui="dialog-title"] {
+    background: var(--surface-elevated) !important;
+}
+
 :root[data-theme] .geocoding-configuration-dialog [data-ui="dialog-actions"] {
-    background: var(--card);
+    background: var(--surface-elevated) !important;
 }
 
 /* Shared dialog language: feature styles may add layout, but surfaces and
