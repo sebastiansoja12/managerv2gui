@@ -4,6 +4,6 @@ import App from './App';
 
 test('renders manager navigation', () => {
   render(<App />);
-  const linkElement = screen.getByText(/manager 2.0/i);
-  expect(linkElement).toBeInTheDocument();
+  const brandElements = screen.getAllByText(/managermove/i);
+  expect(brandElements.length).toBeGreaterThan(0);
 });

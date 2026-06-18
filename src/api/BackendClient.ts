@@ -1,6 +1,5 @@
 import {AxiosError, AxiosInstance, AxiosRequestConfig} from "axios";
 import {ApiErrorResponse, ApiResult, QueryParams} from "./ApiResult";
-import {ShipmentCreateRequestApi} from "../components/Shipment/dto/ShipmentDto";
 
 class BackendClient {
     private readonly http: AxiosInstance;

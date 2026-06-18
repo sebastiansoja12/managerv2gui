@@ -2,19 +2,26 @@ import React, {ChangeEvent, useMemo, useState} from "react";
 import {
     Alert,
     Button,
+    Chip,
     Snackbar,
     TextField,
     Typography,
 } from "@mui/material";
 import {
+    AccessTime,
     Add,
-    ChatBubbleOutline,
-    ContentCopy,
-    Inventory2,
-    LocalShipping,
-    LocationOn,
-    Phone,
-    Search,
+    AttachMoney,
+    Category,
+    FileDownload,
+    FilterList,
+    GridView,
+    MoreVert,
+    OpenInFull,
+    Person,
+    Route,
+    Storefront,
+    Tune,
+    ViewList,
 } from "@mui/icons-material";
 import {useNavigate} from "react-router-dom";
 import ShipmentService from "../../hooks/ShipmentService";
@@ -27,114 +34,80 @@ type Notice = {
     message: string;
 };
 
-type ShipmentCard = {
+type OrderStatus = "Pending" | "Shipping" | "Delivered" | "Returned" | "Canceled" | "On Delivery";
+
+type OrderRow = {
     id: string;
-    status: string;
-    statusTone: "orange" | "purple" | "blue" | "green";
-    estimatedTime: string;
-    estimatedDate: string;
-    senderAddress: string;
-    senderCity: string;
-    recipientAddress: string;
-    recipientCity: string;
-    recipientName: string;
-    courier: string;
-    type: string;
-    quantity: string;
-    weight: string;
-    price: string;
+    category: string;
+    merchant: string;
+    customer: string;
+    arrivalTime: string;
+    fee: string;
+    assignTo: string;
+    routeFrom: string;
+    routeTo: string;
+    status: OrderStatus;
 };
 
-const demoShipments: ShipmentCard[] = [
-    {
-        id: "657890",
-        status: "On The Way",
-        statusTone: "orange",
-        estimatedTime: "03:50 PM",
-        estimatedDate: "Dec 12, 2023",
-        senderAddress: "206 Beach Blvd",
-        senderCity: "Miami, FL 32104",
-        recipientAddress: "102 Collins Ave",
-        recipientCity: "Chicago, IL 20090",
-        recipientName: "Saddam Ali",
-        courier: "DHL Express",
-        type: "Furniture",
-        quantity: "10 Package",
-        weight: "55 kg",
-        price: "$550.99",
-    },
-    {
-        id: "540775",
-        status: "In Sorting Centre",
-        statusTone: "purple",
-        estimatedTime: "06:20 PM",
-        estimatedDate: "Dec 13, 2023",
-        senderAddress: "15 Green St",
-        senderCity: "Warsaw, PL",
-        recipientAddress: "77 Lake Road",
-        recipientCity: "Berlin, DE",
-        recipientName: "Muhammad Ali",
-        courier: "Warehouse Fleet",
-        type: "Standard",
-        quantity: "4 Package",
-        weight: "18 kg",
-        price: "$120.00",
-    },
-    {
-        id: "201998",
-        status: "In Transit",
-        statusTone: "blue",
-        estimatedTime: "11:25 AM",
-        estimatedDate: "Dec 14, 2023",
-        senderAddress: "90 Depot Way",
-        senderCity: "Poznan, PL",
-        recipientAddress: "24 Harbor Ave",
-        recipientCity: "Gdansk, PL",
-        recipientName: "Anna Nowak",
-        courier: "Internal",
-        type: "Express",
-        quantity: "1 Package",
-        weight: "8 kg",
-        price: "$49.90",
-    },
+const demoOrders: OrderRow[] = [
+    {id: "#0014ABCD", category: "Clothing", merchant: "Tov Talent", customer: "Theresa", arrivalTime: "17 May 2025", fee: "$120", assignTo: "Hawkins", routeFrom: "32 Danmondi", routeTo: "82 Subidbaz", status: "Pending"},
+    {id: "#0013ABGS", category: "Electric", merchant: "Ahshav", customer: "Devon", arrivalTime: "18 May 2025", fee: "$121.5", assignTo: "Cameron", routeFrom: "21 Savar", routeTo: "24 New Market", status: "Shipping"},
+    {id: "#0016ABLL", category: "Clothing", merchant: "Aviv Flavor", customer: "Cameron", arrivalTime: "18 May 2025", fee: "$35.61", assignTo: "Kathryn", routeFrom: "Devtakhum", routeTo: "Dhaka 1120", status: "Delivered"},
+    {id: "#0018ABAA", category: "Accessories", merchant: "Simcha Spa", customer: "Darlene", arrivalTime: "17 May 2025", fee: "$98", assignTo: "Leslie", routeFrom: "42 Dulukampa", routeTo: "82 Subidbaz", status: "Returned"},
+    {id: "#0013ABGG", category: "Electric", merchant: "Simcha Spa", customer: "Darlene", arrivalTime: "14 May 2025", fee: "$12", assignTo: "Leslie", routeFrom: "64 Handipas", routeTo: "212 Laksam", status: "Shipping"},
+    {id: "#0011ABCD", category: "Clothing", merchant: "Sababa Fashion", customer: "Brooklyn", arrivalTime: "17 May 2025", fee: "$40", assignTo: "Brooklyn", routeFrom: "92 Saklin", routeTo: "13 Kataria", status: "Delivered"},
+    {id: "#0009ABEE", category: "Accessories", merchant: "Sababa Fashion", customer: "Brooklyn", arrivalTime: "18 May 2025", fee: "$131", assignTo: "Brooklyn", routeFrom: "212 Laksam", routeTo: "10/2 Silango", status: "Pending"},
+    {id: "#0023ABGG", category: "Electric", merchant: "Little Haifa", customer: "Floyd", arrivalTime: "15 May 2025", fee: "$125", assignTo: "Warren", routeFrom: "Denin Fanvos", routeTo: "15 South gol", status: "Shipping"},
+    {id: "#0011ABVV", category: "Electric", merchant: "Little Haifa", customer: "Floyd", arrivalTime: "16 May 2025", fee: "$75", assignTo: "Warren", routeFrom: "72 Saltuki", routeTo: "64 Handipas", status: "Canceled"},
+    {id: "#0011ABXZ", category: "Clothing", merchant: "Yalla Street Food", customer: "Leslie", arrivalTime: "16 May 2025", fee: "$32.5", assignTo: "Dianne", routeFrom: "1 Bugnai", routeTo: "32/2 Railgate area", status: "Delivered"},
+    {id: "#0073ABPO", category: "Accessories", merchant: "Yalla Street Food", customer: "Leslie", arrivalTime: "16 May 2025", fee: "$10.65", assignTo: "Dianne", routeFrom: "13 Kataria", routeTo: "82 Subidbazar", status: "Delivered"},
 ];
 
-const mapShipmentToCard = (shipment: ShipmentDto): ShipmentCard => ({
-    id: shipment.shipmentId.value.toString(),
-    status: shipment.shipmentStatus || "CREATED",
-    statusTone: shipment.shipmentStatus === "DELIVERY" ? "green" : shipment.shipmentStatus === "RETURN" ? "orange" : "blue",
-    estimatedTime: "03:50 PM",
-    estimatedDate: new Date().toLocaleDateString("en-US", {
-        month: "short",
+const mapShipmentToOrder = (shipment: ShipmentDto): OrderRow => ({
+    id: `#${shipment.shipmentId.value}`,
+    category: shipment.shipmentSize || "Shipment",
+    merchant: `${shipment.sender?.firstName || "Sender"} ${shipment.sender?.lastName || ""}`.trim(),
+    customer: `${shipment.recipient?.firstName || "Recipient"} ${shipment.recipient?.lastName || ""}`.trim(),
+    arrivalTime: new Date().toLocaleDateString("en-GB", {
         day: "2-digit",
+        month: "short",
         year: "numeric",
     }),
-    senderAddress: shipment.sender?.street || "Origin address",
-    senderCity: [shipment.sender?.city, shipment.sender?.postalCode].filter(Boolean).join(", ") || "Origin city",
-    recipientAddress: shipment.recipient?.street || shipment.destination || "Destination address",
-    recipientCity: [shipment.recipient?.city, shipment.recipient?.postalCode].filter(Boolean).join(", ") || "Destination city",
-    recipientName: `${shipment.recipient?.firstName || ""} ${shipment.recipient?.lastName || ""}`.trim() || "Recipient",
-    courier: "Manager Fleet",
-    type: shipment.shipmentSize || "Standard",
-    quantity: "1 Package",
-    weight: shipment.dangerousGood?.weight ? `${shipment.dangerousGood.weight.value} ${shipment.dangerousGood.weight.unit}` : "N/A",
-    price: shipment.price ? `${shipment.price.amount} ${shipment.price.currency}` : "N/A",
+    fee: shipment.price ? `${shipment.price.amount} ${shipment.price.currency}` : "$0",
+    assignTo: "Manager Fleet",
+    routeFrom: shipment.sender?.city || "Origin",
+    routeTo: shipment.recipient?.city || shipment.destination || "Destination",
+    status: shipment.shipmentStatus === "DELIVERY"
+        ? "Delivered"
+        : shipment.shipmentStatus === "RETURN"
+            ? "Returned"
+            : shipment.shipmentStatus === "SENT"
+                ? "Shipping"
+                : shipment.shipmentStatus === "REDIRECT"
+                    ? "Canceled"
+                    : "Pending",
 });
+
+const statusClassName = (status: OrderStatus) => `tm-status tm-status-${status.toLowerCase().replace(" ", "-")}`;
+
+const avatarFor = (name: string) => name.trim().slice(0, 1).toUpperCase() || "?";
 
 const ShipmentList: React.FC = () => {
     const navigate = useNavigate();
     const [lookupTrackingNumber, setLookupTrackingNumber] = useState<string>("");
     const [lookupId, setLookupId] = useState<string>("");
     const [shipments, setShipments] = useState<ShipmentDto[]>([]);
-    const [selectedShipmentId, setSelectedShipmentId] = useState<string>("657890");
     const [notice, setNotice] = useState<Notice | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
 
-    const shipmentCards = useMemo(() => {
-        return shipments.length ? shipments.map(mapShipmentToCard) : demoShipments;
+    const orders = useMemo(() => {
+        return shipments.length ? shipments.map(mapShipmentToOrder) : demoOrders;
     }, [shipments]);
 
-    const selectedShipment = shipmentCards.find((shipment) => shipment.id === selectedShipmentId) || shipmentCards[0];
+    const totalOrders = orders.length;
+    const pendingOrders = orders.filter((order) => order.status === "Pending").length;
+    const deliveredOrders = orders.filter((order) => order.status === "Delivered").length;
+    const shippingOrders = orders.filter((order) => order.status === "Shipping" || order.status === "On Delivery").length;
 
     const numericShipmentId = (value: string): number => {
         const parsed = Number(value);
@@ -152,7 +125,6 @@ const ShipmentList: React.FC = () => {
     };
 
     const upsertShipment = (shipment: ShipmentDto) => {
-        setSelectedShipmentId(shipment.shipmentId.value.toString());
         setShipments((currentShipments) => {
             const withoutCurrent = currentShipments.filter((current) => current.shipmentId.value !== shipment.shipmentId.value);
             return [shipment].concat(withoutCurrent);
@@ -173,66 +145,113 @@ const ShipmentList: React.FC = () => {
     const findByTrackingNumber = () => runOperation(async () => {
         const response = await ShipmentService.getByTrackingNumber(lookupTrackingNumber.trim());
         upsertShipment(response.data);
-        setNotice({severity: "success", message: "Przesyłka została dodana do listy"});
+        setNotice({severity: "success", message: "Przesyłka została dodana do tabeli"});
     });
 
     const findById = () => runOperation(async () => {
-        const response = await ShipmentService.get(numericShipmentId(lookupId),
-            "");
+        const response = await ShipmentService.get(numericShipmentId(lookupId), localStorage.getItem("token") || "");
         upsertShipment(response.data);
-        setNotice({severity: "success", message: "Przesyłka została dodana do listy"});
-    });
-
-    const filteredShipments = shipmentCards.filter((shipment) => {
-        const query = lookupTrackingNumber.trim().toLowerCase();
-        if (!query) {
-            return true;
-        }
-
-        return shipment.id.toLowerCase().includes(query) || shipment.recipientName.toLowerCase().includes(query);
+        setNotice({severity: "success", message: "Przesyłka została dodana do tabeli"});
     });
 
     return (
-        <div className="shipment-dashboard">
-            <aside className="shipment-sidebar">
-                <div className="shipment-logo">S</div>
-                <div className="shipment-sidebar-links">
-                    <span className="shipment-sidebar-dot" />
-                    <span className="shipment-sidebar-dot shipment-sidebar-active"><LocalShipping fontSize="small" /></span>
-                    <span className="shipment-sidebar-dot" />
-                    <span className="shipment-sidebar-dot" />
-                </div>
-            </aside>
-
-            <main className="shipment-board">
-                <section className="shipment-list-column">
-                    <div className="shipment-list-heading">
-                        <Typography variant="h4">SHIPMENT</Typography>
+        <div className="tm-page">
+            <div className="tm-content">
+                <div className="tm-top-row">
+                    <div className="tm-page-heading">
+                        <span className="tm-heading-kicker">Manager 2.0</span>
+                        <Typography variant="h4">Przesyłki</Typography>
+                        <p>Lista przesyłek z oddziału oraz szybkie operacje na backendzie.</p>
                     </div>
-
-                    <div className="shipment-search">
-                        <Search fontSize="small" />
-                        <input
-                            aria-label="Search tracking number"
-                            placeholder="Search tracking number"
-                            value={lookupTrackingNumber}
-                            onChange={(event: ChangeEvent<HTMLInputElement>) => setLookupTrackingNumber(event.target.value)}
-                        />
-                    </div>
-
                     <Button
-                        className="shipment-add-load"
-                        fullWidth
+                        className="tm-add-new"
                         startIcon={<Add />}
                         variant="contained"
                         onClick={() => navigate("/shipments/create")}
                     >
-                        Add Load
+                        Add new
                     </Button>
+                </div>
 
-                    <div className="shipment-id-search">
+                <div className="tm-metrics-grid">
+                    <section className="tm-card tm-order-overview">
+                        <div className="tm-card-header">
+                            <Typography variant="h5">Order Overview</Typography>
+                            <div className="tm-card-actions">
+                                <Button size="small" variant="outlined">Week</Button>
+                                <button type="button"><OpenInFull fontSize="small" /></button>
+                            </div>
+                        </div>
+                        <span className="tm-muted">Total Order</span>
+                        <div className="tm-total-line">
+                            <strong>{totalOrders.toLocaleString()}</strong>
+                            <b>↑ +10.5%</b>
+                            <span>Compared to last week</span>
+                        </div>
+                        <div className="tm-order-stats">
+                            <span><i className="tm-violet" />Active Order <strong>{shippingOrders}</strong></span>
+                            <span><i className="tm-orange" />Pending Order <strong>{pendingOrders}</strong></span>
+                            <span><i className="tm-green" />On Delivery <strong>{shippingOrders}</strong></span>
+                            <span><i className="tm-blue" />Delivered <strong>{deliveredOrders}</strong></span>
+                        </div>
+                        <div className="tm-progress-bar">
+                            <span className="tm-progress-violet" />
+                            <span className="tm-progress-orange" />
+                            <span className="tm-progress-green" />
+                            <span className="tm-progress-blue" />
+                        </div>
+                    </section>
+
+                    <section className="tm-card tm-revenue-card">
+                        <div className="tm-card-header">
+                            <Typography variant="h5">Revenue</Typography>
+                            <div className="tm-card-actions">
+                                <Button size="small" variant="outlined">Last Month</Button>
+                                <button type="button"><OpenInFull fontSize="small" /></button>
+                            </div>
+                        </div>
+                        <div className="tm-revenue-layout">
+                            <div>
+                                <span className="tm-muted">Total Revenue</span>
+                                <strong>$ 116K</strong>
+                                <div className="tm-loss-line">
+                                    <b>↓ -7.2%</b>
+                                    <span>Compared to last week</span>
+                                </div>
+                            </div>
+                            <div className="tm-gauge">
+                                <span />
+                            </div>
+                        </div>
+                        <div className="tm-revenue-legend">
+                            <span><i className="tm-violet" />Online <strong>$ 74K</strong></span>
+                            <span><i className="tm-orange" />Cash <strong>42K</strong></span>
+                        </div>
+                    </section>
+                </div>
+
+                <section className="tm-card tm-orders-card">
+                    <div className="tm-orders-header">
+                        <Typography variant="h5">Orders</Typography>
+                        <div className="tm-toolbar-actions">
+                            <Button startIcon={<FilterList />} variant="outlined">Filters</Button>
+                            <Button startIcon={<Tune />} variant="outlined">Manage</Button>
+                            <Button startIcon={<FileDownload />} variant="outlined">Export</Button>
+                            <button className="tm-icon-button" type="button"><ViewList fontSize="small" /></button>
+                            <button className="tm-icon-button" type="button"><GridView fontSize="small" /></button>
+                        </div>
+                    </div>
+
+                    <div className="tm-orders-controls">
+                        <div className="tm-tabs">
+                            {["On Delivery", "Pending", "Shipping", "Delivered", "Canceled", "Returned"].map((tab, index) => (
+                                <button className={index === 0 ? "tm-tab-active" : ""} key={tab} type="button">{tab}</button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="tm-manual-load">
                         <TextField
-                            fullWidth
                             label="Shipment ID"
                             size="small"
                             type="number"
@@ -240,165 +259,81 @@ const ShipmentList: React.FC = () => {
                             onChange={(event: ChangeEvent<HTMLInputElement>) => setLookupId(event.target.value)}
                         />
                         <Button disabled={loading || !lookupId} variant="outlined" onClick={findById}>
-                            Load
+                            Load by ID
                         </Button>
+                        <TextField
+                            label="Tracking number"
+                            size="small"
+                            value={lookupTrackingNumber}
+                            onChange={(event: ChangeEvent<HTMLInputElement>) => setLookupTrackingNumber(event.target.value)}
+                        />
                         <Button disabled={loading || !lookupTrackingNumber} variant="outlined" onClick={findByTrackingNumber}>
-                            Track
+                            Load by tracking
                         </Button>
                     </div>
 
-                    <div className="shipment-card-list">
-                        {filteredShipments.map((shipment) => (
-                            <button
-                                className={`shipment-load-card${selectedShipment.id === shipment.id ? " shipment-load-card-active" : ""}`}
-                                key={shipment.id}
-                                onClick={() => setSelectedShipmentId(shipment.id)}
-                                type="button"
-                            >
-                                <div className="shipment-load-card-top">
-                                    <span className="shipment-package-icon"><Inventory2 fontSize="small" /></span>
-                                    <strong>#{shipment.id}</strong>
-                                    <span className={`shipment-status-pill shipment-status-${shipment.statusTone}`}>{shipment.status}</span>
-                                </div>
-
-                                {selectedShipment.id === shipment.id ? (
-                                    <>
-                                        <div className="shipment-load-divider" />
-                                        <div className="shipment-estimate">
-                                            <span>Estimated Time</span>
-                                            <div>
-                                                <strong>{shipment.estimatedTime.replace(" PM", "")}</strong>
-                                                <small>PM</small>
-                                                <b>{shipment.estimatedDate}</b>
-                                            </div>
-                                        </div>
-                                        <div className="shipment-progress">
-                                            <span className="shipment-progress-start" />
-                                            <span className="shipment-progress-line" />
-                                            <LocalShipping className="shipment-progress-truck" fontSize="small" />
-                                            <span className="shipment-progress-dash" />
-                                            <span className="shipment-progress-end"><LocationOn fontSize="small" /></span>
-                                        </div>
-                                        <div className="shipment-address-row">
-                                            <div>
-                                                <strong>{shipment.senderAddress}</strong>
-                                                <span>{shipment.senderCity}</span>
-                                            </div>
-                                            <div>
-                                                <strong>{shipment.recipientAddress}</strong>
-                                                <span>{shipment.recipientCity}</span>
-                                            </div>
-                                        </div>
-                                        <div className="shipment-recipient-row">
-                                            <span className="shipment-avatar">{shipment.recipientName.charAt(0)}</span>
-                                            <div>
-                                                <strong>{shipment.recipientName}</strong>
-                                                <span>Recipient</span>
-                                            </div>
-                                            <span className="shipment-round-action"><Phone fontSize="small" /></span>
-                                            <span className="shipment-round-action shipment-round-action-solid"><ChatBubbleOutline fontSize="small" /></span>
-                                        </div>
-                                    </>
-                                ) : null}
-                            </button>
-                        ))}
-                    </div>
-                </section>
-
-                <section className="shipment-detail-column">
-                    <div className="shipment-map-card">
-                        <div className="shipment-map">
-                            <span className="shipment-river shipment-river-one" />
-                            <span className="shipment-river shipment-river-two" />
-                            <span className="shipment-route" />
-                            <span className="shipment-map-pin"><LocationOn fontSize="small" /></span>
-                            <span className="shipment-map-truck"><LocalShipping fontSize="small" /></span>
-                        </div>
-                    </div>
-
-                    <div className="shipment-info-layout">
-                        <div className="shipment-info-stack">
-                            <div className="shipment-info-card">
-                                <Typography variant="h5">Shipping Info</Typography>
-                                <div className="shipment-info-grid">
-                                    <div>
-                                        <span>Tracking number</span>
-                                        <strong>#{selectedShipment.id}</strong>
-                                        <ContentCopy fontSize="inherit" />
-                                    </div>
-                                    <div>
-                                        <span>Courier</span>
-                                        <strong>{selectedShipment.courier}</strong>
-                                    </div>
-                                    <div>
-                                        <span>Type</span>
-                                        <strong>{selectedShipment.type}</strong>
-                                    </div>
-                                    <div>
-                                        <span>Quantity</span>
-                                        <strong>{selectedShipment.quantity}</strong>
-                                    </div>
-                                    <div>
-                                        <span>Weight</span>
-                                        <strong>{selectedShipment.weight}</strong>
-                                    </div>
-                                    <div>
-                                        <span>Price</span>
-                                        <strong>{selectedShipment.price}</strong>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="shipment-info-card">
-                                <Typography variant="h5">Driver Info</Typography>
-                                <div className="shipment-driver-main">
-                                    <span className="shipment-driver-avatar">M</span>
-                                    <div>
-                                        <strong>Muhammad Ali</strong>
-                                        <span>Online</span>
-                                    </div>
-                                    <span className="shipment-round-action"><Phone fontSize="small" /></span>
-                                    <span className="shipment-round-action"><ChatBubbleOutline fontSize="small" /></span>
-                                </div>
-                                <div className="shipment-info-grid shipment-driver-grid">
-                                    <div>
-                                        <span>Truck number</span>
-                                        <strong>B 3129 KVK</strong>
-                                    </div>
-                                    <div>
-                                        <span>Truck type</span>
-                                        <strong>Trailer Truck</strong>
-                                    </div>
-                                    <div>
-                                        <span>Trailer number</span>
-                                        <strong>TN-32-40-5</strong>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="shipment-route-card">
-                            <Typography variant="h5">Route Detail</Typography>
-                            {["Dec 9, 2023", "Dec 10, 2023", "Dec 11, 2023", "Dec 12, 2023"].map((date, index) => (
-                                <div className="shipment-route-step" key={date}>
-                                    <span className="shipment-route-node" />
-                                    <div>
-                                        <strong>{date}</strong>
-                                        <span>{index === 0 ? "08:00 AM" : index === 3 ? "11:25 AM" : "10:50 AM"}</span>
-                                    </div>
-                                </div>
+                    <div className="tm-table-wrap">
+                        <table className="tm-orders-table">
+                            <thead>
+                            <tr>
+                                <th><span className="tm-checkbox" /> Order ID</th>
+                                <th><Category fontSize="small" /> Category</th>
+                                <th><Storefront fontSize="small" /> Merchant</th>
+                                <th><Person fontSize="small" /> Customer</th>
+                                <th><AccessTime fontSize="small" /> Arrival time</th>
+                                <th><AttachMoney fontSize="small" /> Fee</th>
+                                <th><Person fontSize="small" /> Assign to</th>
+                                <th><Route fontSize="small" /> Route</th>
+                                <th>Status</th>
+                                <th />
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {orders.map((order) => (
+                                <tr key={order.id}>
+                                    <td><span className="tm-checkbox" /> {order.id}</td>
+                                    <td>{order.category}</td>
+                                    <td>
+                                        <span className="tm-entity">
+                                            <span className="tm-logo-avatar">{avatarFor(order.merchant)}</span>
+                                            {order.merchant}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span className="tm-entity">
+                                            <span className="tm-user-avatar">{avatarFor(order.customer)}</span>
+                                            {order.customer}
+                                        </span>
+                                    </td>
+                                    <td className="tm-muted-cell">{order.arrivalTime}</td>
+                                    <td>{order.fee}</td>
+                                    <td>
+                                        <span className="tm-entity">
+                                            <span className="tm-user-avatar tm-driver-avatar">{avatarFor(order.assignTo)}</span>
+                                            {order.assignTo}
+                                        </span>
+                                    </td>
+                                    <td className="tm-muted-cell">{order.routeFrom} <span className="tm-arrow">→</span> {order.routeTo}</td>
+                                    <td><Chip className={statusClassName(order.status)} label={order.status} size="small" /></td>
+                                    <td><MoreVert fontSize="small" /></td>
+                                </tr>
                             ))}
-                            <div className="shipment-route-step shipment-route-step-muted">
-                                <span className="shipment-route-node"><LocationOn fontSize="small" /></span>
-                                <div>
-                                    <strong>Dec 12, 2023</strong>
-                                    <span>03:50 PM</span>
-                                </div>
-                            </div>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div className="tm-table-footer">
+                        <span>Showing 1 of 5</span>
+                        <div className="tm-pagination">
+                            <button type="button">‹</button>
+                            {[1, 2, 3, 4, 5].map((page) => (
+                                <button className={page === 1 ? "tm-page-active" : ""} key={page} type="button">{page}</button>
+                            ))}
+                            <button type="button">›</button>
                         </div>
                     </div>
                 </section>
-            </main>
+            </div>
 
             <Snackbar open={Boolean(notice)} autoHideDuration={4500} onClose={() => setNotice(null)}>
                 {notice ? <Alert severity={notice.severity} onClose={() => setNotice(null)}>{notice.message}</Alert> : undefined}

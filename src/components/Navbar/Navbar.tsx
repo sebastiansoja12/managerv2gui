@@ -1,243 +1,180 @@
 import React from 'react';
 import {
-    AppBar,
-    Avatar,
-    Box,
-    Container,
-    IconButton,
-    Menu,
-    MenuItem,
-    Toolbar,
-    Tooltip,
-    Typography,
-} from '@mui/material';
-import {
-    AccountCircle,
-    AltRoute,
-    ArrowDropDown,
-    FormatListBulleted,
+    AccountBalance,
+    Add,
+    AdminPanelSettings,
+    Analytics,
     Dashboard,
-    Groups,
+    DirectionsCar,
+    ExpandMore,
+    LocalOffer,
     LocalShipping,
-    Login,
-    Logout,
-    Menu as MenuIcon,
+    NotificationsNone,
     Person,
-    PrecisionManufacturing,
+    Settings,
     SettingsSuggest,
+    ShoppingCart,
     Storefront,
+    SupportAgent,
+    TaskAlt,
 } from '@mui/icons-material';
-import {NavLink, useLocation} from 'react-router-dom';
 import './styles/main.css';
 
-type NavigationItem = {
+export type AppTabDefinition = {
     label: string;
     path: string;
+};
+
+type NavbarItem = AppTabDefinition & {
     icon: React.ElementType;
 };
 
-const navigationItems: NavigationItem[] = [
-    {label: 'Routes', path: '/routes', icon: AltRoute},
-    {label: 'Depots', path: '/depots', icon: Storefront},
-    {label: 'Software', path: '/software-configurations', icon: SettingsSuggest},
-    {label: 'Suppliers', path: '/suppliers', icon: PrecisionManufacturing},
-    {label: 'Users', path: '/users', icon: Groups},
+type NavbarMenu = {
+    label: string;
+    icon: React.ElementType;
+    items: NavbarItem[];
+};
+
+type NavbarProps = {
+    activePath: string;
+    onOpenTab: (tab: AppTabDefinition) => void;
+};
+
+const mainItems: NavbarItem[] = [
+    {label: 'Strona startowa', path: '/', icon: Dashboard},
+    {label: 'Zadania', path: '/routes', icon: TaskAlt},
+    {label: 'Analityka', path: '/analytics', icon: Analytics},
 ];
 
-const shipmentMenuItems: NavigationItem[] = [
-    {label: 'Lista przesyłek', path: '/shipments/list', icon: FormatListBulleted},
-    {label: 'Utwórz przesyłkę', path: '/shipments/create', icon: LocalShipping},
+const menus: NavbarMenu[] = [
+    {
+        label: 'Przesyłki',
+        icon: ShoppingCart,
+        items: [
+            {label: 'Lista przesyłek', path: '/shipments/list', icon: ShoppingCart},
+            {label: 'Utwórz przesyłkę', path: '/shipments/create', icon: LocalShipping},
+        ],
+    },
+    {
+        label: 'Użytkownicy',
+        icon: Person,
+        items: [
+            {label: 'Dostawcy', path: '/suppliers', icon: Storefront},
+            {label: 'Kierowcy', path: '/users', icon: Person},
+            {label: 'Pojazdy', path: '/depots', icon: DirectionsCar},
+        ],
+    },
+    {
+        label: 'Zarządzanie',
+        icon: Settings,
+        items: [
+            {label: 'Promocje', path: '/deals', icon: LocalOffer},
+            {label: 'Płatności', path: '/billing', icon: AccountBalance},
+            {label: 'Administratorzy', path: '/users', icon: AdminPanelSettings},
+            {label: 'Software', path: '/software-configurations', icon: SettingsSuggest},
+            {label: 'Support', path: '/support', icon: SupportAgent},
+        ],
+    },
 ];
 
-const isUserLoggedIn = () => localStorage.getItem('logged');
+function Navbar({activePath, onOpenTab}: NavbarProps) {
+    const [openMenu, setOpenMenu] = React.useState<string | null>(null);
+    const environment = (process.env.REACT_APP_ENVIRONMENT || process.env.NODE_ENV || "prod").toLowerCase();
 
-function ResponsiveAppBar() {
-    const location = useLocation();
-    const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
-    const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
-    const [anchorElShipments, setAnchorElShipments] = React.useState<null | HTMLElement>(null);
-
-    const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
-        setAnchorElNav(event.currentTarget);
+    const openTab = (tab: AppTabDefinition) => {
+        onOpenTab(tab);
+        setOpenMenu(null);
     };
 
-    const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
-        setAnchorElUser(event.currentTarget);
-    };
-
-    const handleOpenShipmentsMenu = (event: React.MouseEvent<HTMLElement>) => {
-        setAnchorElShipments(event.currentTarget);
-    };
-
-    const handleCloseNavMenu = () => {
-        setAnchorElNav(null);
-    };
-
-    const handleCloseUserMenu = () => {
-        setAnchorElUser(null);
-    };
-
-    const handleCloseShipmentsMenu = () => {
-        setAnchorElShipments(null);
-    };
-
-    const isShipmentsActive = location.pathname.startsWith('/shipments') || location.pathname === '/parcels';
-
-    const renderNavigationLink = (item: NavigationItem) => {
+    const renderTopItem = (item: NavbarItem) => {
         const Icon = item.icon;
+        const isActive = activePath === item.path;
 
         return (
-            <NavLink
+            <button
+                className={`top-nav-link${isActive ? ' top-nav-link-active' : ''}`}
                 key={item.path}
-                to={item.path}
-                className={({isActive}) => `navbar-link${isActive ? ' navbar-link-active' : ''}`}
+                onClick={() => openTab(item)}
+                type="button"
             >
-                <Icon className="navbar-link-icon" fontSize="small" />
+                <Icon fontSize="small" />
                 <span>{item.label}</span>
-            </NavLink>
-        );
-    };
-
-    const renderMobileMenuItem = (item: NavigationItem) => {
-        const Icon = item.icon;
-
-        return (
-            <MenuItem className="navbar-mobile-item" key={item.path} onClick={handleCloseNavMenu}>
-                <NavLink
-                    to={item.path}
-                    className={({isActive}) => `navbar-mobile-link${isActive ? ' navbar-mobile-link-active' : ''}`}
-                >
-                    <Icon fontSize="small" />
-                    <span>{item.label}</span>
-                </NavLink>
-            </MenuItem>
-        );
-    };
-
-    const renderShipmentMenuItem = (item: NavigationItem) => {
-        const Icon = item.icon;
-
-        return (
-            <MenuItem className="navbar-mobile-item" key={item.path} onClick={handleCloseShipmentsMenu}>
-                <NavLink
-                    to={item.path}
-                    className={({isActive}) => `navbar-mobile-link${isActive ? ' navbar-mobile-link-active' : ''}`}
-                >
-                    <Icon fontSize="small" />
-                    <span>{item.label}</span>
-                </NavLink>
-            </MenuItem>
+            </button>
         );
     };
 
     return (
-        <AppBar className="navbar-appbar" position="sticky" elevation={0}>
-            <Container maxWidth="xl">
-                <Toolbar className="navbar-toolbar" disableGutters>
-                    <Box className="navbar-mobile-trigger">
-                        <Tooltip title="Menu">
-                            <IconButton
-                                aria-controls="menu-appbar"
-                                aria-haspopup="true"
-                                aria-label="open navigation"
-                                className="navbar-icon-button"
-                                onClick={handleOpenNavMenu}
-                                size="large"
+        <header className="top-nav-shell" data-environment={environment}>
+            <div className="top-nav-brand">
+                <span className="top-nav-brand-icon"><ShoppingCart fontSize="small" /></span>
+                <span>Manager 2.0</span>
+            </div>
+
+            <nav className="top-nav-menu" aria-label="Main navigation">
+                {mainItems.map(renderTopItem)}
+                {menus.map((menu) => {
+                    const Icon = menu.icon;
+                    const isActive = menu.items.some((item) => activePath === item.path);
+                    const isOpen = openMenu === menu.label;
+
+                    return (
+                        <div className="top-nav-dropdown" key={menu.label}>
+                            <button
+                                className={`top-nav-link${isActive ? ' top-nav-link-active' : ''}`}
+                                onClick={() => setOpenMenu(isOpen ? null : menu.label)}
+                                type="button"
                             >
-                                <MenuIcon />
-                            </IconButton>
-                        </Tooltip>
-                        <Menu
-                            anchorEl={anchorElNav}
-                            anchorOrigin={{vertical: 'bottom', horizontal: 'left'}}
-                            className="navbar-mobile-menu"
-                            id="menu-appbar"
-                            keepMounted
-                            onClose={handleCloseNavMenu}
-                            open={Boolean(anchorElNav)}
-                            transformOrigin={{vertical: 'top', horizontal: 'left'}}
-                        >
-                            {shipmentMenuItems.map(renderMobileMenuItem)}
-                            {navigationItems.map(renderMobileMenuItem)}
-                        </Menu>
-                    </Box>
+                                <Icon fontSize="small" />
+                                <span>{menu.label}</span>
+                                <ExpandMore fontSize="small" />
+                            </button>
+                            {isOpen ? (
+                                <div className="top-nav-dropdown-panel">
+                                    {menu.items.map((item) => {
+                                        const ItemIcon = item.icon;
+                                        return (
+                                            <button
+                                                className="top-nav-dropdown-item"
+                                                key={item.path}
+                                                onClick={() => openTab(item)}
+                                                type="button"
+                                            >
+                                                <ItemIcon fontSize="small" />
+                                                <span>{item.label}</span>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            ) : null}
+                        </div>
+                    );
+                })}
+            </nav>
 
-                    <NavLink className="navbar-brand" to="/">
-                        <span className="navbar-brand-mark">
-                            <LocalShipping fontSize="small" />
-                        </span>
-                        <span className="navbar-brand-copy">
-                            <Typography className="navbar-brand-title" component="span">
-                                Manager 2.0
-                            </Typography>
-                            <Typography className="navbar-brand-subtitle" component="span">
-                                logistics console
-                            </Typography>
-                        </span>
-                    </NavLink>
-
-                    <Box className="navbar-links">
-                        <button
-                            aria-controls="shipments-menu"
-                            aria-haspopup="true"
-                            className={`navbar-link navbar-link-button${isShipmentsActive ? ' navbar-link-active' : ''}`}
-                            onClick={handleOpenShipmentsMenu}
-                            type="button"
-                        >
-                            <LocalShipping className="navbar-link-icon" fontSize="small" />
-                            <span>Shipments</span>
-                            <ArrowDropDown className="navbar-link-icon" fontSize="small" />
-                        </button>
-                        <Menu
-                            anchorEl={anchorElShipments}
-                            anchorOrigin={{vertical: 'bottom', horizontal: 'left'}}
-                            className="navbar-shipments-menu"
-                            id="shipments-menu"
-                            keepMounted
-                            onClose={handleCloseShipmentsMenu}
-                            open={Boolean(anchorElShipments)}
-                            transformOrigin={{vertical: 'top', horizontal: 'left'}}
-                        >
-                            {shipmentMenuItems.map(renderShipmentMenuItem)}
-                        </Menu>
-                        {navigationItems.map(renderNavigationLink)}
-                    </Box>
-
-                    <Box className="navbar-user">
-                        <Tooltip title="Account">
-                            <IconButton className="navbar-avatar-button" onClick={handleOpenUserMenu}>
-                                <Avatar className="navbar-avatar" alt="User Avatar">
-                                    <Person fontSize="small" />
-                                </Avatar>
-                            </IconButton>
-                        </Tooltip>
-                        <Menu
-                            anchorEl={anchorElUser}
-                            anchorOrigin={{vertical: 'bottom', horizontal: 'right'}}
-                            className="navbar-user-menu"
-                            keepMounted
-                            onClose={handleCloseUserMenu}
-                            open={Boolean(anchorElUser)}
-                            transformOrigin={{vertical: 'top', horizontal: 'right'}}
-                        >
-                            <MenuItem className="navbar-user-item" onClick={handleCloseUserMenu}>
-                                <AccountCircle fontSize="small" />
-                                <span>Profile</span>
-                            </MenuItem>
-                            <MenuItem className="navbar-user-item" onClick={handleCloseUserMenu}>
-                                <Dashboard fontSize="small" />
-                                <span>Dashboard</span>
-                            </MenuItem>
-                            <MenuItem className="navbar-user-item" onClick={handleCloseUserMenu}>
-                                {isUserLoggedIn() ? <Logout fontSize="small" /> : <Login fontSize="small" />}
-                                <span>{isUserLoggedIn() ? 'Logout' : 'Log in'}</span>
-                            </MenuItem>
-                        </Menu>
-                    </Box>
-                </Toolbar>
-            </Container>
-        </AppBar>
+            <div className="top-nav-actions">
+                <span className="top-nav-env">{environment}</span>
+                <button
+                    className="top-nav-primary-action"
+                    onClick={() => openTab({label: "Utwórz przesyłkę", path: "/shipments/create"})}
+                    type="button"
+                >
+                    <Add fontSize="small" />
+                    <span>Dodaj</span>
+                </button>
+                <button className="top-nav-icon-button" type="button" aria-label="Powiadomienia">
+                    <NotificationsNone fontSize="small" />
+                </button>
+                <button className="top-nav-user" type="button">
+                    <span className="top-nav-user-avatar"><Person fontSize="small" /></span>
+                    <span>
+                        <strong>Admin</strong>
+                        <small>S. ADMIN</small>
+                    </span>
+                    <ExpandMore fontSize="small" />
+                </button>
+            </div>
+        </header>
     );
 }
 
-export default ResponsiveAppBar;
+export default Navbar;
