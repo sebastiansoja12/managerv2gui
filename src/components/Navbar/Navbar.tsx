@@ -21,7 +21,6 @@ import {
 import {getAppEnvironment} from "../../config/appEnvironment";
 import {AppTabDefinition} from "../AppShell/types";
 import './styles/main.css';
-import {getAppVersion} from "../../config/appConfig";
 
 type NavbarItem = AppTabDefinition & {
     icon: React.ElementType;

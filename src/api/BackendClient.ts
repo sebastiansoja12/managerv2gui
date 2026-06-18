@@ -38,6 +38,19 @@ class BackendClient {
         });
     }
 
+    async delete<TRequest, TResponse>(
+        url: string,
+        data: TRequest,
+        config?: AxiosRequestConfig
+    ): Promise<ApiResult<TResponse>> {
+        return this.request<TResponse>({
+            method: "DELETE",
+            url,
+            data,
+            ...config,
+        });
+    }
+
     async put<TRequest, TResponse>(url: string, data?: TRequest, params?: QueryParams): Promise<ApiResult<TResponse>> {
         return this.request<TResponse>({
             method: "PUT",
