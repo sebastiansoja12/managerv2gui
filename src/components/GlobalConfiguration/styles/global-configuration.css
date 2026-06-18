@@ -400,6 +400,155 @@
     min-width: 0;
 }
 
+.shipment-tracking-rule-summary {
+    display: grid;
+    gap: 8px;
+    min-width: 0;
+}
+
+.shipment-tracking-rule-summary code {
+    background: var(--input);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    color: var(--foreground);
+    display: block;
+    font-size: 0.72rem;
+    overflow: hidden;
+    padding: 7px 9px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.shipment-tracking-rule-summary [data-ui="button"] {
+    background: transparent;
+    border-color: var(--border-strong);
+    border-radius: 8px;
+    color: var(--foreground);
+    font-size: 0.75rem;
+    min-height: 36px;
+    padding-inline: 10px;
+    text-transform: none;
+}
+
+[data-ui="dialog"].shipment-tracking-number-dialog {
+    max-width: 680px;
+}
+
+.shipment-tracking-number-dialog [data-ui="dialog-title"] {
+    background: var(--surface-elevated) !important;
+    border-color: var(--border);
+    color: var(--foreground);
+    font-size: 1.15rem;
+    letter-spacing: -0.015em;
+    padding: 20px 22px;
+}
+
+.shipment-tracking-number-dialog [data-ui="dialog-content"] {
+    background: var(--surface) !important;
+    padding: 20px 22px 24px;
+}
+
+.shipment-tracking-number-description {
+    color: var(--muted-foreground);
+    font-size: 0.84rem;
+    line-height: 1.55;
+    margin: 0 0 18px;
+}
+
+.shipment-tracking-number-fields {
+    display: grid;
+    gap: 14px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.shipment-tracking-number-fields [data-ui="input-label"] {
+    color: var(--muted-foreground);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.shipment-tracking-number-option {
+    align-items: center;
+    background: color-mix(in srgb, var(--surface-secondary) 52%, var(--surface));
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    display: flex;
+    gap: 14px;
+    justify-content: space-between;
+    min-height: 70px;
+    padding: 11px 13px;
+}
+
+.shipment-tracking-number-option strong,
+.shipment-tracking-number-option small {
+    display: block;
+}
+
+.shipment-tracking-number-option strong {
+    color: var(--foreground);
+    font-size: 0.78rem;
+}
+
+.shipment-tracking-number-option small {
+    color: var(--muted-foreground);
+    font-size: 0.69rem;
+    line-height: 1.4;
+    margin-top: 3px;
+}
+
+.shipment-tracking-number-option [data-ui="switch"] > input:checked + span {
+    background: color-mix(in srgb, var(--primary) 52%, var(--muted)) !important;
+}
+
+.shipment-tracking-number-preview {
+    background: color-mix(in srgb, var(--surface-secondary) 54%, var(--surface));
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    display: grid;
+    gap: 7px;
+    margin-top: 16px;
+    padding: 13px 15px;
+}
+
+.shipment-tracking-number-preview span {
+    color: var(--muted-foreground);
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.shipment-tracking-number-preview code {
+    color: var(--foreground);
+    font-size: 0.95rem;
+    font-weight: 800;
+    overflow-wrap: anywhere;
+}
+
+.shipment-tracking-number-dialog [data-ui="dialog-actions"] {
+    background: var(--surface-elevated) !important;
+    border-color: var(--border);
+    gap: 10px;
+    padding: 16px 22px 18px;
+}
+
+.shipment-tracking-number-dialog [data-ui="dialog-actions"] [data-ui="button"] {
+    background: transparent;
+    border-color: var(--border-strong);
+    border-radius: 9px;
+    color: var(--foreground);
+    font-weight: 800;
+    min-height: 40px;
+    text-transform: none;
+}
+
+.shipment-tracking-number-dialog [data-ui="dialog-actions"] .shipment-tracking-number-save {
+    background: color-mix(in srgb, var(--primary) 11%, var(--surface-elevated));
+    border-color: color-mix(in srgb, var(--primary) 34%, var(--border));
+}
+
 @media (max-width: 1060px) {
     .shipment-configuration-grid {
         grid-template-columns: 1fr;
@@ -431,6 +580,10 @@
 
     .shipment-setting-row [data-ui="form-control-label"] {
         justify-self: start;
+    }
+
+    .shipment-tracking-number-fields {
+        grid-template-columns: 1fr;
     }
 }
 

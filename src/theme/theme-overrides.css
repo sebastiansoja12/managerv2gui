@@ -544,6 +544,12 @@
     background: var(--surface-elevated) !important;
 }
 
+:root[data-theme] .shipment-tracking-number-dialog [data-ui="dialog-title"],
+:root[data-theme] .shipment-tracking-number-dialog [data-ui="dialog-actions"] {
+    background: var(--surface-elevated) !important;
+    border-color: var(--border) !important;
+}
+
 /* Shared dialog language: feature styles may add layout, but surfaces and
  * controls always follow the active theme instead of legacy light colors. */
 :root[data-theme] [data-ui="dialog-backdrop"] {

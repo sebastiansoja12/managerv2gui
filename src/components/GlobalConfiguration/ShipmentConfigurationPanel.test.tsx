@@ -34,4 +34,35 @@ describe("ShipmentConfigurationPanel", () => {
         expect(storedConfiguration.validateAddressData).toBe(false);
         expect(screen.getByText(pl.globalConfiguration.shipmentConfiguration.messages.saved)).toBeInTheDocument();
     });
+
+    it("configures and stores the tracking number rule locally", () => {
+        render(<ShipmentConfigurationPanel />);
+
+        fireEvent.click(screen.getByRole("button", {
+            name: pl.globalConfiguration.shipmentConfiguration.trackingNumber.configure,
+        }));
+
+        expect(screen.getByRole("dialog")).toBeInTheDocument();
+        expect(screen.getByText(
+            pl.globalConfiguration.shipmentConfiguration.trackingNumber.title,
+        )).toBeInTheDocument();
+
+        fireEvent.change(screen.getByLabelText(
+            pl.globalConfiguration.shipmentConfiguration.trackingNumber.keyLabel,
+        ), {target: {value: "CLIENT"}});
+        fireEvent.change(screen.getByLabelText(
+            pl.globalConfiguration.shipmentConfiguration.trackingNumber.sourceLabel,
+        ), {target: {value: "shipmentId"}});
+        fireEvent.click(screen.getByRole("button", {
+            name: pl.globalConfiguration.shipmentConfiguration.trackingNumber.save,
+        }));
+
+        const storedConfiguration = JSON.parse(
+            window.localStorage.getItem(SHIPMENT_CONFIGURATION_STORAGE_KEY) || "{}",
+        );
+        expect(storedConfiguration.trackingNumberKey).toBe("CLIENT");
+        expect(storedConfiguration.trackingNumberSource).toBe("shipmentId");
+        expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+        expect(screen.getByText("CLIENT-20260814-582104")).toBeInTheDocument();
+    });
 });
