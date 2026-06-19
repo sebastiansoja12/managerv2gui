@@ -76,9 +76,14 @@ export interface ShipmentDto {
     shipmentRelatedId?: ShipmentIdDto | null;
     shipmentPriority: ShipmentPriorityDto;
     price: MoneyApi;
+    trackingNumber: TrackingNumberDto;
     locked: boolean;
     signature?: SignatureDto | null;
     dangerousGood?: DangerousGoodApi | null;
+}
+
+export interface TrackingNumberDto {
+    value: string;
 }
 
 export interface ShipmentCreateRequestApi {
@@ -116,6 +121,25 @@ export interface ShipmentUpdateRequestApi {
 export interface ShipmentStatusRequestApi {
     shipmentId: ShipmentIdDto;
     shipmentStatus: ShipmentStatusDto;
+}
+
+export interface ShipmentSearchRequestApi {
+    shipmentId?: number | null;
+    trackingNumber?: string | null;
+    shipmentStatuses?: ShipmentStatusDto[];
+    shipmentSizes?: ShipmentSizeDto[];
+    shipmentPriorities?: ShipmentPriorityDto[];
+    senderName?: string | null;
+    recipientName?: string | null;
+    destination?: string | null;
+    minPrice?: number | null;
+    maxPrice?: number | null;
+    currency?: string | null;
+    locked?: boolean | null;
+    createdFrom?: string | null;
+    createdTo?: string | null;
+    page?: number;
+    size?: number;
 }
 
 export interface SignatureChangeRequestApi {

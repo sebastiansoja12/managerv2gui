@@ -1,0 +1,203 @@
+.departments-page {
+    color: #111827;
+    margin: 0 auto;
+    max-width: 1520px;
+    padding: 28px;
+    text-align: left;
+}
+
+.departments-header {
+    align-items: flex-end;
+    border-bottom: 1px solid #e5e7eb;
+    display: grid;
+    gap: 20px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    margin-bottom: 18px;
+    padding-bottom: 22px;
+}
+
+.departments-heading {
+    border-left: 4px solid #2563eb;
+    padding-left: 16px;
+}
+
+.departments-kicker {
+    color: #2563eb;
+    display: inline-flex;
+    font-size: 0.76rem;
+    font-weight: 900;
+    letter-spacing: 0;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+
+.departments-heading .MuiTypography-root {
+    color: #0f172a;
+    font-size: 2rem;
+    font-weight: 900;
+    line-height: 1.15;
+    margin: 0;
+}
+
+.departments-heading p {
+    color: #64748b;
+    font-size: 0.98rem;
+    font-weight: 650;
+    margin: 8px 0 0;
+    max-width: 760px;
+}
+
+.departments-stats {
+    display: grid;
+    gap: 10px;
+    grid-template-columns: repeat(3, minmax(130px, 1fr));
+}
+
+.departments-stats div {
+    align-items: center;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    display: grid;
+    gap: 4px;
+    grid-template-columns: auto 1fr;
+    min-height: 68px;
+    padding: 12px;
+}
+
+.departments-stats svg {
+    color: #1d4ed8;
+    grid-row: span 2;
+}
+
+.departments-stats span {
+    color: #64748b;
+    font-size: 0.78rem;
+    font-weight: 800;
+}
+
+.departments-stats strong {
+    color: #0f172a;
+    font-size: 1.2rem;
+    font-weight: 950;
+}
+
+.departments-table-panel {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.05);
+    overflow: hidden;
+}
+
+.departments-table-header {
+    align-items: center;
+    border-bottom: 1px solid #eef1f4;
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 18px 22px;
+}
+
+.departments-table-header .MuiTypography-root {
+    color: #111827;
+    font-size: 1.15rem;
+    font-weight: 900;
+}
+
+.departments-table-header .MuiButton-root {
+    border-radius: 8px;
+    font-weight: 800;
+    text-transform: none;
+}
+
+.departments-loader {
+    align-items: center;
+    color: #64748b;
+    display: flex;
+    font-weight: 800;
+    gap: 12px;
+    justify-content: center;
+    min-height: 260px;
+}
+
+.departments-table-wrap {
+    overflow-x: auto;
+    width: 100%;
+}
+
+.departments-table {
+    border-collapse: collapse;
+    min-width: 1480px;
+    width: 100%;
+}
+
+.departments-table th,
+.departments-table td {
+    border-right: 1px solid #eef1f4;
+    border-top: 1px solid #eef1f4;
+    padding: 12px 14px;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.departments-table th {
+    align-items: center;
+    background: #fbfcfd;
+    color: #5e6570;
+    font-size: 0.9rem;
+    font-weight: 800;
+    gap: 8px;
+}
+
+.departments-table th svg {
+    color: #77808c;
+    margin-right: 6px;
+    vertical-align: middle;
+}
+
+.departments-table td {
+    color: #101827;
+    font-size: 0.92rem;
+    font-weight: 650;
+}
+
+.departments-table tbody tr:hover td {
+    background: #f8fbff;
+}
+
+.departments-table td:first-child strong {
+    background: #eaf2ff;
+    border-radius: 6px;
+    color: #1d4ed8;
+    display: inline-flex;
+    font-weight: 900;
+    padding: 4px 8px;
+}
+
+.departments-empty-row {
+    color: #64748b !important;
+    font-weight: 800 !important;
+    padding: 28px 14px !important;
+    text-align: center !important;
+}
+
+@media (max-width: 980px) {
+    .departments-page {
+        padding: 16px;
+    }
+
+    .departments-header {
+        align-items: stretch;
+        grid-template-columns: 1fr;
+    }
+
+    .departments-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .departments-table-header {
+        align-items: stretch;
+        flex-direction: column;
+    }
+}

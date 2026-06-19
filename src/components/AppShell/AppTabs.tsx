@@ -1,4 +1,5 @@
 import React from "react";
+import pl from "../../i18n/pl";
 import {AppTabDefinition} from "./types";
 
 type AppTabsProps = {
@@ -35,7 +36,7 @@ function AppTabs({activePath, openTabs, onCloseAllTabs, onCloseTab, onSelectTab}
             ))}
             <div className="app-tab-actions">
                 <button className="app-close-tabs-button" onClick={onCloseAllTabs} type="button">
-                    Zamknij wszystkie
+                    {pl.app.tabs.closeAll}
                 </button>
             </div>
         </div>

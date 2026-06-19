@@ -1196,12 +1196,14 @@
 }
 
 .tm-table-wrap {
-    overflow-x: auto;
+    overflow-x: visible;
+    width: 100%;
 }
 
 .tm-orders-table {
     border-collapse: collapse;
-    min-width: 1180px;
+    min-width: 0;
+    table-layout: fixed;
     width: 100%;
 }
 
@@ -1209,14 +1211,64 @@
 .tm-orders-table td {
     border-right: 1px solid #eef1f4;
     border-top: 1px solid #eef1f4;
-    padding: 13px 14px;
+    overflow: hidden;
+    padding: 10px 8px;
     text-align: left;
+    text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.tm-orders-table th:nth-child(1),
+.tm-orders-table td:nth-child(1) {
+    width: 8.5%;
+}
+
+.tm-orders-table th:nth-child(2),
+.tm-orders-table td:nth-child(2) {
+    width: 8%;
+}
+
+.tm-orders-table th:nth-child(3),
+.tm-orders-table td:nth-child(3),
+.tm-orders-table th:nth-child(4),
+.tm-orders-table td:nth-child(4) {
+    width: 13%;
+}
+
+.tm-orders-table th:nth-child(5),
+.tm-orders-table td:nth-child(5) {
+    width: 10%;
+}
+
+.tm-orders-table th:nth-child(6),
+.tm-orders-table td:nth-child(6) {
+    width: 7%;
+}
+
+.tm-orders-table th:nth-child(7),
+.tm-orders-table td:nth-child(7) {
+    width: 11.5%;
+}
+
+.tm-orders-table th:nth-child(8),
+.tm-orders-table td:nth-child(8) {
+    width: 14%;
+}
+
+.tm-orders-table th:nth-child(9),
+.tm-orders-table td:nth-child(9) {
+    width: 9%;
+}
+
+.tm-orders-table th:nth-child(10),
+.tm-orders-table td:nth-child(10) {
+    width: 42px;
 }
 
 .tm-orders-table th {
     background: #fbfcfd;
     color: #5e6570;
+    font-size: 0.9rem;
     font-weight: 760;
 }
 
@@ -1228,7 +1280,15 @@
 
 .tm-orders-table td {
     color: #101827;
+    font-size: 0.92rem;
     font-weight: 650;
+}
+
+.tm-orders-table .tm-empty-row {
+    color: #64748b;
+    font-weight: 700;
+    padding: 28px 14px;
+    text-align: center;
 }
 
 .tm-muted-cell {
@@ -1241,7 +1301,7 @@
     border-radius: 5px;
     display: inline-block;
     height: 16px;
-    margin-right: 12px;
+    margin-right: 6px;
     vertical-align: middle;
     width: 16px;
 }
@@ -1249,7 +1309,15 @@
 .tm-entity {
     align-items: center;
     display: inline-flex;
-    gap: 10px;
+    gap: 8px;
+    max-width: 100%;
+    min-width: 0;
+}
+
+.tm-entity span:last-child {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .tm-logo-avatar,
@@ -1260,9 +1328,10 @@
     display: inline-flex;
     font-size: 0.72rem;
     font-weight: 900;
-    height: 26px;
+    flex: 0 0 24px;
+    height: 24px;
     justify-content: center;
-    width: 26px;
+    width: 24px;
 }
 
 .tm-logo-avatar {
@@ -1284,7 +1353,78 @@
 
 .tm-status.MuiChip-root {
     border-radius: 6px;
+    max-width: 100%;
     font-weight: 850;
+}
+
+.tm-status .MuiChip-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tm-clickable-row {
+    cursor: pointer;
+}
+
+.tm-clickable-row:hover td {
+    background: #f8fbff;
+}
+
+.tm-actions-cell {
+    overflow: visible !important;
+    padding: 0 4px !important;
+    text-align: center !important;
+}
+
+.tm-row-action-button {
+    align-items: center;
+    background: transparent;
+    border: 0;
+    border-radius: 8px;
+    color: #111827;
+    cursor: pointer;
+    display: inline-flex;
+    height: 32px;
+    justify-content: center;
+    transition: background 160ms ease, color 160ms ease;
+    width: 32px;
+}
+
+.tm-row-action-button:hover,
+.tm-row-action-button:focus-visible {
+    background: #eaf2ff;
+    color: #1d4ed8;
+    outline: none;
+}
+
+.tm-status-created {
+    background: #eaf2ff !important;
+    color: #1d4ed8 !important;
+}
+
+.tm-status-reroute {
+    background: #f4e9ff !important;
+    color: #6d28d9 !important;
+}
+
+.tm-status-sent {
+    background: #e0f2fe !important;
+    color: #0369a1 !important;
+}
+
+.tm-status-delivery {
+    background: #dcfce7 !important;
+    color: #047857 !important;
+}
+
+.tm-status-return {
+    background: #fff7ed !important;
+    color: #c2410c !important;
+}
+
+.tm-status-redirect {
+    background: #f1f5f9 !important;
+    color: #334155 !important;
 }
 
 .tm-status-pending {
@@ -1329,6 +1469,302 @@
     font-weight: 900;
 }
 
+.shipment-details-subtitle {
+    color: #64748b;
+    display: block;
+    font-size: 0.86rem;
+    font-weight: 700;
+    margin-top: 4px;
+}
+
+.shipment-details-summary {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin-bottom: 18px;
+}
+
+.shipment-details-summary div {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 12px;
+}
+
+.shipment-details-summary span {
+    color: #64748b;
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.shipment-details-summary strong {
+    color: #111827;
+    display: block;
+    font-size: 0.94rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.shipment-details-section {
+    border-top: 1px solid #eef1f4;
+    margin-top: 16px;
+    padding-top: 16px;
+}
+
+.shipment-details-section-header {
+    align-items: center;
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.shipment-details-section-header .MuiTypography-root {
+    font-size: 1rem;
+    font-weight: 900;
+}
+
+.shipment-details-grid {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.shipment-details-wide {
+    grid-column: 1 / -1;
+}
+
+.shipment-edit-header-actions {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.shipment-edit-header-actions .MuiButton-root {
+    border-radius: 8px;
+    font-weight: 800;
+    min-height: 40px;
+    text-transform: none;
+}
+
+.shipment-edit-panel {
+    display: grid;
+    gap: 18px;
+}
+
+.shipment-edit-summary {
+    margin-bottom: 0;
+}
+
+.shipment-edit-section {
+    border-top: 1px solid #eef1f4;
+    padding-top: 18px;
+}
+
+.shipment-edit-section-header {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.shipment-edit-section-header .MuiTypography-root {
+    color: #111827;
+    font-size: 1rem;
+    font-weight: 900;
+}
+
+.shipment-edit-loader {
+    align-items: center;
+    color: #64748b;
+    display: flex;
+    font-weight: 800;
+    gap: 12px;
+    justify-content: center;
+    min-height: 280px;
+}
+
+.shipment-cc-shell {
+    max-width: 1680px;
+}
+
+.shipment-cc-layout {
+    align-items: start;
+    display: grid;
+    gap: 18px;
+    grid-template-columns: minmax(0, 1fr) 380px;
+}
+
+.shipment-cc-side {
+    align-self: start;
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 150px);
+    overflow: hidden;
+    position: sticky;
+    top: 88px;
+}
+
+.shipment-cc-side-header {
+    align-items: center;
+    border-bottom: 1px solid #eef1f4;
+    display: flex;
+    justify-content: space-between;
+    margin: -4px -4px 12px;
+    padding: 0 0 12px;
+}
+
+.shipment-cc-side-header .MuiTypography-root {
+    color: #111827;
+    font-size: 1rem;
+    font-weight: 900;
+}
+
+.shipment-cc-side-header span {
+    color: #64748b;
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 800;
+    margin-top: 2px;
+}
+
+.shipment-cc-side-empty {
+    align-items: center;
+    color: #64748b;
+    display: flex;
+    flex-direction: column;
+    font-weight: 800;
+    gap: 10px;
+    justify-content: center;
+    min-height: 220px;
+    text-align: center;
+}
+
+.shipment-cc-timeline {
+    overflow: auto;
+    padding: 4px 2px 4px 14px;
+}
+
+.shipment-cc-timeline-item {
+    border-left: 2px solid #dbe7f8;
+    padding: 0 0 18px 18px;
+    position: relative;
+}
+
+.shipment-cc-timeline-item:last-child {
+    padding-bottom: 2px;
+}
+
+.shipment-cc-timeline-dot {
+    background: #2563eb;
+    border: 4px solid #dbeafe;
+    border-radius: 999px;
+    height: 14px;
+    left: -8px;
+    position: absolute;
+    top: 2px;
+    width: 14px;
+}
+
+.shipment-cc-timeline-top {
+    display: flex;
+    gap: 10px;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.shipment-cc-timeline-top strong {
+    color: #111827;
+    font-size: 0.9rem;
+    font-weight: 900;
+}
+
+.shipment-cc-timeline-top span {
+    color: #64748b;
+    font-size: 0.78rem;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.shipment-cc-timeline-item p {
+    color: #475569;
+    font-size: 0.86rem;
+    margin: 8px 0;
+}
+
+.shipment-cc-timeline-item dl {
+    display: grid;
+    gap: 6px;
+    margin: 0;
+}
+
+.shipment-cc-timeline-item dl div {
+    display: flex;
+    gap: 10px;
+    justify-content: space-between;
+}
+
+.shipment-cc-timeline-item dt {
+    color: #64748b;
+    font-size: 0.75rem;
+    font-weight: 800;
+}
+
+.shipment-cc-timeline-item dd {
+    color: #111827;
+    font-size: 0.78rem;
+    font-weight: 850;
+    margin: 0;
+    text-align: right;
+}
+
+.shipment-cc-courier {
+    align-items: center;
+    background: #f8fbff;
+    border: 1px solid #dbeafe;
+    border-radius: 8px;
+    display: flex;
+    gap: 14px;
+    padding: 16px;
+}
+
+.shipment-cc-courier-icon {
+    align-items: center;
+    background: #1d4ed8;
+    border-radius: 8px;
+    color: #ffffff;
+    display: flex;
+    flex: 0 0 44px;
+    height: 44px;
+    justify-content: center;
+    width: 44px;
+}
+
+.shipment-cc-courier span {
+    color: #64748b;
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 800;
+    margin-bottom: 4px;
+}
+
+.shipment-cc-courier strong {
+    color: #111827;
+    display: block;
+    font-size: 1.05rem;
+    font-weight: 900;
+}
+
+.shipment-cc-courier p {
+    color: #475569;
+    font-size: 0.86rem;
+    margin: 4px 0 0;
+}
+
 @media (max-width: 1100px) {
     .shipments-grid {
         grid-template-columns: 1fr;
@@ -1340,6 +1776,15 @@
 }
 
 @media (max-width: 1180px) {
+    .shipment-cc-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .shipment-cc-side {
+        max-height: none;
+        position: static;
+    }
+
     .shipment-dashboard {
         grid-template-columns: 1fr;
     }
@@ -1459,5 +1904,21 @@
     .tm-tabs,
     .tm-manual-load {
         flex-wrap: wrap;
+    }
+
+    .shipment-details-summary,
+    .shipment-details-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .shipment-details-section-header,
+    .shipment-edit-header-actions,
+    .shipment-edit-section-header {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .shipment-edit-header-actions .MuiButton-root {
+        width: 100%;
     }
 }

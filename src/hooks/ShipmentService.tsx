@@ -10,6 +10,7 @@ import {
     ShipmentDto,
     ShipmentResponseInformation,
     ShipmentReturnRequestApi,
+    ShipmentSearchRequestApi,
     ShipmentStatusRequestApi,
     ShipmentTypeDto,
     ShipmentUpdateRequestApi,
@@ -26,8 +27,34 @@ const create = (data: ShipmentCreateRequestApi) => {
     );
 };
 
-const get = (shipmentId: number) => {
-    return client.get<ShipmentDto>(`/shipments/${shipmentId}`);
+const search = (data: ShipmentSearchRequestApi) => {
+    return client.post<ShipmentSearchRequestApi, ShipmentDto[]>("/shipments/search", data);
+};
+
+const get = async (shipmentId: number) => {
+    try {
+        return await client.get<ShipmentDto>(`/shipments/${shipmentId}`);
+    } catch (error) {
+        const apiError = error as { status?: number };
+        if (apiError.status !== 404) {
+            throw error;
+        }
+
+        const response = await search({
+            shipmentId,
+            page: 0,
+            size: 1,
+        });
+        const shipment = response.data[0];
+        if (!shipment) {
+            throw error;
+        }
+
+        return {
+            data: shipment,
+            status: response.status,
+        };
+    }
 };
 
 const getByTrackingNumber = (trackingNumber: string) => {
@@ -83,6 +110,7 @@ const changeShipmentType = (shipmentId: number, shipmentType: ShipmentTypeDto) =
 const ShipmentService = {
     create,
     get,
+    search,
     getByTrackingNumber,
     update,
     returnShipment,
