@@ -342,6 +342,7 @@ export const pl = {
                 REFRESH_TOKEN: "Token odświeżający",
             },
             geocodingProviders: {
+                GEOAPIFY: "Geoapify",
                 POSITION_STACK: "PositionStack",
             },
             featuresTitle: "Funkcje operatora",
@@ -1044,6 +1045,8 @@ export const pl = {
             addFirst: "Dodaj pierwszego providera",
             edit: "Edytuj",
             delete: "Usuń",
+            setDefault: "Ustaw jako domyślnego",
+            defaultAlreadySelected: "Provider jest domyślny",
             loading: "Ładowanie konfiguracji geolokalizacji...",
             emptyTitle: "Brak skonfigurowanych providerów",
             emptyDescription: "Dodaj providera, aby uruchomić geokodowanie adresów.",
@@ -1055,7 +1058,11 @@ export const pl = {
                 apiAddress: "Adres API",
             },
             providers: {
+                geoapify: "Geoapify",
                 positionStack: "Positionstack",
+            },
+            providerApis: {
+                geocodingApi: "Geocoding API",
             },
             fields: {
                 apiUserName: "Nazwa użytkownika API",
@@ -1066,6 +1073,7 @@ export const pl = {
                 refreshToken: "Token odświeżający",
             },
             status: {
+                defaultProvider: "Domyślny",
                 enabled: "Aktywny",
                 disabled: "Nieaktywny",
             },
@@ -1079,6 +1087,8 @@ export const pl = {
                 urlLabel: "Adres API",
                 enabledLabel: "Konfiguracja aktywna",
                 enabledHint: "Provider będzie dostępny dla procesów geokodowania.",
+                defaultLabel: "Provider domyślny",
+                defaultHint: "Ten provider będzie używany do pobierania współrzędnych.",
                 save: "Dodaj konfigurację",
                 saving: "Zapisywanie...",
                 update: "Zapisz zmiany",
@@ -1098,6 +1108,10 @@ export const pl = {
                 updateSuccess: "Konfiguracja geolokalizacji została zaktualizowana",
                 deleteError: "Nie udało się usunąć konfiguracji geolokalizacji",
                 deleteSuccess: "Konfiguracja geolokalizacji została usunięta",
+                defaultProviderError: "Nie udało się ustawić domyślnego providera",
+                defaultProviderSuccess: "Domyślny provider został ustawiony",
+                defaultProviderRequired: "Wybierz aktywnego providera domyślnego przed zapisem",
+                defaultProviderRequiredBeforeDelete: "Najpierw ustaw innego aktywnego providera jako domyślnego",
             },
         },
         messages: {

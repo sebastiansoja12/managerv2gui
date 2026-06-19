@@ -52,9 +52,9 @@ const sensitiveGeocodingFields = new Set<GeocodingConfigurationField>([
     "REFRESH_TOKEN",
 ]);
 
-const getProviderLabel = (provider: string) => provider === "POSITION_STACK"
-    ? pl.superAdmin.editor.geocodingProviders.POSITION_STACK
-    : provider.toLowerCase().split("_").map((part) => (
+const getProviderLabel = (provider: string) => (
+    pl.superAdmin.editor.geocodingProviders as Record<string, string>
+)[provider] || provider.toLowerCase().split("_").map((part) => (
         part.charAt(0).toUpperCase() + part.slice(1)
     )).join(" ");
 

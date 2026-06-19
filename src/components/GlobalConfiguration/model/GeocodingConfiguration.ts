@@ -8,6 +8,8 @@ export type GeocodingConfigurationField =
     | "ACCESS_TOKEN"
     | "REFRESH_TOKEN";
 
+export type GeocodingProviderApi = "GEOCODING_API";
+
 export type GeocodingConfigurationId = {
     value: string;
 };
@@ -16,6 +18,7 @@ export type GeocodingProviderDefinition = {
     provider: GeocodingProvider;
     url: string;
     activeFields: GeocodingConfigurationField[];
+    providerApis: GeocodingProviderApi[];
 };
 
 export type GeocodingConfiguration = {
@@ -28,6 +31,7 @@ export type GeocodingConfiguration = {
     accessToken: string | null;
     refreshToken: string | null;
     enabled: boolean;
+    defaultProvider: boolean;
     provider: GeocodingProvider;
 };
 
