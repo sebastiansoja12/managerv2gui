@@ -18,13 +18,16 @@ import {
 import {
     ArrowDropDown,
     ArrowBack,
+    Block,
     Close,
+    ContentCopy,
     Delete,
     Download,
     Edit,
     InfoOutlined,
     LocalShipping,
     Map,
+    MoreVert,
     PersonPinCircle,
     QrCode2,
     Refresh,
@@ -37,6 +40,7 @@ import {useNavigate, useParams} from "react-router-dom";
 import ShipmentService from "../../hooks/ShipmentService";
 import DocumentService from "../../hooks/DocumentService";
 import DepartmentService from "../../hooks/DepartmentService";
+import OperatorConfigurationService from "../../hooks/OperatorConfigurationService";
 import Department from "../../class/depots/Department";
 import {getBackendErrorMessage} from "../../api/errorMessage";
 import RouteLogRecord from "../RouteLog/model/RouteLogRecord";
@@ -45,12 +49,12 @@ import {
     DangerousGoodApi,
     PersonApi,
     PersonType,
+    ShipmentCreateInitialState,
     ShipmentDto,
-    shipmentTypes,
-    shipmentStatuses,
+    shipmentChangeStatuses,
     ShipmentStatusDto,
-    ShipmentTypeDto,
 } from "./dto/ShipmentDto";
+import {DefaultShipmentStatusApi} from "../GlobalConfiguration/model/ShipmentConfiguration";
 import pl from "../../i18n/translate";
 import {valueObjectValue} from "../../utils/valueObject";
 import {shipmentEventDescription} from "./shipmentEventDescription";
@@ -70,6 +74,23 @@ type DocumentAction = "qr" | "excel";
 type ShipmentDetailsTab = "overview" | "sender" | "recipient";
 
 type RouteDetail = RouteLogRecord["routeLogRecordDetails"]["routeLogRecordDetailSet"][number];
+
+const draftShipmentStatuses: ShipmentStatusDto[] = ["CREATED", "PREPARED", "ACCEPTED"];
+
+export const getConfiguredDraftShipmentStatus = (
+    defaultStatus?: DefaultShipmentStatusApi | null,
+): ShipmentStatusDto => (
+    draftShipmentStatuses.includes(defaultStatus as ShipmentStatusDto)
+        ? defaultStatus as ShipmentStatusDto
+        : "CREATED"
+);
+
+export const getConfiguredShipmentStatuses = (
+    configuredDraftStatus: ShipmentStatusDto,
+): ShipmentStatusDto[] => [
+    configuredDraftStatus,
+    ...shipmentChangeStatuses.filter((shipmentStatus) => !draftShipmentStatuses.includes(shipmentStatus)),
+];
 
 const emptyPerson: PersonApi = {
     firstName: "",
@@ -131,6 +152,43 @@ const formatDateTime = (date?: string) => {
     });
 };
 
+const cancellationTimeLeft = (createdAt?: string | null, cancellationWindowMinutes = 0, now = Date.now()) => {
+    if (!createdAt) {
+        return null;
+    }
+    if (cancellationWindowMinutes <= 0) {
+        return 0;
+    }
+
+    const createdAtTime = new Date(createdAt).getTime();
+    if (Number.isNaN(createdAtTime)) {
+        return null;
+    }
+
+    return Math.max(0, createdAtTime + cancellationWindowMinutes * 60_000 - now);
+};
+
+const formatCancellationTimeLeft = (timeLeftMs: number | null) => {
+    if (timeLeftMs === null) {
+        return pl.common.dash;
+    }
+
+    if (timeLeftMs <= 0) {
+        return pl.shipments.summary.cancellationWindowExpired;
+    }
+
+    const totalSeconds = Math.ceil(timeLeftMs / 1000);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    if (hours > 0) {
+        return `${hours}h ${String(minutes).padStart(2, "0")}min ${String(seconds).padStart(2, "0")}s`;
+    }
+
+    return `${minutes}min ${String(seconds).padStart(2, "0")}s`;
+};
+
 const routeDetails = (routeLog: RouteLogRecord | null): RouteDetail[] => {
     const details = routeLog?.routeLogRecordDetails?.routeLogRecordDetailSet;
     if (!details) {
@@ -173,22 +231,26 @@ const ShipmentDetails: React.FC = () => {
     const [departments, setDepartments] = useState<Department[]>([]);
     const [routeLog, setRouteLog] = useState<RouteLogRecord | null>(null);
     const [status, setStatus] = useState<ShipmentStatusDto>("CREATED");
-    const [shipmentType, setShipmentType] = useState<ShipmentTypeDto>("PARENT");
+    const [configuredDraftStatus, setConfiguredDraftStatus] = useState<ShipmentStatusDto>("CREATED");
+    const [cancellationWindowMinutes, setCancellationWindowMinutes] = useState<number>(30);
+    const [currentTime, setCurrentTime] = useState<number>(() => Date.now());
     const [sender, setSender] = useState<PersonApi>({...emptyPerson});
     const [recipient, setRecipient] = useState<PersonApi>({...emptyPerson});
     const [loadingShipment, setLoadingShipment] = useState<boolean>(true);
     const [loadingRouteLog, setLoadingRouteLog] = useState<boolean>(false);
-    const [saving, setSaving] = useState<boolean>(false);
+    const [cancelingShipment, setCancelingShipment] = useState<boolean>(false);
     const [savingStatus, setSavingStatus] = useState<boolean>(false);
     const [savingPersonType, setSavingPersonType] = useState<PersonType | null>(null);
     const [personDialogType, setPersonDialogType] = useState<PersonType | null>(null);
     const [personDraft, setPersonDraft] = useState<PersonApi>({...emptyPerson});
     const [statusDialogOpen, setStatusDialogOpen] = useState<boolean>(false);
+    const [cancelShipmentDialogOpen, setCancelShipmentDialogOpen] = useState<boolean>(false);
     const [dangerousGoodDialogOpen, setDangerousGoodDialogOpen] = useState<boolean>(false);
     const [dangerousGoodDeleteDialogOpen, setDangerousGoodDeleteDialogOpen] = useState<boolean>(false);
     const [dangerousGoodDraft, setDangerousGoodDraft] = useState<DangerousGoodApi>(createEmptyDangerousGood());
     const [savingDangerousGood, setSavingDangerousGood] = useState<boolean>(false);
     const [downloadingDocument, setDownloadingDocument] = useState<DocumentAction | null>(null);
+    const [operationMenuAnchor, setOperationMenuAnchor] = useState<HTMLElement | null>(null);
     const [qrMenuAnchor, setQrMenuAnchor] = useState<HTMLElement | null>(null);
     const [destinationInfoAnchor, setDestinationInfoAnchor] = useState<HTMLElement | null>(null);
     const [qrPreviewUrl, setQrPreviewUrl] = useState<string | null>(null);
@@ -199,18 +261,47 @@ const ShipmentDetails: React.FC = () => {
     const decodedTrackingNumber = trackingNumber ? decodeURIComponent(trackingNumber) : "";
     const personDialogSource = personDialogType === "SENDER" ? shipment?.sender : shipment?.recipient;
     const personDialogChanged = personDialogType ? !personsEqual(personDialogSource, personDraft) : false;
-    const dangerousGoodMutable = Boolean(
+    const shipmentDataMutable = Boolean(
         shipment
         && !shipment.locked
         && !["SENT", "DELIVERY", "RETURN"].includes(shipment.shipmentStatus)
     );
+    const shipmentStatusMutable = Boolean(shipment && !["DELIVERY", "CANCELED"].includes(shipment.shipmentStatus));
+    const dangerousGoodMutable = shipmentDataMutable;
 
     const details = useMemo(() => routeDetails(routeLog), [routeLog]);
+    const availableShipmentStatuses = useMemo(
+        () => getConfiguredShipmentStatuses(configuredDraftStatus),
+        [configuredDraftStatus],
+    );
     const currentCourierDetail = details.find((detail) => detail.supplierCode || detail.username) || null;
     const destinationDepartment = useMemo(() => {
         const destinationCode = shipment ? departmentCodeValue(shipment.destination) : "";
         return departments.find((department) => department.departmentCode?.value === destinationCode) || null;
     }, [departments, shipment]);
+    const originDepartment = useMemo(() => {
+        const originDepartmentId = shipment?.originDepartmentId?.value;
+        if (originDepartmentId === undefined || originDepartmentId === null) {
+            return null;
+        }
+
+        return departments.find((department) => department.departmentId === originDepartmentId) || null;
+    }, [departments, shipment]);
+    const cancellationWindowTimeLeft = useMemo(
+        () => cancellationTimeLeft(shipment?.createdAt, cancellationWindowMinutes, currentTime),
+        [cancellationWindowMinutes, currentTime, shipment?.createdAt],
+    );
+    const shipmentCanBeCanceled = Boolean(
+        shipment
+        && !shipment.locked
+        && draftShipmentStatuses.includes(shipment.shipmentStatus)
+        && cancellationWindowTimeLeft !== null
+        && cancellationWindowTimeLeft > 0
+    );
+    const showCancellationWindow = Boolean(
+        shipment
+        && draftShipmentStatuses.includes(shipment.shipmentStatus)
+    );
     const historyPath = decodedTrackingNumber
         ? `/shipments/tracking/${encodeURIComponent(decodedTrackingNumber)}/history`
         : `/shipments/${shipmentId || shipment?.shipmentId.value || ""}/history`;
@@ -285,7 +376,6 @@ const ShipmentDetails: React.FC = () => {
     const applyShipment = (data: ShipmentDto) => {
         setShipment(data);
         setStatus(data.shipmentStatus);
-        setShipmentType(data.shipmentType);
         setSender(clonePerson(data.sender));
         setRecipient(clonePerson(data.recipient));
         setPersonDialogType(null);
@@ -326,6 +416,48 @@ const ShipmentDetails: React.FC = () => {
             .catch(() => setDepartments([]));
     }, []);
 
+    useEffect(() => {
+        let active = true;
+
+        OperatorConfigurationService.getCurrentShipmentConfiguration()
+            .then((response) => {
+                if (active) {
+                    const workflowConfiguration = response.data?.workflowConfiguration;
+                    setConfiguredDraftStatus(getConfiguredDraftShipmentStatus(
+                        workflowConfiguration?.defaultStatus,
+                    ));
+                    setCancellationWindowMinutes(workflowConfiguration?.cancellationWindowMinutes ?? 30);
+                }
+            })
+            .catch(() => {
+                if (active) {
+                    setConfiguredDraftStatus("CREATED");
+                    setCancellationWindowMinutes(30);
+                }
+            });
+
+        return () => {
+            active = false;
+        };
+    }, []);
+
+    useEffect(() => {
+        setCurrentTime(Date.now());
+        const interval = window.setInterval(() => setCurrentTime(Date.now()), 1000);
+
+        return () => window.clearInterval(interval);
+    }, [shipment?.createdAt, cancellationWindowMinutes]);
+
+    useEffect(() => {
+        if (statusDialogOpen) {
+            setStatus((currentStatus) => (
+                availableShipmentStatuses.includes(currentStatus)
+                    ? currentStatus
+                    : configuredDraftStatus
+            ));
+        }
+    }, [availableShipmentStatuses, configuredDraftStatus, statusDialogOpen]);
+
     const updatePersonDraftField = (
         field: keyof PersonApi,
         event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -335,11 +467,13 @@ const ShipmentDetails: React.FC = () => {
     };
 
     const openStatusDialog = () => {
-        if (!shipment) {
+        if (!shipment || !shipmentStatusMutable) {
             return;
         }
 
-        setStatus(shipment.shipmentStatus);
+        setStatus(availableShipmentStatuses.includes(shipment.shipmentStatus)
+            ? shipment.shipmentStatus
+            : configuredDraftStatus);
         setStatusDialogOpen(true);
     };
 
@@ -350,7 +484,7 @@ const ShipmentDetails: React.FC = () => {
     };
 
     const saveShipmentStatus = async () => {
-        if (!shipment) {
+        if (!shipment || !shipmentStatusMutable) {
             return;
         }
 
@@ -375,31 +509,64 @@ const ShipmentDetails: React.FC = () => {
         }
     };
 
-    const saveShipment = async () => {
-        if (!shipment) {
-            return;
-        }
-
-        setSaving(true);
-        try {
-            if (shipmentType !== shipment.shipmentType) {
-                await ShipmentService.changeShipmentType(shipment.shipmentId.value, shipmentType);
-            }
-
-            const response = shipment.trackingNumber?.value
-                ? await ShipmentService.getControlCenterByTrackingNumber(shipment.trackingNumber.value)
-                : await ShipmentService.getControlCenter(shipment.shipmentId.value);
-            applyShipment(response.data.shipment);
-            setRouteLog(response.data.routeLog);
-            setNotice({severity: "success", message: pl.shipments.messages.saveSuccess});
-        } catch (error) {
-            showError(error, pl.shipments.messages.saveError);
-        } finally {
-            setSaving(false);
+    const openCancelShipmentDialog = () => {
+        setOperationMenuAnchor(null);
+        if (shipmentCanBeCanceled) {
+            setCancelShipmentDialogOpen(true);
         }
     };
 
+    const closeCancelShipmentDialog = () => {
+        if (!cancelingShipment) {
+            setCancelShipmentDialogOpen(false);
+        }
+    };
+
+    const cancelShipment = async () => {
+        if (!shipment || !shipmentCanBeCanceled) {
+            setCancelShipmentDialogOpen(false);
+            return;
+        }
+
+        setCancelingShipment(true);
+        try {
+            await ShipmentService.cancel(shipment.shipmentId.value);
+            await loadShipment();
+            setCancelShipmentDialogOpen(false);
+            setNotice({severity: "success", message: pl.shipments.messages.cancelSuccess});
+        } catch (error) {
+            showError(error, pl.shipments.messages.cancelError);
+        } finally {
+            setCancelingShipment(false);
+        }
+    };
+
+    const createSimilarShipment = () => {
+        if (!shipment) {
+            setOperationMenuAnchor(null);
+            return;
+        }
+
+        const similarShipment: ShipmentCreateInitialState = {
+            sender: clonePerson(shipment.sender),
+            recipient: clonePerson(shipment.recipient),
+            shipmentSize: shipment.shipmentSize,
+            shipmentPriority: shipment.shipmentPriority,
+            priceAmount: String(shipment.price?.amount ?? ""),
+            currency: shipment.price?.currency || "PLN",
+            issuerCountryCode: shipment.originCountry || "PL",
+            receiverCountryCode: shipment.destinationCountry || "DE",
+            dangerousGood: shipment.dangerousGood ? {...shipment.dangerousGood} : null,
+        };
+
+        setOperationMenuAnchor(null);
+        navigate("/shipments/create", {state: {similarShipment}});
+    };
+
     const openDangerousGoodDialog = () => {
+        if (!dangerousGoodMutable) {
+            return;
+        }
         setDangerousGoodDraft(shipment?.dangerousGood
             ? {...shipment.dangerousGood}
             : createEmptyDangerousGood());
@@ -407,7 +574,7 @@ const ShipmentDetails: React.FC = () => {
     };
 
     const saveDangerousGood = async (replace: boolean) => {
-        if (!shipment) {
+        if (!shipment || !dangerousGoodMutable) {
             return;
         }
         if (!isDangerousGoodValid(dangerousGoodDraft)) {
@@ -438,7 +605,7 @@ const ShipmentDetails: React.FC = () => {
     };
 
     const deleteDangerousGood = async () => {
-        if (!shipment) {
+        if (!shipment || !dangerousGoodMutable) {
             return;
         }
         setSavingDangerousGood(true);
@@ -456,7 +623,7 @@ const ShipmentDetails: React.FC = () => {
 
     const savePerson = async () => {
         const personType = personDialogType;
-        if (!shipment || !personType) {
+        if (!shipment || !personType || !shipmentDataMutable) {
             return;
         }
 
@@ -489,6 +656,9 @@ const ShipmentDetails: React.FC = () => {
     };
 
     const openPersonDialog = (personType: PersonType) => {
+        if (!shipmentDataMutable) {
+            return;
+        }
         setPersonDraft(clonePerson(personType === "SENDER" ? shipment?.sender : shipment?.recipient));
         setPersonDialogType(personType);
     };
@@ -511,7 +681,7 @@ const ShipmentDetails: React.FC = () => {
                 <div className="shipment-edit-section-actions">
                     <Button
                         className="shipment-edit-section-action"
-                        disabled={loadingShipment || !shipment || savingPersonType !== null || saving}
+                        disabled={loadingShipment || !shipmentDataMutable || savingPersonType !== null}
                         onClick={() => openPersonDialog(personType)}
                         size="small"
                         startIcon={<Edit />}
@@ -769,9 +939,33 @@ const ShipmentDetails: React.FC = () => {
                         >
                             {pl.shipments.actions.exportToExcel}
                         </Button>
-                        <Button disabled={loadingShipment || saving || !shipment} startIcon={<Save />} variant="contained" onClick={saveShipment}>
-                            {pl.common.saveChanges}
+                        <Button
+                            disabled={loadingShipment || cancelingShipment || !shipment}
+                            startIcon={<MoreVert />}
+                            endIcon={<ArrowDropDown />}
+                            variant="outlined"
+                            onClick={(event) => setOperationMenuAnchor(event.currentTarget)}
+                        >
+                            {pl.shipments.actions.operations}
                         </Button>
+                        <Menu
+                            anchorEl={operationMenuAnchor}
+                            open={Boolean(operationMenuAnchor)}
+                            onClose={() => setOperationMenuAnchor(null)}
+                        >
+                            <MenuItem className="shipment-document-menu-item" disabled={!shipment} onClick={createSimilarShipment}>
+                                <ContentCopy fontSize="small" />
+                                {pl.shipments.actions.createSimilar}
+                            </MenuItem>
+                            <MenuItem
+                                className="shipment-document-menu-item"
+                                disabled={!shipmentCanBeCanceled || cancelingShipment}
+                                onClick={openCancelShipmentDialog}
+                            >
+                                {cancelingShipment ? <CircularProgress size={18} /> : <Block fontSize="small" />}
+                                {pl.shipments.actions.cancelShipment}
+                            </MenuItem>
+                        </Menu>
                     </div>
                 </div>
 
@@ -816,7 +1010,7 @@ const ShipmentDetails: React.FC = () => {
                                     <Chip className={`tm-status tm-status-${shipment.shipmentStatus.toLowerCase()}`} label={pl.shipments.status[shipment.shipmentStatus]} size="small" />
                                 </div>
 
-                                <div className="shipment-details-summary shipment-edit-summary">
+                                <div className={`shipment-details-summary shipment-edit-summary shipment-details-summary-with-origin${showCancellationWindow ? " shipment-details-summary-with-cancellation" : ""}`}>
                                     <div>
                                         <span>{pl.shipments.summary.tracking}</span>
                                         <strong>{shipment.trackingNumber?.value || pl.common.dash}</strong>
@@ -836,6 +1030,10 @@ const ShipmentDetails: React.FC = () => {
                                     <div>
                                         <span>{pl.shipments.summary.size}</span>
                                         <strong>{pl.shipments.size[shipment.shipmentSize]}</strong>
+                                    </div>
+                                    <div>
+                                        <span>{pl.shipments.summary.originDepartment}</span>
+                                        <strong>{originDepartment?.departmentCode?.value || pl.common.dash}</strong>
                                     </div>
                                     <div>
                                         <span>{pl.shipments.summary.destination}</span>
@@ -894,31 +1092,33 @@ const ShipmentDetails: React.FC = () => {
                                         <span>{pl.shipments.summary.status}</span>
                                         <strong>{pl.shipments.status[shipment.shipmentStatus]}</strong>
                                     </div>
+                                    <div>
+                                        <span>{pl.shipments.summary.createdAt}</span>
+                                        <strong>{formatDateTime(shipment.createdAt || undefined)}</strong>
+                                    </div>
+                                    <div>
+                                        <span>{pl.shipments.summary.updatedAt}</span>
+                                        <strong>{formatDateTime(shipment.updatedAt || undefined)}</strong>
+                                    </div>
+                                    {showCancellationWindow ? (
+                                        <div>
+                                            <span>{pl.shipments.summary.cancellationWindow}</span>
+                                            <strong className="shipment-cancellation-window-value">
+                                                {formatCancellationTimeLeft(cancellationWindowTimeLeft)}
+                                            </strong>
+                                        </div>
+                                    ) : null}
                                 </div>
 
                                     </section>
 
                                     <div className="shipment-details-operations-grid shipment-details-operations-separated">
                                         <ShipmentStatusControl
-                                            disabled={savingStatus}
+                                            disabled={savingStatus || !shipmentStatusMutable}
                                             status={shipment.shipmentStatus}
                                             onChangeStatus={openStatusDialog}
                                         />
 
-                                        <label className="shipment-type-control">
-                                            <span>{pl.shipments.form.fields.shipmentType}</span>
-                                            <select
-                                                aria-label={pl.shipments.form.fields.shipmentType}
-                                                value={shipmentType}
-                                                onChange={(event) => setShipmentType(event.target.value as ShipmentTypeDto)}
-                                            >
-                                                {shipmentTypes.map((currentShipmentType) => (
-                                                    <option key={currentShipmentType} value={currentShipmentType}>
-                                                        {pl.shipments.type[currentShipmentType]}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        </label>
                                     </div>
 
                                     <section className="shipment-cc-courier shipment-details-segment">
@@ -1041,25 +1241,51 @@ const ShipmentDetails: React.FC = () => {
                         <span>{pl.shipments.form.fields.shipmentStatus}</span>
                         <select
                             autoFocus
+                            disabled={!shipmentStatusMutable || savingStatus}
                             value={status}
                             onChange={(event) => setStatus(event.target.value as ShipmentStatusDto)}
                         >
-                        {shipmentStatuses.map((shipmentStatus) => (
-                            <option key={shipmentStatus} value={shipmentStatus}>
-                                {pl.shipments.status[shipmentStatus]}
-                            </option>
-                        ))}
+                            {availableShipmentStatuses.map((shipmentStatus) => (
+                                <option key={shipmentStatus} value={shipmentStatus}>
+                                    {pl.shipments.status[shipmentStatus]}
+                                </option>
+                            ))}
                         </select>
                     </label>
                 </DialogContent>
                 <DialogActions className="shipment-status-dialog-actions">
                     <Button disabled={savingStatus} onClick={closeStatusDialog} variant="outlined">{pl.common.cancel}</Button>
                     <Button
+                        disabled={!shipmentStatusMutable || savingStatus}
                         startIcon={savingStatus ? <CircularProgress size={18} /> : <Save />}
                         variant="contained"
                         onClick={saveShipmentStatus}
                     >
                         {pl.common.saveChanges}
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            <Dialog
+                fullWidth
+                maxWidth="xs"
+                open={cancelShipmentDialogOpen}
+                onClose={closeCancelShipmentDialog}
+            >
+                <DialogTitle>{pl.shipments.cancelDialog.title}</DialogTitle>
+                <DialogContent>{pl.shipments.cancelDialog.description}</DialogContent>
+                <DialogActions>
+                    <Button disabled={cancelingShipment} onClick={closeCancelShipmentDialog} variant="outlined">
+                        {pl.common.cancel}
+                    </Button>
+                    <Button
+                        color="error"
+                        disabled={cancelingShipment || !shipmentCanBeCanceled}
+                        startIcon={cancelingShipment ? <CircularProgress size={18} /> : <Block fontSize="small" />}
+                        variant="contained"
+                        onClick={cancelShipment}
+                    >
+                        {pl.shipments.cancelDialog.confirm}
                     </Button>
                 </DialogActions>
             </Dialog>
@@ -1148,7 +1374,7 @@ const ShipmentDetails: React.FC = () => {
                         {pl.common.cancel}
                     </Button>
                     <Button
-                        disabled={!personDialogChanged || savingPersonType !== null}
+                        disabled={!shipmentDataMutable || !personDialogChanged || savingPersonType !== null}
                         onClick={savePerson}
                         startIcon={savingPersonType ? <CircularProgress color="inherit" size={16} /> : <Save />}
                         variant="contained"
@@ -1169,7 +1395,7 @@ const ShipmentDetails: React.FC = () => {
                 <DialogTitle>{pl.shipments.dangerousGood.editorTitle}</DialogTitle>
                 <DialogContent>
                     <DangerousGoodForm
-                        disabled={savingDangerousGood}
+                        disabled={!dangerousGoodMutable || savingDangerousGood}
                         value={dangerousGoodDraft}
                         onChange={setDangerousGoodDraft}
                     />
@@ -1182,7 +1408,7 @@ const ShipmentDetails: React.FC = () => {
                         {pl.common.cancel}
                     </Button>
                     <Button
-                        disabled={savingDangerousGood}
+                        disabled={!dangerousGoodMutable || savingDangerousGood}
                         startIcon={savingDangerousGood ? <CircularProgress size={18} /> : <Save />}
                         variant="contained"
                         onClick={() => saveDangerousGood(false)}
@@ -1191,7 +1417,7 @@ const ShipmentDetails: React.FC = () => {
                     </Button>
                     {shipment?.dangerousGood ? (
                         <Button
-                            disabled={savingDangerousGood}
+                            disabled={!dangerousGoodMutable || savingDangerousGood}
                             variant="outlined"
                             onClick={() => saveDangerousGood(true)}
                         >
@@ -1216,7 +1442,7 @@ const ShipmentDetails: React.FC = () => {
                     </Button>
                     <Button
                         color="error"
-                        disabled={savingDangerousGood}
+                        disabled={!dangerousGoodMutable || savingDangerousGood}
                         startIcon={savingDangerousGood ? <CircularProgress size={18} /> : <Delete />}
                         variant="contained"
                         onClick={deleteDangerousGood}

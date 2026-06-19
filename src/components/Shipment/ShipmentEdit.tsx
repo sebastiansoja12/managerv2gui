@@ -22,7 +22,7 @@ import {
     PersonApi,
     PersonType,
     ShipmentDto,
-    shipmentStatuses,
+    shipmentChangeStatuses,
     ShipmentStatusDto,
 } from "./dto/ShipmentDto";
 import pl from "../../i18n/translate";
@@ -362,7 +362,7 @@ const ShipmentEdit: React.FC = () => {
                                     value={status}
                                     onChange={(event) => setStatus(event.target.value as ShipmentStatusDto)}
                                 >
-                                    {shipmentStatuses.map((shipmentStatus) => (
+                                    {shipmentChangeStatuses.map((shipmentStatus) => (
                                         <MenuItem key={shipmentStatus} value={shipmentStatus}>
                                             {pl.shipments.status[shipmentStatus]}
                                         </MenuItem>

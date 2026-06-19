@@ -65,4 +65,19 @@ describe("ReturnService", () => {
         });
         expect(mockReturningRequest).not.toHaveBeenCalled();
     });
+
+    it("cancels a return through Manager", async () => {
+        mockManagerRequest.mockResolvedValue({data: {status: "OK"}, status: 200});
+
+        await ReturnService.cancel("123");
+
+        expect(mockManagerRequest).toHaveBeenCalledWith({
+            method: "DELETE",
+            url: "/shipments/returns/123",
+            data: undefined,
+            params: undefined,
+            headers: undefined,
+        });
+        expect(mockReturningRequest).not.toHaveBeenCalled();
+    });
 });

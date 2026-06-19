@@ -62,7 +62,7 @@ const validateToken = (request: ReturnTokenValidationRequest) =>
     );
 
 const cancel = (returnPackageId: string) =>
-    returningClient.delete<undefined, {status: "OK"}>(`/returns/${returnPackageId}`, undefined);
+    managerClient.delete<undefined, {status: "OK"}>(`/shipments/returns/${returnPackageId}`, undefined);
 
 const ReturnService = {
     cancel,

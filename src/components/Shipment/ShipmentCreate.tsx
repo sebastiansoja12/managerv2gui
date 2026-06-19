@@ -12,13 +12,14 @@ import {
     Typography,
 } from "components/ui";
 import {ArrowBack, LocalShipping, Save} from "components/ui/icons";
-import {useNavigate} from "react-router-dom";
+import {useLocation, useNavigate} from "react-router-dom";
 import ShipmentService from "../../hooks/ShipmentService";
 import {ApiErrorResponse} from "../../api/ApiResult";
 import {
     countryCodes,
     DangerousGoodApi,
     PersonApi,
+    ShipmentCreateInitialState,
     ShipmentCreateRequestApi,
     ShipmentPriorityDto,
     shipmentPriorities,
@@ -32,6 +33,10 @@ import "./styles/shipments.css";
 type Notice = {
     severity: "success" | "error" | "info";
     message: string;
+};
+
+type ShipmentCreateLocationState = {
+    similarShipment?: ShipmentCreateInitialState;
 };
 
 const emptyPerson: PersonApi = {
@@ -51,21 +56,32 @@ const initialCurrency = "PLN";
 const initialIssuerCountryCode = "PL";
 const initialReceiverCountryCode = "DE";
 
+const clonePerson = (person?: PersonApi): PersonApi => ({
+    ...emptyPerson,
+    ...(person || {}),
+});
+
 const ShipmentCreate: React.FC = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const shipmentTranslations = pl.shipments;
+    const similarShipment = (location.state as ShipmentCreateLocationState | null)?.similarShipment;
     const [notice, setNotice] = useState<Notice | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
-    const [sender, setSender] = useState<PersonApi>({...emptyPerson});
-    const [recipient, setRecipient] = useState<PersonApi>({...emptyPerson});
-    const [shipmentSize, setShipmentSize] = useState<ShipmentSizeDto>(initialShipmentSize);
-    const [shipmentPriority, setShipmentPriority] = useState<ShipmentPriorityDto>(initialShipmentPriority);
-    const [priceAmount, setPriceAmount] = useState<string>(initialPriceAmount);
-    const [currency, setCurrency] = useState<string>(initialCurrency);
-    const [issuerCountryCode, setIssuerCountryCode] = useState<string>(initialIssuerCountryCode);
-    const [receiverCountryCode, setReceiverCountryCode] = useState<string>(initialReceiverCountryCode);
-    const [dangerousEnabled, setDangerousEnabled] = useState<boolean>(false);
-    const [dangerousGood, setDangerousGood] = useState<DangerousGoodApi>(createEmptyDangerousGood());
+    const [sender, setSender] = useState<PersonApi>(() => clonePerson(similarShipment?.sender));
+    const [recipient, setRecipient] = useState<PersonApi>(() => clonePerson(similarShipment?.recipient));
+    const [shipmentSize, setShipmentSize] = useState<ShipmentSizeDto>(similarShipment?.shipmentSize || initialShipmentSize);
+    const [shipmentPriority, setShipmentPriority] = useState<ShipmentPriorityDto>(similarShipment?.shipmentPriority || initialShipmentPriority);
+    const [priceAmount, setPriceAmount] = useState<string>(similarShipment?.priceAmount || initialPriceAmount);
+    const [currency, setCurrency] = useState<string>(similarShipment?.currency || initialCurrency);
+    const [issuerCountryCode, setIssuerCountryCode] = useState<string>(similarShipment?.issuerCountryCode || initialIssuerCountryCode);
+    const [receiverCountryCode, setReceiverCountryCode] = useState<string>(similarShipment?.receiverCountryCode || initialReceiverCountryCode);
+    const [dangerousEnabled, setDangerousEnabled] = useState<boolean>(Boolean(similarShipment?.dangerousGood));
+    const [dangerousGood, setDangerousGood] = useState<DangerousGoodApi>(() => (
+        similarShipment?.dangerousGood
+            ? {...similarShipment.dangerousGood}
+            : createEmptyDangerousGood()
+    ));
 
     const textField = (
         label: string,
