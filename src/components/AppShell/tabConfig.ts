@@ -1,6 +1,6 @@
-import pl from "../../i18n/pl";
+import pl from "../../i18n/translate";
 
-export const tabTitles: Record<string, string> = {
+export const tabTitles = (): Record<string, string> => ({
     "/": pl.navigation.home,
     "/shipment-control-center": pl.home.tiles.shipmentControlCenter.title,
     "/shipments": pl.navigation.shipmentList,
@@ -24,7 +24,7 @@ export const tabTitles: Record<string, string> = {
     "/profile": pl.navigation.profile,
     "/device-pairing": pl.navigation.devicePairing,
     "/software-configurations": pl.navigation.systemSettings,
-};
+});
 
 export const normalizePath = (path: string) => path === "/shipments" ? "/shipments/list" : path;
 
@@ -40,5 +40,5 @@ export const getTabTitle = (path: string) => {
         return `ShipmentControlCenter #${shipmentEditMatch[1]}`;
     }
 
-    return tabTitles[normalizedPath] || "Nowa karta";
+    return tabTitles()[normalizedPath] || pl.app.tabs.fallbackTitle;
 };

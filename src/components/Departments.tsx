@@ -11,22 +11,22 @@ import {
 } from "@mui/icons-material";
 import Department from "../class/depots/Department";
 import departmentService from "../hooks/DepartmentService";
-import pl from "../i18n/pl";
+import pl from "../i18n/translate";
 import "./Departments/styles/departments.css";
 
-const valueOrDash = (value?: string | null) => value || "-";
+const valueOrDash = (value?: string | null) => value || pl.common.dash;
 
 const translateDepartmentType = (value?: string | null) => value
     ? pl.departments.type[value as keyof typeof pl.departments.type] || value
-    : "-";
+    : pl.common.dash;
 
 const translateDepartmentStatus = (value?: string | null) => value
     ? pl.departments.status[value as keyof typeof pl.departments.status] || value
-    : "-";
+    : pl.common.dash;
 
 const formatDateTime = (value?: string | null) => {
     if (!value) {
-        return "-";
+        return pl.common.dash;
     }
 
     const date = new Date(value);
@@ -34,7 +34,7 @@ const formatDateTime = (value?: string | null) => {
         return value;
     }
 
-    return date.toLocaleString("pl-PL", {
+    return date.toLocaleString(pl.common.locale, {
         day: "2-digit",
         month: "2-digit",
         year: "numeric",

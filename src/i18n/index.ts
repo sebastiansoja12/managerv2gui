@@ -1,5 +1,4 @@
-// src/i18n/index.ts
-import pl from "./pl";
+import {pl} from "./pl";
 import en from "./en";
 
 export const translations = {

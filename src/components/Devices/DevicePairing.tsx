@@ -6,7 +6,7 @@ import AuthService from "../../hooks/AuthService";
 import DeviceService from "../../hooks/DeviceService";
 import {CurrentUserDto} from "../../auth/UserProfileDto";
 import {ApiErrorResponse} from "../../api/ApiResult";
-import pl from "../../i18n/pl";
+import pl from "../../i18n/translate";
 import {DeviceDto, DevicePairResponseDto} from "./dto/DeviceDto";
 import "./styles/device-pairing.css";
 
@@ -16,7 +16,7 @@ type Notice = {
 };
 
 function valueOrDash(value?: string | number | null) {
-    return value === undefined || value === null || value === "" ? "-" : value;
+    return value === undefined || value === null || value === "" ? pl.common.dash : value;
 }
 
 function DevicePairing() {
@@ -129,7 +129,7 @@ function DevicePairing() {
                                 fullWidth
                                 label={pl.devices.fields.departmentCode}
                                 size="small"
-                                value={departmentCode || "-"}
+                                value={departmentCode || pl.common.dash}
                             />
                             <Button disabled={loading} startIcon={<QrCode2 />} variant="contained" onClick={pairDevice}>
                                 {pl.devices.actions.generateQr}
@@ -188,7 +188,7 @@ function DevicePairing() {
                                                 size="small"
                                             />
                                         </td>
-                                        <td>{device.lastUpdate ? new Date(device.lastUpdate).toLocaleString("pl-PL") : "-"}</td>
+                                        <td>{device.lastUpdate ? new Date(device.lastUpdate).toLocaleString(pl.common.locale) : pl.common.dash}</td>
                                     </tr>
                                 )) : (
                                     <tr>

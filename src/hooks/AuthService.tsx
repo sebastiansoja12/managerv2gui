@@ -1,7 +1,7 @@
 import http from "../http-common";
 import {LoginRequest} from "../components/LoginPage/model/LoginRequest";
 import {AuthenticationToken} from "../components/LoginPage/model/AuthenticationToken";
-import {ChangePasswordRequest, CurrentUserDto} from "../auth/UserProfileDto";
+import {ChangeLanguageRequest, ChangePasswordRequest, CurrentUserDto} from "../auth/UserProfileDto";
 import {RefreshTokenRequestDto} from "../auth/RefreshTokenRequestDto";
 import BackendClient from "../api/BackendClient";
 
@@ -19,6 +19,10 @@ const changePassword = (request: ChangePasswordRequest) => {
     return http.put<void>(`/auth/me/password`, request);
 };
 
+const changeLanguage = (request: ChangeLanguageRequest) => {
+    return http.put<CurrentUserDto>(`/auth/me/language`, request);
+};
+
 const signup = () => {
     return http.post<any>(`/auth/signup`);
 }
@@ -31,6 +35,7 @@ const AuthService = {
     login,
     me,
     changePassword,
+    changeLanguage,
     signup,
     logout
 };

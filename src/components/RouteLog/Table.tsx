@@ -1,6 +1,7 @@
 import type {ColumnDef} from '@tanstack/react-table';
 import {flexRender, getCoreRowModel, useReactTable} from '@tanstack/react-table';
 import {useMemo} from "react";
+import pl from "../../i18n/translate";
 
 interface ReactTableProps<T extends object> {
     data: T[];
@@ -31,17 +32,17 @@ const dummyData = () => {
 const cols = useMemo<ColumnDef<Item>[]>(
     () => [
         {
-            header: 'Name',
+            header: pl.routeLogs.columns.name,
             cell: (row) => row.renderValue(),
             accessorKey: 'name',
         },
         {
-            header: 'Price',
+            header: pl.routeLogs.columns.price,
             cell: (row) => row.renderValue(),
             accessorKey: 'price',
         },
         {
-            header: 'Quantity',
+            header: pl.routeLogs.columns.quantity,
             cell: (row) => row.renderValue(),
             accessorKey: 'quantity',
         },

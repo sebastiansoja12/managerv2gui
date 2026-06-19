@@ -166,8 +166,55 @@
 
 .top-nav-profile-panel {
     left: auto;
-    min-width: 190px;
+    min-width: 230px;
     right: 0;
+}
+
+.top-nav-language-switch {
+    border-bottom: 1px solid #edf0f4;
+    display: grid;
+    gap: 8px;
+    padding: 8px 9px 10px;
+}
+
+.top-nav-language-switch > span {
+    color: #64748b;
+    font-size: 0.72rem;
+    font-weight: 850;
+}
+
+.top-nav-language-switch > div {
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    display: grid;
+    gap: 3px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding: 3px;
+}
+
+.top-nav-language-switch button {
+    background: transparent;
+    border: 0;
+    border-radius: 6px;
+    color: #475569;
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.74rem;
+    font-weight: 850;
+    min-height: 28px;
+    transition: background 160ms ease, color 160ms ease, box-shadow 160ms ease;
+}
+
+.top-nav-language-switch button:hover {
+    background: #ffffff;
+    color: #111827;
+}
+
+.top-nav-language-switch .top-nav-language-active {
+    background: var(--nav-accent);
+    box-shadow: 0 8px 18px color-mix(in srgb, var(--nav-accent) 18%, transparent);
+    color: #ffffff;
 }
 
 .top-nav-logout-item {

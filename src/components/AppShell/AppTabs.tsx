@@ -1,5 +1,5 @@
 import React from "react";
-import pl from "../../i18n/pl";
+import pl from "../../i18n/translate";
 import {AppTabDefinition} from "./types";
 
 type AppTabsProps = {
@@ -23,6 +23,7 @@ function AppTabs({activePath, openTabs, onCloseAllTabs, onCloseTab, onSelectTab}
                     <span>{tab.label}</span>
                     <span
                         className="app-tab-close"
+                        aria-label={pl.app.tabs.close}
                         onClick={(event) => {
                             event.stopPropagation();
                             onCloseTab(tab.path);
@@ -30,7 +31,7 @@ function AppTabs({activePath, openTabs, onCloseAllTabs, onCloseTab, onSelectTab}
                         role="button"
                         tabIndex={0}
                     >
-                        x
+                        ×
                     </span>
                 </button>
             ))}

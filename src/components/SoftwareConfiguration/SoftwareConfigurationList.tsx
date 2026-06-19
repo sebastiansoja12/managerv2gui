@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react';
 import SoftwareConfigurationList from "./SoftwareConfiguration";
 import Software from "./model/Software";
 import SoftwareConfigurationService from "../../hooks/SoftwareConfigurationService";
+import pl from "../../i18n/translate";
 
 const SoftwarePropertyList: React.FC = () => {
     const [softwareProperties, setSoftwareProperties] = useState<Software[]>([]);
@@ -12,7 +13,7 @@ const SoftwarePropertyList: React.FC = () => {
                 const response = await SoftwareConfigurationService.getAll();
                 setSoftwareProperties(response.data);
             } catch (error) {
-                console.error('Error fetching software properties:', error);
+                console.error(pl.softwareConfiguration.messages.loadError, error);
             }
         };
 
@@ -33,14 +34,14 @@ const SoftwarePropertyList: React.FC = () => {
                 return prevProperties.map((item) => (item.id === id ? updatedSoftware : item)) as Software[];
             });
         } catch (error) {
-            console.error('Error updating property:', error);
+            console.error(pl.softwareConfiguration.messages.updateError, error);
         }
         window.location.reload();
     };
 
     return (
         <div>
-            <h1>Software Properties List</h1>
+            <h1>{pl.softwareConfiguration.title}</h1>
             <SoftwareConfigurationList softwareProperties={softwareProperties} onUpdate={handleUpdate} />
         </div>
     );

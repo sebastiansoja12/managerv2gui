@@ -1,6 +1,6 @@
 import React from "react";
 import {Construction} from "@mui/icons-material";
-import pl from "../../i18n/pl";
+import pl from "../../i18n/translate";
 import "./styles/home-dashboard.css";
 
 type ModulePlaceholderProps = {
