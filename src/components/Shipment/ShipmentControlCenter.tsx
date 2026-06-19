@@ -32,6 +32,7 @@ import {
 } from "./dto/ShipmentDto";
 import pl from "../../i18n/pl";
 import "./styles/shipments.css";
+import en from "../../i18n/en";
 
 type Notice = {
     severity: "success" | "error" | "info";
@@ -232,13 +233,55 @@ const ShipmentControlCenter: React.FC = () => {
                 <Typography variant="h6">{title}</Typography>
             </div>
             <div className="shipment-details-grid">
-                <TextField label="Imię" size="small" value={person.firstName} onChange={(event) => updatePersonField(personType, "firstName", event)} />
-                <TextField label="Nazwisko" size="small" value={person.lastName} onChange={(event) => updatePersonField(personType, "lastName", event)} />
-                <TextField label="E-mail" size="small" value={person.email} onChange={(event) => updatePersonField(personType, "email", event)} />
-                <TextField label="Telefon" size="small" value={person.telephoneNumber} onChange={(event) => updatePersonField(personType, "telephoneNumber", event)} />
-                <TextField label="Miasto" size="small" value={person.city} onChange={(event) => updatePersonField(personType, "city", event)} />
-                <TextField label="Kod pocztowy" size="small" value={person.postalCode} onChange={(event) => updatePersonField(personType, "postalCode", event)} />
-                <TextField className="shipment-details-wide" label="Ulica" size="small" value={person.street} onChange={(event) => updatePersonField(personType, "street", event)} />
+                <TextField
+                    label={pl.shipments.form.fields.firstName}
+                    size="small"
+                    value={person.firstName}
+                    onChange={(event) => updatePersonField(personType, "firstName", event)}
+                />
+
+                <TextField
+                    label={pl.shipments.form.fields.lastName}
+                    size="small"
+                    value={person.lastName}
+                    onChange={(event) => updatePersonField(personType, "lastName", event)}
+                />
+
+                <TextField
+                    label={pl.shipments.form.fields.email}
+                    size="small"
+                    value={person.email}
+                    onChange={(event) => updatePersonField(personType, "email", event)}
+                />
+
+                <TextField
+                    label={pl.shipments.form.fields.phone}
+                    size="small"
+                    value={person.telephoneNumber}
+                    onChange={(event) => updatePersonField(personType, "telephoneNumber", event)}
+                />
+
+                <TextField
+                    label={pl.shipments.form.fields.city}
+                    size="small"
+                    value={person.city}
+                    onChange={(event) => updatePersonField(personType, "city", event)}
+                />
+
+                <TextField
+                    label={pl.shipments.form.fields.postalCode}
+                    size="small"
+                    value={person.postalCode}
+                    onChange={(event) => updatePersonField(personType, "postalCode", event)}
+                />
+
+                <TextField
+                    className="shipment-details-wide"
+                    label={pl.shipments.form.fields.street}
+                    size="small"
+                    value={person.street}
+                    onChange={(event) => updatePersonField(personType, "street", event)}
+                />
             </div>
         </section>
     );
