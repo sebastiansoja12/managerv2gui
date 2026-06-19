@@ -1,0 +1,467 @@
+.department-relations {
+    color: var(--brand-ink);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    height: 100%;
+    min-height: 0;
+}
+
+.department-relations-header {
+    align-items: end;
+    display: grid;
+    gap: 24px;
+    grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.department-relations-kicker {
+    align-items: center;
+    color: var(--brand-accent-strong);
+    display: inline-flex;
+    font-size: 0.75rem;
+    font-weight: 900;
+    gap: 7px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.department-relations-header h2 {
+    font-size: 1.7rem;
+    font-weight: 950;
+    line-height: 1.15;
+    margin: 7px 0 0;
+}
+
+.department-relations-header p {
+    color: var(--brand-muted);
+    font-size: 0.92rem;
+    font-weight: 600;
+    margin: 7px 0 0;
+    max-width: 720px;
+}
+
+.department-relations-summary {
+    display: grid;
+    gap: 8px;
+    grid-template-columns: repeat(3, minmax(98px, 1fr));
+}
+
+.department-relations-summary div {
+    background: var(--surface);
+    border: 1px solid var(--brand-border);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    min-width: 104px;
+    padding: 10px 12px;
+}
+
+.department-relations-summary span {
+    color: var(--brand-muted);
+    font-size: 0.7rem;
+    font-weight: 800;
+}
+
+.department-relations-summary strong {
+    font-size: 1.12rem;
+    font-weight: 950;
+}
+
+.department-relations-summary .is-invalid {
+    border-color: color-mix(in srgb, var(--danger) 50%, var(--brand-border));
+    color: var(--danger);
+}
+
+.department-relations-summary .is-valid {
+    border-color: color-mix(in srgb, var(--success) 50%, var(--brand-border));
+    color: var(--success);
+}
+
+.department-relations-workspace {
+    display: grid;
+    flex: 1;
+    gap: 16px;
+    grid-template-columns: minmax(0, 1fr) 360px;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.department-relations-map-panel {
+    background: var(--surface);
+    border: 1px solid var(--brand-border);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.department-relations-instructions {
+    align-items: center;
+    background: var(--surface-secondary);
+    border-bottom: 1px solid var(--brand-border);
+    color: var(--brand-ink);
+    display: flex;
+    font-size: 0.84rem;
+    font-weight: 750;
+    gap: 9px;
+    min-height: 52px;
+    padding: 8px 14px;
+}
+
+.department-relations-instructions > svg {
+    color: var(--brand-accent-strong);
+    flex: 0 0 auto;
+}
+
+.department-relations-instructions > span {
+    flex: 1;
+}
+
+.department-relations-instructions [data-ui="button"] {
+    min-height: 34px;
+    padding: 5px 9px;
+}
+
+.department-relations-leaflet-map,
+.department-relations-map-empty {
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+}
+
+.department-relations-leaflet-map {
+    background: var(--surface-secondary);
+    z-index: 0;
+}
+
+.department-relations-map-empty {
+    align-items: center;
+    color: var(--brand-muted);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 48px;
+    text-align: center;
+}
+
+.department-relations-map-empty svg {
+    color: var(--warning);
+    height: 36px;
+    margin-bottom: 12px;
+    width: 36px;
+}
+
+.department-relations-map-empty strong {
+    color: var(--brand-ink);
+    font-size: 1rem;
+}
+
+.department-relations-map-empty span {
+    font-size: 0.84rem;
+    margin-top: 5px;
+    max-width: 420px;
+}
+
+.department-relations-legend {
+    align-items: center;
+    background: var(--surface-secondary);
+    border-top: 1px solid var(--brand-border);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    min-height: 42px;
+    padding: 8px 14px;
+}
+
+.department-relations-legend > span {
+    align-items: center;
+    color: var(--brand-muted);
+    display: inline-flex;
+    font-size: 0.72rem;
+    font-weight: 750;
+    gap: 6px;
+}
+
+.department-relations-legend-marker {
+    background: #2563a9;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.25);
+    display: inline-block;
+    height: 12px;
+    width: 12px;
+}
+
+.department-relations-legend-marker.is-sorting {
+    background: #0f766e;
+    height: 14px;
+    width: 14px;
+}
+
+.department-relations-legend-marker.is-missing {
+    border-color: #dc2626;
+}
+
+.department-relations-editor {
+    background: var(--surface);
+    border: 1px solid var(--brand-border);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 13px;
+    min-height: 0;
+    overflow: hidden;
+    padding: 16px;
+}
+
+.department-relations-editor-kicker {
+    color: var(--brand-accent-strong);
+    font-size: 0.68rem;
+    font-weight: 900;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+}
+
+.department-relations-editor h3 {
+    font-size: 1.02rem;
+    font-weight: 900;
+    margin: 4px 0 0;
+}
+
+.department-relations-editor p {
+    color: var(--brand-muted);
+    font-size: 0.78rem;
+    line-height: 1.45;
+    margin: 5px 0 0;
+}
+
+.department-relations-editor [data-ui="input-label"] {
+    font-size: 0.74rem;
+    font-weight: 800;
+}
+
+.department-relations-editor [data-ui="select"] {
+    min-height: 42px;
+}
+
+.department-relations-editor > [data-ui="button"] {
+    border-radius: 9px;
+    width: 100%;
+}
+
+.department-relations-list {
+    border-top: 1px solid var(--brand-border);
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 7px;
+    margin-top: 3px;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 13px 8px 2px 0;
+    scrollbar-gutter: stable;
+}
+
+.department-relations-list-heading {
+    align-items: center;
+    background: var(--surface);
+    display: flex;
+    font-size: 0.78rem;
+    flex: 0 0 auto;
+    justify-content: space-between;
+    margin-bottom: 2px;
+    padding-bottom: 5px;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.department-relations-list-heading span {
+    align-items: center;
+    background: var(--surface-secondary);
+    border-radius: 999px;
+    display: inline-flex;
+    font-weight: 850;
+    height: 24px;
+    justify-content: center;
+    min-width: 24px;
+    padding: 0 7px;
+}
+
+.department-relations-list-item {
+    align-items: center;
+    background: var(--surface-secondary);
+    border: 1px solid var(--brand-border);
+    border-radius: 8px;
+    display: flex;
+    flex: 0 0 auto;
+    gap: 8px;
+    justify-content: space-between;
+    padding: 7px 7px 7px 10px;
+}
+
+.department-relations-list-item > span {
+    align-items: center;
+    display: flex;
+    font-size: 0.76rem;
+    gap: 6px;
+    min-width: 0;
+}
+
+.department-relations-list-item i {
+    color: var(--brand-accent-strong);
+    font-size: 1rem;
+    font-style: normal;
+}
+
+.department-relations-list-item button {
+    align-items: center;
+    background: transparent;
+    border: 0;
+    border-radius: 6px;
+    color: var(--brand-muted);
+    cursor: pointer;
+    display: inline-flex;
+    height: 28px;
+    justify-content: center;
+    padding: 0;
+    width: 28px;
+}
+
+.department-relations-list-item button:hover {
+    background: color-mix(in srgb, var(--danger) 12%, transparent);
+    color: var(--danger);
+}
+
+.department-relations-list-empty {
+    align-items: center;
+    border: 1px dashed var(--brand-border);
+    border-radius: 8px;
+    color: var(--brand-muted);
+    display: flex;
+    font-size: 0.76rem;
+    justify-content: center;
+    min-height: 66px;
+    padding: 12px;
+    text-align: center;
+}
+
+.department-relations-arrow-icon {
+    background: transparent;
+    border: 0;
+}
+
+.department-relations-arrow {
+    border-bottom: 7px solid transparent;
+    border-left: 13px solid #2563a9;
+    border-top: 7px solid transparent;
+    display: block;
+    height: 0;
+    margin: 2px;
+    transform-origin: 7px 7px;
+    width: 0;
+}
+
+.department-relations-marker-label {
+    background: var(--surface);
+    border: 1px solid var(--brand-border);
+    border-radius: 6px;
+    box-shadow: 0 3px 10px rgba(15, 23, 42, 0.14);
+    color: var(--brand-ink);
+    font-size: 0.68rem;
+    font-weight: 900;
+    padding: 3px 6px;
+}
+
+.department-relations-marker-label::before {
+    border-top-color: var(--brand-border);
+}
+
+.department-relations-popup {
+    display: flex;
+    flex-direction: column;
+    min-width: 130px;
+}
+
+.department-relations-popup strong {
+    color: #172033;
+    font-size: 0.9rem;
+    margin-bottom: 3px;
+}
+
+.department-relations-popup span {
+    color: #556274;
+    font-size: 0.76rem;
+}
+
+.departments-relations-dialog {
+    display: flex;
+    flex-direction: column;
+    height: min(920px, calc(100dvh - 32px));
+    max-height: calc(100dvh - 32px);
+    max-width: 1600px;
+    overflow: hidden;
+    width: calc(100vw - 32px);
+}
+
+.departments-relations-dialog-content {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    padding: 20px;
+}
+
+.departments-relations-dialog [data-ui="dialog-actions"] {
+    flex: 0 0 auto;
+}
+
+@media (max-width: 1080px) {
+    .department-relations-header {
+        align-items: stretch;
+        grid-template-columns: 1fr;
+    }
+
+    .department-relations-summary {
+        max-width: 390px;
+    }
+
+    .department-relations-workspace {
+        grid-template-columns: 1fr;
+        overflow-y: auto;
+    }
+
+    .department-relations-editor {
+        max-height: 460px;
+        min-height: 420px;
+    }
+
+    .department-relations-map-panel {
+        min-height: 520px;
+    }
+}
+
+@media (max-width: 680px) {
+    .department-relations-summary {
+        grid-template-columns: 1fr;
+        max-width: none;
+    }
+
+    .department-relations-summary div {
+        align-items: center;
+        flex-direction: row;
+        justify-content: space-between;
+    }
+
+    .department-relations-leaflet-map,
+    .department-relations-map-empty {
+        min-height: 360px;
+    }
+
+    .department-relations-legend {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 7px;
+    }
+}

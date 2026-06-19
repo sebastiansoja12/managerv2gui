@@ -30,7 +30,7 @@ const create = (data: ShipmentCreateRequestApi) => {
 };
 
 const search = (data: ShipmentSearchRequestApi) => {
-    return client.post<ShipmentSearchRequestApi, ShipmentDto[]>("/shipments/search", data);
+    return client.post<ShipmentSearchRequestApi, ShipmentDto[]>("/shipments/read-model/search", data);
 };
 
 const get = async (shipmentId: string) => {

@@ -53,7 +53,12 @@ describe("external tracking search", () => {
     });
 
     it("keeps System as default and shows provider selection only for external source", async () => {
-        render(<MemoryRouter><ShipmentList/></MemoryRouter>);
+        render(<React.StrictMode><MemoryRouter><ShipmentList/></MemoryRouter></React.StrictMode>);
+
+        await waitFor(() => expect(ShipmentService.search).toHaveBeenCalledTimes(1));
+        await waitFor(() => expect(
+            screen.getByRole("button", {name: pl.shipments.status.CREATED})
+        ).not.toBeDisabled());
 
         expect(screen.getByLabelText(pl.shipments.externalSearch.source)).toHaveTextContent(
             pl.shipments.externalSearch.system);
@@ -109,5 +114,30 @@ describe("external tracking search", () => {
         fireEvent.click(screen.getByRole("button", {name: pl.shipments.externalSearch.search}));
 
         expect(await screen.findByText("Provider temporarily unavailable")).toBeInTheDocument();
+    });
+
+    it("sends advanced filters to the shipment read model search", async () => {
+        render(<MemoryRouter><ShipmentList/></MemoryRouter>);
+
+        fireEvent.click(screen.getByRole("button", {name: pl.shipments.actions.filters}));
+        fireEvent.change(screen.getByLabelText(pl.shipments.form.fields.size), {
+            target: {value: "BIG"},
+        });
+        fireEvent.change(screen.getByLabelText(pl.shipments.table.columns.sender), {
+            target: {value: "Anna Nowak"},
+        });
+        fireEvent.change(screen.getByLabelText(pl.shipments.filters.minPrice), {
+            target: {value: "25.50"},
+        });
+        fireEvent.click(await screen.findByRole("button", {name: pl.shipments.filters.apply}));
+
+        await waitFor(() => expect(ShipmentService.search).toHaveBeenCalledWith(expect.objectContaining({
+            shipmentSizes: ["BIG"],
+            senderName: "Anna Nowak",
+            minPrice: 25.5,
+            page: 0,
+            size: 100,
+        })));
+        expect(await screen.findByText(pl.shipments.filters.applied)).toBeInTheDocument();
     });
 });

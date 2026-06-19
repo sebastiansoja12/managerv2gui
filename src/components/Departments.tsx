@@ -14,6 +14,7 @@ import {
     Typography,
 } from "components/ui";
 import {
+    AccountTree,
     AddBusiness,
     ArchiveOutlined,
     Business,
@@ -37,6 +38,8 @@ import Department from "../class/depots/Department";
 import departmentService, {DepartmentCreateRequest, DepartmentStatus} from "../hooks/DepartmentService";
 import UserManagementService from "../hooks/UserManagementService";
 import pl from "../i18n/translate";
+import DepartmentRelationsMap from "./Departments/DepartmentRelationsMap";
+import {DepartmentRelation} from "./Departments/model/DepartmentRelation";
 import {User} from "./Users/model/User";
 import "./Departments/styles/departments.css";
 
@@ -135,6 +138,8 @@ const Departments: React.FC = () => {
     const [createForm, setCreateForm] = useState({...emptyDepartmentForm});
     const [editForm, setEditForm] = useState({...emptyEditForm});
     const [createDialogOpen, setCreateDialogOpen] = useState<boolean>(false);
+    const [relationsDialogOpen, setRelationsDialogOpen] = useState<boolean>(false);
+    const [departmentRelations, setDepartmentRelations] = useState<DepartmentRelation[]>([]);
     const [editedDepartment, setEditedDepartment] = useState<Department | null>(null);
     const [usersDepartment, setUsersDepartment] = useState<Department | null>(null);
     const [selectedDepartmentId, setSelectedDepartmentId] = useState<number | null>(null);
@@ -511,6 +516,14 @@ const Departments: React.FC = () => {
                     <div className="departments-table-header">
                         <Typography variant="h5">{pl.departments.page.listTitle}</Typography>
                         <div className="departments-table-actions">
+                            <Button
+                                disabled={loading}
+                                startIcon={<AccountTree />}
+                                variant="outlined"
+                                onClick={() => setRelationsDialogOpen(true)}
+                            >
+                                {pl.departments.relations.openMap}
+                            </Button>
                             <Button disabled={saving} startIcon={<AddBusiness />} variant="contained" onClick={() => setCreateDialogOpen(true)}>
                                 {createTranslations.title}
                             </Button>
@@ -745,6 +758,28 @@ const Departments: React.FC = () => {
                     </table>
                 </aside>
             </div>
+
+            <Dialog
+                className="departments-relations-dialog-shell"
+                fullWidth
+                maxWidth={false}
+                PaperProps={{className: "departments-relations-dialog"}}
+                open={relationsDialogOpen}
+                onClose={() => setRelationsDialogOpen(false)}
+            >
+                <DialogContent className="departments-relations-dialog-content">
+                    <DepartmentRelationsMap
+                        departments={departments}
+                        relations={departmentRelations}
+                        onRelationsChange={setDepartmentRelations}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button variant="outlined" onClick={() => setRelationsDialogOpen(false)}>
+                        {pl.common.close}
+                    </Button>
+                </DialogActions>
+            </Dialog>
 
             <Dialog
                 className="departments-create-dialog-shell"

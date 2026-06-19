@@ -39,7 +39,18 @@ import {
     TrackingProvider,
     TrackingProviderId,
 } from "../GlobalConfiguration/model/TrackingIntegration";
-import {departmentCodeValue, ShipmentDto, ShipmentSearchRequestApi, ShipmentStatusDto} from "./dto/ShipmentDto";
+import {
+    dangerousGoodRegulationTypes,
+    dangerousGoodTransportModes,
+    departmentCodeValue,
+    shipmentPriorities,
+    ShipmentDto,
+    ShipmentPriorityDto,
+    ShipmentSearchRequestApi,
+    ShipmentSizeDto,
+    shipmentSizes,
+    ShipmentStatusDto,
+} from "./dto/ShipmentDto";
 import pl from "../../i18n/translate";
 import {AppTabDefinition} from "../AppShell/types";
 import "./styles/shipments.css";
@@ -62,14 +73,14 @@ type ShipmentRow = {
 };
 
 const shipmentTranslations = pl.shipments;
-const shipmentListCache: {loaded: boolean; shipments: ShipmentDto[]} = {
+const shipmentListCache: {
+    loaded: boolean;
+    shipments: ShipmentDto[];
+    promise: Promise<ShipmentDto[]> | null;
+} = {
     loaded: false,
     shipments: [],
-};
-const shipmentTrendCache: {loaded: boolean; currentWeekShipments: ShipmentDto[]; previousWeekShipments: ShipmentDto[]} = {
-    loaded: false,
-    currentWeekShipments: [],
-    previousWeekShipments: [],
+    promise: null,
 };
 const trackingProviderCache: {loaded: boolean; providers: TrackingProvider[]} = {
     loaded: false,
@@ -124,54 +135,48 @@ const statusClassName = (status: ShipmentStatusDto) => `tm-status tm-status-${st
 const avatarFor = (name: string) => name.trim().slice(0, 1).toUpperCase() || "?";
 
 const loadShipments = async (criteria: ShipmentSearchRequestApi = {}) => {
-    const collectedShipments: ShipmentDto[] = [];
-    let page = 0;
+    const response = await ShipmentService.search({
+        ...criteria,
+        page: 0,
+        size: SHIPMENT_PAGE_SIZE,
+    });
+    return response.data;
+};
 
-    while (true) {
-        const response = await ShipmentService.search({
-            ...criteria,
-            page,
-            size: SHIPMENT_PAGE_SIZE,
-        });
-
-        collectedShipments.push(...response.data);
-
-        if (response.data.length < SHIPMENT_PAGE_SIZE) {
-            break;
-        }
-
-        page += 1;
+const loadInitialShipments = () => {
+    if (shipmentListCache.loaded) {
+        return Promise.resolve(shipmentListCache.shipments);
     }
 
-    return collectedShipments;
+    if (!shipmentListCache.promise) {
+        shipmentListCache.promise = loadShipments()
+            .then((shipments) => {
+                shipmentListCache.loaded = true;
+                shipmentListCache.shipments = shipments;
+                return shipments;
+            })
+            .finally(() => {
+                shipmentListCache.promise = null;
+            });
+    }
+
+    return shipmentListCache.promise;
 };
 
-const toApiLocalDateTime = (date: Date) => {
-    const pad = (value: number) => value.toString().padStart(2, "0");
-
-    return [
-        date.getFullYear(),
-        pad(date.getMonth() + 1),
-        pad(date.getDate()),
-    ].join("-") + `T${[
-        pad(date.getHours()),
-        pad(date.getMinutes()),
-        pad(date.getSeconds()),
-    ].join(":")}`;
-};
-
-const weekRange = (weeksBack: number) => {
+const shipmentsFromWeek = (shipments: ShipmentDto[], weeksBack: number) => {
     const end = new Date();
-    end.setMilliseconds(0);
+    end.setDate(end.getDate() - (weeksBack * 7));
     const start = new Date(end);
     start.setDate(start.getDate() - 7);
-    start.setDate(start.getDate() - (weeksBack * 7));
-    end.setDate(end.getDate() - (weeksBack * 7));
 
-    return {
-        createdFrom: toApiLocalDateTime(start),
-        createdTo: toApiLocalDateTime(end),
-    };
+    return shipments.filter((shipment) => {
+        if (!shipment.createdAt) {
+            return false;
+        }
+
+        const createdAt = new Date(shipment.createdAt);
+        return !Number.isNaN(createdAt.getTime()) && createdAt >= start && createdAt <= end;
+    });
 };
 
 const amountValue = (shipment: ShipmentDto) => {
@@ -304,21 +309,36 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
     const [dangerousGoodsFilter, setDangerousGoodsFilter] = useState<"ALL" | "YES" | "NO">("ALL");
     const [unNumberFilter, setUnNumberFilter] = useState<string>("");
     const [hazardClassFilter, setHazardClassFilter] = useState<string>("");
+    const [filtersExpanded, setFiltersExpanded] = useState<boolean>(false);
+    const [shipmentSizeFilter, setShipmentSizeFilter] = useState<ShipmentSizeDto | "">("");
+    const [shipmentPriorityFilter, setShipmentPriorityFilter] = useState<ShipmentPriorityDto | "">("");
+    const [senderNameFilter, setSenderNameFilter] = useState<string>("");
+    const [recipientNameFilter, setRecipientNameFilter] = useState<string>("");
+    const [destinationFilter, setDestinationFilter] = useState<string>("");
+    const [minPriceFilter, setMinPriceFilter] = useState<string>("");
+    const [maxPriceFilter, setMaxPriceFilter] = useState<string>("");
+    const [currencyFilter, setCurrencyFilter] = useState<string>("");
+    const [lockedFilter, setLockedFilter] = useState<"ALL" | "YES" | "NO">("ALL");
+    const [createdFromFilter, setCreatedFromFilter] = useState<string>("");
+    const [createdToFilter, setCreatedToFilter] = useState<string>("");
+    const [regulationTypeFilter, setRegulationTypeFilter] = useState<string>("");
+    const [transportModeFilter, setTransportModeFilter] = useState<string>("");
     const [shipments, setShipments] = useState<ShipmentDto[]>(shipmentListCache.shipments);
+    const [readModelSearchResults, setReadModelSearchResults] = useState<ShipmentDto[] | null>(null);
     const [notice, setNotice] = useState<Notice | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
     const [searchSource, setSearchSource] = useState<"SYSTEM" | "EXTERNAL">("SYSTEM");
     const [trackingProviders, setTrackingProviders] = useState<TrackingProvider[]>(trackingProviderCache.providers);
     const [trackingProvider, setTrackingProvider] = useState<TrackingProviderId | "">("");
-    const [currentWeekShipments, setCurrentWeekShipments] = useState<ShipmentDto[]>(shipmentTrendCache.currentWeekShipments);
-    const [previousWeekShipments, setPreviousWeekShipments] = useState<ShipmentDto[]>(shipmentTrendCache.previousWeekShipments);
     const [externalLoading, setExternalLoading] = useState(false);
     const [externalResult, setExternalResult] = useState<ExternalTrackingResult | null>(null);
     const [actionMenuAnchor, setActionMenuAnchor] = useState<HTMLElement | null>(null);
     const [actionShipment, setActionShipment] = useState<ShipmentDto | null>(null);
 
+    const displayedShipments = readModelSearchResults || shipments;
+
     const visibleShipments = useMemo(() => {
-        return shipments
+        return displayedShipments
             .filter((shipment) => shipment.shipmentStatus === activeStatus)
             .filter((shipment) => !appliedLookupId || shipment.shipmentId.value.toString() === appliedLookupId)
             .filter((shipment) => {
@@ -337,7 +357,7 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
         appliedLookupTrackingNumber,
         dangerousGoodsFilter,
         hazardClassFilter,
-        shipments,
+        displayedShipments,
         unNumberFilter,
     ]);
 
@@ -369,6 +389,8 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
         };
     }, [shipments]);
 
+    const currentWeekShipments = useMemo(() => shipmentsFromWeek(shipments, 0), [shipments]);
+    const previousWeekShipments = useMemo(() => shipmentsFromWeek(shipments, 1), [shipments]);
     const currentWeekValue = useMemo(() => calculateShipmentValue(currentWeekShipments), [currentWeekShipments]);
     const previousWeekValue = useMemo(() => calculateShipmentValue(previousWeekShipments), [previousWeekShipments]);
     const shipmentTrend = calculateTrendPercent(currentWeekShipments.length, previousWeekShipments.length);
@@ -421,7 +443,7 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
             return;
         }
 
-        const shipment = shipments.find((current) => current.trackingNumber?.value?.toLowerCase().includes(trackingNumber.toLowerCase()));
+        const shipment = displayedShipments.find((current) => current.trackingNumber?.value?.toLowerCase().includes(trackingNumber.toLowerCase()));
         if (!shipment) {
             setNotice({severity: "error", message: shipmentTranslations.table.localFilterNotFound});
             return;
@@ -444,7 +466,7 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
             return;
         }
 
-        const shipment = shipments.find((current) => current.shipmentId.value === shipmentId);
+        const shipment = displayedShipments.find((current) => current.shipmentId.value === shipmentId);
         if (!shipment) {
             setNotice({severity: "error", message: shipmentTranslations.table.localFilterNotFound});
             return;
@@ -464,6 +486,95 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
         setAppliedLookupId("");
         setAppliedLookupTrackingNumber("");
         setExternalResult(null);
+    };
+
+    const priceFilterValue = (value: string): number | null => {
+        if (!value.trim()) {
+            return null;
+        }
+
+        const price = Number(value.replace(",", "."));
+        if (!Number.isFinite(price) || price < 0) {
+            throw new Error(shipmentTranslations.filters.invalidPrice);
+        }
+
+        return price;
+    };
+
+    const dateFilterValue = (value: string, endOfDay = false): string | null => {
+        if (!value) {
+            return null;
+        }
+
+        return `${value}T${endOfDay ? "23:59:59" : "00:00:00"}`;
+    };
+
+    const applyAdvancedFilters = async () => {
+        let minPrice: number | null;
+        let maxPrice: number | null;
+
+        try {
+            minPrice = priceFilterValue(minPriceFilter);
+            maxPrice = priceFilterValue(maxPriceFilter);
+            if (minPrice !== null && maxPrice !== null && minPrice > maxPrice) {
+                throw new Error(shipmentTranslations.filters.invalidPriceRange);
+            }
+        } catch (error) {
+            setNotice({severity: "error", message: (error as Error).message});
+            return;
+        }
+
+        const criteria: ShipmentSearchRequestApi = {
+            shipmentSizes: shipmentSizeFilter ? [shipmentSizeFilter] : [],
+            shipmentPriorities: shipmentPriorityFilter ? [shipmentPriorityFilter] : [],
+            senderName: senderNameFilter.trim() || null,
+            recipientName: recipientNameFilter.trim() || null,
+            destination: destinationFilter.trim() || null,
+            minPrice,
+            maxPrice,
+            currency: currencyFilter.trim().toUpperCase() || null,
+            locked: lockedFilter === "ALL" ? null : lockedFilter === "YES",
+            createdFrom: dateFilterValue(createdFromFilter),
+            createdTo: dateFilterValue(createdToFilter, true),
+            hasDangerousGoods: dangerousGoodsFilter === "ALL" ? null : dangerousGoodsFilter === "YES",
+            unNumber: unNumberFilter.trim() || null,
+            hazardClass: hazardClassFilter.trim() || null,
+            regulationType: regulationTypeFilter || null,
+            transportMode: transportModeFilter || null,
+        };
+
+        setLoading(true);
+        try {
+            const filteredShipments = await loadShipments(criteria);
+            setReadModelSearchResults(filteredShipments);
+            clearLocalFilters();
+            setNotice({severity: "success", message: shipmentTranslations.filters.applied});
+        } catch (error) {
+            showError(error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const resetAdvancedFilters = () => {
+        setShipmentSizeFilter("");
+        setShipmentPriorityFilter("");
+        setSenderNameFilter("");
+        setRecipientNameFilter("");
+        setDestinationFilter("");
+        setMinPriceFilter("");
+        setMaxPriceFilter("");
+        setCurrencyFilter("");
+        setLockedFilter("ALL");
+        setCreatedFromFilter("");
+        setCreatedToFilter("");
+        setDangerousGoodsFilter("ALL");
+        setUnNumberFilter("");
+        setHazardClassFilter("");
+        setRegulationTypeFilter("");
+        setTransportModeFilter("");
+        clearLocalFilters();
+        setReadModelSearchResults(null);
     };
 
     useEffect(() => {
@@ -559,12 +670,10 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
         }
 
         setLoading(true);
-        loadShipments()
+        loadInitialShipments()
             .then((response) => {
                 if (active) {
-                    shipmentListCache.loaded = true;
-                    shipmentListCache.shipments = response;
-                    setShipments([...shipmentListCache.shipments]);
+                    setShipments([...response]);
                 }
             })
             .catch((error) => {
@@ -575,43 +684,6 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
             .finally(() => {
                 if (active) {
                     setLoading(false);
-                }
-            });
-
-        return () => {
-            active = false;
-        };
-    }, []);
-
-    useEffect(() => {
-        let active = true;
-
-        if (shipmentTrendCache.loaded) {
-            setCurrentWeekShipments([...shipmentTrendCache.currentWeekShipments]);
-            setPreviousWeekShipments([...shipmentTrendCache.previousWeekShipments]);
-            return () => {
-                active = false;
-            };
-        }
-
-        Promise.all([
-            loadShipments(weekRange(0)),
-            loadShipments(weekRange(1)),
-        ])
-            .then(([currentWeek, previousWeek]) => {
-                if (!active) {
-                    return;
-                }
-
-                shipmentTrendCache.loaded = true;
-                shipmentTrendCache.currentWeekShipments = currentWeek;
-                shipmentTrendCache.previousWeekShipments = previousWeek;
-                setCurrentWeekShipments([...currentWeek]);
-                setPreviousWeekShipments([...previousWeek]);
-            })
-            .catch((error) => {
-                if (active) {
-                    showError(error);
                 }
             });
 
@@ -717,7 +789,14 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
                     <div className="tm-orders-header">
                         <Typography variant="h5">{shipmentTranslations.table.title}</Typography>
                         <div className="tm-toolbar-actions">
-                            <Button startIcon={<FilterList />} variant="outlined">{shipmentTranslations.actions.filters}</Button>
+                            <Button
+                                aria-expanded={filtersExpanded}
+                                startIcon={<FilterList />}
+                                variant="outlined"
+                                onClick={() => setFiltersExpanded((expanded) => !expanded)}
+                            >
+                                {shipmentTranslations.actions.filters}
+                            </Button>
                             <Button startIcon={<Tune />} variant="outlined">{shipmentTranslations.actions.manage}</Button>
                             <Button startIcon={<FileDownload />} variant="outlined">{shipmentTranslations.actions.export}</Button>
                             <button className="tm-icon-button" type="button"><ViewList fontSize="small" /></button>
@@ -814,6 +893,134 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
                             onChange={(event) => setHazardClassFilter(event.target.value)}
                         />
                     </div>
+
+                    {filtersExpanded ? (
+                        <section className="tm-advanced-filters" aria-label={shipmentTranslations.filters.title}>
+                            <TextField
+                                label={shipmentTranslations.form.fields.size}
+                                select
+                                size="small"
+                                value={shipmentSizeFilter}
+                                onChange={(event) => setShipmentSizeFilter(event.target.value as ShipmentSizeDto | "")}
+                            >
+                                <MenuItem value="">{pl.common.all}</MenuItem>
+                                {shipmentSizes.map((size) => (
+                                    <MenuItem key={size} value={size}>{shipmentTranslations.size[size]}</MenuItem>
+                                ))}
+                            </TextField>
+                            <TextField
+                                label={shipmentTranslations.form.fields.priority}
+                                select
+                                size="small"
+                                value={shipmentPriorityFilter}
+                                onChange={(event) => setShipmentPriorityFilter(event.target.value as ShipmentPriorityDto | "")}
+                            >
+                                <MenuItem value="">{pl.common.all}</MenuItem>
+                                {shipmentPriorities.map((priority) => (
+                                    <MenuItem key={priority} value={priority}>{shipmentTranslations.priority[priority]}</MenuItem>
+                                ))}
+                            </TextField>
+                            <TextField
+                                label={shipmentTranslations.table.columns.sender}
+                                size="small"
+                                value={senderNameFilter}
+                                onChange={(event) => setSenderNameFilter(event.target.value)}
+                            />
+                            <TextField
+                                label={shipmentTranslations.table.columns.recipient}
+                                size="small"
+                                value={recipientNameFilter}
+                                onChange={(event) => setRecipientNameFilter(event.target.value)}
+                            />
+                            <TextField
+                                label={shipmentTranslations.table.columns.destination}
+                                size="small"
+                                value={destinationFilter}
+                                onChange={(event) => setDestinationFilter(event.target.value)}
+                            />
+                            <TextField
+                                inputProps={{min: 0, step: "0.01"}}
+                                label={shipmentTranslations.filters.minPrice}
+                                size="small"
+                                type="number"
+                                value={minPriceFilter}
+                                onChange={(event) => setMinPriceFilter(event.target.value)}
+                            />
+                            <TextField
+                                inputProps={{min: 0, step: "0.01"}}
+                                label={shipmentTranslations.filters.maxPrice}
+                                size="small"
+                                type="number"
+                                value={maxPriceFilter}
+                                onChange={(event) => setMaxPriceFilter(event.target.value)}
+                            />
+                            <TextField
+                                label={shipmentTranslations.form.fields.currency}
+                                size="small"
+                                value={currencyFilter}
+                                onChange={(event) => setCurrencyFilter(event.target.value)}
+                            />
+                            <TextField
+                                label={shipmentTranslations.filters.locked}
+                                select
+                                size="small"
+                                value={lockedFilter}
+                                onChange={(event) => setLockedFilter(event.target.value as "ALL" | "YES" | "NO")}
+                            >
+                                <MenuItem value="ALL">{pl.common.all}</MenuItem>
+                                <MenuItem value="YES">{shipmentTranslations.dangerousGood.yes}</MenuItem>
+                                <MenuItem value="NO">{shipmentTranslations.dangerousGood.no}</MenuItem>
+                            </TextField>
+                            <TextField
+                                label={shipmentTranslations.filters.createdFrom}
+                                size="small"
+                                type="date"
+                                value={createdFromFilter}
+                                onChange={(event) => setCreatedFromFilter(event.target.value)}
+                            />
+                            <TextField
+                                label={shipmentTranslations.filters.createdTo}
+                                size="small"
+                                type="date"
+                                value={createdToFilter}
+                                onChange={(event) => setCreatedToFilter(event.target.value)}
+                            />
+                            <TextField
+                                label={shipmentTranslations.form.fields.regulationType}
+                                select
+                                size="small"
+                                value={regulationTypeFilter}
+                                onChange={(event) => setRegulationTypeFilter(event.target.value)}
+                            >
+                                <MenuItem value="">{pl.common.all}</MenuItem>
+                                {dangerousGoodRegulationTypes.map((regulationType) => (
+                                    <MenuItem key={regulationType} value={regulationType}>{regulationType}</MenuItem>
+                                ))}
+                            </TextField>
+                            <TextField
+                                label={shipmentTranslations.form.fields.transportMode}
+                                select
+                                size="small"
+                                value={transportModeFilter}
+                                onChange={(event) => setTransportModeFilter(event.target.value)}
+                            >
+                                <MenuItem value="">{pl.common.all}</MenuItem>
+                                {dangerousGoodTransportModes.map((transportMode) => (
+                                    <MenuItem key={transportMode} value={transportMode}>
+                                        {shipmentTranslations.filters.transportModes[transportMode]}
+                                    </MenuItem>
+                                ))}
+                            </TextField>
+                            <div className="tm-filter-actions">
+                                <Button disabled={loading} variant="contained" onClick={applyAdvancedFilters}>
+                                    {loading ? <CircularProgress size={18}/> : shipmentTranslations.filters.apply}
+                                </Button>
+                                <Button disabled={loading} variant="text" onClick={resetAdvancedFilters}>
+                                    {shipmentTranslations.filters.reset}
+                                </Button>
+                            </div>
+                        </section>
+                    ) : undefined}
 
                     {searchSource === "EXTERNAL" && !trackingProviders.length ? (
                         <Alert severity="info" className="tm-external-empty">
@@ -939,7 +1146,7 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
                     </div>
 
                     <div className="tm-table-footer">
-                        <span>{shipmentTranslations.table.shown} {shipmentRows.length} {shipmentTranslations.table.of} {shipments.length}</span>
+                        <span>{shipmentTranslations.table.shown} {shipmentRows.length} {shipmentTranslations.table.of} {displayedShipments.length}</span>
                         <div className="tm-pagination">
                             <button type="button">‹</button>
                             {[1, 2, 3, 4, 5].map((page) => (
