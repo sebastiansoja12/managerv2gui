@@ -842,7 +842,7 @@ export const de: typeof pl = {
             value: "Wert",
         },
         shipmentConfiguration: {
-            previewNote: "GUI-Vorschau — die Einstellungen werden nur in diesem Browser gespeichert.",
+            previewNote: "Die Konfiguration wird für den aktuellen Operator geladen und gespeichert.",
             categories: {
                 validation: "Validierung",
                 labels: "Etiketten",
@@ -1022,7 +1022,11 @@ export const de: typeof pl = {
                 },
             },
             messages: {
-                saved: "Die Sendungseinstellungen wurden lokal in der GUI gespeichert.",
+                loading: "Sendungskonfiguration wird geladen...",
+                saving: "Wird gespeichert...",
+                saved: "Die Sendungseinstellungen wurden gespeichert.",
+                loadError: "Sendungskonfiguration konnte nicht geladen werden",
+                saveError: "Sendungskonfiguration konnte nicht gespeichert werden",
             },
         },
         courierConfiguration: {
