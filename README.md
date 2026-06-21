@@ -81,6 +81,14 @@ If the map tile variables are not set, the application uses
 
 ## Available Scripts
 
+UI styling is split between shared controls and feature-owned styles. See
+[Technical UI](src/theme/technical/README.md) for file ownership and cascade rules.
+Check stylesheet imports and core text contrast across saved skins with:
+
+```bash
+npm run check:styles
+```
+
 Install dependencies:
 
 ```bash

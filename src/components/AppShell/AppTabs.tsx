@@ -89,7 +89,8 @@ function AppTabs({activePath, openTabs, onCloseAllTabs, onCloseTab, onSelectTab}
             </div>
             {openTabs.length > 1 ? (
                 <button className="app-close-tabs-button" onClick={onCloseAllTabs} type="button">
-                    {pl.app.tabs.closeAll}
+                    <span aria-hidden="true" className="app-close-tabs-icon">×</span>
+                    <span>{pl.app.tabs.closeAll}</span>
                 </button>
             ) : null}
         </nav>

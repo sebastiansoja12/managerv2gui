@@ -1050,7 +1050,7 @@ const Departments: React.FC = () => {
                     </div>
                 </DialogContent>
                 <DialogActions className="departments-dialog-actions">
-                    <Button disabled={saving} onClick={closeCreateDialog}>{createTranslations.cancel}</Button>
+                    <Button disabled={saving} variant="outlined" onClick={closeCreateDialog}>{createTranslations.cancel}</Button>
                     <Button disabled={saving} startIcon={<Save />} variant="contained" onClick={createDepartment}>
                         {saving ? createTranslations.saving : createTranslations.submit}
                     </Button>
@@ -1147,7 +1147,7 @@ const Departments: React.FC = () => {
                     </div>
                 </DialogContent>
                 <DialogActions className="departments-dialog-actions">
-                    <Button disabled={saving} onClick={closeEditDialog}>{pl.common.cancel}</Button>
+                    <Button disabled={saving} variant="outlined" onClick={closeEditDialog}>{pl.common.cancel}</Button>
                     <Button disabled={saving} startIcon={<Save />} variant="contained" onClick={updateDepartment}>
                         {saving ? editTranslations.saving : pl.common.saveChanges}
                     </Button>
@@ -1178,7 +1178,7 @@ const Departments: React.FC = () => {
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
-                    <Button disabled={saving} onClick={() => setPendingStatusChange(null)}>
+                    <Button disabled={saving} variant="outlined" onClick={() => setPendingStatusChange(null)}>
                         {pl.common.cancel}
                     </Button>
                     <Button

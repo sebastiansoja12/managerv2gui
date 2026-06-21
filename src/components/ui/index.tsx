@@ -1,4 +1,5 @@
 import React from "react";
+import {createPortal} from "react-dom";
 
 type AnyProps = {
     children?: React.ReactNode;
@@ -43,7 +44,7 @@ export function Container({className, sx, children, maxWidth, ...props}: AnyProp
 }
 
 export function Paper({className, sx, elevation, children, ...props}: AnyProps) {
-    return <div className={join("rounded-2xl border border-border bg-card text-card-foreground shadow-panel", elevation === 0 && "shadow-none", className)} style={toStyle(sx)} {...props}>{children}</div>;
+    return <div data-ui="paper" className={join("rounded-2xl border border-border bg-card text-card-foreground shadow-panel", elevation === 0 && "shadow-none", className)} style={toStyle(sx)} {...props}>{children}</div>;
 }
 
 const typographyTags: Record<string, keyof JSX.IntrinsicElements> = {
@@ -84,7 +85,7 @@ export function Chip({label, icon, avatar, onDelete, deleteIcon, color = "defaul
 
 export function Alert({severity = "info", action, className, sx, children, onClose, ...props}: AnyProps) {
     const tones: Record<string, string> = {success: "border-success/30 bg-success/10 text-success", error: "border-danger/30 bg-danger/10 text-danger", warning: "border-warning/30 bg-warning/10 text-warning", info: "border-info/30 bg-info/10 text-info"};
-    return <div data-ui="alert" role="alert" className={join("flex items-center gap-3 rounded-xl border px-4 py-3 text-sm font-medium", tones[severity] || tones.info, className)} style={toStyle(sx)} {...props}><div className="min-w-0 flex-1">{children}</div>{action}{onClose && <button type="button" className="text-current opacity-70 hover:opacity-100" onClick={onClose} aria-label="Zamknij">×</button>}</div>;
+    return <div data-ui="alert" data-severity={severity} role="alert" className={join("flex items-center gap-3 rounded-xl border px-4 py-3 text-sm font-medium", tones[severity] || tones.info, className)} style={toStyle(sx)} {...props}><div className="min-w-0 flex-1">{children}</div>{action}{onClose && <button type="button" className="text-current opacity-70 hover:opacity-100" onClick={onClose} aria-label="Zamknij">×</button>}</div>;
 }
 
 export function CircularProgress({size = 24, className, sx, ...props}: AnyProps) {
@@ -96,12 +97,307 @@ type TextFieldProps = AnyProps & {
     onBlur?: React.FocusEventHandler<any>;
 };
 
+type SelectOptionModel = {
+    disabled: boolean;
+    key: React.Key;
+    label: React.ReactNode;
+    value: string;
+};
+
+const collectSelectOptions = (children: React.ReactNode): SelectOptionModel[] => {
+    const options: SelectOptionModel[] = [];
+
+    React.Children.forEach(children, (child) => {
+        if (!React.isValidElement(child)) {
+            return;
+        }
+
+        if (child.type === React.Fragment) {
+            options.push(...collectSelectOptions(child.props.children));
+            return;
+        }
+
+        if (child.props.value === undefined) {
+            return;
+        }
+
+        options.push({
+            disabled: Boolean(child.props.disabled),
+            key: child.key || String(child.props.value),
+            label: child.props.children,
+            value: String(child.props.value),
+        });
+    });
+
+    return options;
+};
+
+type TechnicalSelectProps = AnyProps & {
+    onChange?: React.ChangeEventHandler<HTMLSelectElement>;
+};
+
+function TechnicalSelect({
+    children,
+    className,
+    defaultValue,
+    disabled,
+    fullWidth,
+    id,
+    labelId,
+    name,
+    onBlur,
+    onChange,
+    required,
+    sx,
+    value,
+    ...props
+}: TechnicalSelectProps) {
+    const options = React.useMemo(() => collectSelectOptions(children), [children]);
+    const firstEnabledValue = options.find((option) => !option.disabled)?.value || "";
+    const [uncontrolledValue, setUncontrolledValue] = React.useState(String(defaultValue ?? firstEnabledValue));
+    const [open, setOpen] = React.useState(false);
+    const [menuPosition, setMenuPosition] = React.useState<React.CSSProperties>({});
+    const rootRef = React.useRef<HTMLDivElement>(null);
+    const triggerRef = React.useRef<HTMLButtonElement>(null);
+    const menuRef = React.useRef<HTMLDivElement>(null);
+    const controlled = value !== undefined;
+    const selectedValue = String(controlled ? value : uncontrolledValue);
+    const selectedOption = options.find((option) => option.value === selectedValue);
+    const menuId = `${id || "technical-select"}-options`;
+
+    const updateMenuPosition = React.useCallback(() => {
+        const rect = triggerRef.current?.getBoundingClientRect();
+        if (!rect) {
+            return;
+        }
+
+        const minimumWidth = Math.max(rect.width, 196);
+        const left = Math.min(rect.left, window.innerWidth - minimumWidth - 8);
+        setMenuPosition({
+            left: Math.max(8, left),
+            maxHeight: Math.max(160, Math.min(360, window.innerHeight - rect.bottom - 18)),
+            top: rect.bottom + 6,
+            width: minimumWidth,
+        });
+    }, []);
+
+    React.useLayoutEffect(() => {
+        if (!open) {
+            return undefined;
+        }
+
+        updateMenuPosition();
+        const focusSelectedOption = window.requestAnimationFrame(() => {
+            const selected = menuRef.current?.querySelector<HTMLButtonElement>('[aria-selected="true"]');
+            const firstEnabled = menuRef.current?.querySelector<HTMLButtonElement>('button:not(:disabled)');
+            (selected || firstEnabled)?.focus();
+        });
+        const close = () => setOpen(false);
+        const closeOnExternalScroll = (event: Event) => {
+            const target = event.target;
+            if (target instanceof Node && menuRef.current?.contains(target)) {
+                return;
+            }
+            close();
+        };
+
+        window.addEventListener("resize", close);
+        window.addEventListener("scroll", closeOnExternalScroll, true);
+        return () => {
+            window.cancelAnimationFrame(focusSelectedOption);
+            window.removeEventListener("resize", close);
+            window.removeEventListener("scroll", closeOnExternalScroll, true);
+        };
+    }, [open, updateMenuPosition]);
+
+    React.useEffect(() => {
+        if (!open) {
+            return undefined;
+        }
+
+        const closeOnOutsideInteraction = (event: PointerEvent) => {
+            const target = event.target as Node;
+            if (!rootRef.current?.contains(target) && !menuRef.current?.contains(target)) {
+                setOpen(false);
+            }
+        };
+
+        document.addEventListener("pointerdown", closeOnOutsideInteraction);
+        return () => document.removeEventListener("pointerdown", closeOnOutsideInteraction);
+    }, [open]);
+
+    React.useEffect(() => {
+        const trigger = triggerRef.current;
+        if (!trigger) {
+            return undefined;
+        }
+
+        const handleLegacyChange = (event: Event) => {
+            const nextValue = (event.currentTarget as HTMLButtonElement).value;
+            const nextOption = options.find((option) => option.value === nextValue);
+            if (!nextOption || nextOption.disabled) {
+                return;
+            }
+
+            if (!controlled) {
+                setUncontrolledValue(nextOption.value);
+            }
+            onChange?.({
+                currentTarget: {name, value: nextOption.value},
+                target: {name, value: nextOption.value},
+            } as unknown as React.ChangeEvent<HTMLSelectElement>);
+            setOpen(false);
+        };
+
+        trigger.addEventListener("change", handleLegacyChange);
+        return () => trigger.removeEventListener("change", handleLegacyChange);
+    }, [controlled, name, onChange, options]);
+
+    const chooseOption = (option: SelectOptionModel) => {
+        if (option.disabled) {
+            return;
+        }
+
+        if (!controlled) {
+            setUncontrolledValue(option.value);
+        }
+
+        onChange?.({
+            currentTarget: {name, value: option.value},
+            target: {name, value: option.value},
+        } as unknown as React.ChangeEvent<HTMLSelectElement>);
+        setOpen(false);
+        window.requestAnimationFrame(() => triggerRef.current?.focus());
+    };
+
+    const handleOptionKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
+        const enabledOptions = Array.from(menuRef.current?.querySelectorAll<HTMLButtonElement>('button:not(:disabled)') || []);
+        const currentIndex = enabledOptions.indexOf(event.currentTarget);
+        let nextIndex = currentIndex;
+
+        if (event.key === "ArrowDown") {
+            nextIndex = Math.min(enabledOptions.length - 1, currentIndex + 1);
+        } else if (event.key === "ArrowUp") {
+            nextIndex = Math.max(0, currentIndex - 1);
+        } else if (event.key === "Home") {
+            nextIndex = 0;
+        } else if (event.key === "End") {
+            nextIndex = enabledOptions.length - 1;
+        } else if (event.key === "Escape") {
+            event.preventDefault();
+            setOpen(false);
+            triggerRef.current?.focus();
+            return;
+        } else if (event.key === "Tab") {
+            setOpen(false);
+            return;
+        } else {
+            return;
+        }
+
+        event.preventDefault();
+        enabledOptions[nextIndex]?.focus();
+    };
+
+    const menu = open ? createPortal(
+        <div
+            aria-labelledby={labelId}
+            className="technical-select-menu"
+            data-ui="select-menu"
+            id={menuId}
+            ref={menuRef}
+            role="listbox"
+            style={menuPosition}
+        >
+            {options.map((option) => (
+                <button
+                    aria-selected={option.value === selectedValue}
+                    className="technical-select-option"
+                    disabled={option.disabled}
+                    key={option.key}
+                    onClick={() => chooseOption(option)}
+                    onKeyDown={handleOptionKeyDown}
+                    role="option"
+                    tabIndex={option.value === selectedValue ? 0 : -1}
+                    type="button"
+                >
+                    <span>{option.label}</span>
+                    <span aria-hidden="true" className="technical-select-check">✓</span>
+                </button>
+            ))}
+        </div>,
+        document.body,
+    ) : null;
+
+    return (
+        <div
+            className={join("technical-select", fullWidth && "w-full", className)}
+            data-disabled={disabled ? "true" : undefined}
+            data-open={open ? "true" : undefined}
+            data-ui="select"
+            ref={rootRef}
+            style={toStyle(sx)}
+        >
+            <select
+                aria-hidden="true"
+                className="technical-select-native"
+                disabled={disabled}
+                name={name}
+                onChange={() => undefined}
+                required={required}
+                tabIndex={-1}
+                value={selectedValue}
+            >
+                {options.map((option) => (
+                    <option disabled={option.disabled} key={option.key} value={option.value}>{option.label}</option>
+                ))}
+            </select>
+            <button
+                aria-controls={menuId}
+                aria-expanded={open}
+                aria-haspopup="listbox"
+                aria-labelledby={labelId}
+                className="technical-select-trigger"
+                disabled={disabled}
+                id={id}
+                onBlur={onBlur}
+                onClick={(event) => {
+                    if (event.detail === 0) {
+                        setOpen((current) => !current);
+                    }
+                }}
+                onKeyDown={(event) => {
+                    if (["ArrowDown", "ArrowUp", "Enter", " "].includes(event.key)) {
+                        event.preventDefault();
+                        setOpen(true);
+                    }
+                }}
+                onMouseDown={(event) => {
+                    if (event.button === 0) {
+                        event.preventDefault();
+                        setOpen((current) => !current);
+                    }
+                }}
+                ref={triggerRef}
+                role="combobox"
+                type="button"
+                {...omitLegacyProps(props, ["autoComplete", "MenuProps", "variant", "size"])}
+            >
+                <span className="technical-select-value">{selectedOption?.label ?? "—"}</span>
+                <span aria-hidden="true" className="technical-select-chevron" />
+            </button>
+            {menu}
+        </div>
+    );
+}
+
 export function TextField({label, helperText, error, select, multiline, rows, fullWidth, required, disabled, className, sx, InputProps, inputProps, SelectProps, variant, margin, size, children, id, ...props}: TextFieldProps) {
     const inputClass = join("w-full rounded-xl border bg-input px-3 py-2.5 text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-ring/30 disabled:cursor-not-allowed disabled:opacity-60", error ? "border-danger" : "border-border");
     const generatedId = React.useId();
     const resolvedId = id || props.name || `field-${generatedId.replace(/[^a-zA-Z0-9_-]/g, "")}`;
+    const labelId = `${resolvedId}-label`;
     const common = {...omitLegacyProps(props, ["autoComplete", "defaultValue"]), ...(InputProps?.inputProps || {}), ...(inputProps || {})};
-    return <label data-ui="text-field" className={join("block", fullWidth !== false && "w-full", className)} htmlFor={resolvedId} style={toStyle(sx)}>{label && <span data-ui="input-label" className="mb-1.5 block text-sm font-medium text-foreground">{label}{required && <span aria-hidden="true" className="ml-1 text-danger"> *</span>}</span>}{select ? <select data-ui="select" id={resolvedId} disabled={disabled} className={inputClass} {...common} {...SelectProps}>{children}</select> : multiline ? <textarea data-ui="input" id={resolvedId} disabled={disabled} rows={rows || 3} className={inputClass} {...common} /> : <input data-ui="input" id={resolvedId} disabled={disabled} className={inputClass} {...common} />}{helperText && <span data-ui="helper" className={join("mt-1.5 block text-xs", error ? "text-danger" : "text-muted-foreground")}>{helperText}</span>}</label>;
+    return <div data-ui="text-field" className={join("block", fullWidth !== false && "w-full", className)} style={toStyle(sx)}>{label && <label data-ui="input-label" className="mb-1.5 block text-sm font-medium text-foreground" htmlFor={resolvedId} id={labelId}>{label}{required && <span aria-hidden="true" className="ml-1 text-danger"> *</span>}</label>}{select ? <TechnicalSelect id={resolvedId} labelId={label ? labelId : undefined} disabled={disabled} required={required} className={inputClass} {...common} {...SelectProps}>{children}</TechnicalSelect> : multiline ? <textarea data-ui="input" id={resolvedId} disabled={disabled} required={required} rows={rows || 3} className={inputClass} {...common} /> : <input data-ui="input" id={resolvedId} disabled={disabled} required={required} className={inputClass} {...common} />}{helperText && <span data-ui="helper" className={join("mt-1.5 block text-xs", error ? "text-danger" : "text-muted-foreground")}>{helperText}</span>}</div>;
 }
 
 const MenuContext = React.createContext(false);
@@ -124,7 +420,7 @@ export function MenuItem({value, className, children, disabled, onClick, sx, ...
             {...props}
         >{children}</option>;
     }
-    return <button type="button" role="menuitem" disabled={disabled} onClick={onClick} className={join("flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-foreground transition hover:bg-surface-secondary disabled:opacity-50", className)} style={toStyle(sx)} {...props}>{children}</button>;
+    return <button data-ui="menu-item" type="button" role="menuitem" disabled={disabled} onClick={onClick} className={join("flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-foreground transition hover:bg-surface-secondary disabled:opacity-50", className)} style={toStyle(sx)} {...props}>{children}</button>;
 }
 
 export function FormControl({children, className, sx, fullWidth, ...props}: AnyProps) {
@@ -138,14 +434,14 @@ export function InputLabel({children, className, sx, ...props}: AnyProps) {
 type SelectProps = AnyProps & {onChange?: React.ChangeEventHandler<HTMLSelectElement>};
 
 export function Select({children, className, sx, fullWidth, id, labelId, ...props}: SelectProps) {
-    return <select
-        data-ui="select"
+    return <TechnicalSelect
         id={id}
-        aria-labelledby={labelId}
+        labelId={labelId}
         className={join("rounded-xl border border-border bg-input px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-ring/30", fullWidth && "w-full", className)}
-        style={toStyle(sx)}
+        sx={sx}
+        fullWidth={fullWidth}
         {...omitLegacyProps(props, ["label", "labelId", "variant", "size"])}
-    >{children}</select>;
+    >{children}</TechnicalSelect>;
 }
 
 type CheckableProps = AnyProps & {onChange?: React.ChangeEventHandler<HTMLInputElement>};
@@ -168,13 +464,13 @@ export function Stack({direction = "column", spacing = 1, alignItems, justifyCon
 }
 
 export function TableContainer({children, className, sx, component: Component = "div", ...props}: AnyProps) {
-    return <Component className={join("w-full overflow-x-auto rounded-xl border border-border", className)} style={toStyle(sx)} {...props}>{children}</Component>;
+    return <Component data-ui="table-container" className={join("w-full overflow-x-auto rounded-xl border border-border", className)} style={toStyle(sx)} {...props}>{children}</Component>;
 }
-export function Table({children, className, sx, size, ...props}: AnyProps) { return <table className={join("w-full border-collapse text-left text-sm", size === "small" && "text-xs", className)} style={toStyle(sx)} {...props}>{children}</table>; }
-export function TableHead({children, className, sx, ...props}: AnyProps) { return <thead className={join("bg-surface-secondary text-muted-foreground", className)} style={toStyle(sx)} {...props}>{children}</thead>; }
-export function TableBody({children, className, sx, ...props}: AnyProps) { return <tbody className={join("divide-y divide-border", className)} style={toStyle(sx)} {...props}>{children}</tbody>; }
-export function TableRow({children, className, sx, hover, selected, ...props}: AnyProps) { return <tr className={join("transition", hover && "hover:bg-surface-secondary", selected && "bg-primary/10", className)} style={toStyle(sx)} {...props}>{children}</tr>; }
-export function TableCell({children, className, sx, align, component: Component = "td", colSpan, rowSpan, ...props}: AnyProps) { return <Component className={join("px-4 py-3 align-middle text-foreground", align === "right" && "text-right", align === "center" && "text-center", className)} style={toStyle(sx)} colSpan={colSpan} rowSpan={rowSpan} {...omitLegacyProps(props, ["padding", "sortDirection"])}>{children}</Component>; }
+export function Table({children, className, sx, size, ...props}: AnyProps) { return <table data-ui="table" className={join("w-full border-collapse text-left text-sm", size === "small" && "text-xs", className)} style={toStyle(sx)} {...props}>{children}</table>; }
+export function TableHead({children, className, sx, ...props}: AnyProps) { return <thead data-ui="table-head" className={join("bg-surface-secondary text-muted-foreground", className)} style={toStyle(sx)} {...props}>{children}</thead>; }
+export function TableBody({children, className, sx, ...props}: AnyProps) { return <tbody data-ui="table-body" className={join("divide-y divide-border", className)} style={toStyle(sx)} {...props}>{children}</tbody>; }
+export function TableRow({children, className, sx, hover, selected, ...props}: AnyProps) { return <tr data-ui="table-row" className={join("transition", hover && "hover:bg-surface-secondary", selected && "bg-primary/10", className)} style={toStyle(sx)} {...props}>{children}</tr>; }
+export function TableCell({children, className, sx, align, component: Component = "td", colSpan, rowSpan, ...props}: AnyProps) { return <Component data-ui="table-cell" className={join("px-4 py-3 align-middle text-foreground", align === "right" && "text-right", align === "center" && "text-center", className)} style={toStyle(sx)} colSpan={colSpan} rowSpan={rowSpan} {...omitLegacyProps(props, ["padding", "sortDirection"])}>{children}</Component>; }
 
 type TablePaginationProps = AnyProps & {
     onPageChange?: (event: React.MouseEvent<HTMLButtonElement>, page: number) => void;
@@ -185,7 +481,7 @@ type TablePaginationProps = AnyProps & {
 export function TablePagination({count, page = 0, rowsPerPage = 10, onPageChange, onRowsPerPageChange, rowsPerPageOptions = [5, 10, 25], labelDisplayedRows, className, sx, ...props}: TablePaginationProps) {
     const lastPage = Math.max(0, Math.ceil(Math.max(0, count) / rowsPerPage) - 1);
     const displayed = labelDisplayedRows?.({from: count ? page * rowsPerPage + 1 : 0, to: Math.min((page + 1) * rowsPerPage, count), count, page}) || (count ? `${page * rowsPerPage + 1}–${Math.min((page + 1) * rowsPerPage, count)} z ${count}` : "0 z 0");
-    return <div className={join("flex flex-wrap items-center justify-end gap-3 border-t border-border px-3 py-2 text-sm text-muted-foreground", className)} style={toStyle(sx)} {...omitLegacyProps(props, ["component", "labelRowsPerPage"])}><span>{displayed}</span><select value={rowsPerPage} onChange={onRowsPerPageChange} className="rounded-lg border border-border bg-input px-2 py-1 text-foreground">{rowsPerPageOptions.map((value: number) => <option key={value} value={value}>{value}</option>)}</select><button type="button" className="rounded-lg px-2 py-1 hover:bg-surface-secondary disabled:opacity-40" onClick={(event) => onPageChange?.(event, Math.max(0, page - 1))} disabled={page <= 0}>‹</button><button type="button" className="rounded-lg px-2 py-1 hover:bg-surface-secondary disabled:opacity-40" onClick={(event) => onPageChange?.(event, Math.min(lastPage, page + 1))} disabled={page >= lastPage}>›</button></div>;
+    return <div data-ui="table-pagination" className={join("flex flex-wrap items-center justify-end gap-3 border-t border-border px-3 py-2 text-sm text-muted-foreground", className)} style={toStyle(sx)} {...omitLegacyProps(props, ["component", "labelRowsPerPage"])}><span>{displayed}</span><select value={rowsPerPage} onChange={onRowsPerPageChange} className="rounded-lg border border-border bg-input px-2 py-1 text-foreground">{rowsPerPageOptions.map((value: number) => <option key={value} value={value}>{value}</option>)}</select><button type="button" className="rounded-lg px-2 py-1 hover:bg-surface-secondary disabled:opacity-40" onClick={(event) => onPageChange?.(event, Math.max(0, page - 1))} disabled={page <= 0}>‹</button><button type="button" className="rounded-lg px-2 py-1 hover:bg-surface-secondary disabled:opacity-40" onClick={(event) => onPageChange?.(event, Math.min(lastPage, page + 1))} disabled={page >= lastPage}>›</button></div>;
 }
 
 export function Tooltip({title, children, className, ...props}: AnyProps) {

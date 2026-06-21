@@ -1,0 +1,64 @@
+/* Tables share one dense, technical hierarchy. */
+.app-main-content table,
+.super-admin-app table {
+    background: transparent !important;
+    border-collapse: collapse;
+    color: var(--foreground) !important;
+}
+
+.app-main-content table thead,
+.app-main-content table tfoot,
+.super-admin-app table thead,
+.super-admin-app table tfoot {
+    background: var(--surface-secondary) !important;
+}
+
+.app-main-content table thead th,
+.super-admin-app table thead th,
+.super-admin-table-head {
+    background: var(--surface-secondary) !important;
+    border-color: var(--border) !important;
+    color: var(--muted-foreground) !important;
+    font-family: var(--font-mono) !important;
+    font-size: 0.68rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.06em !important;
+    text-transform: uppercase;
+}
+
+.app-main-content table td,
+.super-admin-app table td,
+.super-admin-table-row {
+    background: transparent;
+    border-color: var(--border) !important;
+    color: var(--foreground) !important;
+    font-family: var(--font-ui) !important;
+}
+
+/* Row headers contain record values, not column metadata. */
+:root[data-theme] .app-main-content table tbody th {
+    background: transparent !important;
+    border-color: var(--border) !important;
+    color: var(--foreground) !important;
+    font-family: var(--font-ui) !important;
+    font-size: 0.8125rem !important;
+    font-weight: 600 !important;
+    letter-spacing: normal !important;
+    text-transform: none !important;
+}
+
+.app-main-content table tbody tr:hover > td,
+.super-admin-table-row:not(.super-admin-table-head):hover {
+    background: var(--technical-row-hover) !important;
+}
+
+.app-main-content :is(
+    .couriers-row-selected,
+    .departments-row-selected,
+    .users-row-selected,
+    .tm-clickable-row[class*="selected"]
+) > td,
+.super-admin-table-row-active {
+    background: var(--technical-accent-soft) !important;
+    box-shadow: inset 2px 0 var(--primary) !important;
+}

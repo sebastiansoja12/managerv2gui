@@ -19,17 +19,17 @@
 
 .global-configuration-header {
     background: var(--brand-surface);
-    border: 1px solid #e4e9f1;
+    border: 1px solid var(--border);
     border-radius: 8px;
-    box-shadow: 0 16px 34px var(--brand-shadow);
+    box-shadow: none;
     display: flex;
     min-width: 0;
     padding: 22px 24px;
 }
 
 .global-configuration-header h4 {
-    color: #101828;
-    font-weight: 800;
+    color: var(--foreground);
+    font-weight: 600;
     letter-spacing: 0;
 }
 
@@ -39,10 +39,10 @@
 }
 
 .global-configuration-kicker {
-    color: #315a9f;
+    color: var(--primary);
     display: block;
     font-size: 13px;
-    font-weight: 800;
+    font-weight: 600;
     letter-spacing: 0;
     margin-bottom: 4px;
     text-transform: uppercase;
@@ -50,9 +50,9 @@
 
 .global-configuration-tabs {
     background: var(--brand-surface);
-    border: 1px solid #e4e9f1;
+    border: 1px solid var(--border);
     border-radius: 8px;
-    box-shadow: 0 16px 34px var(--brand-shadow);
+    box-shadow: none;
     overflow: hidden;
     padding: 10px;
     min-width: 0;
@@ -71,12 +71,12 @@
     background: var(--brand-surface);
     border: 1px solid transparent;
     border-radius: 8px;
-    color: #344054;
+    color: var(--foreground);
     cursor: pointer;
     display: inline-flex;
     font: inherit;
     font-size: 15px;
-    font-weight: 850;
+    font-weight: 600;
     justify-content: center;
     letter-spacing: 0;
     min-height: 42px;
@@ -89,23 +89,23 @@
 .global-configuration-tab:hover,
 .global-configuration-tab:focus-visible {
     background: var(--brand-accent-wash);
-    border-color: #d7e3ff;
-    color: #315a9f;
+    border-color: var(--border);
+    color: var(--primary);
     outline: none;
 }
 
 .global-configuration-tab-active {
-    background: #eaf1ff;
-    border-color: #d7e3ff;
-    color: #1f56c0;
+    background: var(--surface-secondary);
+    border-color: var(--border);
+    color: var(--primary);
 }
 
 .global-configuration-toolbar,
 .global-configuration-section {
     background: var(--brand-surface);
-    border: 1px solid #e4e9f1;
+    border: 1px solid var(--border);
     border-radius: 8px;
-    box-shadow: 0 16px 34px var(--brand-shadow);
+    box-shadow: none;
     margin: 0;
     min-width: 0;
 }
@@ -120,9 +120,9 @@
 }
 
 .global-configuration-toolbar h2 {
-    color: #101828;
+    color: var(--foreground);
     font-size: 22px;
-    font-weight: 800;
+    font-weight: 600;
     letter-spacing: 0;
     margin: 0;
 }
@@ -135,13 +135,13 @@
 .global-configuration-loader {
     align-items: center;
     background: var(--brand-surface);
-    border: 1px solid #e4e9f1;
+    border: 1px solid var(--border);
     border-radius: 8px;
     color: var(--brand-muted);
     display: flex;
     gap: 10px;
     justify-content: center;
-    box-shadow: 0 16px 34px var(--brand-shadow);
+    box-shadow: none;
     min-height: 260px;
     min-width: 0;
 }
@@ -163,9 +163,9 @@
 }
 
 .global-configuration-panel-header h3 {
-    color: #101828;
+    color: var(--foreground);
     font-size: 20px;
-    font-weight: 800;
+    font-weight: 600;
     letter-spacing: 0;
     margin: 0;
 }
@@ -179,7 +179,7 @@
 
 .global-configuration-courier-grid [data-ui="form-control-label"] {
     background: var(--brand-accent-wash);
-    border: 1px solid #e6ebf2;
+    border: 1px solid var(--border);
     border-radius: 8px;
     margin: 0;
     min-height: 52px;
@@ -188,9 +188,9 @@
 }
 
 .global-configuration-courier-grid [data-ui="form-control-label-text"] {
-    color: #344054;
+    color: var(--foreground);
     font-size: 14px;
-    font-weight: 700;
+    font-weight: 600;
 }
 
 .global-configuration-table-wrap {
@@ -205,7 +205,7 @@
 
 .global-configuration-table th,
 .global-configuration-table td {
-    border-bottom: 1px solid #eef2f7;
+    border-bottom: 1px solid var(--border);
     color: var(--brand-ink);
     font-size: 14px;
     padding: 14px 12px;
@@ -216,7 +216,7 @@
 .global-configuration-table th {
     background: var(--brand-accent-wash);
     color: var(--brand-muted);
-    font-weight: 800;
+    font-weight: 600;
     white-space: nowrap;
 }
 
@@ -225,12 +225,12 @@
 }
 
 .global-configuration-category {
-    background: #eef2ff;
+    background: var(--surface-secondary);
     border-radius: 7px;
-    color: #315a9f;
+    color: var(--primary);
     display: inline-flex;
     font-size: 13px;
-    font-weight: 800;
+    font-weight: 600;
     padding: 5px 9px;
     white-space: nowrap;
 }
@@ -261,7 +261,7 @@
     border-radius: 9px;
     color: var(--foreground);
     flex: 0 0 auto;
-    font-weight: 800;
+    font-weight: 600;
     min-height: 40px;
     text-transform: none;
 }
@@ -302,8 +302,7 @@
         var(--surface-elevated);
     border: 1px solid color-mix(in srgb, var(--success) 42%, var(--border));
     border-radius: 14px;
-    box-shadow: 0 18px 48px color-mix(in srgb, var(--success) 16%, transparent),
-        0 14px 34px color-mix(in srgb, var(--foreground) 24%, transparent);
+    box-shadow: none;
     color: var(--foreground);
     display: flex;
     gap: 12px;
@@ -340,7 +339,7 @@
 .shipment-configuration-toast-copy strong {
     color: var(--foreground);
     font-size: 14px;
-    font-weight: 850;
+    font-weight: 600;
     letter-spacing: 0;
     line-height: 1.3;
 }
@@ -406,7 +405,7 @@
 .shipment-configuration-group > header h3 {
     color: var(--foreground);
     font-size: 1rem;
-    font-weight: 850;
+    font-weight: 600;
     letter-spacing: -0.01em;
     margin: 0;
 }
@@ -450,7 +449,7 @@
 .shipment-setting-copy strong {
     color: var(--foreground);
     font-size: 0.82rem;
-    font-weight: 800;
+    font-weight: 600;
     line-height: 1.35;
 }
 
@@ -468,7 +467,7 @@
 .shipment-setting-row [data-ui="form-control-label-text"] {
     color: var(--muted-foreground);
     font-size: 0.75rem;
-    font-weight: 700;
+    font-weight: 600;
 }
 
 .shipment-setting-row [data-ui="switch"] > input:checked + span {
@@ -486,7 +485,7 @@
     color: var(--muted-foreground);
     flex: 0 0 auto;
     font-size: 0.75rem;
-    font-weight: 750;
+    font-weight: 600;
 }
 
 .shipment-setting-input [data-ui="input"],
@@ -565,7 +564,7 @@
 .shipment-tracking-number-fields [data-ui="input-label"] {
     color: var(--muted-foreground);
     font-size: 0.72rem;
-    font-weight: 800;
+    font-weight: 600;
     letter-spacing: 0.04em;
     text-transform: uppercase;
 }
@@ -616,7 +615,7 @@
 .shipment-tracking-number-preview span {
     color: var(--muted-foreground);
     font-size: 0.68rem;
-    font-weight: 800;
+    font-weight: 600;
     letter-spacing: 0.05em;
     text-transform: uppercase;
 }
@@ -624,7 +623,7 @@
 .shipment-tracking-number-preview code {
     color: var(--foreground);
     font-size: 0.95rem;
-    font-weight: 800;
+    font-weight: 600;
     overflow-wrap: anywhere;
 }
 
@@ -640,7 +639,7 @@
     border-color: var(--border-strong);
     border-radius: 9px;
     color: var(--foreground);
-    font-weight: 800;
+    font-weight: 600;
     min-height: 40px;
     text-transform: none;
 }
@@ -704,7 +703,7 @@
 .geocoding-configuration-heading h3 {
     color: var(--foreground);
     font-size: 1rem;
-    font-weight: 850;
+    font-weight: 600;
     margin: 0;
 }
 
@@ -721,7 +720,7 @@
     border-color: var(--border-strong);
     border-radius: 9px;
     color: var(--foreground);
-    font-weight: 800;
+    font-weight: 600;
     min-height: 40px;
     text-transform: none;
 }
@@ -763,7 +762,7 @@
     border-radius: 8px 8px 0 0;
     color: var(--muted-foreground);
     font-size: 12px;
-    font-weight: 800;
+    font-weight: 600;
     letter-spacing: 0.025em;
     padding: 8px 11px;
     text-transform: uppercase;
@@ -815,7 +814,7 @@
 .geocoding-provider-main h4 {
     color: var(--foreground);
     font-size: 15px;
-    font-weight: 800;
+    font-weight: 600;
     margin: 0;
 }
 
@@ -823,7 +822,7 @@
     color: var(--muted-foreground);
     display: block;
     font-size: 12px;
-    font-weight: 750;
+    font-weight: 600;
     letter-spacing: 0.04em;
     margin-top: 2px;
 }
@@ -832,7 +831,7 @@
     color: var(--muted-foreground);
     display: block;
     font-size: 12px;
-    font-weight: 700;
+    font-weight: 600;
     margin-top: 2px;
 }
 
@@ -854,7 +853,7 @@
     color: var(--muted-foreground);
     display: inline-flex;
     font-size: 12px;
-    font-weight: 700;
+    font-weight: 600;
     gap: 5px;
     margin-top: 4px;
 }
@@ -927,7 +926,7 @@
     border-bottom: 1px solid var(--border);
     color: var(--foreground);
     font-size: 1.15rem;
-    font-weight: 850;
+    font-weight: 600;
     letter-spacing: -0.015em;
     padding: 20px 22px;
 }
@@ -959,7 +958,7 @@
 .geocoding-configuration-dialog [data-ui="form-control"] [data-ui="input-label"] {
     color: var(--muted-foreground);
     font-size: 0.72rem;
-    font-weight: 800;
+    font-weight: 600;
     letter-spacing: 0.04em;
     text-transform: uppercase;
 }
@@ -977,7 +976,7 @@
     border-color: var(--border-strong);
     border-radius: 9px;
     color: var(--foreground);
-    font-weight: 800;
+    font-weight: 600;
     min-height: 40px;
     text-transform: none;
 }
@@ -1013,8 +1012,8 @@
 
 .geocoding-enabled-control {
     align-items: center;
-    background: #f8faff;
-    border: 1px solid #e2e9f5;
+    background: var(--surface);
+    border: 1px solid var(--border);
     border-radius: 10px;
     cursor: pointer;
     display: flex;
@@ -1029,11 +1028,11 @@
 }
 
 .geocoding-enabled-control strong {
-    color: #344054;
+    color: var(--foreground);
 }
 
 .geocoding-enabled-control small {
-    color: #667085;
+    color: var(--muted-foreground);
     margin-top: 2px;
 }
 
@@ -1059,8 +1058,8 @@
 }
 
 .integration-provider-panel {
-    background: #f8fbff;
-    border: 1px solid #e2e8f1;
+    background: var(--surface);
+    border: 1px solid var(--border);
     border-radius: 8px;
     display: grid;
     gap: 10px;
@@ -1094,7 +1093,7 @@
 }
 
 .integration-provider-status-section {
-    border-top: 1px solid #e1e8f2;
+    border-top: 1px solid var(--border);
     grid-area: provider-status;
     padding: 9px 2px 0;
 }
@@ -1109,15 +1108,15 @@
 }
 
 .integration-provider-panel-heading h4 {
-    color: #101828;
+    color: var(--foreground);
     font-size: 14px;
-    font-weight: 850;
+    font-weight: 600;
     line-height: 1.25;
     margin: 0;
 }
 
 .integration-provider-panel-heading p {
-    color: #667085;
+    color: var(--muted-foreground);
     font-size: 11px;
     font-weight: 650;
     margin: 3px 0 0;
@@ -1135,8 +1134,8 @@
 
 .integration-provider-menu-item {
     align-items: center;
-    background: #ffffff;
-    border: 1px solid #e3eaf3;
+    background: var(--card);
+    border: 1px solid var(--border);
     border-radius: 8px;
     color: inherit;
     cursor: pointer;
@@ -1152,8 +1151,8 @@
 .integration-provider-menu-item:hover,
 .integration-provider-menu-item:focus-visible,
 .integration-provider-menu-item-active {
-    background: #f4f8ff;
-    border-color: #bdd2ff;
+    background: var(--surface-secondary);
+    border-color: var(--border);
     box-shadow: 0 8px 18px rgba(49, 90, 159, 0.08);
     outline: none;
 }
@@ -1168,26 +1167,26 @@
 }
 
 .integration-provider-menu-copy strong {
-    color: #101828;
+    color: var(--foreground);
     font-size: 16px;
-    font-weight: 850;
+    font-weight: 600;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
 .integration-provider-menu-copy small {
-    color: #667085;
+    color: var(--muted-foreground);
     font-size: 12px;
-    font-weight: 700;
+    font-weight: 600;
     margin-top: 2px;
 }
 
 .integration-provider-icon {
     align-items: center;
-    background: #f1ecff;
+    background: var(--surface-secondary);
     border-radius: 8px;
-    color: #6941c6;
+    color: var(--primary);
     display: flex;
     height: 48px;
     justify-content: center;
@@ -1199,7 +1198,7 @@
 }
 
 .integration-provider-dot {
-    background: #d0d5dd;
+    background: var(--muted);
     border-radius: 999px;
     display: block;
     height: 9px;
@@ -1207,12 +1206,12 @@
 }
 
 .integration-provider-dot-active {
-    background: #2e7d32;
-    box-shadow: 0 0 0 4px rgba(46, 125, 50, 0.12);
+    background: var(--success);
+    box-shadow: none;
 }
 
 .integration-provider-actions {
-    border-top: 1px solid #e1e8f2;
+    border-top: 1px solid var(--border);
     display: grid;
     gap: 8px;
     grid-area: provider-actions;
@@ -1223,7 +1222,7 @@
 .integration-provider-actions [data-ui="button"] {
     border-radius: 7px;
     font-size: 11px;
-    font-weight: 800;
+    font-weight: 600;
     justify-content: center;
     line-height: 1.15;
     min-height: 48px;
@@ -1242,8 +1241,8 @@
 
 .integration-status-panel {
     align-items: center;
-    background: #f8fbff;
-    border: 1px solid #e1e9f4;
+    background: var(--surface);
+    border: 1px solid var(--border);
     border-radius: 8px;
     display: flex;
     gap: 16px;
@@ -1261,9 +1260,9 @@
 
 .integration-status-icon {
     align-items: center;
-    background: #eaf1ff;
+    background: var(--surface-secondary);
     border-radius: 8px;
-    color: #315a9f;
+    color: var(--primary);
     display: flex;
     flex: 0 0 32px;
     height: 32px;
@@ -1272,22 +1271,22 @@
 }
 
 .integration-status-copy h4 {
-    color: #101828;
+    color: var(--foreground);
     font-size: 13px;
-    font-weight: 850;
+    font-weight: 600;
     margin: 0;
 }
 
 .integration-status-copy p {
-    color: #667085;
+    color: var(--muted-foreground);
     font-size: 11px;
     font-weight: 650;
     margin: 3px 0 0;
 }
 
 .integration-option-group {
-    background: #ffffff;
-    border: 1px solid #e4eaf2;
+    background: var(--card);
+    border: 1px solid var(--border);
     border-radius: 8px;
     display: flex;
     flex-direction: column;
@@ -1307,21 +1306,21 @@
 }
 
 .integration-option-heading > svg {
-    color: #315a9f;
+    color: var(--primary);
     flex: 0 0 auto;
     margin-top: 1px;
 }
 
 .integration-option-heading h5 {
-    color: #101828;
+    color: var(--foreground);
     font-size: 17px;
-    font-weight: 850;
+    font-weight: 600;
     line-height: 1.2;
     margin: 0;
 }
 
 .integration-option-heading p {
-    color: #667085;
+    color: var(--muted-foreground);
     font-size: 13px;
     font-weight: 650;
     line-height: 1.35;
@@ -1347,15 +1346,15 @@
 
 .integration-option-group [data-ui="form-control-label-text"],
 .integration-switch-list .integration-switch-row > span {
-    color: #344054;
+    color: var(--foreground);
     font-size: 14px;
-    font-weight: 700;
+    font-weight: 600;
 }
 
 .integration-switch-row {
     align-items: center;
-    background: #f8fafc;
-    border: 1px solid #edf1f7;
+    background: var(--surface);
+    border: 1px solid var(--border);
     border-radius: 7px;
     display: flex;
     justify-content: space-between;
@@ -1390,12 +1389,12 @@
 }
 
 .integrations-configuration-empty > svg {
-    color: #9b8bc5;
+    color: var(--primary);
     font-size: 42px;
 }
 
 .integrations-configuration-empty h4 {
-    color: #344054;
+    color: var(--foreground);
     font-size: 18px;
     margin: 12px 0 0;
 }
@@ -1429,10 +1428,10 @@
 }
 
 .integration-configuration-dialog [data-ui="dialog-title"] {
-    border-bottom: 1px solid #eaecf0;
-    color: #101828;
+    border-bottom: 1px solid var(--border);
+    color: var(--foreground);
     font-size: 22px;
-    font-weight: 800;
+    font-weight: 600;
     padding: 22px 24px 16px;
 }
 
@@ -1441,13 +1440,13 @@
 }
 
 .integration-configuration-dialog [data-ui="dialog-actions"] {
-    border-top: 1px solid #eaecf0;
+    border-top: 1px solid var(--border);
     gap: 8px;
     padding: 16px 24px 20px;
 }
 
 .integration-dialog-description {
-    color: #667085;
+    color: var(--muted-foreground);
     margin: 0 0 6px;
 }
 
@@ -1459,8 +1458,8 @@
 
 .integration-enabled-control {
     align-items: center;
-    background: #f8faff;
-    border: 1px solid #e2e9f5;
+    background: var(--surface);
+    border: 1px solid var(--border);
     border-radius: 10px;
     cursor: pointer;
     display: flex;
@@ -1475,11 +1474,11 @@
 }
 
 .integration-enabled-control strong {
-    color: #344054;
+    color: var(--foreground);
 }
 
 .integration-enabled-control small {
-    color: #667085;
+    color: var(--muted-foreground);
     margin-top: 2px;
 }
 
@@ -1579,7 +1578,7 @@
 
     .geocoding-provider-card:first-of-type {
         border-radius: 8px 8px 0 0;
-        border-top: 1px solid #e5eaf2;
+        border-top: 1px solid var(--border);
     }
 
     .integration-provider-list-header {
@@ -1607,7 +1606,7 @@
 
     .integration-provider-card:first-of-type {
         border-radius: 8px 8px 0 0;
-        border-top: 1px solid #e5eaf2;
+        border-top: 1px solid var(--border);
     }
 
     .global-configuration-courier-grid {

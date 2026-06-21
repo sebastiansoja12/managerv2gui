@@ -1,0 +1,37 @@
+/* Tabs and segmented navigation */
+:is(
+    .global-configuration-tab,
+    .tm-tabs button,
+    .shipment-detail-tabs a,
+    .shipment-detail-tabs button,
+    .super-admin-nav-item,
+    .super-admin-workspace-tabs button
+) {
+    background: transparent !important;
+    border: 1px solid transparent !important;
+    border-radius: var(--radius-control) !important;
+    box-shadow: none !important;
+    color: var(--muted-foreground) !important;
+    font-family: var(--font-ui) !important;
+    font-weight: 500 !important;
+}
+
+:is(
+    .global-configuration-tab,
+    .tm-tabs button,
+    .shipment-detail-tabs a,
+    .shipment-detail-tabs button,
+    .super-admin-nav-item,
+    .super-admin-workspace-tabs button
+):hover,
+:is(
+    .global-configuration-tab.global-configuration-tab-active,
+    .tm-tabs .tm-tab-active,
+    .shipment-detail-tabs .shipment-detail-tab-active,
+    .super-admin-nav-item.super-admin-nav-item-active,
+    .super-admin-workspace-tabs .super-admin-workspace-tab-active
+) {
+    background: var(--technical-accent-soft) !important;
+    border-color: var(--technical-accent-line) !important;
+    color: var(--foreground) !important;
+}

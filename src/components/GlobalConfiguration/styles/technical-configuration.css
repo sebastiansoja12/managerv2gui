@@ -1,0 +1,84 @@
+/* Configuration workspace: provider choices are controls, not feature tiles. */
+.app-main-content .global-configuration-page :is(
+    .integration-left-rail, .integration-provider-panel-section
+) {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+
+.app-main-content .global-configuration-page :is(h2, h3, h4, h5):not(.global-configuration-header h4) {
+    font-family: var(--font-ui) !important;
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+    letter-spacing: -0.015em !important;
+    line-height: 1.4;
+}
+
+.app-main-content .global-configuration-page :is(
+    .integration-provider-menu-item, .integration-switch-row,
+    .integration-enabled-control, .geocoding-enabled-control,
+    .global-configuration-loader
+),
+:is(.integration-configuration-dialog, .geocoding-configuration-dialog) :is(
+    .integration-enabled-control, .geocoding-enabled-control
+) {
+    background: var(--surface) !important;
+    border-color: var(--border) !important;
+    border-radius: var(--radius-control);
+    color: var(--foreground) !important;
+    box-shadow: none !important;
+}
+
+.app-main-content .integration-provider-menu-item-active {
+    border-color: var(--border-strong) !important;
+    box-shadow: inset 2px 0 var(--primary) !important;
+}
+
+.app-main-content .integration-provider-menu-item:hover {
+    background: var(--surface-secondary) !important;
+}
+
+.app-main-content .global-configuration-page :is(
+    .integration-provider-panel-heading p, .integration-status-copy p,
+    .integration-provider-menu-copy small, .integration-provider-actions [data-ui="button"]
+) {
+    font-size: 0.75rem;
+    line-height: 1.5;
+}
+
+.app-main-content .integration-provider-actions {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+}
+
+.app-main-content .integration-provider-panel {
+    grid-template-rows: auto minmax(88px, 1fr) auto auto;
+}
+
+.app-main-content :is(.integration-field-grid, .integration-checkbox-grid) {
+    align-items: end;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+}
+
+.app-main-content .integration-status-panel {
+    padding: 12px !important;
+}
+
+.app-main-content .integration-switch-row {
+    gap: 12px;
+}
+
+.app-main-content .integration-switch-row > span {
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 1100px) {
+    .app-main-content .integrations-workspace {
+        grid-template-columns: 1fr;
+        min-height: 0;
+    }
+
+    .app-main-content .integration-provider-menu {
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+    }
+}

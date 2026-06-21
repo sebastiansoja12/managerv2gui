@@ -1,0 +1,132 @@
+/* Feature-specific color cleanup */
+.process-payload,
+.shipments-json {
+    background: color-mix(in srgb, var(--foreground) 92%, var(--background)) !important;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-control) !important;
+    color: var(--background) !important;
+}
+
+.tm-progress-bar {
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    gap: 1px;
+}
+
+:is(.tm-progress-violet, .tm-progress-orange, .tm-progress-green, .tm-progress-blue) {
+    background: var(--primary) !important;
+    background-image: none !important;
+}
+
+.tm-progress-empty {
+    background: var(--muted) !important;
+    background-image: none !important;
+}
+
+:is(.tm-violet, .tm-orange, .tm-green, .tm-blue) {
+    background: var(--primary) !important;
+}
+
+.tm-gauge {
+    background: conic-gradient(from 270deg, var(--primary) 0 var(--standard-share, 0%), var(--muted) var(--standard-share, 0%) 100%) !important;
+    box-shadow: none !important;
+}
+
+.tm-gauge::after {
+    display: none;
+}
+
+.shipment-cc-page,
+.shipment-dashboard,
+.courier-details-page {
+    background-image: none !important;
+}
+
+.shipment-cc-page .shipment-cc-shell {
+    gap: 12px !important;
+}
+
+.shipment-cc-page .shipments-header,
+.shipment-cc-page .shipment-detail-tabs,
+.shipment-cc-page > .shipment-cc-shell > [data-ui="alert"] {
+    background: var(--technical-panel) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius-panel) !important;
+    box-shadow: none !important;
+}
+
+.shipment-cc-page .shipments-header {
+    margin-bottom: 0 !important;
+}
+
+.shipment-cc-page .shipment-detail-tabs {
+    gap: 4px !important;
+    margin-bottom: 6px !important;
+    min-height: 48px;
+    padding: 5px 7px;
+}
+
+.shipment-cc-page .shipment-detail-tabs :is(a, button) {
+    border: 1px solid transparent !important;
+    border-radius: 5px !important;
+    padding: 8px 11px !important;
+}
+
+.shipment-cc-page .shipment-detail-tabs .shipment-detail-tab-active {
+    background: var(--technical-accent-soft) !important;
+    border-color: var(--technical-accent-line) !important;
+    text-shadow: none !important;
+}
+
+.shipment-cc-page > .shipment-cc-shell > [data-ui="alert"] {
+    min-height: 72px;
+    padding: 18px 20px;
+}
+
+.shipment-cc-page .shipment-details-summary,
+.shipment-cc-page .shipment-details-grid {
+    background: var(--border) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius-control) !important;
+    gap: 1px;
+    overflow: hidden;
+}
+
+.shipment-cc-page .shipment-details-summary > div,
+.shipment-cc-page .shipment-detail-value {
+    background: var(--card) !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+}
+
+.shipment-details-segment::before,
+.courier-details-main-panel::before {
+    background: var(--primary) !important;
+    box-shadow: none !important;
+    opacity: 0.72;
+}
+
+.shipment-scanner-feedback {
+    background: var(--surface) !important;
+    border-color: var(--border) !important;
+    border-radius: var(--radius-control) !important;
+    box-shadow: none !important;
+}
+
+.shipment-scanner-feedback-success {
+    background: var(--technical-success-soft) !important;
+    border-color: color-mix(in srgb, var(--success) 34%, var(--border)) !important;
+}
+
+.shipment-scanner-feedback-error,
+.shipment-scanner-feedback-duplicate {
+    background: var(--technical-danger-soft) !important;
+    border-color: color-mix(in srgb, var(--danger) 34%, var(--border)) !important;
+}
+
+.shipment-scanner-feedback-loading,
+.shipment-scanner-feedback-ready {
+    background: var(--technical-info-soft) !important;
+    border-color: color-mix(in srgb, var(--info) 30%, var(--border)) !important;
+}
+

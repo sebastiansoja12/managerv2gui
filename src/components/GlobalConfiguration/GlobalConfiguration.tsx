@@ -181,6 +181,7 @@ function GlobalConfiguration() {
                             <button
                                 className={`global-configuration-tab${isActive ? " global-configuration-tab-active" : ""}`}
                                 key={section.key}
+                                aria-pressed={isActive}
                                 onClick={() => setActiveSectionKey(section.key)}
                                 type="button"
                             >

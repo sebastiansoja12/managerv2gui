@@ -263,18 +263,36 @@ function AppShell() {
             <div className="app-main-content">
                 <AppRoutes onOpenTab={openTab} operationalProfile={operationalProfile}/>
             </div>
-            <Dialog open={Boolean(pendingOperationalProfile)} onClose={() => setPendingOperationalProfile(null)}>
-                <DialogTitle>{pl.app.profileChangeDialog.title}</DialogTitle>
-                <DialogContent>
-                    <Typography>
+            <Dialog
+                className="operational-profile-dialog"
+                open={Boolean(pendingOperationalProfile)}
+                onClose={() => setPendingOperationalProfile(null)}
+            >
+                <DialogTitle className="operational-profile-dialog-title">
+                    <span className="operational-profile-dialog-kicker">
+                        {pl.common.brand} / {pl.operationalProfiles.label}
+                    </span>
+                    <strong>{pl.app.profileChangeDialog.title}</strong>
+                </DialogTitle>
+                <DialogContent className="operational-profile-dialog-content">
+                    <Typography className="operational-profile-dialog-message">
+                        <span aria-hidden="true" className="operational-profile-dialog-marker" />
                         {pl.app.profileChangeDialog.description}
                     </Typography>
                 </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setPendingOperationalProfile(null)}>
+                <DialogActions className="operational-profile-dialog-actions">
+                    <Button
+                        className="operational-profile-dialog-cancel"
+                        onClick={() => setPendingOperationalProfile(null)}
+                        variant="outlined"
+                    >
                         {pl.app.profileChangeDialog.cancel}
                     </Button>
-                    <Button variant="contained" onClick={confirmOperationalProfileChange}>
+                    <Button
+                        className="operational-profile-dialog-confirm"
+                        variant="contained"
+                        onClick={confirmOperationalProfileChange}
+                    >
                         {pl.app.profileChangeDialog.confirm}
                     </Button>
                 </DialogActions>

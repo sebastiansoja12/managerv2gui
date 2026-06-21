@@ -1,0 +1,105 @@
+:is(.couriers-create-dialog-actions, .courier-edit-dialog-actions, .courier-configuration-dialog-actions) [data-ui="button"][data-variant="contained"] {
+    background: var(--foreground) !important;
+    border-color: var(--foreground) !important;
+    color: var(--background) !important;
+}
+
+@media (max-width: 1400px) {
+    .app-main-content .courier-details-section-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 1180px) {
+    .app-main-content .courier-details-main-panel {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .app-main-content .couriers-workspace {
+        grid-template-columns: minmax(0, 1fr) 224px;
+    }
+
+    .app-main-content .couriers-filter-bar {
+        grid-template-columns: minmax(180px, 1fr) minmax(140px, 0.7fr) minmax(150px, 0.8fr) auto;
+    }
+
+    .app-main-content .couriers-filter-count {
+        display: none;
+    }
+}
+
+@media (max-width: 980px) {
+    .app-main-content .couriers-header,
+    .app-main-content .couriers-workspace,
+    .app-main-content .courier-details-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .app-main-content .couriers-header {
+        align-items: stretch;
+        display: grid;
+    }
+
+    .app-main-content .couriers-summary {
+        width: 100%;
+    }
+
+    .app-main-content .couriers-side-actions,
+    .app-main-content .courier-details-page .courier-details-side-panel {
+        position: static;
+    }
+}
+
+@media (max-width: 720px) {
+    .app-main-content .couriers-page .couriers-header {
+        padding-bottom: 14px !important;
+    }
+
+    .app-main-content .couriers-summary {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .app-main-content .couriers-summary div {
+        grid-template-columns: 1fr;
+        min-width: 0;
+    }
+
+    .app-main-content .couriers-summary svg {
+        display: none;
+    }
+
+    .app-main-content .couriers-panel-header {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .app-main-content .couriers-table-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .app-main-content .courier-details-page .couriers-table-actions {
+        grid-template-columns: 1fr;
+    }
+
+    .app-main-content .couriers-table-actions [data-ui="button"] {
+        justify-content: center;
+        width: 100%;
+    }
+
+    .app-main-content .couriers-filter-bar,
+    .courier-configuration-grid,
+    .couriers-dialog-grid,
+    .courier-edit-dialog-grid,
+    .app-main-content .courier-details-main-panel,
+    .app-main-content .courier-details-section-grid,
+    .app-main-content .courier-summary-list,
+    .app-main-content .courier-summary-list-four {
+        grid-template-columns: 1fr;
+    }
+
+    .app-main-content .couriers-filter-count {
+        display: block;
+        justify-self: stretch;
+    }
+}

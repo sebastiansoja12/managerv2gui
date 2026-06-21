@@ -1,0 +1,276 @@
+/* Shipment details: use the same restrained action and surface system. */
+.app-main-content .shipment-cc-page {
+    background-color: transparent !important;
+    padding: clamp(22px, 2.4vw, 38px) clamp(18px, 3vw, 48px) 48px !important;
+}
+
+.shipment-cc-page .shipment-cc-shell {
+    gap: 14px !important;
+    margin-inline: auto;
+    max-width: 1880px;
+}
+
+.shipment-cc-page .shipments-header {
+    align-items: center;
+    background: transparent !important;
+    border: 0 !important;
+    border-bottom: 1px solid var(--border) !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    gap: 18px;
+    padding: 0 0 18px !important;
+}
+
+.shipment-cc-page .shipments-title-icon {
+    background: var(--technical-accent-soft) !important;
+    border: 1px solid var(--technical-accent-line) !important;
+    border-radius: 4px !important;
+    box-shadow: none !important;
+    color: var(--primary) !important;
+    flex-basis: 40px;
+    height: 40px;
+    width: 40px;
+}
+
+.shipment-cc-page .shipments-title-icon svg {
+    height: 21px;
+    width: 21px;
+}
+
+.shipment-cc-page .shipments-title [data-ui="typography"][data-variant="h4"] {
+    font-family: var(--font-display) !important;
+    font-size: clamp(1.8rem, 2.3vw, 2.45rem) !important;
+    font-weight: 400 !important;
+    letter-spacing: -0.04em !important;
+    line-height: 1 !important;
+}
+
+.shipment-cc-page .shipments-title [data-ui="typography"][data-variant="body2"] {
+    color: var(--muted-foreground) !important;
+    font-size: 0.8rem;
+    font-weight: 500;
+    margin-top: 4px;
+}
+
+.shipment-cc-page .shipment-edit-header-actions {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px !important;
+    justify-content: flex-end;
+}
+
+.shipment-cc-page .shipment-edit-header-actions [data-ui="button"],
+.shipment-cc-page .shipment-cc-side-header [data-ui="button"],
+.shipment-cc-page .shipment-status-control [data-ui="button"],
+.shipment-cc-page .shipment-edit-section-actions [data-ui="button"],
+.shipment-cc-page .shipment-details-dangerous-good [data-ui="button"] {
+    background: transparent !important;
+    border: 1px solid var(--border-strong) !important;
+    border-radius: 4px !important;
+    box-shadow: none !important;
+    color: var(--foreground) !important;
+    font-family: var(--font-ui) !important;
+    font-size: 0.78rem !important;
+    font-weight: 600 !important;
+    min-height: 36px !important;
+    padding: 0 12px !important;
+    transform: none !important;
+    white-space: nowrap;
+}
+
+.shipment-cc-page .shipment-edit-header-actions [data-ui="button"]:hover:not(:disabled),
+.shipment-cc-page .shipment-cc-side-header [data-ui="button"]:hover:not(:disabled),
+.shipment-cc-page .shipment-status-control [data-ui="button"]:hover:not(:disabled),
+.shipment-cc-page .shipment-edit-section-actions [data-ui="button"]:hover:not(:disabled),
+.shipment-cc-page .shipment-details-dangerous-good [data-ui="button"]:hover:not(:disabled) {
+    background: var(--surface-secondary) !important;
+    border-color: var(--border-strong) !important;
+}
+
+.shipment-cc-page .shipment-edit-header-actions [data-ui="button"] svg,
+.shipment-cc-page .shipment-cc-side-header [data-ui="button"] svg,
+.shipment-cc-page .shipment-status-control [data-ui="button"] svg {
+    height: 18px;
+    width: 18px;
+}
+
+.shipment-document-menu-item[data-ui="menu-item"] {
+    border-radius: 4px !important;
+    font-size: 0.8rem !important;
+    font-weight: 550 !important;
+    min-height: 36px;
+}
+
+.shipment-cc-page .shipment-detail-tabs {
+    background: transparent !important;
+    border: 0 !important;
+    border-bottom: 1px solid var(--border) !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    gap: 3px !important;
+    margin-bottom: 4px !important;
+    min-height: 45px;
+    padding: 4px 0 !important;
+}
+
+.shipment-cc-page .shipment-detail-tabs :is(a, button) {
+    border: 1px solid transparent !important;
+    border-radius: 4px !important;
+    color: var(--muted-foreground) !important;
+    font-family: var(--font-ui) !important;
+    font-size: 0.8rem !important;
+    font-weight: 550 !important;
+    padding: 8px 11px !important;
+}
+
+.shipment-cc-page .shipment-detail-tabs :is(a, button):hover {
+    background: var(--surface-secondary) !important;
+    color: var(--foreground) !important;
+}
+
+.shipment-cc-page .shipment-detail-tabs .shipment-detail-tab-active {
+    background: var(--technical-accent-soft) !important;
+    border-color: var(--technical-accent-line) !important;
+    color: var(--foreground) !important;
+}
+
+.shipment-cc-page .shipment-cc-layout {
+    gap: 14px !important;
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 0.28fr);
+}
+
+.shipment-cc-page .shipment-details-segment,
+.shipment-cc-page .shipment-status-control,
+.shipment-cc-page .shipment-cc-side {
+    background: var(--technical-panel) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 4px !important;
+    box-shadow: none !important;
+}
+
+.shipment-cc-page .shipment-details-segment {
+    padding: 18px !important;
+}
+
+.shipment-cc-page .shipment-details-segment::before {
+    display: none !important;
+}
+
+.shipment-cc-page .shipment-edit-section-header {
+    margin: 0 0 14px !important;
+}
+
+.shipment-cc-page .shipment-edit-section-header [data-ui="typography"] {
+    color: var(--foreground) !important;
+    font-family: var(--font-ui) !important;
+    font-size: 0.9rem !important;
+    font-weight: 650 !important;
+}
+
+.shipment-cc-page .shipment-details-summary,
+.shipment-cc-page .shipment-details-grid {
+    border-radius: 4px !important;
+}
+
+.shipment-cc-page .shipment-details-summary:not(.shipment-details-summary-with-cancellation)::after {
+    background: var(--card);
+    content: "";
+    min-height: 76px;
+}
+
+.shipment-cc-page .shipment-details-summary > div > span,
+.shipment-cc-page .shipment-detail-value span,
+.shipment-cc-page .shipment-status-copy > span {
+    color: var(--muted-foreground) !important;
+    font-family: var(--font-mono) !important;
+    font-size: 0.64rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.07em !important;
+}
+
+.shipment-cc-page .shipment-details-summary > div > strong,
+.shipment-cc-page .shipment-detail-value strong,
+.shipment-cc-page .shipment-status-copy strong {
+    color: var(--foreground) !important;
+    font-weight: 600 !important;
+}
+
+.shipment-cc-page .shipment-details-operations-separated {
+    gap: 12px !important;
+}
+
+.shipment-cc-page .shipment-status-control {
+    min-height: 68px !important;
+    padding: 12px 14px !important;
+}
+
+.shipment-cc-page .shipment-cc-courier {
+    border-left: 1px solid var(--border) !important;
+}
+
+.shipment-cc-page .shipment-cc-courier-icon {
+    background: var(--technical-accent-soft) !important;
+    border: 1px solid var(--technical-accent-line) !important;
+    border-radius: 4px !important;
+    box-shadow: none !important;
+    color: var(--primary) !important;
+}
+
+.shipment-cc-page .shipment-cc-courier-meta {
+    border-color: var(--border) !important;
+}
+
+.shipment-cc-page .shipment-cc-side-header {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 10px;
+    margin: 0 !important;
+    padding: 16px !important;
+}
+
+.shipment-cc-page .shipment-cc-side-header [data-ui="button"] {
+    justify-content: center;
+    width: 100%;
+}
+
+.shipment-cc-page .shipment-cc-timeline {
+    padding: 18px 18px 24px 26px !important;
+}
+
+.shipment-cc-page .shipment-cc-timeline-item > div:last-child {
+    padding-left: 13px !important;
+}
+
+@media (max-width: 1120px) {
+    .shipment-cc-page .shipments-header {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .shipment-cc-page .shipment-edit-header-actions {
+        justify-content: flex-start;
+    }
+}
+
+@media (max-width: 760px) {
+    .shipment-cc-page .shipment-details-summary:not(.shipment-details-summary-with-cancellation)::after {
+        display: none;
+    }
+
+    .shipment-cc-page .shipment-edit-header-actions {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .shipment-cc-page .shipment-edit-header-actions [data-ui="button"] {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 520px) {
+    .shipment-cc-page .shipment-edit-header-actions {
+        grid-template-columns: 1fr;
+    }
+}
+

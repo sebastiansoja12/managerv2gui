@@ -1,0 +1,32 @@
+/* Dialogs, menus, notifications */
+[data-ui="dialog"],
+[data-ui="menu"],
+.technical-select-menu {
+    background: var(--card) !important;
+    background-image: none !important;
+    border-color: var(--border) !important;
+    border-radius: var(--radius-panel) !important;
+    box-shadow: var(--shadow-floating) !important;
+    color: var(--card-foreground) !important;
+}
+
+[data-ui="dialog-title"],
+[data-ui="dialog-actions"] {
+    background: var(--surface) !important;
+    background-image: none !important;
+    border-color: var(--border) !important;
+    color: var(--foreground) !important;
+}
+
+[data-ui="dialog-title"] {
+    font-family: var(--font-ui) !important;
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+    letter-spacing: -0.02em !important;
+}
+
+[data-ui="dialog-content"] {
+    background: var(--card) !important;
+    color: var(--card-foreground) !important;
+}
+

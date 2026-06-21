@@ -1,0 +1,46 @@
+/* Icons and metrics use a single theme accent; semantic states remain distinct. */
+.app-main-content :is(
+    [class$="-title-icon"],
+    [class*="-title-icon "],
+    [class$="-dialog-icon"],
+    [class*="-dialog-icon "],
+    [class$="-card-icon"],
+    [class*="-card-icon "],
+    [class$="-metric-icon"],
+    [class*="-metric-icon "],
+    [class$="-provider-icon"],
+    [class*="-provider-icon "]
+),
+.super-admin-app :is(.super-admin-brand > span, .super-admin-metric-icon, .super-admin-module-card-icon) {
+    background: var(--technical-accent-soft) !important;
+    background-image: none !important;
+    border: 1px solid var(--technical-accent-line) !important;
+    border-radius: var(--radius-control) !important;
+    box-shadow: none !important;
+    color: var(--primary) !important;
+}
+
+.app-main-content :is(
+    .couriers-summary div,
+    .departments-stats div,
+    .microservice-status-summary div,
+    .users-stats div,
+    .tm-metric-card,
+    .shipment-scanner-mini-stats > div
+),
+.super-admin-metric-card {
+    background: var(--surface) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius-control) !important;
+    box-shadow: none !important;
+}
+
+.app-main-content :is(
+    .couriers-summary svg,
+    .departments-stats svg,
+    .microservice-status-summary svg,
+    .users-stats svg
+) {
+    color: var(--primary) !important;
+}
+

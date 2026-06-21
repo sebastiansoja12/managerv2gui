@@ -30,8 +30,8 @@ const SoftwarePropertiesList: React.FC<SoftwarePropertiesListProps> = ({ softwar
     };
 
     return (
-        <TableContainer component={Paper} sx={{ maxWidth: '80%', margin: 'auto' }}>
-            <Table>
+        <TableContainer className="software-configuration-panel" component={Paper}>
+            <Table className="software-configuration-table">
                 <TableHead>
                     <TableRow>
                         <TableCell>{pl.softwareConfiguration.columns.id}</TableCell>
@@ -65,6 +65,7 @@ const SoftwarePropertiesList: React.FC<SoftwarePropertiesListProps> = ({ softwar
                             </TableCell>
                             <TableCell>
                                 <Button
+                                    className="software-configuration-save"
                                     variant="contained"
                                     color="primary"
                                     onClick={() => handleUpdateClick(property)}

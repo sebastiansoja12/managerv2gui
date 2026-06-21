@@ -1,0 +1,80 @@
+/* Buttons and actions */
+[data-ui="button"],
+[data-ui="icon-button"],
+[data-ui="menu-item"],
+.users-primary-button,
+.users-secondary-button,
+.super-admin-primary-button,
+.super-admin-secondary-button,
+.super-admin-ghost-button,
+.super-admin-icon-button,
+.tm-icon-button,
+.tm-row-action-button {
+    border-radius: var(--radius-control) !important;
+    box-shadow: none !important;
+    font-family: var(--font-ui) !important;
+    font-weight: 600 !important;
+    letter-spacing: -0.01em !important;
+    text-transform: none !important;
+}
+
+:is(.users-primary-button, .super-admin-primary-button) {
+    background: var(--primary) !important;
+    border-color: var(--primary) !important;
+    color: var(--primary-foreground) !important;
+}
+
+:is(.users-secondary-button, .super-admin-secondary-button, .super-admin-ghost-button, .super-admin-icon-button) {
+    background: transparent !important;
+    border-color: var(--border-strong) !important;
+    color: var(--foreground) !important;
+}
+
+.app-main-content :is(.departments-actions-table, .couriers-actions-table, .users-actions-table) button {
+    background: transparent !important;
+    border-radius: 0 !important;
+    color: var(--foreground) !important;
+}
+
+.app-main-content :is(.departments-actions-table, .couriers-actions-table, .users-actions-table) button:hover:not(:disabled) {
+    background: var(--surface-secondary) !important;
+    transform: none !important;
+}
+
+/* Variants are shared across screens; feature sheets only set their layout. */
+.app-main-content [data-ui="button"] {
+    min-height: 40px;
+    font-size: 0.8125rem;
+    line-height: 1.35;
+    transform: none !important;
+}
+
+.app-main-content [data-ui="button"][data-variant="contained"]:not([data-color="error"]):not(:disabled) {
+    background: var(--foreground) !important;
+    border-color: var(--foreground) !important;
+    color: var(--background) !important;
+}
+
+.app-main-content [data-ui="button"][data-variant="outlined"]:not([data-color="error"]):not(:disabled),
+.app-main-content [data-ui="icon-button"]:not(:disabled) {
+    background: transparent !important;
+    border-color: var(--border-strong) !important;
+    color: var(--foreground) !important;
+}
+
+.app-main-content [data-ui="button"][data-variant="text"]:not([data-color="error"]):not(:disabled) {
+    background: transparent !important;
+    color: var(--foreground) !important;
+}
+
+.app-main-content :is([data-ui="button"], [data-ui="icon-button"]):hover:not(:disabled) {
+    box-shadow: inset 0 0 0 100px color-mix(in srgb, var(--foreground) 6%, transparent) !important;
+}
+
+:root[data-theme] .app-main-content :is(button[data-ui="button"][data-variant], button[data-ui="icon-button"]):disabled {
+    background: var(--muted) !important;
+    border-color: var(--border) !important;
+    color: var(--muted-foreground) !important;
+    box-shadow: none !important;
+    cursor: not-allowed;
+}

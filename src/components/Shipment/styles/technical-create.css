@@ -1,0 +1,266 @@
+/* Shipment creation — one dense form surface instead of colorful stacked cards. */
+.app-main-content .shipments-create-page {
+    background: transparent !important;
+    padding: clamp(28px, 3vw, 52px) clamp(24px, 4vw, 64px) 64px !important;
+}
+
+.app-main-content .shipments-create-shell {
+    max-width: 1440px;
+}
+
+.app-main-content .shipments-create-page .shipments-header {
+    align-items: end;
+    background: transparent !important;
+    border: 0 !important;
+    border-bottom: 1px solid var(--border) !important;
+    border-radius: 0 !important;
+    margin-bottom: 22px;
+    padding: 0 0 24px !important;
+}
+
+.app-main-content .shipments-create-page .shipments-title {
+    align-items: flex-start;
+    gap: 0;
+}
+
+.app-main-content .shipments-create-page .shipments-title-icon {
+    display: none;
+}
+
+.app-main-content .shipments-create-heading-copy {
+    display: grid;
+    gap: 7px;
+}
+
+.app-main-content .shipments-create-kicker {
+    align-items: center;
+    color: var(--muted-foreground);
+    display: inline-flex;
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    font-weight: 600;
+    gap: 8px;
+    letter-spacing: 0.09em;
+    line-height: 1;
+    text-transform: uppercase;
+    width: fit-content;
+}
+
+.app-main-content .shipments-create-kicker::before {
+    background: var(--primary);
+    border-radius: 50%;
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary) 10%, transparent);
+    content: "";
+    height: 5px;
+    width: 5px;
+}
+
+.app-main-content .shipments-create-page .shipments-header [data-ui="typography"][data-variant="h4"] {
+    color: var(--foreground) !important;
+    font-family: var(--font-display) !important;
+    font-size: clamp(2.35rem, 3vw, 3.55rem) !important;
+    font-weight: 400 !important;
+    letter-spacing: -0.045em !important;
+    line-height: 0.95;
+}
+
+.app-main-content .shipments-create-page .shipments-header [data-ui="typography"][data-variant="body2"] {
+    color: var(--muted-foreground) !important;
+    font-size: 0.92rem;
+    line-height: 1.6;
+}
+
+.app-main-content .shipments-create-page .shipments-header [data-ui="button"] {
+    background: transparent !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 5px !important;
+    color: var(--muted-foreground) !important;
+    font-size: 0.74rem;
+    font-weight: 500 !important;
+    min-height: 36px;
+}
+
+.app-main-content .shipments-create-page .shipments-header [data-ui="button"]:hover {
+    background: var(--technical-accent-soft) !important;
+    border-color: var(--technical-accent-line) !important;
+    color: var(--foreground) !important;
+}
+
+.app-main-content .shipments-create-panel {
+    background: color-mix(in srgb, var(--background) 80%, var(--surface)) !important;
+    border: 1px solid var(--border-strong) !important;
+    border-radius: 6px !important;
+    box-shadow: none !important;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin: 0;
+    overflow: hidden;
+    padding: 0;
+}
+
+.app-main-content .shipments-create-panel::before {
+    display: none;
+}
+
+.app-main-content .shipments-create-panel .shipments-panel-title {
+    background: transparent !important;
+    border: 0 !important;
+    border-bottom: 1px solid var(--border) !important;
+    border-radius: 0 !important;
+    color: var(--muted-foreground) !important;
+    grid-column: 1 / -1;
+    margin: 0;
+    min-height: 48px;
+    padding: 0 18px;
+}
+
+.app-main-content .shipments-create-panel .shipments-panel-title svg {
+    color: var(--primary);
+    font-size: 0.95rem;
+}
+
+.app-main-content .shipments-create-panel .shipments-panel-title [data-ui="typography"] {
+    color: var(--foreground) !important;
+    font-size: 0.92rem;
+    font-weight: 600;
+}
+
+.app-main-content .shipments-create-data-grid {
+    gap: 12px;
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    padding: 18px;
+}
+
+.app-main-content .shipments-create-data-grid [data-ui="text-field"]:nth-child(3) {
+    grid-column: auto;
+}
+
+.app-main-content .shipments-create-section {
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    border-top: 1px solid var(--border) !important;
+    box-shadow: none !important;
+    margin: 0;
+    min-width: 0;
+    padding: 17px 18px 19px;
+}
+
+.app-main-content .shipments-create-section-sender {
+    border-right: 1px solid var(--border) !important;
+}
+
+.app-main-content .shipments-create-section-dangerous {
+    grid-column: 1 / -1;
+}
+
+.app-main-content .shipments-create-section-dangerous .shipments-section-title {
+    margin-bottom: 0;
+}
+
+.app-main-content .shipments-create-section .shipments-section-title {
+    color: var(--muted-foreground) !important;
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    font-weight: 600;
+    gap: 8px;
+    letter-spacing: 0.085em;
+    margin-bottom: 14px;
+}
+
+.app-main-content .shipments-create-section .shipments-section-title::before,
+.app-main-content .shipments-create-section-sender .shipments-section-title::before,
+.app-main-content .shipments-create-section-receiver .shipments-section-title::before,
+.app-main-content .shipments-create-section-dangerous .shipments-section-title::before {
+    background: var(--primary) !important;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 9%, transparent);
+    height: 5px;
+    width: 5px;
+}
+
+.app-main-content .shipments-create-section .shipments-form-grid {
+    gap: 11px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.app-main-content .shipments-create-section .shipments-form-grid [data-ui="text-field"]:nth-child(7) {
+    grid-column: span 2;
+}
+
+.app-main-content .shipments-create-page [data-ui="input-label"] {
+    font-size: 0.64rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.075em;
+}
+
+.app-main-content .shipments-create-page [data-ui="text-field"] > [data-ui="input"],
+.app-main-content .shipments-create-page [data-ui="text-field"] > [data-ui="select"],
+.app-main-content .shipments-create-page .technical-select {
+    background: color-mix(in srgb, var(--background) 68%, var(--surface)) !important;
+    border-color: var(--border) !important;
+    min-height: 40px;
+}
+
+.app-main-content .shipments-create-page [data-ui="form-control-label"] {
+    color: var(--muted-foreground) !important;
+    font-size: 0.78rem;
+}
+
+.app-main-content .shipments-create-page .shipments-actions {
+    align-items: center;
+    background: color-mix(in srgb, var(--surface) 58%, transparent);
+    border-top: 1px solid var(--border);
+    grid-column: 1 / -1;
+    justify-content: flex-end;
+    margin: 0;
+    padding: 13px 18px;
+}
+
+.app-main-content .shipments-create-page .shipments-actions [data-ui="button"][data-variant="contained"] {
+    background: var(--foreground) !important;
+    border: 1px solid var(--foreground) !important;
+    border-radius: 5px !important;
+    color: var(--background) !important;
+    font-size: 0.74rem;
+    font-weight: 600 !important;
+    min-height: 38px;
+    min-width: 180px;
+}
+
+@media (max-width: 1080px) {
+    .app-main-content .shipments-create-panel {
+        grid-template-columns: 1fr;
+    }
+
+    .app-main-content .shipments-create-section-sender {
+        border-right: 0 !important;
+    }
+
+    .app-main-content .shipments-create-section-dangerous,
+    .app-main-content .shipments-create-page .shipments-actions,
+    .app-main-content .shipments-create-data-grid,
+    .app-main-content .shipments-create-panel .shipments-panel-title {
+        grid-column: 1;
+    }
+}
+
+@media (max-width: 720px) {
+    .app-main-content .shipments-create-page {
+        padding: 22px 16px 48px !important;
+    }
+
+    .app-main-content .shipments-create-page .shipments-header {
+        align-items: stretch;
+    }
+
+    .app-main-content .shipments-create-data-grid,
+    .app-main-content .shipments-create-section .shipments-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .app-main-content .shipments-create-section .shipments-form-grid [data-ui="text-field"]:nth-child(7) {
+        grid-column: 1;
+    }
+}
+
