@@ -214,7 +214,8 @@ const ShipmentCreate: React.FC = () => {
                 <div className="shipments-header">
                     <div className="shipments-title">
                         <span className="shipments-title-icon"><LocalShipping /></span>
-                        <Box>
+                        <Box className="shipments-create-heading-copy">
+                            <span className="shipments-create-kicker">{pl.common.brand}</span>
                             <Typography variant="h4">{shipmentTranslations.page.createTitle}</Typography>
                             <Typography variant="body2" color="text.secondary">
                                 {shipmentTranslations.page.createSubtitle}

@@ -1673,7 +1673,7 @@ export const pl = {
     shipments: {
         page: {
             title: "Przesyłki",
-            subtitle: "Lista przesyłek z oddziału oraz szybkie operacje na backendzie.",
+            subtitle: "Lista przesyłek z oddziałów.",
             detailsTitle: "Szczegóły przesyłki",
             detailsSubtitle: "Wybierz przesyłkę z listy, aby otworzyć jej szczegóły i operacje.",
             createTitle: "Utwórz przesyłkę",
