@@ -681,9 +681,9 @@ const CourierDetails: React.FC = () => {
                             <div className="couriers-details-panel courier-details-summary-card">
                                 <div className="courier-summary-card-header">
                                     <Typography variant="h6">{pl.couriers.sections.basicData}</Typography>
-                                    <IconButton aria-label={pl.couriers.actions.edit} disabled={saving} size="small" onClick={() => openEditDialog("basicData")}>
-                                        <Edit fontSize="small" />
-                                    </IconButton>
+                                    <Button aria-label={`${pl.common.edit}: ${pl.couriers.sections.basicData}`} disabled={saving} startIcon={<Edit fontSize="small" />} variant="outlined" onClick={() => openEditDialog("basicData")}>
+                                        {pl.common.edit}
+                                    </Button>
                                 </div>
                                 <dl className="courier-summary-list">
                                     <div><dt>{pl.couriers.fields.firstName}</dt><dd>{valueOrDash(courier.firstName)}</dd></div>
@@ -695,9 +695,9 @@ const CourierDetails: React.FC = () => {
                             <div className="couriers-details-panel courier-details-summary-card">
                                 <div className="courier-summary-card-header">
                                     <Typography variant="h6">{pl.couriers.sections.driverLicense}</Typography>
-                                    <IconButton aria-label={pl.couriers.actions.edit} disabled={saving} size="small" onClick={() => openEditDialog("driverLicense")}>
-                                        <Edit fontSize="small" />
-                                    </IconButton>
+                                    <Button aria-label={`${pl.common.edit}: ${pl.couriers.sections.driverLicense}`} disabled={saving} startIcon={<Edit fontSize="small" />} variant="outlined" onClick={() => openEditDialog("driverLicense")}>
+                                        {pl.common.edit}
+                                    </Button>
                                 </div>
                                 <dl className="courier-summary-list">
                                     <div><dt>{pl.couriers.fields.driverLicenseNumber}</dt><dd>{valueOrDash(courier.driverLicense?.number)}</dd></div>
@@ -709,9 +709,9 @@ const CourierDetails: React.FC = () => {
                             <div className="couriers-details-panel courier-details-summary-card courier-details-summary-card-wide">
                                 <div className="courier-summary-card-header">
                                     <Typography variant="h6">{pl.couriers.sections.certification}</Typography>
-                                    <IconButton aria-label={pl.couriers.actions.edit} disabled={saving} size="small" onClick={() => openEditDialog("certification")}>
-                                        <Edit fontSize="small" />
-                                    </IconButton>
+                                    <Button aria-label={`${pl.common.edit}: ${pl.couriers.sections.certification}`} disabled={saving} startIcon={<Edit fontSize="small" />} variant="outlined" onClick={() => openEditDialog("certification")}>
+                                        {pl.common.edit}
+                                    </Button>
                                 </div>
                                 <dl className="courier-summary-list courier-summary-list-four">
                                     <div><dt>{pl.couriers.fields.certificateNumber}</dt><dd>{valueOrDash(courier.dangerousGoodCertification?.certificateNumber)}</dd></div>
@@ -732,16 +732,18 @@ const CourierDetails: React.FC = () => {
                             <div className="courier-operational-card">
                                 <div className="courier-operational-card-header">
                                     <dt>{pl.couriers.columns.status}</dt>
-                                    <IconButton disabled={saving} size="small" onClick={() => openEditDialog("status")}>
+                                    <IconButton aria-label={`${pl.common.edit}: ${pl.couriers.columns.status}`} disabled={saving} size="small" onClick={() => openEditDialog("status")}>
                                         <Edit fontSize="small" />
                                     </IconButton>
                                 </div>
-                                <dd>{valueOrDash(courier.status)}</dd>
+                                <dd><span className={`couriers-status couriers-status-${(courier.status || "unknown").toLowerCase()}`}>
+                                    {courier.status ? pl.couriers.status[courier.status as keyof typeof pl.couriers.status] || courier.status : pl.common.dash}
+                                </span></dd>
                             </div>
                             <div className="courier-operational-card">
                                 <div className="courier-operational-card-header">
                                     <dt>{pl.couriers.fields.device}</dt>
-                                    <IconButton disabled={saving} size="small" onClick={() => openEditDialog("device")}>
+                                    <IconButton aria-label={`${pl.common.edit}: ${pl.couriers.fields.device}`} disabled={saving} size="small" onClick={() => openEditDialog("device")}>
                                         <Edit fontSize="small" />
                                     </IconButton>
                                 </div>
@@ -750,7 +752,7 @@ const CourierDetails: React.FC = () => {
                             <div className="courier-operational-card">
                                 <div className="courier-operational-card-header">
                                     <dt>{pl.couriers.columns.vehicle}</dt>
-                                    <IconButton disabled={saving} size="small" onClick={() => openEditDialog("vehicle")}>
+                                    <IconButton aria-label={`${pl.common.edit}: ${pl.couriers.columns.vehicle}`} disabled={saving} size="small" onClick={() => openEditDialog("vehicle")}>
                                         <Edit fontSize="small" />
                                     </IconButton>
                                 </div>
@@ -759,7 +761,7 @@ const CourierDetails: React.FC = () => {
                             <div className="courier-operational-card">
                                 <div className="courier-operational-card-header">
                                     <dt>{pl.couriers.fields.deliveryArea}</dt>
-                                    <IconButton disabled={saving} size="small" onClick={() => openEditDialog("deliveryArea")}>
+                                    <IconButton aria-label={`${pl.common.edit}: ${pl.couriers.fields.deliveryArea}`} disabled={saving} size="small" onClick={() => openEditDialog("deliveryArea")}>
                                         <Edit fontSize="small" />
                                     </IconButton>
                                 </div>
@@ -768,7 +770,7 @@ const CourierDetails: React.FC = () => {
                             <div className="courier-operational-card">
                                 <div className="courier-operational-card-header">
                                     <dt>{pl.couriers.fields.packageTypes}</dt>
-                                    <IconButton disabled={saving} size="small" onClick={() => openEditDialog("packageTypes")}>
+                                    <IconButton aria-label={`${pl.common.edit}: ${pl.couriers.fields.packageTypes}`} disabled={saving} size="small" onClick={() => openEditDialog("packageTypes")}>
                                         <Edit fontSize="small" />
                                     </IconButton>
                                 </div>
@@ -777,7 +779,7 @@ const CourierDetails: React.FC = () => {
                             <div className="courier-operational-card">
                                 <div className="courier-operational-card-header">
                                     <dt>{pl.couriers.fields.department}</dt>
-                                    <IconButton disabled={saving} size="small" onClick={() => openEditDialog("department")}>
+                                    <IconButton aria-label={`${pl.common.edit}: ${pl.couriers.fields.department}`} disabled={saving} size="small" onClick={() => openEditDialog("department")}>
                                         <Edit fontSize="small" />
                                     </IconButton>
                                 </div>
@@ -920,7 +922,7 @@ const CourierDetails: React.FC = () => {
                     ) : undefined}
                 </DialogContent>
                 <DialogActions className="courier-edit-dialog-actions">
-                    <Button disabled={saving} onClick={closeEditDialog}>{pl.couriers.actions.cancelEdit}</Button>
+                    <Button disabled={saving} variant="outlined" onClick={closeEditDialog}>{pl.couriers.actions.cancelEdit}</Button>
                     <Button disabled={saving} startIcon={<Save />} variant="contained" onClick={saveActiveSection}>
                         {pl.common.saveChanges}
                     </Button>
