@@ -1,4 +1,6 @@
 import React, {useEffect, useMemo, useState} from "react";
+import {Dialog} from "components/ui";
+import {Business} from "components/ui/icons";
 import OperatorService from "../../../hooks/OperatorService";
 import OperatorDirectoryService from "../../../hooks/OperatorDirectoryService";
 import GeocodingConfigurationService from "../../../hooks/GeocodingConfigurationService";
@@ -132,10 +134,18 @@ function SuperAdminOperatorsPage() {
 
     const startCreate = () => {
         setCreateMode(true);
-        setSelectedOperatorId("");
         setDraft(createEmptyOperatorDraft(geocodingProviders[0]?.provider));
+        setError("");
         setUserDialogOpen(false);
         setDirectoryDialogMode(null);
+    };
+
+    const closeCreate = () => {
+        setCreateMode(false);
+        setError("");
+        if (selectedOperator) {
+            setDraft(operatorToDraft(selectedOperator));
+        }
     };
 
     const updateDraft = <K extends keyof OperatorDraft>(key: K, value: OperatorDraft[K]) => {
@@ -225,20 +235,7 @@ function SuperAdminOperatorsPage() {
                     query={query}
                     selectedOperatorId={selectedOperatorId}
                 />
-                {createMode || !selectedOperator ? (
-                    <OperatorEditor
-                        createMode={createMode}
-                        draft={draft}
-                        geocodingProviders={geocodingProviders}
-                        onCreate={startCreate}
-                        onSave={saveDraft}
-                        onToggleCapability={toggleCapability}
-                        onToggleStatus={toggleStatus}
-                        onUpdateDraft={updateDraft}
-                        saving={saving}
-                        selectedOperator={selectedOperator}
-                    />
-                ) : (
+                {selectedOperator ? (
                     <OperatorWorkspace
                         capabilityLabels={capabilityLabels}
                         couriers={directoryCouriers}
@@ -255,8 +252,37 @@ function SuperAdminOperatorsPage() {
                         saving={saving}
                         users={directoryUsers}
                     />
+                ) : (
+                    <article className="super-admin-panel super-admin-operator-workspace">
+                        <div className="super-admin-empty-state super-admin-operator-empty-state">
+                            <Business fontSize="large"/>
+                            <strong>{pl.superAdmin.list.emptyTitle}</strong>
+                            <span>{pl.superAdmin.list.emptyDescription}</span>
+                        </div>
+                    </article>
                 )}
             </section>
+
+            <Dialog
+                className="super-admin-dialog super-admin-operator-create-dialog"
+                fullWidth
+                maxWidth="lg"
+                onClose={saving ? undefined : closeCreate}
+                open={createMode}
+            >
+                <OperatorEditor
+                    createMode
+                    draft={draft}
+                    error={error}
+                    geocodingProviders={geocodingProviders}
+                    onCreate={closeCreate}
+                    onSave={saveDraft}
+                    onToggleCapability={toggleCapability}
+                    onToggleStatus={toggleStatus}
+                    onUpdateDraft={updateDraft}
+                    saving={saving}
+                />
+            </Dialog>
 
             {!createMode && selectedOperator ? (
                 <>

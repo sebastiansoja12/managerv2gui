@@ -1,6 +1,6 @@
-import React, {useState} from "react";
-import {Close, MoreHoriz, PersonAddAlt, ToggleOff, ToggleOn} from "components/ui/icons";
-import {Snackbar} from "components/ui";
+import React, {useEffect, useState} from "react";
+import {ArrowBack, ChevronRight, Close, PersonAddAlt, Save, ToggleOff, ToggleOn} from "components/ui/icons";
+import {Alert, Select, Snackbar} from "components/ui";
 import pl from "../../../i18n/translate";
 import {
     DeliveryTimeConfiguration,
@@ -21,6 +21,7 @@ import OperatorUserDialog from "./OperatorUserDialog";
 type OperatorEditorProps = {
     createMode: boolean;
     draft: OperatorDraft;
+    error?: string;
     geocodingProviders: GeocodingProviderDefinition[];
     saving: boolean;
     selectedOperator?: Operator;
@@ -30,6 +31,8 @@ type OperatorEditorProps = {
     onToggleStatus: () => void;
     onUpdateDraft: <K extends keyof OperatorDraft>(key: K, value: OperatorDraft[K]) => void;
 };
+
+type OperatorCreateStep = "data" | "configuration" | "department";
 
 type OperatorGeocodingCredentialKey = Exclude<
     keyof OperatorGeocodingConfigurationDraft,
@@ -61,6 +64,7 @@ const getProviderLabel = (provider: string) => (
 function OperatorEditor({
     createMode,
     draft,
+    error,
     geocodingProviders,
     saving,
     selectedOperator,
@@ -72,6 +76,7 @@ function OperatorEditor({
 }: OperatorEditorProps) {
     const [userDialogOpen, setUserDialogOpen] = useState(false);
     const [userCreated, setUserCreated] = useState(false);
+    const [createStep, setCreateStep] = useState<OperatorCreateStep>("data");
     const capabilityLabels = getCapabilityLabels();
     const selectedGeocodingProvider = geocodingProviders.find((definition) => (
         definition.provider === draft.geocodingConfiguration.provider
@@ -127,19 +132,51 @@ function OperatorEditor({
         || selectedGeocodingProvider.activeFields.some((field) => (
             !String(draft.geocodingConfiguration[geocodingFieldKeys[field]] ?? "").trim()
         ));
-    const createRequirementsMissing = createMode && (
-        !draft.userFirstName
+    const dataRequirementsMissing = !draft.companyName
+        || !draft.taxId
+        || !draft.userFirstName
         || !draft.userLastName
         || !draft.username
         || !draft.password
-        || !draft.email
-        || geocodingRequirementsMissing
-        || !draft.firstDepartment.departmentCode
+        || !draft.email;
+    const departmentRequirementsMissing = !draft.firstDepartment.departmentCode
         || !draft.firstDepartment.city
         || !draft.firstDepartment.street
-        || !draft.firstDepartment.postalCode
+        || !draft.firstDepartment.postalCode;
+    const createRequirementsMissing = createMode && (
+        dataRequirementsMissing
+        || geocodingRequirementsMissing
+        || departmentRequirementsMissing
     );
     const saveDisabled = saving || !draft.companyName || !draft.taxId || createRequirementsMissing;
+    const createSteps: Array<{key: OperatorCreateStep; label: string; hint: string; invalid: boolean}> = [
+        {
+            key: "data",
+            label: pl.superAdmin.editor.wizard.data,
+            hint: pl.superAdmin.editor.wizard.dataHint,
+            invalid: dataRequirementsMissing,
+        },
+        {
+            key: "configuration",
+            label: pl.superAdmin.editor.wizard.configuration,
+            hint: pl.superAdmin.editor.wizard.configurationHint,
+            invalid: geocodingRequirementsMissing,
+        },
+        {
+            key: "department",
+            label: pl.superAdmin.editor.wizard.department,
+            hint: pl.superAdmin.editor.wizard.departmentHint,
+            invalid: departmentRequirementsMissing,
+        },
+    ];
+    const currentStepIndex = createSteps.findIndex((step) => step.key === createStep);
+    const currentStepInvalid = createSteps[currentStepIndex]?.invalid ?? false;
+
+    useEffect(() => {
+        if (createMode) {
+            setCreateStep("data");
+        }
+    }, [createMode]);
 
     return (
         <article className="super-admin-panel super-admin-editor">
@@ -162,29 +199,52 @@ function OperatorEditor({
                 </div>
             </div>
 
-            <div className="super-admin-section-title">
-                <strong>{pl.superAdmin.editor.basicTitle}</strong>
-            </div>
-            <div className="super-admin-form-grid">
-                <label>
-                    <span>{pl.superAdmin.editor.fields.companyName}</span>
-                    <input value={draft.companyName} onChange={(event) => onUpdateDraft("companyName", event.target.value)}/>
-                </label>
-                <label>
-                    <span>{pl.superAdmin.editor.fields.taxId}</span>
-                    <input value={draft.taxId} onChange={(event) => onUpdateDraft("taxId", event.target.value)}/>
-                </label>
-                <label>
-                    <span>{pl.superAdmin.editor.fields.contactEmail}</span>
-                    <input value={draft.contactEmail} onChange={(event) => onUpdateDraft("contactEmail", event.target.value)}/>
-                </label>
-                <label>
-                    <span>{pl.superAdmin.editor.fields.contactPhone}</span>
-                    <input value={draft.contactPhone} onChange={(event) => onUpdateDraft("contactPhone", event.target.value)}/>
-                </label>
+            {createMode ? (
+                <div className="super-admin-editor-wizard-tabs" role="tablist" aria-label={pl.superAdmin.editor.wizard.ariaLabel}>
+                    {createSteps.map((step, index) => (
+                        <button
+                            aria-selected={createStep === step.key}
+                            className={`${createStep === step.key ? "is-active" : ""}${!step.invalid ? " is-complete" : ""}`}
+                            key={step.key}
+                            onClick={() => setCreateStep(step.key)}
+                            role="tab"
+                            type="button"
+                        >
+                            <span className="super-admin-editor-wizard-index">{String(index + 1).padStart(2, "0")}</span>
+                            <span><strong>{step.label}</strong><small>{step.hint}</small></span>
+                        </button>
+                    ))}
+                </div>
+            ) : null}
+
+            <div className={createMode ? "super-admin-editor-wizard-content" : undefined}>
+            {error ? <Alert className="super-admin-editor-alert" severity="error">{error}</Alert> : null}
+
+            <div className="super-admin-editor-step-section" hidden={createMode && createStep !== "data"}>
+                <div className="super-admin-section-title">
+                    <strong>{pl.superAdmin.editor.basicTitle}</strong>
+                </div>
+                <div className="super-admin-form-grid">
+                    <label>
+                        <span>{pl.superAdmin.editor.fields.companyName}</span>
+                        <input value={draft.companyName} onChange={(event) => onUpdateDraft("companyName", event.target.value)}/>
+                    </label>
+                    <label>
+                        <span>{pl.superAdmin.editor.fields.taxId}</span>
+                        <input value={draft.taxId} onChange={(event) => onUpdateDraft("taxId", event.target.value)}/>
+                    </label>
+                    <label>
+                        <span>{pl.superAdmin.editor.fields.contactEmail}</span>
+                        <input value={draft.contactEmail} onChange={(event) => onUpdateDraft("contactEmail", event.target.value)}/>
+                    </label>
+                    <label>
+                        <span>{pl.superAdmin.editor.fields.contactPhone}</span>
+                        <input value={draft.contactPhone} onChange={(event) => onUpdateDraft("contactPhone", event.target.value)}/>
+                    </label>
+                </div>
             </div>
 
-            <div className="super-admin-editor-section">
+            <div className="super-admin-editor-section" hidden={createMode && createStep !== "data"}>
                 <div className="super-admin-section-title">
                     <strong>{pl.superAdmin.editor.contractTitle}</strong>
                 </div>
@@ -206,7 +266,7 @@ function OperatorEditor({
 
             {createMode ? (
                 <>
-                    <div className="super-admin-editor-section">
+                    <div className="super-admin-editor-section" hidden={createStep !== "data"}>
                         <div className="super-admin-section-title">
                             <strong>{pl.superAdmin.editor.adminTitle}</strong>
                         </div>
@@ -238,7 +298,7 @@ function OperatorEditor({
                         </div>
                     </div>
 
-                    <div className="super-admin-editor-section">
+                    <div className="super-admin-editor-section" hidden={createStep !== "configuration"}>
                         <div className="super-admin-section-title">
                             <strong>{pl.superAdmin.editor.geocodingTitle}</strong>
                             <span>{pl.superAdmin.editor.geocodingSubtitle}</span>
@@ -246,7 +306,8 @@ function OperatorEditor({
                         <div className="super-admin-form-grid">
                             <label>
                                 <span>{pl.superAdmin.editor.fields.geocodingProvider}</span>
-                                <select
+                                <Select
+                                    aria-label={pl.superAdmin.editor.fields.geocodingProvider}
                                     value={draft.geocodingConfiguration.provider}
                                     onChange={(event) => selectGeocodingProvider(event.target.value)}
                                 >
@@ -256,7 +317,7 @@ function OperatorEditor({
                                             {getProviderLabel(definition.provider)}
                                         </option>
                                     ))}
-                                </select>
+                                </Select>
                             </label>
                             {selectedGeocodingProvider?.activeFields.map((field) => {
                                 const key = geocodingFieldKeys[field];
@@ -275,7 +336,7 @@ function OperatorEditor({
                         </div>
                     </div>
 
-                    <div className="super-admin-editor-section">
+                    <div className="super-admin-editor-section" hidden={createStep !== "department"}>
                         <div className="super-admin-section-title">
                             <strong>{pl.superAdmin.editor.firstDepartmentTitle}</strong>
                         </div>
@@ -306,18 +367,18 @@ function OperatorEditor({
                             </label>
                             <label>
                                 <span>{pl.superAdmin.editor.fields.departmentType}</span>
-                                <select value={draft.firstDepartment.departmentType} onChange={(event) => updateFirstDepartment("departmentType", event.target.value)}>
+                                <Select aria-label={pl.superAdmin.editor.fields.departmentType} value={draft.firstDepartment.departmentType} onChange={(event) => updateFirstDepartment("departmentType", event.target.value)}>
                                     <option value="BRANCH">{pl.superAdmin.editor.departmentTypes.BRANCH}</option>
                                     <option value="HEADQUARTERS">{pl.superAdmin.editor.departmentTypes.HEADQUARTERS}</option>
                                     <option value="WAREHOUSE">{pl.superAdmin.editor.departmentTypes.WAREHOUSE}</option>
-                                </select>
+                                </Select>
                             </label>
                         </div>
                     </div>
                 </>
             ) : undefined}
 
-            <div className="super-admin-editor-section">
+            <div className="super-admin-editor-section" hidden={createMode && createStep !== "configuration"}>
                 <div className="super-admin-section-title">
                     <strong>{pl.superAdmin.editor.featuresTitle}</strong>
                     <span>{pl.superAdmin.editor.featuresSubtitle}</span>
@@ -344,7 +405,7 @@ function OperatorEditor({
                 </div>
             </div>
 
-            <div className="super-admin-editor-section">
+            <div className="super-admin-editor-section" hidden={createMode && createStep !== "configuration"}>
                 <div className="super-admin-section-title">
                     <strong>{pl.superAdmin.editor.shipmentLimitsTitle}</strong>
                 </div>
@@ -363,7 +424,7 @@ function OperatorEditor({
                 </div>
             </div>
 
-            <div className="super-admin-editor-section">
+            <div className="super-admin-editor-section" hidden={createMode && createStep !== "configuration"}>
                 <div className="super-admin-section-title">
                     <strong>{pl.superAdmin.editor.deliveryTitle}</strong>
                 </div>
@@ -381,17 +442,46 @@ function OperatorEditor({
                     ))}
                 </div>
             </div>
-
-            <div className="super-admin-editor-footer">
-                <button className="super-admin-secondary-button" onClick={onCreate} type="button">
-                    <Close fontSize="small"/>
-                    <span>{pl.superAdmin.editor.clear}</span>
-                </button>
-                <button className="super-admin-primary-button" disabled={saveDisabled} onClick={onSave} type="button">
-                    <MoreHoriz fontSize="small"/>
-                    <span>{saving ? pl.superAdmin.editor.saving : createMode ? pl.superAdmin.editor.create : pl.superAdmin.editor.save}</span>
-                </button>
             </div>
+
+            {createMode ? (
+                <div className="super-admin-editor-footer super-admin-editor-wizard-footer">
+                    <button className="super-admin-secondary-button" disabled={saving} onClick={onCreate} type="button">
+                        <Close fontSize="small"/>
+                        <span>{pl.superAdmin.editor.wizard.cancel}</span>
+                    </button>
+                    <div className="super-admin-editor-wizard-navigation">
+                        {currentStepIndex > 0 ? (
+                            <button className="super-admin-secondary-button" disabled={saving} onClick={() => setCreateStep(createSteps[currentStepIndex - 1].key)} type="button">
+                                <ArrowBack fontSize="small"/>
+                                <span>{pl.superAdmin.editor.wizard.back}</span>
+                            </button>
+                        ) : null}
+                        {currentStepIndex < createSteps.length - 1 ? (
+                            <button className="super-admin-primary-button" disabled={saving || currentStepInvalid} onClick={() => setCreateStep(createSteps[currentStepIndex + 1].key)} type="button">
+                                <span>{pl.superAdmin.editor.wizard.next}</span>
+                                <ChevronRight fontSize="small"/>
+                            </button>
+                        ) : (
+                            <button className="super-admin-primary-button" disabled={saveDisabled} onClick={onSave} type="button">
+                                <Save fontSize="small"/>
+                                <span>{saving ? pl.superAdmin.editor.saving : pl.superAdmin.editor.create}</span>
+                            </button>
+                        )}
+                    </div>
+                </div>
+            ) : (
+                <div className="super-admin-editor-footer">
+                    <button className="super-admin-secondary-button" onClick={onCreate} type="button">
+                        <Close fontSize="small"/>
+                        <span>{pl.superAdmin.editor.clear}</span>
+                    </button>
+                    <button className="super-admin-primary-button" disabled={saveDisabled} onClick={onSave} type="button">
+                        <Save fontSize="small"/>
+                        <span>{saving ? pl.superAdmin.editor.saving : pl.superAdmin.editor.save}</span>
+                    </button>
+                </div>
+            )}
 
             {selectedOperator ? (
                 <OperatorUserDialog

@@ -1,5 +1,5 @@
 import React, {FormEvent, useEffect, useState} from "react";
-import {Alert, Dialog, DialogActions, DialogContent, DialogTitle} from "components/ui";
+import {Alert, Dialog, DialogActions, DialogContent, DialogTitle, Select} from "components/ui";
 import pl from "../../../i18n/translate";
 import OperatorUserService from "../../../hooks/OperatorUserService";
 import {
@@ -57,7 +57,7 @@ function OperatorUserDialog({open, operatorId, operatorName, onClose, onCreated}
         || !request.departmentCode;
 
     return (
-        <Dialog fullWidth maxWidth="sm" open={open} onClose={saving ? undefined : onClose}>
+        <Dialog className="super-admin-dialog" fullWidth maxWidth="sm" open={open} onClose={saving ? undefined : onClose}>
             <form className="super-admin-user-dialog" onSubmit={submit}>
                 <DialogTitle>{pl.superAdmin.userDialog.title}</DialogTitle>
                 <DialogContent>
@@ -123,25 +123,27 @@ function OperatorUserDialog({open, operatorId, operatorName, onClose, onCreated}
                         </label>
                         <label>
                             <span>{pl.superAdmin.userDialog.fields.role}</span>
-                            <select
+                            <Select
+                                aria-label={pl.superAdmin.userDialog.fields.role}
                                 value={request.role}
                                 onChange={(event) => updateRequest("role", event.target.value as OperatorUserRole)}
                             >
                                 {Object.entries(pl.superAdmin.userDialog.roles).map(([role, label]) => (
                                     <option key={role} value={role}>{label}</option>
                                 ))}
-                            </select>
+                            </Select>
                         </label>
                         <label>
                             <span>{pl.superAdmin.userDialog.fields.language}</span>
-                            <select
+                            <Select
+                                aria-label={pl.superAdmin.userDialog.fields.language}
                                 value={request.language}
                                 onChange={(event) => updateRequest("language", event.target.value)}
                             >
                                 {Object.entries(pl.superAdmin.userDialog.languages).map(([language, label]) => (
                                     <option key={language} value={language}>{label}</option>
                                 ))}
-                            </select>
+                            </Select>
                         </label>
                     </div>
                 </DialogContent>
