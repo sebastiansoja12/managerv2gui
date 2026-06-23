@@ -1594,6 +1594,7 @@ export const en: typeof pl = {
         },
         details: {
             kicker: "Return case",
+            title: "Return details",
             reasonTitle: "Return reason",
         },
         create: {
@@ -1622,6 +1623,7 @@ export const en: typeof pl = {
             validateToken: "Validate token",
             retry: "Try again",
             open: "Open",
+            backToList: "Returns list",
         },
         status: {
             CREATED: "Created",

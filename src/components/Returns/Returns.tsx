@@ -20,6 +20,7 @@ import {
     Typography,
 } from "components/ui";
 import {
+    ArrowBack,
     CheckCircleOutline,
     ContentCopy,
     DeleteOutline,
@@ -31,6 +32,7 @@ import {
     Search,
     Shield,
 } from "components/ui/icons";
+import {useNavigate, useParams} from "react-router-dom";
 import {getBackendErrorMessage} from "../../api/errorMessage";
 import {useAuthState} from "../../auth/AuthState";
 import Department from "../../class/depots/Department";
@@ -42,6 +44,7 @@ import {
     ReturnReasonCode,
     returnReasonCodes,
 } from "./model/ReturnPackage";
+import {AppTabDefinition} from "../AppShell/types";
 import "./styles/returns.css";
 
 type Notice = {
@@ -99,9 +102,16 @@ const departmentLabel = (department: Department) => {
     return city ? `${code} — ${city}` : code;
 };
 
-function Returns() {
+type ReturnsProps = {
+    onOpenTab?: (tab: AppTabDefinition) => void;
+};
+
+function Returns({onOpenTab}: ReturnsProps) {
+    const navigate = useNavigate();
+    const {returnId = ""} = useParams();
     const {user} = useAuthState();
-    const [lookupId, setLookupId] = useState("");
+    const detailMode = Boolean(returnId);
+    const [lookupId, setLookupId] = useState(returnId);
     const [returnPackage, setReturnPackage] = useState<ReturnPackageDto | null>(null);
     const [returnPackages, setReturnPackages] = useState<ReturnPackageDto[]>([]);
     const [departmentFilter, setDepartmentFilter] = useState("");
@@ -147,7 +157,32 @@ function Returns() {
         setTokenResult(null);
     };
 
+    const openReturnDetails = (requestedId: string) => {
+        const normalizedId = requestedId.trim();
+        if (!/^\d+$/.test(normalizedId)) {
+            setNotice({severity: "error", message: pl.returns.messages.invalidReturnId});
+            return;
+        }
+
+        const path = `/returns/${encodeURIComponent(normalizedId)}`;
+        const tab = {
+            label: `${pl.returns.details.title} #${normalizedId}`,
+            path,
+        };
+
+        if (onOpenTab) {
+            onOpenTab(tab);
+            return;
+        }
+
+        navigate(path);
+    };
+
     useEffect(() => {
+        if (detailMode) {
+            return;
+        }
+
         let ignore = false;
         setDepartmentsLoading(true);
         setDepartmentsError(null);
@@ -191,10 +226,10 @@ function Returns() {
         return () => {
             ignore = true;
         };
-    }, [departmentsReloadKey, user?.departmentCode]);
+    }, [departmentsReloadKey, detailMode, user?.departmentCode]);
 
     useEffect(() => {
-        if (!departmentFilter) {
+        if (detailMode || !departmentFilter) {
             setReturnPackages([]);
             return;
         }
@@ -224,7 +259,7 @@ function Returns() {
         return () => {
             ignore = true;
         };
-    }, [departmentFilter, listReloadKey]);
+    }, [departmentFilter, detailMode, listReloadKey]);
 
     const loadReturn = async (requestedId = lookupId) => {
         const normalizedId = requestedId.trim();
@@ -259,8 +294,20 @@ function Returns() {
 
     const searchReturn = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        void loadReturn();
+        openReturnDetails(lookupId);
     };
+
+    useEffect(() => {
+        if (!detailMode) {
+            setReturnPackage(null);
+            return;
+        }
+
+        setLookupId(returnId);
+        void loadReturn(returnId);
+        // The route ID is the source of truth for the separately opened details tab.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [detailMode, returnId]);
 
     const openCreateDialog = () => {
         const preferredDepartmentCode = availableDepartmentCodes.has(user?.departmentCode || "")
@@ -411,17 +458,28 @@ function Returns() {
                     <div className="returns-title">
                         <span className="returns-title-icon"><Loop /></span>
                         <div>
-                            <Typography variant="h4">{pl.returns.page.title}</Typography>
-                            <Typography variant="body2" color="text.secondary">{pl.returns.page.subtitle}</Typography>
+                            <Typography variant="h4">
+                                {detailMode ? pl.returns.details.title : pl.returns.page.title}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                                {detailMode ? `#${returnId}` : pl.returns.page.subtitle}
+                            </Typography>
                         </div>
                     </div>
-                    <Button startIcon={<Inventory2Outlined />} onClick={openCreateDialog}>
-                        {pl.returns.actions.create}
-                    </Button>
+                    {detailMode ? (
+                        <Button startIcon={<ArrowBack />} variant="outlined" onClick={() => navigate("/returns")}>
+                            {pl.returns.actions.backToList}
+                        </Button>
+                    ) : (
+                        <Button startIcon={<Inventory2Outlined />} onClick={openCreateDialog}>
+                            {pl.returns.actions.create}
+                        </Button>
+                    )}
                 </header>
 
                 {notice ? <Alert severity={notice.severity} onClose={() => setNotice(null)}>{notice.message}</Alert> : null}
 
+                {!detailMode ? <>
                 <section className="returns-lookup-panel" aria-labelledby="returns-lookup-title">
                     <div>
                         <span className="returns-section-kicker">{pl.returns.lookup.kicker}</span>
@@ -519,7 +577,7 @@ function Returns() {
                                             <TableCell>{returnReasonLabel(item.reasonCode?.value)}</TableCell>
                                             <TableCell>{formatDateTime(item.updatedAt)}</TableCell>
                                             <TableCell align="right">
-                                                <Button variant="text" onClick={() => selectReturnPackage(item)}>
+                                                <Button variant="text" onClick={() => openReturnDetails(item.returnPackageId.value)}>
                                                     {pl.returns.actions.open}
                                                 </Button>
                                             </TableCell>
@@ -535,8 +593,18 @@ function Returns() {
                             </Table>
                         </TableContainer>
                 </section>
+                </> : null}
 
-                {returnPackage ? (
+                {detailMode && loading ? (
+                    <section className="returns-detail-card">
+                        <div className="returns-table-state" role="status">
+                            <CircularProgress size={24} />
+                            {pl.common.loading}
+                        </div>
+                    </section>
+                ) : null}
+
+                {detailMode && returnPackage && !loading ? (
                     <>
                         <section className="returns-detail-card">
                             <div className="returns-detail-header">
@@ -553,7 +621,7 @@ function Returns() {
                                     <p>{pl.returns.fields.shipmentId}: #{returnPackage.shipmentId.value}</p>
                                 </div>
                                 <div className="returns-actions">
-                                    <Button disabled={loading} startIcon={<Refresh />} variant="outlined" onClick={() => loadReturn()}>
+                                    <Button disabled={loading} startIcon={<Refresh />} variant="outlined" onClick={() => loadReturn(returnId)}>
                                         {pl.common.refresh}
                                     </Button>
                                     {!terminal ? (
@@ -667,7 +735,7 @@ function Returns() {
                 ) : null}
             </div>
 
-            <Dialog fullWidth maxWidth="sm" open={createDialogOpen} onClose={() => !saving && setCreateDialogOpen(false)}>
+            <Dialog className="returns-dialog" fullWidth maxWidth="sm" open={createDialogOpen} onClose={() => !saving && setCreateDialogOpen(false)}>
                 <form onSubmit={createReturn}>
                     <DialogTitle>{pl.returns.create.title}</DialogTitle>
                     <DialogContent className="returns-dialog-content">
@@ -744,7 +812,7 @@ function Returns() {
                 </form>
             </Dialog>
 
-            <Dialog fullWidth maxWidth="xs" open={reasonDialogOpen} onClose={() => !saving && setReasonDialogOpen(false)}>
+            <Dialog className="returns-dialog" fullWidth maxWidth="xs" open={reasonDialogOpen} onClose={() => !saving && setReasonDialogOpen(false)}>
                 <DialogTitle>{pl.returns.reasonDialog.title}</DialogTitle>
                 <DialogContent className="returns-dialog-content">
                     <DialogContentText>{pl.returns.reasonDialog.description}</DialogContentText>
@@ -765,7 +833,7 @@ function Returns() {
                 </DialogActions>
             </Dialog>
 
-            <Dialog maxWidth="xs" open={Boolean(confirmation)} onClose={() => !saving && setConfirmation(null)}>
+            <Dialog className="returns-dialog returns-confirmation-dialog" maxWidth="xs" open={Boolean(confirmation)} onClose={() => !saving && setConfirmation(null)}>
                 <DialogTitle>{confirmation === "complete" ? pl.returns.confirmation.completeTitle : pl.returns.confirmation.cancelTitle}</DialogTitle>
                 <DialogContent>
                     <DialogContentText>

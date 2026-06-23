@@ -1591,6 +1591,7 @@ export const de: typeof pl = {
         },
         details: {
             kicker: "Retourenvorgang",
+            title: "Retourendetails",
             reasonTitle: "Retourengrund",
         },
         create: {
@@ -1619,6 +1620,7 @@ export const de: typeof pl = {
             validateToken: "Token prüfen",
             retry: "Erneut versuchen",
             open: "Öffnen",
+            backToList: "Retourenliste",
         },
         status: {
             CREATED: "Erstellt",

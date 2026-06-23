@@ -1590,6 +1590,7 @@ export const pl = {
         },
         details: {
             kicker: "Sprawa zwrotu",
+            title: "Szczegóły zwrotu",
             reasonTitle: "Powód zwrotu",
         },
         create: {
@@ -1618,6 +1619,7 @@ export const pl = {
             validateToken: "Sprawdź token",
             retry: "Spróbuj ponownie",
             open: "Otwórz",
+            backToList: "Lista zwrotów",
         },
         status: {
             CREATED: "Utworzony",

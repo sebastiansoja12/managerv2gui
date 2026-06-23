@@ -1,5 +1,6 @@
 import React from "react";
 import {fireEvent, render, screen, waitFor, within} from "@testing-library/react";
+import {MemoryRouter, Route, Routes} from "react-router-dom";
 import DepartmentService from "../../hooks/DepartmentService";
 import ReturnService from "../../hooks/ReturnService";
 import pl from "../../i18n/translate";
@@ -46,6 +47,18 @@ const returnPackage = {
     createdAt: "2026-08-14T08:00:00Z",
     updatedAt: "2026-08-14T09:00:00Z",
 };
+
+const renderReturns = (
+    props: React.ComponentProps<typeof Returns> = {},
+    initialPath = "/returns",
+) => render(
+    <MemoryRouter initialEntries={[initialPath]}>
+        <Routes>
+            <Route path="/returns" element={<Returns {...props}/>} />
+            <Route path="/returns/:returnId" element={<Returns {...props}/>} />
+        </Routes>
+    </MemoryRouter>,
+);
 
 describe("Returns", () => {
     beforeEach(() => {
@@ -97,7 +110,7 @@ describe("Returns", () => {
     });
 
     it("loads the returns table immediately for the default department", async () => {
-        render(<Returns />);
+        renderReturns();
 
         await waitFor(() => expect(mockedReturnService.getAllByDepartment).toHaveBeenCalledWith("WAW01"));
         expect(await screen.findByRole("rowheader", {name: returnPackage.returnPackageId.value})).toBeInTheDocument();
@@ -106,10 +119,10 @@ describe("Returns", () => {
         expect(screen.queryByText(`#${returnPackage.returnPackageId.value}`)).not.toBeInTheDocument();
     });
 
-    it("loads a return by ID and exposes only backend-supported actions", async () => {
-        mockedReturnService.get.mockResolvedValue({data: returnPackage, status: 200});
+    it("opens a searched return in a separate application tab", async () => {
+        const onOpenTab = jest.fn();
 
-        render(<Returns />);
+        renderReturns({onOpenTab});
 
         await screen.findByRole("rowheader", {name: returnPackage.returnPackageId.value});
 
@@ -118,13 +131,38 @@ describe("Returns", () => {
         });
         fireEvent.click(screen.getByRole("button", {name: pl.returns.actions.search}));
 
-        await waitFor(() => expect(mockedReturnService.get).toHaveBeenCalledWith("9223372036854775001"));
-        expect(await screen.findByText("#9223372036854775001")).toBeInTheDocument();
-        expect(screen.getByRole("rowheader", {name: "9223372036854775001"})).toBeInTheDocument();
-        expect(screen.getAllByText(pl.returns.status.CREATED)).toHaveLength(2);
-        expect(screen.getByRole("button", {name: pl.returns.actions.complete})).toBeInTheDocument();
+        expect(onOpenTab).toHaveBeenCalledWith({
+            label: `${pl.returns.details.title} #9223372036854775001`,
+            path: "/returns/9223372036854775001",
+        });
+        expect(mockedReturnService.get).not.toHaveBeenCalled();
+        expect(screen.queryByRole("button", {name: pl.returns.actions.complete})).not.toBeInTheDocument();
+    });
+
+    it("opens a table row in a separate application tab", async () => {
+        const onOpenTab = jest.fn();
+
+        renderReturns({onOpenTab});
+
+        await screen.findByRole("rowheader", {name: returnPackage.returnPackageId.value});
+        fireEvent.click(screen.getByRole("button", {name: pl.returns.actions.open}));
+
+        expect(onOpenTab).toHaveBeenCalledWith({
+            label: `${pl.returns.details.title} #${returnPackage.returnPackageId.value}`,
+            path: `/returns/${returnPackage.returnPackageId.value}`,
+        });
+        expect(screen.queryByText(`#${returnPackage.returnPackageId.value}`)).not.toBeInTheDocument();
+    });
+
+    it("loads details and backend-supported actions on the dedicated route", async () => {
+        mockedReturnService.get.mockResolvedValue({data: returnPackage, status: 200});
+
+        renderReturns({}, `/returns/${returnPackage.returnPackageId.value}`);
+
+        await waitFor(() => expect(mockedReturnService.get).toHaveBeenCalledWith(returnPackage.returnPackageId.value));
+        expect(await screen.findByRole("button", {name: pl.returns.actions.complete})).toBeInTheDocument();
+        expect(screen.queryByRole("table", {name: pl.returns.list.tableLabel})).not.toBeInTheDocument();
         expect(screen.getByRole("button", {name: pl.returns.actions.cancelReturn})).toBeInTheDocument();
-        await waitFor(() => expect(screen.queryByRole("progressbar")).not.toBeInTheDocument());
     });
 
     it("reloads the table when the handling department changes", async () => {
@@ -138,7 +176,7 @@ describe("Returns", () => {
             code === "KRK02" ? [krakowReturn] : [returnPackage]
         ));
 
-        render(<Returns />);
+        renderReturns();
 
         await screen.findByRole("rowheader", {name: returnPackage.returnPackageId.value});
 
@@ -155,18 +193,19 @@ describe("Returns", () => {
     it("submits a new return using the manager shipment endpoint contract", async () => {
         mockedReturnService.create.mockResolvedValue({data: {status: "OK"}, status: 200});
 
-        render(<Returns />);
+        renderReturns();
 
         await screen.findByRole("rowheader", {name: returnPackage.returnPackageId.value});
         await waitFor(() => expect(screen.queryByRole("progressbar")).not.toBeInTheDocument());
 
         fireEvent.click(screen.getByRole("button", {name: pl.returns.actions.create}));
         const dialog = screen.getByRole("dialog");
-        expect(await within(dialog).findByRole("option", {name: "WAW01 — Warszawa"})).toBeInTheDocument();
         const departmentSelect = within(dialog).getByRole("combobox", {name: /Oddział obsługujący/});
-        expect(within(departmentSelect).queryByRole("option", {name: /KT1/})).not.toBeInTheDocument();
+        fireEvent.mouseDown(departmentSelect);
+        const warsawOption = await screen.findByRole("option", {name: "WAW01 — Warszawa"});
+        expect(screen.queryByRole("option", {name: /KT1/})).not.toBeInTheDocument();
         fireEvent.change(within(dialog).getByRole("textbox", {name: /ID przesyłki/}), {target: {value: "582104"}});
-        fireEvent.change(departmentSelect, {target: {value: "WAW01"}});
+        fireEvent.click(warsawOption);
         fireEvent.change(within(dialog).getByRole("textbox", {name: /Opis powodu/}), {target: {value: "Damaged parcel corner"}});
         fireEvent.click(within(dialog).getByRole("button", {name: pl.returns.actions.create}));
 
@@ -183,12 +222,11 @@ describe("Returns", () => {
 
     it("cancels a return without reloading the cancelled return by id", async () => {
         mockedReturnService.cancel.mockResolvedValue({data: {status: "OK"}, status: 200});
+        mockedReturnService.get.mockResolvedValue({data: returnPackage, status: 200});
 
-        render(<Returns />);
+        renderReturns({}, `/returns/${returnPackage.returnPackageId.value}`);
 
-        await screen.findByRole("rowheader", {name: returnPackage.returnPackageId.value});
-        fireEvent.click(screen.getByRole("button", {name: pl.returns.actions.open}));
-        fireEvent.click(screen.getByRole("button", {name: pl.returns.actions.cancelReturn}));
+        fireEvent.click(await screen.findByRole("button", {name: pl.returns.actions.cancelReturn}));
         fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", {
             name: pl.returns.actions.cancelReturn,
         }));
@@ -196,8 +234,8 @@ describe("Returns", () => {
         await waitFor(() => expect(mockedReturnService.cancel).toHaveBeenCalledWith(
             returnPackage.returnPackageId.value,
         ));
-        expect(mockedReturnService.get).not.toHaveBeenCalled();
+        expect(mockedReturnService.get).toHaveBeenCalledTimes(1);
         expect(await screen.findByText(pl.returns.messages.cancelSuccess)).toBeInTheDocument();
-        expect(screen.getAllByText(pl.returns.status.CANCELLED).length).toBeGreaterThan(0);
+        expect(screen.getByText(pl.returns.status.CANCELLED)).toBeInTheDocument();
     });
 });

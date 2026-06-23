@@ -53,7 +53,8 @@ function AppRoutes({onOpenTab, operationalProfile = "warehouse"}: AppRoutesProps
             <Route path="analytics" element={guarded("/analytics", <ModulePlaceholder title={pl.home.tiles.analytics.title}/>)}/>
             <Route path="processes" element={guarded("/processes", <Processes/>)}/>
             <Route path="processes/:processId" element={guarded("/processes/1", <ProcessDetails/>)}/>
-            <Route path="returns" element={guarded("/returns", <Returns/>)}/>
+            <Route path="returns" element={guarded("/returns", <Returns onOpenTab={onOpenTab}/>)}/>
+            <Route path="returns/:returnId" element={guarded("/returns", <Returns onOpenTab={onOpenTab}/>)}/>
             <Route path="couriers" element={guarded("/couriers", <Couriers/>)}/>
             <Route path="couriers/:supplierCode" element={guarded("/couriers", <CourierDetails/>)}/>
             <Route path="vehicles" element={guarded("/vehicles", <ModulePlaceholder title={pl.home.tiles.vehicles.title}/>)}/>
