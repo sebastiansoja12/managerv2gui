@@ -31,6 +31,7 @@ configuration screens, plus a separate super-admin area.
 - Courier list, details and courier creation.
 - Process list and process details.
 - User management with create, edit, role and permission dialogs.
+- Organization chat backed by the real organization user directory and persistent REST conversations, with search and conversation bubbles grouped in the bottom-right dock.
 - Device pairing.
 - Global configuration, geocoding configuration and integration configuration panels.
 - Software configuration list.
@@ -137,3 +138,13 @@ Authentication is cookie/JWT based and the backend CORS configuration must allow
 the GUI origin, usually `http://localhost:3000`.
 
 Release notes are maintained in `CHANGELOG.md`.
+
+
+### Obecność i powiadomienia czatu
+
+Zielona kropka oznacza aktywne połączenie WebSocket z widoczną kartą aplikacji.
+Każda karta ma osobną sesję STOMP, a backend rozsyła listę online przez
+`/user/queue/chat/presence`. Ukrycie karty, utrata połączenia i wylogowanie usuwają
+obecność zdarzeniowo, bez odpytywania REST.
+Kafelki z nieprzeczytanymi powiadomieniami są podświetlane do czasu wyświetlenia rozmowy.
+Liczniki odebranych powiadomień są współdzielone między widokami w bieżącej sesji GUI.
