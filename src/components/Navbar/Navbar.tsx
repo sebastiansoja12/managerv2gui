@@ -5,6 +5,7 @@ import {
     AdminPanelSettings,
     Analytics,
     AccountTree,
+    ChatBubbleOutline,
     Dashboard,
     DevicesOther,
     ExpandMore,
@@ -12,6 +13,7 @@ import {
     Logout,
     LocalOffer,
     LocalShipping,
+    LocationOn,
     Loop,
     Person,
     Radar,
@@ -97,6 +99,7 @@ function Navbar({
     const mainItems: NavbarItem[] = [
         {label: pl.navigation.home, path: '/', icon: Dashboard},
         {label: pl.navigation.processes, path: '/processes', icon: TaskAlt},
+        {label: pl.navigation.chat, path: '/chat', icon: ChatBubbleOutline},
     ];
     const menus: NavbarMenu[] = [
         {
@@ -117,6 +120,7 @@ function Navbar({
             items: [
                 {label: pl.navigation.users, path: '/users', icon: AdminPanelSettings},
                 {label: pl.navigation.departments, path: '/depots', icon: WarehouseRounded},
+                {label: pl.navigation.pickupPoints, path: '/pickup-points', icon: LocationOn},
                 {label: pl.navigation.couriers, path: '/couriers', icon: Person},
                 {label: pl.navigation.devicePairing, path: '/device-pairing', icon: DevicesOther},
                 {label: pl.navigation.analytics, path: '/analytics', icon: Analytics},
@@ -342,13 +346,15 @@ function Navbar({
                         ["terminal-green", pl.common.themes.terminalGreen],
                         ["arctic-dark", pl.common.themes.arcticDark],
                         ["graphite-red", pl.common.themes.graphiteRed],
+                        ["electric-blue", pl.common.themes.electricBlue],
+                        ["ultraviolet", pl.common.themes.ultraviolet],
+                        ["graphite-deep", pl.common.themes.graphiteDeep],
+                        ["acid-lime", pl.common.themes.acidLime],
                         ["deep-ocean", pl.common.themes.deepOcean],
                         ["aubergine", pl.common.themes.aubergine],
                         ["midnight-blue", pl.common.themes.midnightBlue],
                         ["carbon", pl.common.themes.carbon],
-                        ["volcanic", pl.common.themes.volcanic],
                         ["courier-blue", pl.common.themes.courierBlue],
-                        ["dispatch-teal", pl.common.themes.dispatchTeal],
                     ] as Array<[AppTheme, string]>).map(([value, label]) => (
                         <button
                             aria-pressed={theme === value}

@@ -24,6 +24,8 @@ import {
 } from "../../i18n/languageStore";
 import AuthService from "../../hooks/AuthService";
 import {clearStoredTabs, OPEN_TABS_STORAGE_KEY} from "./tabStorage";
+import {OrganizationChatDockProvider} from "../Chat/ChatDockContext";
+import OrganizationChatDock from "../Chat/OrganizationChatDock";
 
 const homeTab = (): AppTabDefinition => ({
     label: pl.navigation.home,
@@ -246,7 +248,7 @@ function AppShell() {
     }
 
     return (
-        <>
+        <OrganizationChatDockProvider>
             <AnnouncementBanner />
             <Navbar
                 activePath={activePath}
@@ -263,6 +265,7 @@ function AppShell() {
             <div className="app-main-content">
                 <AppRoutes onOpenTab={openTab} operationalProfile={operationalProfile}/>
             </div>
+            <OrganizationChatDock />
             <Dialog
                 className="operational-profile-dialog"
                 open={Boolean(pendingOperationalProfile)}
@@ -297,7 +300,7 @@ function AppShell() {
                     </Button>
                 </DialogActions>
             </Dialog>
-        </>
+        </OrganizationChatDockProvider>
     );
 }
 
