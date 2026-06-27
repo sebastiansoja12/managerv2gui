@@ -5,8 +5,11 @@ import DevicePairing from "../Devices/DevicePairing";
 import HomeDashboard from "../Home/HomeDashboard";
 import ModulePlaceholder from "../Home/ModulePlaceholder";
 import LoginPage from "../LoginPage/LoginPage";
+import ProcessDetails from "../Process/ProcessDetails";
+import Processes from "../Process/Processes";
 import ShipmentCreate from "../Shipment/ShipmentCreate";
 import ShipmentControlCenter from "../Shipment/ShipmentControlCenter";
+import ShipmentHistoryDetails from "../Shipment/ShipmentHistoryDetails";
 import ShipmentList from "../Shipment/ShipmentList";
 import SoftwareConfigurationList from "../SoftwareConfiguration/SoftwareConfigurationList";
 import UserProfile from "../UserProfile/UserProfile";
@@ -36,9 +39,12 @@ function AppRoutes({onOpenTab, operationalProfile = "warehouse"}: AppRoutesProps
             <Route path="shipments/list" element={guarded("/shipments/list", <ShipmentList onOpenTab={onOpenTab}/>)}/>
             <Route path="shipments/create" element={guarded("/shipments/create", <ShipmentCreate/>)}/>
             <Route path="shipments/tracking/:trackingNumber/edit" element={guarded("/shipments/tracking/:trackingNumber/edit", <ShipmentControlCenter/>)}/>
+            <Route path="shipments/tracking/:trackingNumber/history" element={guarded("/shipments/tracking/:trackingNumber/history", <ShipmentHistoryDetails/>)}/>
             <Route path="shipments/:shipmentId/edit" element={guarded("/shipments/1/edit", <ShipmentControlCenter/>)}/>
+            <Route path="shipments/:shipmentId/history" element={guarded("/shipments/1/history", <ShipmentHistoryDetails/>)}/>
             <Route path="analytics" element={guarded("/analytics", <ModulePlaceholder title={pl.home.tiles.analytics.title}/>)}/>
-            <Route path="processes" element={guarded("/processes", <ModulePlaceholder title={pl.home.tiles.processes.title}/>)}/>
+            <Route path="processes" element={guarded("/processes", <Processes/>)}/>
+            <Route path="processes/:processId" element={guarded("/processes/1", <ProcessDetails/>)}/>
             <Route path="couriers" element={guarded("/couriers", <ModulePlaceholder title={pl.home.tiles.couriers.title}/>)}/>
             <Route path="vehicles" element={guarded("/vehicles", <ModulePlaceholder title={pl.home.tiles.vehicles.title}/>)}/>
             <Route path="pallets" element={guarded("/pallets", <ModulePlaceholder title={pl.home.tiles.pallets.title}/>)}/>

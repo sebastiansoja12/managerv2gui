@@ -22,7 +22,11 @@ export const isPathAllowedForProfile = (path: string, profile: OperationalProfil
         return true;
     }
 
-    if (/^\/shipments\/tracking\/[^/]+\/edit$/.test(path) || /^\/shipments\/\d+\/edit$/.test(path)) {
+    if (/^\/shipments\/tracking\/[^/]+\/edit$/.test(path)
+        || /^\/shipments\/tracking\/[^/]+\/history$/.test(path)
+        || /^\/shipments\/\d+\/edit$/.test(path)
+        || /^\/shipments\/\d+\/history$/.test(path)
+        || /^\/processes\/[^/]+$/.test(path)) {
         return true;
     }
 

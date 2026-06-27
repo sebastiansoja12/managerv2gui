@@ -13,6 +13,7 @@ import {
 import {
     ArrowBack,
     LocalShipping,
+    Map,
     PersonPinCircle,
     Refresh,
     Route,
@@ -125,6 +126,9 @@ const ShipmentControlCenter: React.FC = () => {
 
     const details = useMemo(() => routeDetails(routeLog), [routeLog]);
     const currentCourierDetail = details.find((detail) => detail.supplierCode || detail.username) || null;
+    const historyPath = decodedTrackingNumber
+        ? `/shipments/tracking/${encodeURIComponent(decodedTrackingNumber)}/history`
+        : `/shipments/${shipmentId || shipment?.shipmentId.value || ""}/history`;
 
     const showError = (error: unknown, fallback = pl.shipments.messages.operationFailed) => {
         const apiError = error as ApiErrorResponse;
@@ -425,7 +429,15 @@ const ShipmentControlCenter: React.FC = () => {
                                     <Typography variant="h6">{pl.shipments.trackerlog}</Typography>
                                     <span>{details.length} {pl.shipments.postCount}</span>
                                 </div>
-                                <Route fontSize="small" />
+                                <Button
+                                    disabled={!shipment}
+                                    size="small"
+                                    startIcon={<Map fontSize="small" />}
+                                    variant="outlined"
+                                    onClick={() => navigate(historyPath)}
+                                >
+                                    {pl.shipments.routeHistory.openDetails}
+                                </Button>
                             </div>
                             {renderRouteHistory()}
                         </aside>
