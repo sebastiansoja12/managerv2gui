@@ -173,6 +173,17 @@ const ProcessDetails: React.FC = () => {
                                 })}>
                                     {pl.processes.actions.showTotalRequest}
                                 </Button>
+
+                                <div>
+                                    <Typography variant="h6">{pl.processes.details.totalResponseTitle}</Typography>
+                                    <span>{pl.processes.details.totalResponseDescription}</span>
+                                </div>
+                                <Button startIcon={<DataObject />} variant="contained" onClick={() => setPayloadDialog({
+                                    title: pl.processes.details.totalResponseTitle,
+                                    payload: processLog?.response,
+                                })}>
+                                    {pl.processes.actions.showTotalResponse}
+                                </Button>
                             </div>
 
                             <section className="process-communications">

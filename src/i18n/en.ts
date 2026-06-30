@@ -331,6 +331,7 @@ export const en: typeof pl = {
             showRequest: "Show request",
             showResponse: "Show response",
             showTotalRequest: "Show incoming request",
+            showTotalResponse: "Pokaż response",
         },
         table: {
             title: "Process list",
@@ -351,7 +352,9 @@ export const en: typeof pl = {
         details: {
             title: "Process details",
             totalRequestTitle: "Incoming process request",
+            totalResponseTitle: "Incoming process response",
             totalRequestDescription: "The full request that started the process.",
+            totalResponseDescription: "The full response that ended the process.",
             communicationTitle: "Microservice communication",
             communicationCount: "entries",
             noCommunicationLogs: "No communication entries",

@@ -327,6 +327,7 @@ export const pl = {
             showRequest: "Pokaż request",
             showResponse: "Pokaż response",
             showTotalRequest: "Pokaż request wejściowy",
+            showTotalResponse: "Pokaż response",
         },
         table: {
             title: "Lista procesów",
@@ -346,8 +347,10 @@ export const pl = {
         },
         details: {
             title: "Szczegóły procesu",
-            totalRequestTitle: "Request wejściowy procesu",
+            totalRequestTitle: "Zapytanie procesu",
+            totalResponseTitle: "Odpowiedź procesu",
             totalRequestDescription: "Całościowy request, od którego rozpoczął się proces.",
+            totalResponseDescription: "Wynik procesu.",
             communicationTitle: "Komunikacja mikroserwisów",
             communicationCount: "wpisów",
             noCommunicationLogs: "Brak wpisów komunikacji",
