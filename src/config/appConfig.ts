@@ -1,6 +1,6 @@
 import { AppEnvironment } from "./appEnvironment";
 
-const BASE_VERSION = "2026.2";
+const BASE_VERSION = "2026.3";
 
 const ENV_VERSION: Record<AppEnvironment, string> = {
     development: `${BASE_VERSION}-SNAPSHOT`,
