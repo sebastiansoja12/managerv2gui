@@ -1,6 +1,6 @@
 export type ShipmentLabelFormatApi = "PDF_A6" | "PDF_A4" | "ZPL";
 
-export type DefaultShipmentStatusApi = "CREATED" | "PREPARED" | "ACCEPTED";
+export type DefaultShipmentStatusApi = "CREATED" | "PREPARED";
 
 export type ShipmentServiceLevelApi = "ECONOMY" | "STANDARD" | "EXPRESS";
 

@@ -143,13 +143,11 @@ const labelFormatToApi: Record<string, ShipmentLabelFormatApi> = {
 const shipmentStatusFromApi: Record<DefaultShipmentStatusApi, string> = {
     CREATED: "created",
     PREPARED: "prepared",
-    ACCEPTED: "accepted",
 };
 
 const shipmentStatusToApi: Record<string, DefaultShipmentStatusApi> = {
     created: "CREATED",
     prepared: "PREPARED",
-    accepted: "ACCEPTED",
 };
 
 const serviceLevelFromApi: Record<ShipmentServiceLevelApi, string> = {
@@ -652,7 +650,6 @@ export function ShipmentConfigurationPanel() {
                         {renderSelectSetting("defaultStatus", shipmentConfiguration.fields.defaultStatus.label, shipmentConfiguration.fields.defaultStatus.hint, [
                             {value: "created", label: shipmentConfiguration.statuses.created},
                             {value: "prepared", label: shipmentConfiguration.statuses.prepared},
-                            {value: "accepted", label: shipmentConfiguration.statuses.accepted},
                         ])}
                         {renderSelectSetting("defaultServiceLevel", shipmentConfiguration.fields.defaultServiceLevel.label, shipmentConfiguration.fields.defaultServiceLevel.hint, [
                             {value: "economy", label: shipmentConfiguration.serviceLevels.economy},
