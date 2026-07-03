@@ -4,6 +4,7 @@ import {
     Analytics,
     History,
     Business,
+    ChatBubbleOutline,
     ChevronRight,
     DevicesOther,
     DirectionsCar,
@@ -46,6 +47,7 @@ const homeTiles: HomeTile[] = [
     {key: "courierDeliveries", path: "/courier-deliveries", icon: LocalShipping, accent: "emerald"},
     {key: "systemSettings", path: "/software-configurations", icon: SettingsSuggest, accent: "violet"},
     {key: "profile", path: "/profile", icon: Person, accent: "slate"},
+    {key: "chat", path: "/chat", icon: ChatBubbleOutline, accent: "violet"},
     {key: "devicePairing", path: "/device-pairing", icon: DevicesOther, accent: "indigo"},
     {key: "processes", path: "/processes", icon: AccountTree, accent: "amber"},
     {key: "couriers", path: "/couriers", icon: LocalShipping, accent: "emerald"},
@@ -118,18 +120,6 @@ function HomeDashboard({onOpenTab, operationalProfile}: HomeDashboardProps) {
 
     return (
         <main className="home-dashboard-page">
-            <section className="home-dashboard-hero">
-                <div className="home-dashboard-heading">
-                    <span className="home-dashboard-kicker">{pl.common.brand}</span>
-                    <h1>{pl.home.title}</h1>
-                    <p>{pl.home.subtitle}</p>
-                </div>
-                <div className="home-dashboard-summary">
-                    <strong>{visibleTiles.length}</strong>
-                    <span>{pl.home.moduleCountLabel}</span>
-                </div>
-            </section>
-
             <section className="home-tracking-lookup" aria-label={pl.home.trackingLookup.ariaLabel}>
                 <div className="home-tracking-lookup-intro">
                     <span className="home-tracking-lookup-icon">

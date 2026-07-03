@@ -12,6 +12,7 @@ test("opens shipment details using the selected lookup criterion", async () => {
         </MemoryRouter>,
     );
 
+    expect(screen.queryByText(pl.home.title)).not.toBeInTheDocument();
     fireEvent.mouseDown(screen.getByLabelText(pl.home.trackingLookup.criterionLabel));
     fireEvent.click(await screen.findByRole("option", {name: pl.home.trackingLookup.criteria.shipmentId}));
     fireEvent.change(screen.getByPlaceholderText(pl.home.trackingLookup.shipmentIdPlaceholder), {
