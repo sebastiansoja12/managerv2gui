@@ -250,6 +250,29 @@
     width: 100%;
 }
 
+.department-relations-automatic {
+    background: color-mix(in srgb, var(--brand-accent) 7%, var(--surface-elevated));
+    border: 1px solid color-mix(in srgb, var(--brand-accent) 30%, var(--brand-border));
+    border-radius: 10px;
+    display: grid;
+    gap: 7px;
+    padding: 12px;
+}
+
+.department-relations-automatic > strong {
+    font-size: 0.86rem;
+}
+
+.department-relations-automatic > p {
+    margin: 0;
+}
+
+.department-relations-automatic [data-ui="button"] {
+    border-radius: 8px;
+    margin-top: 3px;
+    width: 100%;
+}
+
 .department-relations-list {
     border-top: 1px solid var(--brand-border);
     display: flex;

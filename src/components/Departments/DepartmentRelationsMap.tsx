@@ -2,7 +2,7 @@ import React, {useCallback, useEffect, useMemo, useRef, useState} from "react";
 import * as L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import {Alert, Button, MenuItem, TextField} from "components/ui";
-import {AccountTree, Add, Close, Map as MapIcon, WarningAmberOutlined} from "components/ui/icons";
+import {AccountTree, Add, Close, Hub, Map as MapIcon, WarningAmberOutlined} from "components/ui/icons";
 import Department from "../../class/depots/Department";
 import pl from "../../i18n/translate";
 import {DepartmentRelation, departmentRelationPairKey} from "./model/DepartmentRelation";
@@ -97,6 +97,60 @@ export const getUniqueDepartmentRelations = (relations: DepartmentRelation[]) =>
     });
 };
 
+const distanceBetweenDepartments = (source: Department, target: Department) => {
+    const sourcePosition = departmentPosition(source);
+    const targetPosition = departmentPosition(target);
+    if (!sourcePosition || !targetPosition) {
+        return Number.POSITIVE_INFINITY;
+    }
+
+    const latitudeScale = Math.cos((sourcePosition[0] + targetPosition[0]) * Math.PI / 360);
+    const latitudeDistance = targetPosition[0] - sourcePosition[0];
+    const longitudeDistance = (targetPosition[1] - sourcePosition[1]) * latitudeScale;
+    return latitudeDistance * latitudeDistance + longitudeDistance * longitudeDistance;
+};
+
+export const getRelationsWithAutomaticSortingAssignments = (
+    departments: Department[],
+    relations: DepartmentRelation[],
+) => {
+    const activeSortingFacilities = departments
+        .filter((department) => isRelationCandidate(department) && department.departmentType === SORTING_FACILITY)
+        .sort((first, second) => departmentCode(first).localeCompare(departmentCode(second)));
+    if (!activeSortingFacilities.length) {
+        return relations;
+    }
+
+    const relationKeys = new Set(relations.map(departmentRelationPairKey));
+    const automaticRelations = getDepartmentsMissingSortingRelation(departments, relations)
+        .reduce<DepartmentRelation[]>((result, department) => {
+            const sortingFacility = activeSortingFacilities.length === 1
+                ? activeSortingFacilities[0]
+                : activeSortingFacilities
+                    .filter((candidate) => Number.isFinite(distanceBetweenDepartments(department, candidate)))
+                    .sort((first, second) => (
+                        distanceBetweenDepartments(department, first) - distanceBetweenDepartments(department, second)
+                    ))[0];
+
+            if (!sortingFacility) {
+                return result;
+            }
+
+            const relation = {
+                sourceDepartmentId: departmentId(department),
+                targetDepartmentId: departmentId(sortingFacility),
+            };
+            const relationKey = departmentRelationPairKey(relation);
+            if (!relationKeys.has(relationKey)) {
+                relationKeys.add(relationKey);
+                result.push(relation);
+            }
+            return result;
+        }, []);
+
+    return [...relations, ...automaticRelations];
+};
+
 const popupContent = (department: Department) => {
     const popup = document.createElement("div");
     popup.className = "department-relations-popup";
@@ -167,6 +221,11 @@ const DepartmentRelationsMap: React.FC<DepartmentRelationsMapProps> = ({
         () => relationCandidates.filter((department) => department.departmentType === SORTING_FACILITY),
         [relationCandidates],
     );
+    const relationsWithAutomaticAssignments = useMemo(
+        () => getRelationsWithAutomaticSortingAssignments(departments, relations),
+        [departments, relations],
+    );
+    const automaticAssignmentCount = relationsWithAutomaticAssignments.length - relations.length;
     const hasMappedDepartments = mappedDepartments.length > 0;
     const unmappedCount = relationCandidates.length - mappedDepartments.length;
 
@@ -396,6 +455,22 @@ const DepartmentRelationsMap: React.FC<DepartmentRelationsMapProps> = ({
                         <span className="department-relations-editor-kicker">{pl.departments.relations.formKicker}</span>
                         <h3>{pl.departments.relations.formTitle}</h3>
                         <p>{pl.departments.relations.formDescription}</p>
+                    </div>
+                    <div className="department-relations-automatic">
+                        <span className="department-relations-editor-kicker">{pl.departments.relations.automaticKicker}</span>
+                        <strong>{pl.departments.relations.automaticTitle}</strong>
+                        <p>{pl.departments.relations.automaticDescription}</p>
+                        <Button
+                            disabled={!automaticAssignmentCount}
+                            startIcon={<Hub />}
+                            variant="outlined"
+                            onClick={() => onRelationsChange(relationsWithAutomaticAssignments)}
+                        >
+                            {pl.departments.relations.automaticAction.replace(
+                                "{count}",
+                                String(automaticAssignmentCount),
+                            )}
+                        </Button>
                     </div>
                     <TextField
                         select
