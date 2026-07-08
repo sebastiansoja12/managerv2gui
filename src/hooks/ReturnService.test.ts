@@ -80,4 +80,34 @@ describe("ReturnService", () => {
         });
         expect(mockReturningRequest).not.toHaveBeenCalled();
     });
+
+    it("starts return processing through Manager", async () => {
+        mockManagerRequest.mockResolvedValue({data: {status: "OK"}, status: 200});
+
+        await ReturnService.process("456");
+
+        expect(mockManagerRequest).toHaveBeenCalledWith({
+            method: "PUT",
+            url: "/shipments/returns/456/process",
+            data: undefined,
+            params: undefined,
+            headers: undefined,
+        });
+        expect(mockReturningRequest).not.toHaveBeenCalled();
+    });
+
+    it("completes a return through Manager", async () => {
+        mockManagerRequest.mockResolvedValue({data: {status: "OK"}, status: 200});
+
+        await ReturnService.complete("456");
+
+        expect(mockManagerRequest).toHaveBeenCalledWith({
+            method: "PUT",
+            url: "/shipments/returns/456/complete",
+            data: undefined,
+            params: undefined,
+            headers: undefined,
+        });
+        expect(mockReturningRequest).not.toHaveBeenCalled();
+    });
 });
