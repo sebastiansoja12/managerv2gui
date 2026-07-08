@@ -129,7 +129,7 @@ function Returns({onOpenTab}: ReturnsProps) {
     const [departmentsReloadKey, setDepartmentsReloadKey] = useState(0);
     const [reasonDialogOpen, setReasonDialogOpen] = useState(false);
     const [selectedReasonCode, setSelectedReasonCode] = useState<ReturnReasonCode>("DAMAGED");
-    const [confirmation, setConfirmation] = useState<"complete" | "cancel" | null>(null);
+    const [confirmation, setConfirmation] = useState<"process" | "complete" | "cancel" | null>(null);
     const [tokenShipmentId, setTokenShipmentId] = useState("");
     const [token, setToken] = useState("");
     const [tokenResult, setTokenResult] = useState<boolean | null>(null);
@@ -379,30 +379,34 @@ function Returns({onOpenTab}: ReturnsProps) {
         setSaving(true);
         setNotice(null);
         try {
-            if (confirmation === "complete") {
+            if (confirmation === "process") {
+                await ReturnService.process(returnPackage.shipmentId.value);
+            } else if (confirmation === "complete") {
                 await ReturnService.complete(returnPackage.shipmentId.value);
             } else {
                 await ReturnService.cancel(returnPackage.returnPackageId.value);
             }
-            const successMessage = confirmation === "complete"
-                ? pl.returns.messages.completeSuccess
-                : pl.returns.messages.cancelSuccess;
+            const successMessage = confirmation === "process"
+                ? pl.returns.messages.processSuccess
+                : confirmation === "complete"
+                    ? pl.returns.messages.completeSuccess
+                    : pl.returns.messages.cancelSuccess;
+            const updatedReturnPackage: ReturnPackageDto = {
+                ...returnPackage,
+                returnStatus: confirmation === "process"
+                    ? "PROCESSING"
+                    : confirmation === "complete"
+                        ? "COMPLETED"
+                        : "CANCELLED",
+                updatedAt: new Date().toISOString(),
+            };
             setConfirmation(null);
-            if (confirmation === "complete") {
-                await loadReturn(returnPackage.returnPackageId.value);
-            } else {
-                const canceledReturnPackage: ReturnPackageDto = {
-                    ...returnPackage,
-                    returnStatus: "CANCELLED",
-                    updatedAt: new Date().toISOString(),
-                };
-                setReturnPackages((currentReturnPackages) => currentReturnPackages.map((item) => (
-                    item.returnPackageId.value === canceledReturnPackage.returnPackageId.value
-                        ? canceledReturnPackage
-                        : item
-                )));
-                selectReturnPackage(canceledReturnPackage);
-            }
+            setReturnPackages((currentReturnPackages) => currentReturnPackages.map((item) => (
+                item.returnPackageId.value === updatedReturnPackage.returnPackageId.value
+                    ? updatedReturnPackage
+                    : item
+            )));
+            selectReturnPackage(updatedReturnPackage);
             setNotice({severity: "success", message: successMessage});
         } catch (error) {
             setNotice({
@@ -626,9 +630,15 @@ function Returns({onOpenTab}: ReturnsProps) {
                                     </Button>
                                     {!terminal ? (
                                         <>
-                                            <Button startIcon={<CheckCircleOutline />} onClick={() => setConfirmation("complete")}>
-                                                {pl.returns.actions.complete}
-                                            </Button>
+                                            {returnPackage.returnStatus === "CREATED" ? (
+                                                <Button startIcon={<Loop />} onClick={() => setConfirmation("process")}>
+                                                    {pl.returns.actions.process}
+                                                </Button>
+                                            ) : (
+                                                <Button startIcon={<CheckCircleOutline />} onClick={() => setConfirmation("complete")}>
+                                                    {pl.returns.actions.complete}
+                                                </Button>
+                                            )}
                                             <Button color="error" startIcon={<DeleteOutline />} variant="outlined" onClick={() => setConfirmation("cancel")}>
                                                 {pl.returns.actions.cancelReturn}
                                             </Button>
@@ -834,16 +844,30 @@ function Returns({onOpenTab}: ReturnsProps) {
             </Dialog>
 
             <Dialog className="returns-dialog returns-confirmation-dialog" maxWidth="xs" open={Boolean(confirmation)} onClose={() => !saving && setConfirmation(null)}>
-                <DialogTitle>{confirmation === "complete" ? pl.returns.confirmation.completeTitle : pl.returns.confirmation.cancelTitle}</DialogTitle>
+                <DialogTitle>
+                    {confirmation === "process"
+                        ? pl.returns.confirmation.processTitle
+                        : confirmation === "complete"
+                            ? pl.returns.confirmation.completeTitle
+                            : pl.returns.confirmation.cancelTitle}
+                </DialogTitle>
                 <DialogContent>
                     <DialogContentText>
-                        {confirmation === "complete" ? pl.returns.confirmation.completeDescription : pl.returns.confirmation.cancelDescription}
+                        {confirmation === "process"
+                            ? pl.returns.confirmation.processDescription
+                            : confirmation === "complete"
+                                ? pl.returns.confirmation.completeDescription
+                                : pl.returns.confirmation.cancelDescription}
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
                     <Button disabled={saving} variant="text" onClick={() => setConfirmation(null)}>{pl.common.cancel}</Button>
                     <Button color={confirmation === "cancel" ? "error" : "primary"} disabled={saving} onClick={applyStatusAction}>
-                        {confirmation === "complete" ? pl.returns.actions.complete : pl.returns.actions.cancelReturn}
+                        {confirmation === "process"
+                            ? pl.returns.actions.process
+                            : confirmation === "complete"
+                                ? pl.returns.actions.complete
+                                : pl.returns.actions.cancelReturn}
                     </Button>
                 </DialogActions>
             </Dialog>
