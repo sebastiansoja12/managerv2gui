@@ -1,0 +1,187 @@
+.microservice-status-page {
+    box-sizing: border-box;
+    color: #111827;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 20px 24px 32px;
+    text-align: left;
+    width: 100%;
+}
+
+.microservice-status-page *,
+.microservice-status-page *::before,
+.microservice-status-page *::after {
+    box-sizing: border-box;
+}
+
+.microservice-status-header,
+.microservice-status-panel {
+    background: #ffffff;
+    border: 1px solid #e4e9f1;
+    border-radius: 8px;
+    box-shadow: 0 16px 34px rgba(15, 23, 42, 0.05);
+}
+
+.microservice-status-header {
+    align-items: center;
+    display: flex;
+    gap: 20px;
+    justify-content: space-between;
+    padding: 22px 24px;
+}
+
+.microservice-status-header h4,
+.microservice-status-panel-header h5 {
+    color: #101828;
+    font-weight: 800;
+    letter-spacing: 0;
+}
+
+.microservice-status-header p {
+    color: #667085;
+    margin: 6px 0 0;
+}
+
+.microservice-status-kicker {
+    color: #315a9f;
+    display: block;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+}
+
+.microservice-status-summary {
+    display: grid;
+    gap: 10px;
+    grid-template-columns: repeat(3, minmax(130px, 1fr));
+}
+
+.microservice-status-summary div {
+    align-items: center;
+    background: #f8fafc;
+    border: 1px solid #e6ebf2;
+    border-radius: 8px;
+    display: grid;
+    gap: 2px;
+    grid-template-columns: auto 1fr;
+    padding: 12px;
+}
+
+.microservice-status-summary svg {
+    color: #315a9f;
+    grid-row: span 2;
+}
+
+.microservice-status-summary span {
+    color: #667085;
+    font-size: 12px;
+}
+
+.microservice-status-summary strong {
+    color: #111827;
+    font-size: 22px;
+}
+
+.microservice-status-panel {
+    min-width: 0;
+    overflow: hidden;
+}
+
+.microservice-status-panel-header {
+    align-items: center;
+    border-bottom: 1px solid #e9edf4;
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+    min-height: 72px;
+    padding: 16px 20px;
+}
+
+.microservice-status-loader {
+    align-items: center;
+    color: #667085;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    min-height: 260px;
+}
+
+.microservice-status-table-wrap {
+    overflow-x: auto;
+}
+
+.microservice-status-table {
+    border-collapse: collapse;
+    min-width: 980px;
+    width: 100%;
+}
+
+.microservice-status-table th,
+.microservice-status-table td {
+    border-bottom: 1px solid #eef2f7;
+    color: #111827;
+    font-size: 14px;
+    padding: 14px 12px;
+    text-align: left;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.microservice-status-table th {
+    background: #f8fafc;
+    color: #667085;
+    font-weight: 800;
+}
+
+.microservice-status-badge {
+    border-radius: 7px;
+    display: inline-flex;
+    font-size: 13px;
+    font-weight: 800;
+    padding: 5px 9px;
+}
+
+.microservice-status-badge-online {
+    background: #dcfce7;
+    color: #047857;
+}
+
+.microservice-status-badge-offline {
+    background: #ffe4e6;
+    color: #be123c;
+}
+
+.microservice-status-badge-unknown {
+    background: #eef2ff;
+    color: #315a9f;
+}
+
+.microservice-status-empty {
+    color: #667085 !important;
+    height: 160px;
+    text-align: center !important;
+}
+
+@media (max-width: 900px) {
+    .microservice-status-page {
+        padding: 16px;
+    }
+
+    .microservice-status-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .microservice-status-summary {
+        grid-template-columns: 1fr;
+        width: 100%;
+    }
+
+    .microservice-status-panel-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}

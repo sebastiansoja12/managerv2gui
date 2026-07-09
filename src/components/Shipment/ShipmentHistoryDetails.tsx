@@ -107,7 +107,7 @@ const ShipmentHistoryDetails: React.FC = () => {
                     </div>
                     <div className="shipment-edit-header-actions">
                         <Button startIcon={<ArrowBack />} variant="outlined" onClick={() => navigate(backPath)}>
-                            {pl.shipments.page.controlCenterTitle}
+                            {pl.shipments.page.detailsTitle}
                         </Button>
                         <Button disabled={loading} startIcon={<Refresh />} variant="outlined" onClick={loadHistory}>
                             {pl.common.refresh}

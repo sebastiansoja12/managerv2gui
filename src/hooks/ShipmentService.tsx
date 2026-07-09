@@ -6,7 +6,7 @@ import {
     PersonType,
     ShipmentCreateRequestApi,
     ShipmentCreateResponseDto,
-    ShipmentControlCenterDto,
+    ShipmentDetailsDto,
     ShipmentDeliveryRequestApiDto,
     ShipmentDto,
     ShipmentResponseInformation,
@@ -63,11 +63,11 @@ const getByTrackingNumber = (trackingNumber: string) => {
 };
 
 const getControlCenter = (shipmentId: string) => {
-    return client.get<ShipmentControlCenterDto>(`/shipments/${shipmentId}/control-center`);
+    return client.get<ShipmentDetailsDto>(`/shipments/${shipmentId}/control-center`);
 };
 
 const getControlCenterByTrackingNumber = (trackingNumber: string) => {
-    return client.get<ShipmentControlCenterDto>(`/shipments/tracking-numbers/${trackingNumber}/control-center`);
+    return client.get<ShipmentDetailsDto>(`/shipments/tracking-numbers/${trackingNumber}/control-center`);
 };
 
 const update = (data: ShipmentUpdateRequestApi) => {

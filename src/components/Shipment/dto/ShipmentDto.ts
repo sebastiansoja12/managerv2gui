@@ -84,7 +84,7 @@ export interface ShipmentDto {
     dangerousGood?: DangerousGoodApi | null;
 }
 
-export interface ShipmentControlCenterDto {
+export interface ShipmentDetailsDto {
     shipment: ShipmentDto;
     routeLog: RouteLogRecord | null;
 }

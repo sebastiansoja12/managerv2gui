@@ -27,8 +27,10 @@ import {
     PersonApi,
     PersonType,
     ShipmentDto,
+    shipmentTypes,
     shipmentStatuses,
     ShipmentStatusDto,
+    ShipmentTypeDto,
 } from "./dto/ShipmentDto";
 import pl from "../../i18n/translate";
 import "./styles/shipments.css";
@@ -108,12 +110,15 @@ const detailDepartment = (detail: RouteDetail) => detail.departmentCode || detai
 
 const detailTerminal = (detail: RouteDetail) => detail.terminalId?.value || detail.zebraId || pl.common.dash;
 
-const ShipmentControlCenter: React.FC = () => {
+const formatBoolean = (value: boolean) => value ? pl.shipments.dangerousGood.yes : pl.shipments.dangerousGood.no;
+
+const ShipmentDetails: React.FC = () => {
     const navigate = useNavigate();
     const {shipmentId, trackingNumber} = useParams();
     const [shipment, setShipment] = useState<ShipmentDto | null>(null);
     const [routeLog, setRouteLog] = useState<RouteLogRecord | null>(null);
     const [status, setStatus] = useState<ShipmentStatusDto>("CREATED");
+    const [shipmentType, setShipmentType] = useState<ShipmentTypeDto>("PARENT");
     const [sender, setSender] = useState<PersonApi>({...emptyPerson});
     const [recipient, setRecipient] = useState<PersonApi>({...emptyPerson});
     const [loadingShipment, setLoadingShipment] = useState<boolean>(true);
@@ -141,6 +146,7 @@ const ShipmentControlCenter: React.FC = () => {
     const applyShipment = (data: ShipmentDto) => {
         setShipment(data);
         setStatus(data.shipmentStatus);
+        setShipmentType(data.shipmentType);
         setSender(clonePerson(data.sender));
         setRecipient(clonePerson(data.recipient));
     };
@@ -201,6 +207,10 @@ const ShipmentControlCenter: React.FC = () => {
                 });
             }
 
+            if (shipmentType !== shipment.shipmentType) {
+                await ShipmentService.changeShipmentType(shipment.shipmentId.value, shipmentType);
+            }
+
             await ShipmentService.updatePerson(shipment.shipmentId.value, "SENDER", sender);
             await ShipmentService.updatePerson(shipment.shipmentId.value, "RECIPIENT", recipient);
 
@@ -218,7 +228,7 @@ const ShipmentControlCenter: React.FC = () => {
     };
 
     const personFields = (title: string, personType: PersonType, person: PersonApi) => (
-        <section className="shipment-edit-section">
+        <section className={`shipment-edit-section shipment-details-segment shipment-details-person-${personType.toLowerCase()}`}>
             <div className="shipment-edit-section-header">
                 <Typography variant="h6">{title}</Typography>
             </div>
@@ -276,6 +286,87 @@ const ShipmentControlCenter: React.FC = () => {
         </section>
     );
 
+    const renderDangerousGood = () => {
+        const dangerousGood = shipment?.dangerousGood;
+
+        return (
+            <section className="shipment-edit-section shipment-details-segment shipment-details-dangerous-good">
+                <div className="shipment-edit-section-header">
+                    <Typography variant="h6">{pl.shipments.form.sections.dangerousGood}</Typography>
+                    <Chip
+                        className={dangerousGood ? "shipment-dangerous-chip-active" : "shipment-dangerous-chip-empty"}
+                        label={dangerousGood ? pl.shipments.dangerousGood.active : pl.shipments.dangerousGood.emptyStatus}
+                        size="small"
+                    />
+                </div>
+
+                {dangerousGood ? (
+                    <>
+                        <div className="shipment-dangerous-good-grid">
+                            <div>
+                                <span>{pl.shipments.form.fields.name}</span>
+                                <strong>{dangerousGood.name || pl.common.dash}</strong>
+                            </div>
+                            <div>
+                                <span>{pl.shipments.form.fields.classification}</span>
+                                <strong>{dangerousGood.classificationCode || pl.common.dash}</strong>
+                            </div>
+                            <div>
+                                <span>{pl.shipments.form.fields.weight}</span>
+                                <strong>{dangerousGood.weight ? `${dangerousGood.weight.value} ${dangerousGood.weight.unit}` : pl.common.dash}</strong>
+                            </div>
+                            <div>
+                                <span>{pl.shipments.form.fields.packaging}</span>
+                                <strong>{dangerousGood.packaging || pl.common.dash}</strong>
+                            </div>
+                            <div>
+                                <span>{pl.shipments.form.fields.countryOfOrigin}</span>
+                                <strong>{dangerousGood.countryOfOrigin || pl.common.dash}</strong>
+                            </div>
+                            <div>
+                                <span>{pl.shipments.form.fields.emergencyContact}</span>
+                                <strong>{dangerousGood.emergencyContact || pl.common.dash}</strong>
+                            </div>
+                            <div>
+                                <span>{pl.shipments.form.fields.safetyDataSheet}</span>
+                                <strong>{dangerousGood.safetyDataSheet || pl.common.dash}</strong>
+                            </div>
+                            <div>
+                                <span>{pl.shipments.form.fields.hazardSymbols}</span>
+                                <strong>{dangerousGood.hazardSymbols?.length ? dangerousGood.hazardSymbols.join(", ") : pl.common.dash}</strong>
+                            </div>
+                        </div>
+
+                        <div className="shipment-dangerous-good-flags">
+                            <Chip label={`${pl.shipments.form.fields.flammable}: ${formatBoolean(dangerousGood.flammable)}`} size="small" />
+                            <Chip label={`${pl.shipments.form.fields.corrosive}: ${formatBoolean(dangerousGood.corosive)}`} size="small" />
+                            <Chip label={`${pl.shipments.form.fields.toxic}: ${formatBoolean(dangerousGood.toxic)}`} size="small" />
+                        </div>
+
+                        <div className="shipment-dangerous-good-notes">
+                            <div>
+                                <span>{pl.shipments.form.fields.description}</span>
+                                <p>{dangerousGood.description || pl.common.dash}</p>
+                            </div>
+                            <div>
+                                <span>{pl.shipments.form.fields.storageRequirements}</span>
+                                <p>{dangerousGood.storageRequirements || pl.common.dash}</p>
+                            </div>
+                            <div>
+                                <span>{pl.shipments.form.fields.handlingInstructions}</span>
+                                <p>{dangerousGood.handlingInstructions || pl.common.dash}</p>
+                            </div>
+                        </div>
+                    </>
+                ) : (
+                    <div className="shipment-dangerous-good-empty">
+                        {pl.shipments.dangerousGood.empty}
+                    </div>
+                )}
+            </section>
+        );
+    };
+
     const renderRouteHistory = () => {
         if (loadingRouteLog) {
             return (
@@ -330,11 +421,11 @@ const ShipmentControlCenter: React.FC = () => {
                     <div className="shipments-title">
                         <span className="shipments-title-icon"><LocalShipping /></span>
                         <Box>
-                            <Typography variant="h4">{pl.shipments.page.controlCenterTitle}</Typography>
+                            <Typography variant="h4">{pl.shipments.page.detailsTitle}</Typography>
                             <Typography variant="body2" color="text.secondary">
                                 {shipment
                                     ? `${shipment.trackingNumber?.value || pl.common.dash} · ${fullName(shipment.sender)} → ${fullName(shipment.recipient)}`
-                                    : pl.shipments.page.controlCenterSubtitle}
+                                    : pl.shipments.page.detailsSubtitle}
                             </Typography>
                         </Box>
                     </div>
@@ -359,30 +450,81 @@ const ShipmentControlCenter: React.FC = () => {
                 ) : shipment ? (
                     <div className="shipment-cc-layout">
                         <main className="shipments-panel shipment-edit-panel">
-                            <section className="shipment-details-summary shipment-edit-summary">
-                                <div>
-                                    <span>{pl.shipments.summary.tracking}</span>
-                                    <strong>{shipment.trackingNumber?.value || pl.common.dash}</strong>
+                            <section className="shipment-edit-section shipment-details-segment shipment-details-info-segment">
+                                <div className="shipment-edit-section-header">
+                                    <Typography variant="h6">{pl.shipments.form.sections.shipmentData}</Typography>
+                                    <Chip className={`tm-status tm-status-${shipment.shipmentStatus.toLowerCase()}`} label={pl.shipments.status[shipment.shipmentStatus]} size="small" />
                                 </div>
-                                <div>
-                                    <span>{pl.shipments.summary.id}</span>
-                                    <strong>#{shipment.shipmentId.value}</strong>
+
+                                <div className="shipment-details-summary shipment-edit-summary">
+                                    <div>
+                                        <span>{pl.shipments.summary.tracking}</span>
+                                        <strong>{shipment.trackingNumber?.value || pl.common.dash}</strong>
+                                    </div>
+                                    <div>
+                                        <span>{pl.shipments.summary.id}</span>
+                                        <strong>#{shipment.shipmentId.value}</strong>
+                                    </div>
+                                    <div>
+                                        <span>{pl.shipments.summary.type}</span>
+                                        <strong>{pl.shipments.type[shipment.shipmentType]}</strong>
+                                    </div>
+                                    <div>
+                                        <span>{pl.shipments.summary.relatedShipment}</span>
+                                        <strong>{shipment.shipmentRelatedId?.value ? `#${shipment.shipmentRelatedId.value}` : pl.common.dash}</strong>
+                                    </div>
+                                    <div>
+                                        <span>{pl.shipments.summary.size}</span>
+                                        <strong>{pl.shipments.size[shipment.shipmentSize]}</strong>
+                                    </div>
+                                    <div>
+                                        <span>{pl.shipments.summary.destination}</span>
+                                        <strong>{shipment.destination || pl.common.dash}</strong>
+                                    </div>
+                                    <div>
+                                        <span>{pl.shipments.summary.price}</span>
+                                        <strong>{formatPrice(shipment)}</strong>
+                                    </div>
+                                    <div>
+                                        <span>{pl.shipments.summary.status}</span>
+                                        <strong>{pl.shipments.status[shipment.shipmentStatus]}</strong>
+                                    </div>
                                 </div>
-                                <div>
-                                    <span>{pl.shipments.summary.size}</span>
-                                    <strong>{pl.shipments.size[shipment.shipmentSize]}</strong>
-                                </div>
-                                <div>
-                                    <span>{pl.shipments.summary.price}</span>
-                                    <strong>{formatPrice(shipment)}</strong>
-                                </div>
-                                <div>
-                                    <span>{pl.shipments.summary.status}</span>
-                                    <strong>{pl.shipments.status[shipment.shipmentStatus]}</strong>
+
+                                <div className="shipment-details-grid shipment-details-operations-grid">
+                                    <TextField
+                                        fullWidth
+                                        label={pl.shipments.form.fields.shipmentStatus}
+                                        select
+                                        size="small"
+                                        value={status}
+                                        onChange={(event) => setStatus(event.target.value as ShipmentStatusDto)}
+                                    >
+                                        {shipmentStatuses.map((shipmentStatus) => (
+                                            <MenuItem key={shipmentStatus} value={shipmentStatus}>
+                                                {pl.shipments.status[shipmentStatus]}
+                                            </MenuItem>
+                                        ))}
+                                    </TextField>
+
+                                    <TextField
+                                        fullWidth
+                                        label={pl.shipments.form.fields.shipmentType}
+                                        select
+                                        size="small"
+                                        value={shipmentType}
+                                        onChange={(event) => setShipmentType(event.target.value as ShipmentTypeDto)}
+                                    >
+                                        {shipmentTypes.map((currentShipmentType) => (
+                                            <MenuItem key={currentShipmentType} value={currentShipmentType}>
+                                                {pl.shipments.type[currentShipmentType]}
+                                            </MenuItem>
+                                        ))}
+                                    </TextField>
                                 </div>
                             </section>
 
-                            <section className="shipment-cc-courier">
+                            <section className="shipment-cc-courier shipment-details-segment">
                                 <div className="shipment-cc-courier-icon">
                                     <PersonPinCircle />
                                 </div>
@@ -399,26 +541,7 @@ const ShipmentControlCenter: React.FC = () => {
                                 </div>
                             </section>
 
-                            <section className="shipment-edit-section">
-                                <div className="shipment-edit-section-header">
-                                    <Typography variant="h6">{pl.shipments.form.sections.shipmentOperations}</Typography>
-                                </div>
-                                <TextField
-                                    fullWidth
-                                    label={pl.shipments.form.fields.shipmentStatus}
-                                    select
-                                    size="small"
-                                    value={status}
-                                    onChange={(event) => setStatus(event.target.value as ShipmentStatusDto)}
-                                >
-                                    {shipmentStatuses.map((shipmentStatus) => (
-                                        <MenuItem key={shipmentStatus} value={shipmentStatus}>
-                                            {pl.shipments.status[shipmentStatus]}
-                                        </MenuItem>
-                                    ))}
-                                </TextField>
-                            </section>
-
+                            {renderDangerousGood()}
                             {personFields(pl.shipments.form.sections.sender, "SENDER", sender)}
                             {personFields(pl.shipments.form.sections.receiver, "RECIPIENT", recipient)}
                         </main>
@@ -426,7 +549,7 @@ const ShipmentControlCenter: React.FC = () => {
                         <aside className="shipments-panel shipment-cc-side">
                             <div className="shipment-cc-side-header">
                                 <div>
-                                    <Typography variant="h6">{pl.shipments.trackerlog}</Typography>
+                                    <Typography variant="h6">{pl.shipments.routeHistory.title}</Typography>
                                     <span>{details.length} {pl.shipments.postCount}</span>
                                 </div>
                                 <Button
@@ -454,4 +577,4 @@ const ShipmentControlCenter: React.FC = () => {
     );
 };
 
-export default ShipmentControlCenter;
+export default ShipmentDetails;

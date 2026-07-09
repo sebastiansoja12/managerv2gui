@@ -2,7 +2,8 @@ import pl from "../../i18n/translate";
 
 export const tabTitles = (): Record<string, string> => ({
     "/": pl.navigation.home,
-    "/shipment-control-center": pl.home.tiles.shipmentControlCenter.title,
+    "/shipment-control-center": pl.home.tiles.shipmentDetails.title,
+    "/shipment-details": pl.home.tiles.shipmentDetails.title,
     "/shipments": pl.navigation.shipmentList,
     "/shipments/list": pl.navigation.shipmentList,
     "/shipments/create": pl.navigation.shipmentCreate,
@@ -19,10 +20,12 @@ export const tabTitles = (): Record<string, string> => ({
     "/users": pl.navigation.users,
     "/deals": pl.navigation.deals,
     "/billing": pl.navigation.billing,
+    "/microservices": pl.navigation.microservices,
     "/support": pl.navigation.support,
     "/login": pl.navigation.login,
     "/profile": pl.navigation.profile,
     "/device-pairing": pl.navigation.devicePairing,
+    "/global-configuration": pl.navigation.globalConfiguration,
     "/software-configurations": pl.navigation.systemSettings,
 });
 
@@ -32,7 +35,7 @@ export const getTabTitle = (path: string) => {
     const normalizedPath = normalizePath(path);
     const shipmentTrackingEditMatch = normalizedPath.match(/^\/shipments\/tracking\/([^/]+)\/edit$/);
     if (shipmentTrackingEditMatch) {
-        return `ShipmentControlCenter ${decodeURIComponent(shipmentTrackingEditMatch[1])}`;
+        return `${pl.shipments.page.detailsTitle} ${decodeURIComponent(shipmentTrackingEditMatch[1])}`;
     }
 
     const shipmentTrackingHistoryMatch = normalizedPath.match(/^\/shipments\/tracking\/([^/]+)\/history$/);
@@ -42,7 +45,7 @@ export const getTabTitle = (path: string) => {
 
     const shipmentEditMatch = normalizedPath.match(/^\/shipments\/(\d+)\/edit$/);
     if (shipmentEditMatch) {
-        return `ShipmentControlCenter #${shipmentEditMatch[1]}`;
+        return `${pl.shipments.page.detailsTitle} #${shipmentEditMatch[1]}`;
     }
 
     const shipmentHistoryMatch = normalizedPath.match(/^\/shipments\/(\d+)\/history$/);
