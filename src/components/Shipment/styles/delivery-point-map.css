@@ -1,0 +1,141 @@
+.shipment-delivery-method-field {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    min-width: 0;
+}
+
+.shipment-delivery-map-content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.shipment-delivery-map-search {
+    align-items: center;
+    display: grid;
+    gap: 8px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    padding-top: 4px;
+}
+
+.shipment-delivery-map-description {
+    margin: 0;
+    color: var(--muted-foreground);
+    font-size: 14px;
+}
+
+.shipment-delivery-map {
+    height: clamp(240px, 55dvh, 560px);
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    isolation: isolate;
+}
+
+.shipment-delivery-map-marker-container {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+}
+
+.shipment-delivery-map-marker {
+    background: #2563a9;
+    border: 3px solid #fff;
+    border-radius: 50%;
+    box-shadow: 0 1px 5px rgba(15, 23, 42, 0.42);
+    display: block;
+    height: 20px;
+    width: 20px;
+}
+
+.shipment-delivery-map-marker.is-locker {
+    background: #0f766e;
+}
+
+.shipment-delivery-map-marker.is-selected {
+    border-color: #facc15;
+    box-shadow: 0 0 0 4px rgba(250, 204, 21, 0.35), 0 2px 7px rgba(15, 23, 42, 0.55);
+    transform: scale(1.15);
+}
+
+.shipment-delivery-map-popup {
+    display: grid;
+    gap: 3px;
+}
+
+.shipment-delivery-map-popup span {
+    display: block;
+}
+
+.shipment-delivery-map-popup span:last-child {
+    color: #64748b;
+    font-size: 12px;
+}
+
+.shipment-delivery-map-empty {
+    color: var(--muted-foreground);
+    font-size: 14px;
+    padding: 4px 0;
+}
+
+.shipment-delivery-map-results {
+    display: grid;
+    gap: 6px;
+    max-height: 180px;
+    overflow-y: auto;
+}
+
+.shipment-delivery-map-results button {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: inherit;
+    cursor: pointer;
+    display: grid;
+    gap: 2px;
+    padding: 9px 12px;
+    text-align: left;
+}
+
+.shipment-delivery-map-results button:hover,
+.shipment-delivery-map-results button:focus-visible {
+    border-color: #2563a9;
+    outline: none;
+}
+
+.shipment-delivery-map-results button.is-selected {
+    background: rgba(37, 99, 169, 0.08);
+    border-color: #2563a9;
+}
+
+.shipment-delivery-map-results span {
+    color: var(--muted-foreground);
+    font-size: 12px;
+}
+
+.shipment-delivery-point-selection {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    display: grid;
+    gap: 3px;
+    padding: 10px 12px;
+}
+
+.shipment-delivery-point-selection > span,
+.shipment-delivery-point-selection > small {
+    color: var(--muted-foreground);
+}
+
+.shipment-delivery-point-selection .MuiButton-root {
+    justify-self: start;
+    margin-left: -8px;
+}
+
+@media (max-width: 600px) {
+    .shipment-delivery-map-search {
+        align-items: stretch;
+        grid-template-columns: 1fr;
+    }
+}
