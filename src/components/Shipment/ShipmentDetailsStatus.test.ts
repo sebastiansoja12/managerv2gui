@@ -4,7 +4,6 @@ describe("getConfiguredDraftShipmentStatus", () => {
     it.each([
         ["CREATED", "CREATED"],
         ["PREPARED", "PREPARED"],
-        ["ACCEPTED", "ACCEPTED"],
     ] as const)("uses %s from the operator shipment configuration", (configuredStatus, expectedStatus) => {
         expect(getConfiguredDraftShipmentStatus(configuredStatus)).toBe(expectedStatus);
     });
@@ -12,11 +11,14 @@ describe("getConfiguredDraftShipmentStatus", () => {
     it("falls back to created when the configuration does not provide a draft status", () => {
         expect(getConfiguredDraftShipmentStatus(null)).toBe("CREATED");
         expect(getConfiguredDraftShipmentStatus(undefined)).toBe("CREATED");
+        expect(getConfiguredDraftShipmentStatus("ACCEPTED" as never)).toBe("CREATED");
+        expect(getConfiguredDraftShipmentStatus("PLANNED" as never)).toBe("CREATED");
     });
 
     it("keeps one configured draft status and all regular shipment statuses", () => {
         expect(getConfiguredShipmentStatuses("PREPARED")).toEqual([
             "PREPARED",
+            "ACCEPTED",
             "REROUTE",
             "SENT",
             "DELIVERY",
