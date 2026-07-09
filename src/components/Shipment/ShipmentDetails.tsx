@@ -41,6 +41,7 @@ import ShipmentService from "../../hooks/ShipmentService";
 import DocumentService from "../../hooks/DocumentService";
 import DepartmentService from "../../hooks/DepartmentService";
 import OperatorConfigurationService from "../../hooks/OperatorConfigurationService";
+import PickupPointService from "../../hooks/PickupPointService";
 import Department from "../../class/depots/Department";
 import {getBackendErrorMessage} from "../../api/errorMessage";
 import RouteLogRecord from "../RouteLog/model/RouteLogRecord";
@@ -64,6 +65,8 @@ import DangerousGoodForm, {
     isDangerousGoodValid,
 } from "./DangerousGoodForm";
 import ShipmentStatusControl from "./ShipmentStatusControl";
+import ShipmentReturnSummary from "./ShipmentReturnSummary";
+import {ReturnPackageDto} from "../Returns/model/ReturnPackage";
 
 type Notice = {
     severity: "success" | "error" | "info";
@@ -75,12 +78,13 @@ type ShipmentDetailsTab = "overview" | "sender" | "recipient";
 
 type RouteDetail = RouteLogRecord["routeLogRecordDetails"]["routeLogRecordDetailSet"][number];
 
-const draftShipmentStatuses: ShipmentStatusDto[] = ["CREATED", "PREPARED", "ACCEPTED"];
+const draftShipmentStatuses: ShipmentStatusDto[] = ["PLANNED", "CREATED", "PREPARED"];
+const configurableInitialShipmentStatuses: ShipmentStatusDto[] = ["CREATED", "PREPARED"];
 
 export const getConfiguredDraftShipmentStatus = (
     defaultStatus?: DefaultShipmentStatusApi | null,
 ): ShipmentStatusDto => (
-    draftShipmentStatuses.includes(defaultStatus as ShipmentStatusDto)
+    configurableInitialShipmentStatuses.includes(defaultStatus as ShipmentStatusDto)
         ? defaultStatus as ShipmentStatusDto
         : "CREATED"
 );
@@ -227,6 +231,8 @@ const ShipmentDetails: React.FC = () => {
     const navigate = useNavigate();
     const {shipmentId, trackingNumber} = useParams();
     const [shipment, setShipment] = useState<ShipmentDto | null>(null);
+    const [deliveryPickupPointCode, setDeliveryPickupPointCode] = useState<string | null>(null);
+    const [returnPackage, setReturnPackage] = useState<ReturnPackageDto | null>(null);
     const [activeDetailTab, setActiveDetailTab] = useState<ShipmentDetailsTab>("overview");
     const [departments, setDepartments] = useState<Department[]>([]);
     const [routeLog, setRouteLog] = useState<RouteLogRecord | null>(null);
@@ -271,8 +277,13 @@ const ShipmentDetails: React.FC = () => {
 
     const details = useMemo(() => routeDetails(routeLog), [routeLog]);
     const availableShipmentStatuses = useMemo(
-        () => getConfiguredShipmentStatuses(configuredDraftStatus),
-        [configuredDraftStatus],
+        () => {
+            const configuredStatuses = getConfiguredShipmentStatuses(configuredDraftStatus);
+            return shipment?.shipmentStatus === "PLANNED"
+                ? configuredStatuses.filter((shipmentStatus) => !draftShipmentStatuses.includes(shipmentStatus))
+                : configuredStatuses;
+        },
+        [configuredDraftStatus, shipment?.shipmentStatus],
     );
     const currentCourierDetail = details.find((detail) => detail.supplierCode || detail.username) || null;
     const destinationDepartment = useMemo(() => {
@@ -295,6 +306,9 @@ const ShipmentDetails: React.FC = () => {
         shipment
         && !shipment.locked
         && draftShipmentStatuses.includes(shipment.shipmentStatus)
+        && shipment.originDepartmentId?.value !== null
+        && shipment.originDepartmentId?.value !== undefined
+        && Boolean(departmentCodeValue(shipment.destination))
         && cancellationWindowTimeLeft !== null
         && cancellationWindowTimeLeft > 0
     );
@@ -391,12 +405,14 @@ const ShipmentDetails: React.FC = () => {
 
         setLoadingShipment(true);
         setLoadingRouteLog(true);
+        setReturnPackage(null);
         try {
             const response = decodedTrackingNumber
                 ? await ShipmentService.getControlCenterByTrackingNumber(decodedTrackingNumber)
                 : await ShipmentService.getControlCenter(shipmentId || "");
             applyShipment(response.data.shipment);
             setRouteLog(response.data.routeLog);
+            setReturnPackage(response.data.returnPackage ?? null);
         } catch (error) {
             showError(error, pl.shipments.messages.loadError);
         } finally {
@@ -415,6 +431,30 @@ const ShipmentDetails: React.FC = () => {
             .then((response) => setDepartments(Array.isArray(response.data) ? response.data : []))
             .catch(() => setDepartments([]));
     }, []);
+
+    useEffect(() => {
+        let active = true;
+        const pickupPointId = shipment?.deliveryPickupPointId?.value;
+
+        setDeliveryPickupPointCode(null);
+        if (pickupPointId) {
+            PickupPointService.getById(pickupPointId)
+                .then((response) => {
+                    if (active) {
+                        setDeliveryPickupPointCode(response.data.code);
+                    }
+                })
+                .catch(() => {
+                    if (active) {
+                        setDeliveryPickupPointCode(null);
+                    }
+                });
+        }
+
+        return () => {
+            active = false;
+        };
+    }, [shipment?.deliveryPickupPointId?.value]);
 
     useEffect(() => {
         let active = true;
@@ -453,7 +493,7 @@ const ShipmentDetails: React.FC = () => {
             setStatus((currentStatus) => (
                 availableShipmentStatuses.includes(currentStatus)
                     ? currentStatus
-                    : configuredDraftStatus
+                    : availableShipmentStatuses[0] || configuredDraftStatus
             ));
         }
     }, [availableShipmentStatuses, configuredDraftStatus, statusDialogOpen]);
@@ -473,7 +513,7 @@ const ShipmentDetails: React.FC = () => {
 
         setStatus(availableShipmentStatuses.includes(shipment.shipmentStatus)
             ? shipment.shipmentStatus
-            : configuredDraftStatus);
+            : availableShipmentStatuses[0] || configuredDraftStatus);
         setStatusDialogOpen(true);
     };
 
@@ -500,6 +540,7 @@ const ShipmentDetails: React.FC = () => {
                 : await ShipmentService.getControlCenter(shipment.shipmentId.value);
             applyShipment(response.data.shipment);
             setRouteLog(response.data.routeLog);
+            setReturnPackage(response.data.returnPackage ?? null);
             setStatusDialogOpen(false);
             setNotice({severity: "success", message: pl.shipments.messages.statusSaveSuccess});
         } catch (error) {
@@ -556,6 +597,9 @@ const ShipmentDetails: React.FC = () => {
             currency: shipment.price?.currency || "PLN",
             issuerCountryCode: shipment.originCountry || "PL",
             receiverCountryCode: shipment.destinationCountry || "DE",
+            pickupMethod: shipment.pickupMethod || "DEPARTMENT",
+            deliveryMethod: shipment.deliveryMethod || "COURIER",
+            pickupPointId: shipment.pickupPointId?.value,
             dangerousGood: shipment.dangerousGood ? {...shipment.dangerousGood} : null,
         };
 
@@ -640,6 +684,7 @@ const ShipmentDetails: React.FC = () => {
                 : await ShipmentService.getControlCenter(shipment.shipmentId.value);
             applyShipment(response.data.shipment);
             setRouteLog(response.data.routeLog);
+            setReturnPackage(response.data.returnPackage ?? null);
             setNotice({
                 severity: "success",
                 message: personType === "SENDER"
@@ -1036,6 +1081,14 @@ const ShipmentDetails: React.FC = () => {
                                         <strong>{originDepartment?.departmentCode?.value || pl.common.dash}</strong>
                                     </div>
                                     <div>
+                                        <span>{pl.shipments.summary.pickupPoint}</span>
+                                        <strong>{shipment.pickupPointId?.value || pl.common.dash}</strong>
+                                    </div>
+                                    <div>
+                                        <span>{pl.shipments.summary.deliveryPickupPoint}</span>
+                                        <strong>{deliveryPickupPointCode || pl.common.dash}</strong>
+                                    </div>
+                                    <div>
                                         <span>{pl.shipments.summary.destination}</span>
                                         <div className="shipment-destination-control">
                                             <strong className="shipment-destination-value">
@@ -1120,6 +1173,8 @@ const ShipmentDetails: React.FC = () => {
                                         />
 
                                     </div>
+
+                                    <ShipmentReturnSummary returnPackage={returnPackage} />
 
                                     <section className="shipment-cc-courier shipment-details-segment">
                                 <div className="shipment-cc-courier-icon">
