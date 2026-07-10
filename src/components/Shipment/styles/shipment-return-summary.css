@@ -1,0 +1,43 @@
+.shipment-return-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding: 16px 18px;
+    border: 1px solid var(--brand-border);
+    border-radius: 7px;
+    background: var(--brand-surface);
+}
+
+.shipment-return-summary-copy,
+.shipment-return-summary-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.shipment-return-summary-copy > svg {
+    color: var(--brand-accent);
+    flex-shrink: 0;
+}
+
+.shipment-return-summary-copy > div {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    overflow-wrap: anywhere;
+}
+
+.shipment-return-summary-copy span {
+    color: var(--muted-foreground);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.shipment-return-summary-actions {
+    flex-wrap: wrap;
+}
