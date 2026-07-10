@@ -7,7 +7,7 @@ import {
     FiDelete, FiDollarSign, FiDownload, FiEdit, FiEye, FiFilter, FiGrid,
     FiHardDrive, FiInfo, FiKey, FiLayers, FiLayout, FiLink2, FiList,
     FiLogOut, FiMap, FiMapPin, FiMaximize2, FiMonitor, FiMoreHorizontal, FiMoreVertical, FiPackage,
-    FiPhone, FiPlus, FiPrinter, FiRadio, FiRefreshCw, FiRepeat, FiRotateCw, FiSave,
+    FiMessageCircle, FiPhone, FiPlus, FiPrinter, FiRadio, FiRefreshCw, FiRepeat, FiRotateCw, FiSave, FiSend,
     FiSearch, FiSettings, FiShield, FiShoppingBag, FiShoppingCart, FiSliders,
     FiStar, FiTable, FiTag, FiToggleLeft, FiToggleRight, FiTool, FiTrendingUp, FiTruck,
     FiUnlock, FiUpload, FiUser, FiUserPlus, FiUsers, FiX, FiXCircle, FiZap,
@@ -58,6 +58,7 @@ export const Block = makeIcon(FiXCircle);
 export const Business = makeIcon(FiBriefcase);
 export const Cable = makeIcon(FiLink2);
 export const Category = makeIcon(FiTag);
+export const ChatBubbleOutline = makeIcon(FiMessageCircle);
 export const CheckCircle = makeIcon(FiCheckCircle);
 export const CheckCircleOutline = makeIcon(FiCheckCircle);
 export const ChevronRight = makeIcon(FiChevronRight);
@@ -123,6 +124,7 @@ export const Route = makeIcon(FiMap);
 export const RouteOutlined = makeIcon(FiMap);
 export const Save = makeIcon(FiSave);
 export const Search = makeIcon(FiSearch);
+export const Send = makeIcon(FiSend);
 export const SecurityOutlined = makeIcon(FiShield);
 export const Settings = makeIcon(FiSettings);
 export const SettingsOutlined = makeIcon(FiSettings);
