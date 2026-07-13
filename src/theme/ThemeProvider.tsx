@@ -11,13 +11,15 @@ export type AppTheme =
     | "terminal-green"
     | "arctic-dark"
     | "graphite-red"
+    | "electric-blue"
+    | "ultraviolet"
+    | "graphite-deep"
+    | "acid-lime"
     | "deep-ocean"
     | "aubergine"
     | "midnight-blue"
     | "carbon"
-    | "volcanic"
-    | "courier-blue"
-    | "dispatch-teal";
+    | "courier-blue";
 
 type ThemeContextValue = {
     theme: AppTheme;
@@ -41,13 +43,15 @@ const isTheme = (value: string | null): value is AppTheme => Boolean(value && [
     "terminal-green",
     "arctic-dark",
     "graphite-red",
+    "electric-blue",
+    "ultraviolet",
+    "graphite-deep",
+    "acid-lime",
     "deep-ocean",
     "aubergine",
     "midnight-blue",
     "carbon",
-    "volcanic",
     "courier-blue",
-    "dispatch-teal",
 ].includes(value));
 
 const prefersDarkMode = () => typeof window.matchMedia === "function"
@@ -79,11 +83,14 @@ const applyTheme = (theme: Exclude<AppTheme, "system">) => {
             "terminal-green",
             "arctic-dark",
             "graphite-red",
+            "electric-blue",
+            "ultraviolet",
+            "graphite-deep",
+            "acid-lime",
             "deep-ocean",
             "aubergine",
             "midnight-blue",
             "carbon",
-            "volcanic",
         ].includes(theme) ? "dark" : "light";
 };
 
