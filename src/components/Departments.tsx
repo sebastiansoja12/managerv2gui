@@ -1,16 +1,29 @@
 import React, {useEffect, useMemo, useState} from "react";
-import {Alert, Button, CircularProgress, Typography} from "@mui/material";
 import {
+    Alert,
+    Button,
+    CircularProgress,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    MenuItem,
+    TextField,
+    Typography,
+} from "@mui/material";
+import {
+    AddBusiness,
     Business,
     LocationCity,
     Phone,
     Public,
     Refresh,
     Schedule,
+    Save,
     Tag,
 } from "@mui/icons-material";
 import Department from "../class/depots/Department";
-import departmentService from "../hooks/DepartmentService";
+import departmentService, {DepartmentCreateRequest} from "../hooks/DepartmentService";
 import pl from "../i18n/translate";
 import "./Departments/styles/departments.css";
 
@@ -43,17 +56,38 @@ const formatDateTime = (value?: string | null) => {
     });
 };
 
+const emptyDepartmentForm = {
+    departmentCode: "",
+    city: "",
+    street: "",
+    postalCode: "",
+    nip: "",
+    telephoneNumber: "",
+    openingHours: "08:00-16:00",
+    email: "",
+    countryCode: "PL",
+    departmentType: "BRANCH",
+};
+
 const Departments: React.FC = () => {
     const [departments, setDepartments] = useState<Array<Department>>([]);
     const [loading, setLoading] = useState<boolean>(false);
+    const [saving, setSaving] = useState<boolean>(false);
     const [error, setError] = useState<string>("");
+    const [success, setSuccess] = useState<string>("");
+    const [createForm, setCreateForm] = useState({...emptyDepartmentForm});
+    const [createDialogOpen, setCreateDialogOpen] = useState<boolean>(false);
+    const createTranslations = pl.departments.create;
 
     const cityCount = useMemo(() => new Set(departments.map((department) => department.address?.city).filter(Boolean)).size, [departments]);
     const countryCount = useMemo(() => new Set(departments.map((department) => department.address?.countryCode).filter(Boolean)).size, [departments]);
 
-    const retrieveDepartments = () => {
+    const retrieveDepartments = (clearNotice = true) => {
         setLoading(true);
         setError("");
+        if (clearNotice) {
+            setSuccess("");
+        }
         departmentService.getAll()
             .then((response) => {
                 setDepartments(response.data);
@@ -63,6 +97,54 @@ const Departments: React.FC = () => {
             })
             .finally(() => {
                 setLoading(false);
+            });
+    };
+
+    const updateCreateField = (field: keyof typeof createForm, value: string) => {
+        setCreateForm((currentForm) => ({
+            ...currentForm,
+            [field]: value,
+        }));
+    };
+
+    const createDepartmentRequest = (): DepartmentCreateRequest => ({
+        departments: [{
+            departmentCode: {
+                value: createForm.departmentCode.trim(),
+            },
+            city: createForm.city.trim(),
+            street: createForm.street.trim(),
+            postalCode: createForm.postalCode.trim(),
+            nip: createForm.nip.trim(),
+            telephoneNumber: createForm.telephoneNumber.trim(),
+            openingHours: createForm.openingHours.trim(),
+            email: createForm.email.trim(),
+            countryCode: createForm.countryCode.trim().toUpperCase(),
+            departmentType: createForm.departmentType,
+        }],
+    });
+
+    const createDepartment = () => {
+        if (!createForm.departmentCode.trim() || !createForm.city.trim() || !createForm.street.trim()) {
+            setError(createTranslations.required);
+            return;
+        }
+
+        setSaving(true);
+        setError("");
+        setSuccess("");
+        departmentService.create(createDepartmentRequest())
+            .then(() => {
+                setSuccess(createTranslations.success);
+                setCreateForm({...emptyDepartmentForm});
+                setCreateDialogOpen(false);
+                retrieveDepartments(false);
+            })
+            .catch((exception: Error) => {
+                setError(exception.message || createTranslations.error);
+            })
+            .finally(() => {
+                setSaving(false);
             });
     };
 
@@ -98,12 +180,19 @@ const Departments: React.FC = () => {
                 </div>
             </section>
 
+            {success ? <Alert severity="success">{success}</Alert> : undefined}
+
             <section className="departments-table-panel">
                 <div className="departments-table-header">
                     <Typography variant="h5">{pl.departments.page.listTitle}</Typography>
-                    <Button disabled={loading} startIcon={<Refresh />} variant="outlined" onClick={retrieveDepartments}>
-                        {pl.departments.page.refresh}
-                    </Button>
+                    <div className="departments-table-actions">
+                        <Button disabled={saving} startIcon={<AddBusiness />} variant="contained" onClick={() => setCreateDialogOpen(true)}>
+                            {createTranslations.title}
+                        </Button>
+                        <Button disabled={loading} startIcon={<Refresh />} variant="outlined" onClick={() => retrieveDepartments()}>
+                            {pl.departments.page.refresh}
+                        </Button>
+                    </div>
                 </div>
 
                 {error ? <Alert severity="error">{error}</Alert> : undefined}
@@ -161,6 +250,86 @@ const Departments: React.FC = () => {
                     </div>
                 )}
             </section>
+
+            <Dialog fullWidth maxWidth="md" open={createDialogOpen} onClose={() => !saving && setCreateDialogOpen(false)}>
+                <DialogTitle>{createTranslations.title}</DialogTitle>
+                <DialogContent>
+                    <div className="departments-create-grid departments-dialog-grid">
+                        <TextField
+                            label={createTranslations.fields.code}
+                            size="small"
+                            value={createForm.departmentCode}
+                            onChange={(event) => updateCreateField("departmentCode", event.target.value)}
+                        />
+                        <TextField
+                            label={createTranslations.fields.city}
+                            size="small"
+                            value={createForm.city}
+                            onChange={(event) => updateCreateField("city", event.target.value)}
+                        />
+                        <TextField
+                            label={createTranslations.fields.street}
+                            size="small"
+                            value={createForm.street}
+                            onChange={(event) => updateCreateField("street", event.target.value)}
+                        />
+                        <TextField
+                            label={createTranslations.fields.postalCode}
+                            size="small"
+                            value={createForm.postalCode}
+                            onChange={(event) => updateCreateField("postalCode", event.target.value)}
+                        />
+                        <TextField
+                            label={createTranslations.fields.taxId}
+                            size="small"
+                            value={createForm.nip}
+                            onChange={(event) => updateCreateField("nip", event.target.value)}
+                        />
+                        <TextField
+                            label={createTranslations.fields.telephoneNumber}
+                            size="small"
+                            value={createForm.telephoneNumber}
+                            onChange={(event) => updateCreateField("telephoneNumber", event.target.value)}
+                        />
+                        <TextField
+                            label={createTranslations.fields.email}
+                            size="small"
+                            type="email"
+                            value={createForm.email}
+                            onChange={(event) => updateCreateField("email", event.target.value)}
+                        />
+                        <TextField
+                            label={createTranslations.fields.openingHours}
+                            size="small"
+                            value={createForm.openingHours}
+                            onChange={(event) => updateCreateField("openingHours", event.target.value)}
+                        />
+                        <TextField
+                            label={createTranslations.fields.countryCode}
+                            size="small"
+                            value={createForm.countryCode}
+                            onChange={(event) => updateCreateField("countryCode", event.target.value)}
+                        />
+                        <TextField
+                            select
+                            label={createTranslations.fields.departmentType}
+                            size="small"
+                            value={createForm.departmentType}
+                            onChange={(event) => updateCreateField("departmentType", event.target.value)}
+                        >
+                            <MenuItem value="BRANCH">{createTranslations.types.BRANCH}</MenuItem>
+                            <MenuItem value="HEADQUARTERS">{createTranslations.types.HEADQUARTERS}</MenuItem>
+                            <MenuItem value="WAREHOUSE">{createTranslations.types.WAREHOUSE}</MenuItem>
+                        </TextField>
+                    </div>
+                </DialogContent>
+                <DialogActions>
+                    <Button disabled={saving} onClick={() => setCreateDialogOpen(false)}>{createTranslations.cancel}</Button>
+                    <Button disabled={saving} startIcon={<Save />} variant="contained" onClick={createDepartment}>
+                        {saving ? createTranslations.saving : createTranslations.submit}
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </main>
     );
 };
