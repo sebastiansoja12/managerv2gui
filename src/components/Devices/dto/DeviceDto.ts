@@ -6,6 +6,10 @@ export type WrappedNumberDto = {
     value: number;
 };
 
+export type OperatorIdDto = {
+    value: number;
+};
+
 export type DeviceDto = {
     deviceId: WrappedStringDto | null;
     version: WrappedStringDto | null;
@@ -22,7 +26,7 @@ export type CurrentUserDevicePairRequest = {
 };
 
 export type DevicePairResponseDto = {
-    userId: WrappedNumberDto | null;
+    userId: (WrappedNumberDto & { operatorId?: number | null }) | null;
     deviceId: WrappedStringDto | null;
     devicePairId: WrappedNumberDto | null;
     pairStatus: string | null;
@@ -30,4 +34,5 @@ export type DevicePairResponseDto = {
     userValid: boolean | null;
     deviceValid: boolean | null;
     deviceUpToDate: boolean | null;
+    operatorId?: OperatorIdDto | null;
 };
