@@ -4,6 +4,10 @@ import {
     Button,
     Checkbox,
     CircularProgress,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
     FormControlLabel,
     IconButton,
     Menu,
@@ -18,6 +22,7 @@ import {
     Edit,
     LocalShipping,
     MoreVert,
+    PersonAdd,
     Refresh,
     Save,
     WorkspacePremium,
@@ -25,7 +30,7 @@ import {
 import {getBackendErrorMessage} from "../../api/errorMessage";
 import CourierService from "../../hooks/CourierService";
 import pl from "../../i18n/translate";
-import {CourierDto, DangerousGoodCertificationDto} from "./dto/CourierDto";
+import {CourierCreateRequest, CourierDto, DangerousGoodCertificationDto} from "./dto/CourierDto";
 import "./styles/couriers.css";
 
 const valueOrDash = (value?: string | null) => value || pl.common.dash;
@@ -90,6 +95,13 @@ const emptyCertificationForm: DangerousGoodCertificationDto = {
     valid: true,
 };
 
+const emptyCreateForm = {
+    supplierCode: "",
+    firstName: "",
+    lastName: "",
+    telephoneNumber: "",
+};
+
 function Couriers() {
     const [couriers, setCouriers] = useState<CourierDto[]>([]);
     const [selectedCode, setSelectedCode] = useState<string>("");
@@ -101,7 +113,10 @@ function Couriers() {
     const [menuCourier, setMenuCourier] = useState<CourierDto | null>(null);
     const [editing, setEditing] = useState<boolean>(false);
     const [basicForm, setBasicForm] = useState({firstName: "", lastName: "", telephoneNumber: ""});
+    const [createForm, setCreateForm] = useState({...emptyCreateForm});
+    const [createDialogOpen, setCreateDialogOpen] = useState<boolean>(false);
     const [certificationForm, setCertificationForm] = useState<DangerousGoodCertificationDto>(emptyCertificationForm);
+    const createTranslations = pl.couriers.create;
 
     const selectedCourier = useMemo(
         () => couriers.find((courier) => courier.supplierCode?.value === selectedCode) || null,
@@ -128,10 +143,12 @@ function Couriers() {
             : emptyCertificationForm);
     };
 
-    const retrieveCouriers = useCallback(() => {
+    const retrieveCouriers = useCallback((clearNotice = true) => {
         setLoading(true);
         setError("");
-        setSuccess("");
+        if (clearNotice) {
+            setSuccess("");
+        }
         CourierService.getAll()
             .then((response) => {
                 setCouriers(response.data);
@@ -172,6 +189,48 @@ function Couriers() {
                 ? {...courier, ...patch}
                 : courier
         )));
+    };
+
+    const updateCreateField = (field: keyof typeof createForm, value: string) => {
+        setCreateForm((currentForm) => ({
+            ...currentForm,
+            [field]: value,
+        }));
+    };
+
+    const createCourierRequest = (): CourierCreateRequest => ({
+        supplierCode: {
+            value: createForm.supplierCode.trim(),
+        },
+        firstName: createForm.firstName.trim(),
+        lastName: createForm.lastName.trim(),
+        telephoneNumber: createForm.telephoneNumber.trim(),
+    });
+
+    const createCourier = () => {
+        if (!createForm.supplierCode.trim() || !createForm.firstName.trim() || !createForm.lastName.trim()) {
+            setError(createTranslations.required);
+            return;
+        }
+
+        setSaving(true);
+        setError("");
+        setSuccess("");
+        CourierService.create(createCourierRequest())
+            .then(() => {
+                setSuccess(createTranslations.success);
+                const newCode = createForm.supplierCode.trim();
+                setCreateForm({...emptyCreateForm});
+                setCreateDialogOpen(false);
+                setSelectedCode(newCode);
+                retrieveCouriers(false);
+            })
+            .catch((exception: unknown) => {
+                setError(getBackendErrorMessage(exception, createTranslations.error));
+            })
+            .finally(() => {
+                setSaving(false);
+            });
     };
 
     const openMenu = (event: React.MouseEvent<HTMLButtonElement>, courier: CourierDto) => {
@@ -303,9 +362,14 @@ function Couriers() {
                 <div className="couriers-table-panel">
                     <div className="couriers-panel-header">
                         <Typography variant="h5">{pl.couriers.page.listTitle}</Typography>
-                        <Button disabled={loading} startIcon={<Refresh />} variant="outlined" onClick={retrieveCouriers}>
-                            {pl.couriers.actions.refresh}
-                        </Button>
+                        <div className="couriers-table-actions">
+                            <Button disabled={saving} startIcon={<PersonAdd />} variant="contained" onClick={() => setCreateDialogOpen(true)}>
+                                {createTranslations.title}
+                            </Button>
+                            <Button disabled={loading} startIcon={<Refresh />} variant="outlined" onClick={() => retrieveCouriers()}>
+                                {pl.couriers.actions.refresh}
+                            </Button>
+                        </div>
                     </div>
 
                     {loading ? (
@@ -543,6 +607,48 @@ function Couriers() {
                     </MenuItem>
                 ) : undefined}
             </Menu>
+
+            <Dialog fullWidth maxWidth="sm" open={createDialogOpen} onClose={() => !saving && setCreateDialogOpen(false)}>
+                <DialogTitle>{createTranslations.title}</DialogTitle>
+                <DialogContent>
+                    <div className="couriers-create-grid couriers-dialog-grid">
+                        <TextField
+                            disabled={saving}
+                            label={createTranslations.fields.supplierCode}
+                            size="small"
+                            value={createForm.supplierCode}
+                            onChange={(event) => updateCreateField("supplierCode", event.target.value)}
+                        />
+                        <TextField
+                            disabled={saving}
+                            label={pl.couriers.fields.firstName}
+                            size="small"
+                            value={createForm.firstName}
+                            onChange={(event) => updateCreateField("firstName", event.target.value)}
+                        />
+                        <TextField
+                            disabled={saving}
+                            label={pl.couriers.fields.lastName}
+                            size="small"
+                            value={createForm.lastName}
+                            onChange={(event) => updateCreateField("lastName", event.target.value)}
+                        />
+                        <TextField
+                            disabled={saving}
+                            label={pl.couriers.fields.telephoneNumber}
+                            size="small"
+                            value={createForm.telephoneNumber}
+                            onChange={(event) => updateCreateField("telephoneNumber", event.target.value)}
+                        />
+                    </div>
+                </DialogContent>
+                <DialogActions>
+                    <Button disabled={saving} onClick={() => setCreateDialogOpen(false)}>{createTranslations.cancel}</Button>
+                    <Button disabled={saving} startIcon={<Save />} variant="contained" onClick={createCourier}>
+                        {saving ? createTranslations.saving : createTranslations.submit}
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </main>
     );
 }
