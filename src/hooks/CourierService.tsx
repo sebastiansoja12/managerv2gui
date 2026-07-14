@@ -2,6 +2,7 @@ import http from "../http-common";
 import {
     CertificationUpdateRequest,
     CourierBasicDataUpdateRequest,
+    CourierCreateRequest,
     CourierDto,
 } from "../components/Couriers/dto/CourierDto";
 
@@ -11,6 +12,10 @@ const getAll = () => {
 
 const updateBasicData = (data: CourierBasicDataUpdateRequest) => {
     return http.patch("/suppliers/basic-data", data);
+};
+
+const create = (data: CourierCreateRequest) => {
+    return http.post("/suppliers", data);
 };
 
 const updateCertification = (data: CertificationUpdateRequest) => {
@@ -27,6 +32,7 @@ const deactivate = (supplierCode: string) => {
 
 const CourierService = {
     getAll,
+    create,
     updateBasicData,
     updateCertification,
     activate,
