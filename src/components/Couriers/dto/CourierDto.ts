@@ -40,6 +40,7 @@ export interface DeliveryAreaDto {
 
 export interface UserIdDto {
     value: string;
+    operatorId?: number | null;
 }
 
 export interface CourierDto {
@@ -63,6 +64,13 @@ export interface CourierDto {
 }
 
 export interface CourierBasicDataUpdateRequest {
+    supplierCode: SupplierCodeDto;
+    firstName: string;
+    lastName: string;
+    telephoneNumber: string;
+}
+
+export interface CourierCreateRequest {
     supplierCode: SupplierCodeDto;
     firstName: string;
     lastName: string;
