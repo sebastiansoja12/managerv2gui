@@ -1,7 +1,8 @@
 import React from 'react';
-import {BrowserRouter} from 'react-router-dom';
+import {BrowserRouter, Route, Routes} from 'react-router-dom';
 import './App.css';
 import AppShell from "./components/AppShell/AppShell";
+import SuperAdminApplication from "./components/SuperAdmin/SuperAdminApplication";
 
 function App() {
     return (
@@ -9,7 +10,10 @@ function App() {
             <div className="page-container">
                 <div className="content-wrapper">
                     <BrowserRouter>
-                        <AppShell/>
+                        <Routes>
+                            <Route path="/super-admin/*" element={<SuperAdminApplication/>}/>
+                            <Route path="/*" element={<AppShell/>}/>
+                        </Routes>
                     </BrowserRouter>
                 </div>
             </div>
