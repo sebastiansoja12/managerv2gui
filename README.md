@@ -1,6 +1,6 @@
 # Manager 2.0 GUI
 
-**Development Version 2026.3 - 6th July, 2026**
+**Development Version 2026.3 - 10th September, 2026**
 
 Manager 2.0 GUI is a React/TypeScript frontend for the Manager 2.0 logistics
 backend. It provides warehouse, shipment, process, department, courier, user and
@@ -22,11 +22,13 @@ configuration screens, plus a separate super-admin area.
 - Login flow and authenticated HTTP clients.
 - Tabbed application shell with route-aware tab titles.
 - Home dashboard with operational module tiles.
-- Shipment list, create form, details/edit view and shipment history.
+- Shipment list, create form, details/edit view and shipment history, including pickup and delivery methods.
+- Pickup-point catalog with creation, editing, lifecycle actions, filters and a location map.
+- Pickup-point selection from a searchable street/city map during shipment creation and editing; the selected point ID is stored on the shipment while its code is shown to users.
 - Shipment history map with department routes and translated event labels.
 - Dangerous goods form and shipment dangerous-good handling.
 - Shipment document download, QR label preview and print support.
-- Return registration, return lookup by ID, status actions, reason updates and token validation.
+- Return registration, list and detail views, processing/completion/cancellation actions, reason updates and token validation.
 - Department list and department creation.
 - Courier list, details and courier creation.
 - Process list and process details.
@@ -50,6 +52,8 @@ support.
 | --- | --- |
 | `src/components` | Application pages and UI modules. |
 | `src/components/AppShell` | Main layout, routing, tabs and tab persistence. |
+| `src/components/PickupPoints` | Pickup-point catalog, editor, map, selection models and feature styles. |
+| `src/components/Chat` | Organization chat directory, docked conversations, message state and presence tracking. |
 | `src/auth` | Authentication session and user profile types. |
 | `src/hooks` | API service hooks and domain-specific HTTP wrappers. |
 | `src/api` | Shared backend client and API result/error helpers. |
@@ -139,12 +143,33 @@ the GUI origin, usually `http://localhost:3000`.
 
 Release notes are maintained in `CHANGELOG.md`.
 
+## Pickup Points and Shipments
 
-### Obecność i powiadomienia czatu
+The `/pickup-points` route provides the operator's pickup-point catalog and map.
+Search accepts names, codes, streets and cities, while moving the map requests
+points inside the visible bounding box. Creating and editing a point sends its
+address to the backend; coordinates are returned after server-side resolution.
 
-Zielona kropka oznacza aktywne połączenie WebSocket z widoczną kartą aplikacji.
-Każda karta ma osobną sesję STOMP, a backend rozsyła listę online przez
-`/user/queue/chat/presence`. Ukrycie karty, utrata połączenia i wylogowanie usuwają
-obecność zdarzeniowo, bez odpytywania REST.
-Kafelki z nieprzeczytanymi powiadomieniami są podświetlane do czasu wyświetlenia rozmowy.
-Liczniki odebranych powiadomień są współdzielone między widokami w bieżącej sesji GUI.
+Shipment create and edit forms open a delivery-point map for pickup-point or
+locker methods. Selecting a marker stores the pickup-point identifier in the
+shipment request. Shipment details resolve the identifier to a human-readable
+pickup-point code. Eligibility requests include country, point type, shipment
+size and dangerous-goods information.
+
+## Returns
+
+Return lists and the processing and completion actions use the Manager API under
+`/shipments/returns`. A shipment without `RETURN` status does not request return
+details, and unavailable optional return data hides only the return summary
+instead of blocking the shipment view. Reason-code changes and token validation
+continue to use the configured returning-service client.
+
+## Chat Presence and Notifications
+
+The green indicator means that a user has an active WebSocket connection from a
+visible application tab. Every tab has its own STOMP session, and the backend
+publishes the online-user list through `/user/queue/chat/presence`. Hiding a tab,
+losing the connection or logging out removes presence through connection events
+without REST polling. Unread conversation tiles remain highlighted until the
+conversation is viewed, and notification counters are shared across views in the
+current GUI session.
