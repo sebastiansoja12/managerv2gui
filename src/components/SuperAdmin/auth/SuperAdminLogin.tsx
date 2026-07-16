@@ -2,7 +2,8 @@ import React, {useState} from "react";
 import {AdminPanelSettings, Shield} from "@mui/icons-material";
 import {Alert} from "@mui/material";
 import {Navigate, useNavigate} from "react-router-dom";
-import {isSuperAdminAuthenticated, setSuperAdminAuthToken} from "../../../auth/SuperAdminAuthTokenStorage";
+import {authenticateCurrentUser} from "../../../auth/AuthSession";
+import {useAuthState} from "../../../auth/AuthState";
 import SuperAdminAuthService from "../../../hooks/SuperAdminAuthService";
 import pl from "../../../i18n/translate";
 import {LoginRequest} from "../../LoginPage/model/LoginRequest";
@@ -13,6 +14,7 @@ function SuperAdminLogin() {
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const authState = useAuthState();
 
     const login = () => {
         const request: LoginRequest = {username, password};
@@ -20,15 +22,15 @@ function SuperAdminLogin() {
         setError("");
 
         SuperAdminAuthService.login(request)
-            .then((response) => {
-                setSuperAdminAuthToken(response.data.authenticationToken);
+            .then(async () => {
+                await authenticateCurrentUser();
                 navigate("/super-admin/operators", {replace: true});
             })
             .catch(() => setError(pl.superAdmin.login.error))
             .finally(() => setLoading(false));
     };
 
-    if (isSuperAdminAuthenticated()) {
+    if (authState.status === "authenticated") {
         return <Navigate to="/super-admin/operators" replace/>;
     }
 
