@@ -1,7 +1,8 @@
 import React from "react";
 import {Navigate, useLocation, useNavigate} from "react-router-dom";
 import {Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography} from "@mui/material";
-import {isAuthenticated} from "../../auth/AuthTokenStorage";
+import {initializeAuthSession} from "../../auth/AuthSession";
+import {useAuthState} from "../../auth/AuthState";
 import Navbar from "../Navbar/Navbar";
 import AppRoutes from "./AppRoutes";
 import AppTabs from "./AppTabs";
@@ -90,10 +91,15 @@ function AppShell() {
     const [operationalProfile, updateOperationalProfile] = React.useState<OperationalProfile>(getOperationalProfile);
     const [pendingOperationalProfile, setPendingOperationalProfile] = React.useState<OperationalProfile | null>(null);
     const [language, updateLanguage] = React.useState<Language>(getLanguage);
+    const authState = useAuthState();
 
     const activePath = normalizePath(location.pathname);
     const loginRoute = location.pathname === "/login";
-    const authenticated = isAuthenticated();
+    const authenticated = authState.status === "authenticated";
+
+    React.useEffect(() => {
+        void initializeAuthSession();
+    }, []);
 
     const openTab = (tab: AppTabDefinition) => {
         const normalizedTab = {
@@ -181,27 +187,17 @@ function AppShell() {
     }, []);
 
     React.useEffect(() => {
-        if (!authenticated || loginRoute) {
+        if (!authenticated || loginRoute || !authState.user) {
             clearStoredTabs();
             clearCurrentUserLanguageContext();
             return;
         }
 
-        let active = true;
-        AuthService.me()
-            .then((response) => {
-                if (active) {
-                    setCurrentUserLanguageContext(response.data.username || String(response.data.userId?.value), response.data.language);
-                }
-            })
-            .catch((error) => {
-                console.error(pl.userProfile.messages.languageChangeError, error);
-            });
-
-        return () => {
-            active = false;
-        };
-    }, [authenticated, loginRoute]);
+        setCurrentUserLanguageContext(
+            authState.user.username || String(authState.user.userId?.value),
+            authState.user.language,
+        );
+    }, [authState.user, authenticated, loginRoute]);
 
     React.useEffect(() => {
         setOpenTabs((currentTabs) => currentTabs.map((tab) => ({
@@ -232,6 +228,10 @@ function AppShell() {
         setOpenTabs([]);
         navigate("/");
     };
+
+    if (authState.status === "initializing") {
+        return null;
+    }
 
     if (!authenticated && !loginRoute) {
         return <Navigate to="/login" replace/>;
