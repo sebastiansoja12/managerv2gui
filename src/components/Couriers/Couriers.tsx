@@ -27,13 +27,14 @@ import {
     Save,
     WorkspacePremium,
 } from "@mui/icons-material";
+import {useNavigate} from "react-router-dom";
 import {getBackendErrorMessage} from "../../api/errorMessage";
 import CourierService from "../../hooks/CourierService";
 import pl from "../../i18n/translate";
 import {CourierCreateRequest, CourierDto, DangerousGoodCertificationDto} from "./dto/CourierDto";
 import "./styles/couriers.css";
 
-const valueOrDash = (value?: string | null) => value || pl.common.dash;
+const valueOrDash = (value?: string | number | null) => value || pl.common.dash;
 
 const translateCourierStatus = (value?: string | null) => value
     ? pl.couriers.status[value as keyof typeof pl.couriers.status] || value
@@ -103,6 +104,7 @@ const emptyCreateForm = {
 };
 
 function Couriers() {
+    const navigate = useNavigate();
     const [couriers, setCouriers] = useState<CourierDto[]>([]);
     const [selectedCode, setSelectedCode] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(false);
@@ -141,6 +143,11 @@ function Couriers() {
                 expiryDate: toDateInputValue(courier.dangerousGoodCertification.expiryDate),
             }
             : emptyCertificationForm);
+    };
+
+    const openCourierDetails = (courier: CourierDto) => {
+        selectCourier(courier);
+        navigate(`/couriers/${encodeURIComponent(courier.supplierCode.value)}`);
     };
 
     const retrieveCouriers = useCallback((clearNotice = true) => {
@@ -358,8 +365,8 @@ function Couriers() {
             {error ? <Alert severity="error">{error}</Alert> : undefined}
             {success ? <Alert severity="success">{success}</Alert> : undefined}
 
-            <section className="couriers-grid">
-                <div className="couriers-table-panel">
+            <section className="couriers-grid couriers-list-grid">
+                <div className="couriers-table-panel couriers-table-panel-wide">
                     <div className="couriers-panel-header">
                         <Typography variant="h5">{pl.couriers.page.listTitle}</Typography>
                         <div className="couriers-table-actions">
@@ -400,7 +407,7 @@ function Couriers() {
                                         <tr
                                             className={isSelected ? "couriers-row-selected" : ""}
                                             key={courier.supplierCode.value}
-                                            onClick={() => selectCourier(courier)}
+                                            onClick={() => openCourierDetails(courier)}
                                         >
                                             <td><strong>{courier.supplierCode.value}</strong></td>
                                             <td>{courier.firstName} {courier.lastName}</td>
@@ -445,7 +452,7 @@ function Couriers() {
                     )}
                 </div>
 
-                <aside className="couriers-details-panel">
+                <aside className="couriers-details-panel couriers-details-panel-hidden">
                     <div className="couriers-panel-header">
                         <Typography variant="h5">{pl.couriers.page.detailsTitle}</Typography>
                         {selectedCourier ? (
