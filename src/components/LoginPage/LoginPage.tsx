@@ -3,7 +3,7 @@ import { Alert, Box, Button, Container, TextField, Typography } from '@mui/mater
 import AuthService from '../../hooks/AuthService';
 import {LoginRequest} from "./model/LoginRequest";
 import { useNavigate } from 'react-router-dom';
-import {setAuthToken} from "../../auth/AuthTokenStorage";
+import {authenticateCurrentUser} from "../../auth/AuthSession";
 import pl from "../../i18n/translate";
 
 
@@ -19,10 +19,8 @@ const Login: React.FC = () => {
         setErrorMessage('');
         try {
             const loginData: LoginRequest = { username, password };
-            const response = await AuthService.login(loginData);
-
-            const authToken = response.data.authenticationToken;
-            setAuthToken(authToken);
+            await AuthService.login(loginData);
+            await authenticateCurrentUser();
             navigate('/');
         } catch (error) {
             console.error('Login failed:', error);
