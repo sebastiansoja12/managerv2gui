@@ -1,15 +1,12 @@
 import http from "../http-common";
 import {LoginRequest} from "../components/LoginPage/model/LoginRequest";
-import {AuthenticationToken} from "../components/LoginPage/model/AuthenticationToken";
 import {ChangeLanguageRequest, ChangePasswordRequest, CurrentUserDto} from "../auth/UserProfileDto";
-import {RefreshTokenRequestDto} from "../auth/RefreshTokenRequestDto";
-import BackendClient from "../api/BackendClient";
-
-const authClient = new BackendClient(http);
 
 const login = (loginRequest: LoginRequest) => {
-    return http.post<AuthenticationToken>(`/auth/login`, loginRequest);
+    return http.post<void>(`/auth/login`, loginRequest);
 }
+
+const csrf = () => http.get<{token: string}>(`/auth/csrf`);
 
 const me = () => {
     return http.get<CurrentUserDto>(`/auth/me`);
@@ -27,12 +24,11 @@ const signup = () => {
     return http.post<any>(`/auth/signup`);
 }
 
-const logout = (request: RefreshTokenRequestDto) => {
-    return authClient.delete<RefreshTokenRequestDto, undefined>(`/auth/logout`, request);
-}
+const logout = () => http.post<void>(`/auth/logout`);
 
 const AuthService = {
     login,
+    csrf,
     me,
     changePassword,
     changeLanguage,
