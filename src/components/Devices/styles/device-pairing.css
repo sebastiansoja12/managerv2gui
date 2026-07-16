@@ -1,6 +1,6 @@
 .device-pairing-page {
-    background: #f7f8fa;
-    color: #101421;
+    background: var(--brand-surface-warm);
+    color: var(--brand-ink);
     min-height: calc(100vh - 96px);
     padding: 24px;
     text-align: left;
@@ -27,10 +27,10 @@
 
 .device-pairing-title-icon {
     align-items: center;
-    background: #1e40af;
+    background: var(--brand-accent-deep);
     border-radius: 8px;
-    box-shadow: 0 12px 22px rgba(30, 64, 175, 0.18);
-    color: #fff;
+    box-shadow: 0 12px 22px rgba(63, 134, 217, 0.18);
+    color: var(--brand-surface);
     display: inline-flex;
     height: 44px;
     justify-content: center;
@@ -38,7 +38,7 @@
 }
 
 .device-pairing-header h4 {
-    color: #05070d;
+    color: var(--brand-ink);
     font-size: 1.5rem;
     font-weight: 900;
     letter-spacing: 0;
@@ -46,7 +46,7 @@
 
 .device-pairing-header p,
 .device-pairing-panel p {
-    color: #626b7a;
+    color: var(--brand-muted);
     margin: 4px 0 0;
 }
 
@@ -58,15 +58,15 @@
 }
 
 .device-pairing-panel {
-    background: #fff;
-    border: 1px solid #e3e7ee;
+    background: var(--brand-surface);
+    border: 1px solid var(--brand-border);
     border-radius: 8px;
-    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.03);
+    box-shadow: 0 8px 22px var(--brand-shadow);
     padding: 22px;
 }
 
 .device-pairing-panel h5 {
-    color: #121826;
+    color: var(--brand-ink);
     font-size: 1rem;
     font-weight: 900;
 }
@@ -86,11 +86,11 @@
 }
 
 .device-pairing-form .MuiButton-contained {
-    background: #1d4ed8;
+    background: var(--brand-accent-strong);
 }
 
 .device-pairing-form .MuiButton-contained:hover {
-    background: #1e40af;
+    background: var(--brand-accent-deep);
 }
 
 .device-pairing-qr-panel {
@@ -103,7 +103,7 @@
 }
 
 .device-pairing-qr {
-    border: 1px solid #e3e7ee;
+    border: 1px solid var(--brand-border);
     border-radius: 8px;
     height: 260px;
     width: 260px;
@@ -113,7 +113,7 @@
     align-items: center;
     border: 1px dashed #cad2df;
     border-radius: 8px;
-    color: #6b7280;
+    color: var(--brand-muted);
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -123,14 +123,14 @@
 }
 
 .device-pairing-empty-qr svg {
-    color: #1d4ed8;
+    color: var(--brand-accent-strong);
     font-size: 42px;
 }
 
 .device-pairing-pair-details {
     align-items: center;
     background: #f5f7fb;
-    border: 1px solid #e3e7ee;
+    border: 1px solid var(--brand-border);
     border-radius: 8px;
     display: flex;
     gap: 10px;
@@ -141,12 +141,12 @@
 }
 
 .device-pairing-pair-details span {
-    color: #6b7280;
+    color: var(--brand-muted);
     font-size: 0.86rem;
 }
 
 .device-pairing-pair-details strong {
-    color: #111827;
+    color: var(--brand-ink);
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -161,7 +161,7 @@
 }
 
 .device-pairing-table-header span {
-    color: #626b7a;
+    color: var(--brand-muted);
     font-weight: 700;
 }
 
@@ -177,13 +177,13 @@
 
 .device-pairing-table th,
 .device-pairing-table td {
-    border-bottom: 1px solid #edf0f5;
+    border-bottom: 1px solid var(--brand-border);
     padding: 14px 12px;
     text-align: left;
 }
 
 .device-pairing-table th {
-    background: #f8fafc;
+    background: var(--brand-accent-wash);
     color: #5d6573;
     font-size: 0.82rem;
     font-weight: 900;
@@ -191,7 +191,7 @@
 }
 
 .device-pairing-table td {
-    color: #111827;
+    color: var(--brand-ink);
     font-weight: 650;
 }
 
