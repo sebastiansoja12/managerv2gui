@@ -1,20 +1,12 @@
 import axios from "axios";
-import {getAuthToken} from "./auth/AuthTokenStorage";
+import {configureAuthenticatedClient} from "./auth/configureAuthenticatedClient";
 
 const http = axios.create({
     baseURL: `${process.env.SOFTWARE_APP_SERVER_URL}`,
     headers: {
         "Content-type": "application/json"
-    }
+    },
+    withCredentials: true,
 });
 
-http.interceptors.request.use((config) => {
-    const token = getAuthToken();
-    if (token) {
-        config.headers.set("Authorization", `Bearer ${token}`);
-    }
-
-    return config;
-});
-
-export default http;
+export default configureAuthenticatedClient(http);
