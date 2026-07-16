@@ -8,7 +8,7 @@ import {
     SettingsSuggest,
     Shield,
 } from "@mui/icons-material";
-import {clearSuperAdminAuthToken} from "../../../auth/SuperAdminAuthTokenStorage";
+import {logoutAuthSession} from "../../../auth/AuthSession";
 import pl from "../../../i18n/translate";
 
 type SuperAdminLayoutProps = {
@@ -18,9 +18,12 @@ type SuperAdminLayoutProps = {
 };
 
 function SuperAdminLayout({children, error, onCreate}: SuperAdminLayoutProps) {
-    const logout = () => {
-        clearSuperAdminAuthToken();
-        window.location.assign("/super-admin/login");
+    const logout = async () => {
+        try {
+            await logoutAuthSession();
+        } finally {
+            window.location.assign("/super-admin/login");
+        }
     };
 
     return (
