@@ -58,5 +58,10 @@ export const getTabTitle = (path: string) => {
         return `${pl.processes.details.title} ${decodeURIComponent(processMatch[1])}`;
     }
 
+    const courierMatch = normalizedPath.match(/^\/couriers\/([^/]+)$/);
+    if (courierMatch) {
+        return `${pl.couriers.page.detailsTitle} ${decodeURIComponent(courierMatch[1])}`;
+    }
+
     return tabTitles()[normalizedPath] || pl.app.tabs.fallbackTitle;
 };
