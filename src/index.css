@@ -1,3 +1,22 @@
+:root {
+  --brand-accent: #3f86d9;
+  --brand-accent-strong: #2f73c4;
+  --brand-accent-deep: #245a9b;
+  --brand-accent-soft: #eef6ff;
+  --brand-accent-border: #c7dcf4;
+  --brand-accent-wash: #f7fbff;
+  --brand-warning: #f5c84b;
+  --brand-warning-soft: #fff4bf;
+  --brand-ink: #141414;
+  --brand-ink-soft: #343434;
+  --brand-muted: #70757d;
+  --brand-surface: #ffffff;
+  --brand-surface-warm: #fafafa;
+  --brand-border: #e8e5df;
+  --brand-shadow: rgba(34, 25, 18, 0.08);
+  --brand-accent-shadow: rgba(63, 134, 217, 0.2);
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
