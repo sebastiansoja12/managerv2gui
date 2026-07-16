@@ -13,9 +13,7 @@ class BackendClient {
         url: string,
         config?: {
             params?: QueryParams;
-            headers?: {
-                Authorization: string;
-            };
+            headers?: AxiosRequestConfig["headers"];
         }
     ): Promise<ApiResult<TResponse>> {
         return this.request<TResponse>({
