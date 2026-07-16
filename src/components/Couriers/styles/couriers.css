@@ -9,10 +9,10 @@
 .couriers-create-panel,
 .couriers-table-panel,
 .couriers-details-panel {
-    background: #ffffff;
+    background: var(--brand-surface);
     border: 1px solid #e4e9f1;
     border-radius: 8px;
-    box-shadow: 0 16px 34px rgba(15, 23, 42, 0.05);
+    box-shadow: 0 16px 34px var(--brand-shadow);
 }
 
 .couriers-header {
@@ -31,7 +31,7 @@
 
 .couriers-header p {
     margin: 6px 0 0;
-    color: #667085;
+    color: var(--brand-muted);
 }
 
 .couriers-kicker {
@@ -52,7 +52,7 @@
 
 .couriers-summary div {
     align-items: center;
-    background: #f8fafc;
+    background: var(--brand-accent-wash);
     border: 1px solid #e6ebf2;
     border-radius: 8px;
     display: grid;
@@ -67,12 +67,12 @@
 }
 
 .couriers-summary span {
-    color: #667085;
+    color: var(--brand-muted);
     font-size: 12px;
 }
 
 .couriers-summary strong {
-    color: #111827;
+    color: var(--brand-ink);
     font-size: 22px;
 }
 
@@ -102,6 +102,18 @@
     display: grid;
     gap: 16px;
     grid-template-columns: minmax(0, 1.55fr) minmax(360px, 0.85fr);
+}
+
+.couriers-list-grid {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.couriers-table-panel-wide {
+    width: 100%;
+}
+
+.couriers-details-panel-hidden {
+    display: none;
 }
 
 .couriers-table-panel,
@@ -137,7 +149,7 @@
 .couriers-loader,
 .couriers-empty-details {
     align-items: center;
-    color: #667085;
+    color: var(--brand-muted);
     display: flex;
     gap: 10px;
     justify-content: center;
@@ -157,7 +169,7 @@
 .couriers-table th,
 .couriers-table td {
     border-bottom: 1px solid #eef2f7;
-    color: #111827;
+    color: var(--brand-ink);
     font-size: 14px;
     padding: 14px 12px;
     text-align: left;
@@ -166,8 +178,8 @@
 }
 
 .couriers-table th {
-    background: #f8fafc;
-    color: #667085;
+    background: var(--brand-accent-wash);
+    color: var(--brand-muted);
     font-weight: 800;
 }
 
@@ -182,7 +194,7 @@
 }
 
 .couriers-empty-row {
-    color: #667085;
+    color: var(--brand-muted);
     height: 160px;
     text-align: center !important;
 }
@@ -211,7 +223,7 @@
 .couriers-status-suspended,
 .couriers-check-bad {
     background: #fff1d6;
-    color: #b45309;
+    color: var(--brand-accent-deep);
 }
 
 .couriers-status-deleted {
@@ -242,7 +254,7 @@
     align-items: center;
     background: linear-gradient(135deg, #315a9f, #4d7ee8);
     border-radius: 50%;
-    color: #ffffff;
+    color: var(--brand-surface);
     display: inline-flex;
     font-weight: 900;
     height: 44px;
@@ -256,7 +268,7 @@
 }
 
 .couriers-person small {
-    color: #667085;
+    color: var(--brand-muted);
     margin-top: 3px;
 }
 
@@ -281,19 +293,19 @@
 }
 
 .couriers-check-card-bad {
-    background: #fff7ed;
-    color: #b45309;
+    background: var(--brand-accent-soft);
+    color: var(--brand-accent-deep);
 }
 
 .couriers-check-card-ok span,
 .couriers-check-card-bad span {
-    color: #111827;
+    color: var(--brand-ink);
     font-weight: 800;
 }
 
 .couriers-check-card-ok small,
 .couriers-check-card-bad small {
-    color: #667085;
+    color: var(--brand-muted);
 }
 
 .couriers-form-section {
@@ -320,6 +332,10 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.couriers-form-grid-three {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .couriers-meta {
     display: grid;
     gap: 12px;
@@ -328,27 +344,182 @@
 }
 
 .couriers-meta div {
-    background: #f8fafc;
+    background: var(--brand-accent-wash);
     border: 1px solid #e6ebf2;
     border-radius: 8px;
     padding: 12px;
 }
 
 .couriers-meta dt {
-    color: #667085;
+    color: var(--brand-muted);
     font-size: 12px;
     font-weight: 800;
     margin-bottom: 4px;
 }
 
 .couriers-meta dd {
-    color: #111827;
+    color: var(--brand-ink);
     font-weight: 700;
     margin: 0;
 }
 
 .MuiMenuItem-root {
     gap: 10px;
+}
+
+.courier-details-page {
+    margin: 0 auto;
+    max-width: 1380px;
+    width: 100%;
+}
+
+.couriers-detail-heading {
+    align-items: center;
+    display: flex;
+    gap: 16px;
+}
+
+.courier-details-layout {
+    align-items: start;
+    display: grid;
+    gap: 24px;
+    grid-template-columns: minmax(0, 1fr) minmax(340px, 420px);
+}
+
+.courier-details-left-column {
+    display: grid;
+    gap: 18px;
+    min-width: 0;
+}
+
+.courier-details-main-panel,
+.courier-details-side-panel {
+    position: static;
+}
+
+.courier-details-main-panel {
+    padding: 22px 24px;
+}
+
+.courier-details-left-column > .couriers-form-section {
+    padding: 22px 24px;
+}
+
+.courier-details-left-column .MuiButton-root {
+    justify-self: start;
+}
+
+.courier-details-meta {
+    grid-template-columns: 1fr;
+}
+
+.courier-details-side-panel {
+    overflow: hidden;
+}
+
+.courier-operational-list {
+    display: grid;
+    gap: 14px;
+    padding: 20px;
+}
+
+.courier-operational-card {
+    background: var(--brand-accent-wash);
+    border: 1px solid #dfe7f1;
+    border-radius: 8px;
+    display: grid;
+    gap: 8px;
+    justify-items: center;
+    min-height: 92px;
+    padding: 18px 14px;
+    text-align: center;
+}
+
+.courier-operational-card dt {
+    color: var(--brand-muted);
+    font-size: 0.92rem;
+    font-weight: 850;
+}
+
+.courier-operational-card-header {
+    align-items: center;
+    display: grid;
+    gap: 8px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    justify-self: stretch;
+}
+
+.courier-operational-card-header dt {
+    justify-self: center;
+    padding-left: 32px;
+}
+
+.courier-operational-card-header .MuiIconButton-root {
+    background: var(--brand-surface);
+    border: 1px solid #dfe7f1;
+    color: var(--brand-accent-deep);
+    height: 30px;
+    width: 30px;
+}
+
+.courier-operational-card dd {
+    color: var(--brand-ink);
+    font-size: 1.05rem;
+    font-weight: 900;
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.courier-operational-card .MuiFormControl-root {
+    width: 100%;
+}
+
+.courier-operational-card .MuiInputBase-root {
+    background: var(--brand-surface);
+    font-weight: 800;
+}
+
+.courier-operational-card .MuiInputBase-input {
+    text-align: center;
+}
+
+.courier-operational-card .MuiFormHelperText-root {
+    margin-left: 0;
+    margin-right: 0;
+    text-align: center;
+}
+
+.courier-operational-edit {
+    display: grid;
+    gap: 10px;
+    justify-self: stretch;
+}
+
+.courier-operational-edit-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+}
+
+.courier-operational-edit small {
+    color: var(--brand-muted);
+    font-weight: 700;
+}
+
+.courier-operational-actions {
+    align-items: center;
+    border-top: 1px solid #e9edf4;
+    display: grid;
+    gap: 10px;
+    justify-items: center;
+    padding-top: 4px;
+}
+
+.courier-operational-actions small {
+    color: var(--brand-muted);
+    font-weight: 700;
+    text-align: center;
 }
 
 @media (max-width: 1180px) {
@@ -366,6 +537,10 @@
         position: static;
     }
 
+    .courier-details-layout {
+        grid-template-columns: 1fr;
+    }
+
     .couriers-create-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
@@ -380,7 +555,13 @@
     .couriers-check-grid,
     .couriers-create-grid,
     .couriers-form-grid,
+    .couriers-form-grid-three,
     .couriers-meta {
         grid-template-columns: 1fr;
+    }
+
+    .couriers-detail-heading {
+        align-items: flex-start;
+        flex-direction: column;
     }
 }
