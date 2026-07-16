@@ -1,7 +1,7 @@
 .shipments-page {
     min-height: calc(100vh - 64px);
-    background: #f7f8fa;
-    color: #090b12;
+    background: var(--brand-surface-warm);
+    color: var(--brand-ink);
     padding: 24px;
     text-align: left;
 }
@@ -24,12 +24,12 @@
 }
 
 .shipment-history-section-header .MuiTypography-root {
-    color: #111827;
+    color: var(--brand-ink);
     font-weight: 900;
 }
 
 .shipment-history-section-header span {
-    color: #667085;
+    color: var(--brand-muted);
     font-size: 0.86rem;
 }
 
@@ -37,9 +37,9 @@
     background:
         linear-gradient(90deg, rgba(148, 163, 184, 0.15) 1px, transparent 1px),
         linear-gradient(rgba(148, 163, 184, 0.15) 1px, transparent 1px),
-        linear-gradient(135deg, #eef6ff, #f8fafc);
+        linear-gradient(135deg, #eef6ff, var(--brand-accent-wash));
     background-size: 42px 42px, 42px 42px, auto;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--brand-border);
     border-radius: 8px;
     height: min(52vh, 520px);
     min-height: 360px;
@@ -70,7 +70,7 @@
 }
 
 .shipment-history-map-line {
-    border-top: 4px dashed #1e3a8a;
+    border-top: 4px dashed var(--brand-accent-deep);
     left: 12%;
     position: absolute;
     right: 12%;
@@ -81,10 +81,10 @@
 
 .shipment-history-map-point {
     align-items: center;
-    background: #fff;
-    border: 2px solid #2563eb;
+    background: var(--brand-surface);
+    border: 2px solid var(--brand-accent);
     border-radius: 999px;
-    box-shadow: 0 14px 28px rgba(15, 23, 42, 0.14);
+    box-shadow: 0 14px 28px var(--brand-shadow);
     display: flex;
     flex-direction: column;
     gap: 4px;
@@ -97,9 +97,9 @@
 
 .shipment-history-map-point span {
     align-items: center;
-    background: #1e3a8a;
+    background: var(--brand-accent-deep);
     border-radius: 999px;
-    color: #fff;
+    color: var(--brand-surface);
     display: inline-flex;
     font-size: 0.78rem;
     font-weight: 900;
@@ -109,7 +109,7 @@
 }
 
 .shipment-history-map-point strong {
-    color: #111827;
+    color: var(--brand-ink);
     font-size: 0.82rem;
     max-width: 110px;
     overflow: hidden;
@@ -128,7 +128,7 @@
 }
 
 .shipment-history-event {
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--brand-border);
     border-radius: 8px;
     display: grid;
     gap: 14px;
@@ -138,9 +138,9 @@
 
 .shipment-history-event-index {
     align-items: center;
-    background: #1e3a8a;
+    background: var(--brand-accent-deep);
     border-radius: 999px;
-    color: #fff;
+    color: var(--brand-surface);
     display: flex;
     font-weight: 900;
     height: 34px;
@@ -156,12 +156,12 @@
 }
 
 .shipment-history-event-top strong {
-    color: #111827;
+    color: var(--brand-ink);
     font-weight: 900;
 }
 
 .shipment-history-event-top span {
-    color: #667085;
+    color: var(--brand-muted);
     font-size: 0.82rem;
 }
 
@@ -175,7 +175,7 @@
 }
 
 .shipment-history-event p {
-    color: #4b5563;
+    color: var(--brand-ink-soft);
     margin: 10px 0;
 }
 
@@ -187,14 +187,14 @@
 }
 
 .shipment-history-event dt {
-    color: #667085;
+    color: var(--brand-muted);
     font-size: 0.74rem;
     font-weight: 800;
     text-transform: uppercase;
 }
 
 .shipment-history-event dd {
-    color: #111827;
+    color: var(--brand-ink);
     font-weight: 850;
     margin: 2px 0 0;
 }
@@ -236,10 +236,10 @@
 
 .shipments-title-icon {
     align-items: center;
-    background: #2563eb;
+    background: var(--brand-accent);
     border-radius: 8px;
-    box-shadow: 0 12px 22px rgba(37, 99, 235, 0.18);
-    color: #fff;
+    box-shadow: 0 12px 22px rgba(63, 134, 217, 0.18);
+    color: var(--brand-surface);
     display: inline-flex;
     height: 44px;
     justify-content: center;
@@ -253,10 +253,10 @@
 }
 
 .shipments-panel {
-    background: #fff;
-    border: 1px solid #e5e7eb;
+    background: var(--brand-surface);
+    border: 1px solid var(--brand-border);
     border-radius: 8px;
-    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.03);
+    box-shadow: 0 8px 22px var(--brand-shadow);
     padding: 24px;
 }
 
@@ -287,15 +287,15 @@
 }
 
 .shipments-create-panel {
-    border-color: #dbeafe;
-    box-shadow: 0 18px 46px rgba(15, 23, 42, 0.08);
+    border-color: var(--brand-accent-border);
+    box-shadow: 0 18px 46px var(--brand-shadow);
     margin-bottom: 16px;
     overflow: hidden;
     position: relative;
 }
 
 .shipments-create-page {
-    background: #f4f7fb;
+    background: var(--brand-surface-warm);
 }
 
 .shipments-create-shell {
@@ -303,7 +303,7 @@
 }
 
 .shipments-create-panel::before {
-    background: linear-gradient(90deg, #2563eb 0%, #0f766e 34%, #b45309 68%, #be123c 100%);
+    background: linear-gradient(90deg, var(--brand-accent) 0%, #0f766e 34%, var(--brand-accent-deep) 68%, #be123c 100%);
     content: "";
     height: 6px;
     left: 0;
@@ -313,16 +313,16 @@
 }
 
 .shipments-create-panel .shipments-panel-title {
-    background: #eff6ff;
-    border: 1px solid #bfdbfe;
+    background: var(--brand-accent-soft);
+    border: 1px solid var(--brand-accent-border);
     border-radius: 8px;
-    color: #1d4ed8;
+    color: var(--brand-accent-strong);
     margin: 4px 0 18px;
     padding: 12px 14px;
 }
 
 .shipments-create-panel .shipments-panel-title .MuiTypography-root {
-    color: #0f172a;
+    color: var(--brand-ink);
     font-weight: 900;
 }
 
@@ -360,13 +360,13 @@
 }
 
 .shipments-section {
-    border-top: 1px solid #eef1f4;
+    border-top: 1px solid var(--brand-border);
     margin-top: 22px;
     padding-top: 20px;
 }
 
 .shipments-create-section {
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--brand-border);
     border-radius: 8px;
     margin-top: 18px;
     padding: 18px;
@@ -387,17 +387,17 @@
 }
 
 .shipments-create-section-sender {
-    background: #f8fbff;
-    border-color: #bfdbfe;
+    background: var(--brand-accent-wash);
+    border-color: var(--brand-accent-border);
 }
 
 .shipments-create-section-sender .shipments-section-title,
 .shipments-create-section-sender .shipments-section-title::before {
-    color: #1d4ed8;
+    color: var(--brand-accent-strong);
 }
 
 .shipments-create-section-sender .shipments-section-title::before {
-    background: #2563eb;
+    background: var(--brand-accent);
 }
 
 .shipments-create-section-receiver {
@@ -415,17 +415,17 @@
 }
 
 .shipments-create-section-dangerous {
-    background: #fff8f1;
-    border-color: #fed7aa;
+    background: var(--brand-accent-wash);
+    border-color: var(--brand-accent-border);
 }
 
 .shipments-create-section-dangerous .shipments-section-title,
 .shipments-create-section-dangerous .shipments-section-title::before {
-    color: #b45309;
+    color: var(--brand-accent-deep);
 }
 
 .shipments-create-section-dangerous .shipments-section-title::before {
-    background: #f97316;
+    background: var(--brand-accent);
 }
 
 .shipments-create-section .shipments-form-grid {
@@ -449,7 +449,7 @@
 }
 
 .shipments-section-title {
-    color: #111827;
+    color: var(--brand-ink);
     font-size: 0.92rem;
     font-weight: 850;
     letter-spacing: 0;
@@ -466,7 +466,7 @@
 }
 
 .shipments-header .MuiTypography-h4 {
-    color: #05070d;
+    color: var(--brand-ink);
     font-size: 1.5rem;
     font-weight: 900;
     letter-spacing: 0;
@@ -481,13 +481,13 @@
 }
 
 .shipments-header .MuiButton-outlined {
-    border-color: #e1e5ea;
-    color: #111827;
+    border-color: var(--brand-border);
+    color: var(--brand-ink);
 }
 
 .shipments-actions .MuiButton-contained {
-    background: #1d4ed8;
-    box-shadow: 0 14px 28px rgba(37, 99, 235, 0.24);
+    background: var(--brand-accent-strong);
+    box-shadow: 0 14px 28px rgba(63, 134, 217, 0.24);
     min-width: 210px;
 }
 
@@ -496,7 +496,7 @@
 }
 
 .shipments-page .MuiTextField-root {
-    background: #ffffff;
+    background: var(--brand-surface);
 }
 
 .shipments-page .MuiOutlinedInput-root {
@@ -505,12 +505,12 @@
 
 .shipments-page .MuiInputLabel-root,
 .tm-page .MuiInputLabel-root {
-    color: #68707c;
+    color: var(--brand-muted);
 }
 
 .shipments-page .MuiOutlinedInput-notchedOutline,
 .tm-page .MuiOutlinedInput-notchedOutline {
-    border-color: #e1e5ea;
+    border-color: var(--brand-border);
 }
 
 .shipments-page .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline,
@@ -520,7 +520,7 @@
 
 .shipments-page .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline,
 .tm-page .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
-    border-color: #2563eb;
+    border-color: var(--brand-accent);
 }
 
 .shipments-result-list {
@@ -530,8 +530,8 @@
 }
 
 .shipments-result-item {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
+    background: var(--brand-accent-wash);
+    border: 1px solid var(--brand-border);
     border-radius: 8px;
     padding: 12px;
 }
@@ -553,7 +553,7 @@
 }
 
 .shipments-summary-value {
-    color: #172033;
+    color: var(--brand-ink-soft);
     font-weight: 700;
     text-align: right;
 }
@@ -576,8 +576,8 @@
 }
 
 .shipment-dashboard {
-    background: #f4f7fa;
-    color: #17283b;
+    background: var(--brand-surface-warm);
+    color: var(--brand-ink-soft);
     display: grid;
     grid-template-columns: 88px minmax(0, 1fr);
     min-height: calc(100vh - 72px);
@@ -586,8 +586,8 @@
 
 .shipment-sidebar {
     align-items: center;
-    background: #ffffff;
-    border-right: 1px solid #e8edf3;
+    background: var(--brand-surface);
+    border-right: 1px solid var(--brand-border);
     display: flex;
     flex-direction: column;
     gap: 42px;
@@ -596,9 +596,9 @@
 
 .shipment-logo {
     align-items: center;
-    background: #73e700;
+    background: var(--brand-accent);
     border-radius: 8px;
-    color: #ffffff;
+    color: var(--brand-surface);
     display: flex;
     font-size: 1.45rem;
     font-weight: 900;
@@ -618,7 +618,7 @@
 .shipment-sidebar-dot {
     align-items: center;
     border-radius: 999px;
-    color: #9aa9ba;
+    color: var(--brand-muted);
     display: flex;
     height: 42px;
     justify-content: center;
@@ -635,8 +635,8 @@
 }
 
 .shipment-sidebar-active {
-    background: #73e700;
-    color: #17283b;
+    background: var(--brand-accent);
+    color: var(--brand-ink-soft);
 }
 
 .shipment-sidebar-active::before {
@@ -664,7 +664,7 @@
 }
 
 .shipment-list-heading .MuiTypography-root {
-    color: #17283b;
+    color: var(--brand-ink-soft);
     font-size: 1.7rem;
     font-weight: 900;
     letter-spacing: 0;
@@ -672,11 +672,11 @@
 
 .shipment-search {
     align-items: center;
-    background: #ffffff;
-    border: 1px solid #eef2f6;
+    background: var(--brand-surface);
+    border: 1px solid var(--brand-border);
     border-radius: 999px;
-    box-shadow: 0 16px 34px rgba(20, 35, 52, 0.04);
-    color: #17283b;
+    box-shadow: 0 16px 34px var(--brand-shadow);
+    color: var(--brand-ink-soft);
     display: flex;
     gap: 10px;
     height: 64px;
@@ -686,7 +686,7 @@
 
 .shipment-search input {
     border: 0;
-    color: #17283b;
+    color: var(--brand-ink-soft);
     flex: 1;
     font: inherit;
     font-weight: 700;
@@ -699,10 +699,10 @@
 }
 
 .shipment-add-load.MuiButton-root {
-    background: #73e700;
+    background: var(--brand-accent);
     border-radius: 999px;
-    box-shadow: 0 18px 30px rgba(115, 231, 0, 0.22);
-    color: #17283b;
+    box-shadow: 0 18px 30px rgba(63, 134, 217, 0.22);
+    color: var(--brand-ink-soft);
     font-size: 1rem;
     font-weight: 900;
     height: 64px;
@@ -711,8 +711,8 @@
 }
 
 .shipment-add-load.MuiButton-root:hover {
-    background: #64d800;
-    box-shadow: 0 20px 36px rgba(115, 231, 0, 0.3);
+    background: var(--brand-accent-strong);
+    box-shadow: 0 20px 36px rgba(63, 134, 217, 0.3);
 }
 
 .shipment-id-search {
@@ -728,11 +728,11 @@
 }
 
 .shipment-load-card {
-    background: #ffffff;
+    background: var(--brand-surface);
     border: 1px solid transparent;
     border-radius: 28px;
-    box-shadow: 0 18px 42px rgba(23, 40, 59, 0.05);
-    color: #17283b;
+    box-shadow: 0 18px 42px var(--brand-shadow);
+    color: var(--brand-ink-soft);
     cursor: pointer;
     padding: 24px;
     text-align: left;
@@ -740,12 +740,12 @@
 }
 
 .shipment-load-card:hover {
-    box-shadow: 0 22px 48px rgba(23, 40, 59, 0.08);
+    box-shadow: 0 22px 48px var(--brand-shadow);
     transform: translateY(-2px);
 }
 
 .shipment-load-card-active {
-    border-color: #73e700;
+    border-color: var(--brand-accent);
 }
 
 .shipment-load-card-top {
@@ -803,7 +803,7 @@
 }
 
 .shipment-estimate span {
-    color: #9aa9ba;
+    color: var(--brand-muted);
     display: block;
     font-weight: 700;
     margin-bottom: 10px;
@@ -823,7 +823,7 @@
 }
 
 .shipment-estimate small {
-    color: #9aa9ba;
+    color: var(--brand-muted);
     font-size: 1rem;
     font-weight: 800;
 }
@@ -841,15 +841,15 @@
 }
 
 .shipment-progress-start {
-    background: #73e700;
+    background: var(--brand-accent);
     border-radius: 999px;
-    box-shadow: 0 0 0 12px rgba(115, 231, 0, 0.18);
+    box-shadow: 0 0 0 12px rgba(63, 134, 217, 0.18);
     height: 12px;
     width: 12px;
 }
 
 .shipment-progress-line {
-    background: #73e700;
+    background: var(--brand-accent);
     height: 4px;
 }
 
@@ -859,15 +859,15 @@
 }
 
 .shipment-progress-truck {
-    color: #17283b;
+    color: var(--brand-ink-soft);
     margin: 0 8px;
 }
 
 .shipment-progress-end {
     align-items: center;
-    border: 1px solid #e4ebf2;
+    border: 1px solid #edf4fb;
     border-radius: 999px;
-    color: #17283b;
+    color: var(--brand-ink-soft);
     display: flex;
     height: 34px;
     justify-content: center;
@@ -892,7 +892,7 @@
 
 .shipment-address-row span,
 .shipment-recipient-row span {
-    color: #9aa9ba;
+    color: var(--brand-muted);
     font-size: 0.82rem;
     font-weight: 700;
 }
@@ -910,9 +910,9 @@
 .shipment-avatar,
 .shipment-driver-avatar {
     align-items: center;
-    background: #f5dd91;
+    background: var(--brand-warning-soft);
     border-radius: 999px;
-    color: #17283b;
+    color: var(--brand-ink-soft);
     display: flex;
     font-weight: 900;
     height: 48px;
@@ -927,10 +927,10 @@
 
 .shipment-round-action {
     align-items: center;
-    background: #ffffff;
+    background: var(--brand-surface);
     border: 1px solid #e6edf4;
     border-radius: 999px;
-    color: #17283b;
+    color: var(--brand-ink-soft);
     display: flex;
     height: 46px;
     justify-content: center;
@@ -938,8 +938,8 @@
 }
 
 .shipment-round-action-solid {
-    background: #73e700;
-    border-color: #73e700;
+    background: var(--brand-accent);
+    border-color: var(--brand-accent);
 }
 
 .shipment-detail-column {
@@ -949,7 +949,7 @@
 }
 
 .shipment-map-card {
-    background: #ffffff;
+    background: var(--brand-surface);
     border-radius: 34px 0 0 34px;
     margin-bottom: 24px;
     overflow: hidden;
@@ -959,9 +959,9 @@
 .shipment-map {
     background-color: #d8dadd;
     background-image:
-        linear-gradient(35deg, transparent 44%, #ffffff 45%, #ffffff 47%, transparent 48%),
-        linear-gradient(145deg, transparent 44%, #ffffff 45%, #ffffff 47%, transparent 48%),
-        linear-gradient(90deg, transparent 46%, #ffffff 47%, #ffffff 49%, transparent 50%),
+        linear-gradient(35deg, transparent 44%, var(--brand-surface) 45%, var(--brand-surface) 47%, transparent 48%),
+        linear-gradient(145deg, transparent 44%, var(--brand-surface) 45%, var(--brand-surface) 47%, transparent 48%),
+        linear-gradient(90deg, transparent 46%, var(--brand-surface) 47%, var(--brand-surface) 49%, transparent 50%),
         repeating-linear-gradient(0deg, transparent 0 28px, rgba(255,255,255,0.9) 29px 32px),
         repeating-linear-gradient(90deg, transparent 0 34px, rgba(255,255,255,0.9) 35px 38px);
     border-radius: 22px 0 0 22px;
@@ -1015,7 +1015,7 @@
 }
 
 .shipment-route {
-    border: 4px dashed #17283b;
+    border: 4px dashed var(--brand-ink-soft);
     border-bottom: 0;
     border-left: 0;
     display: block;
@@ -1031,10 +1031,10 @@
 .shipment-map-pin,
 .shipment-map-truck {
     align-items: center;
-    background: #ffffff;
+    background: var(--brand-surface);
     border-radius: 999px;
-    box-shadow: 0 12px 26px rgba(23, 40, 59, 0.14);
-    color: #17283b;
+    box-shadow: 0 12px 26px var(--brand-shadow);
+    color: var(--brand-ink-soft);
     display: flex;
     height: 42px;
     justify-content: center;
@@ -1049,7 +1049,7 @@
 }
 
 .shipment-map-truck {
-    background: #73e700;
+    background: var(--brand-accent);
     bottom: 132px;
     right: 18px;
 }
@@ -1067,10 +1067,10 @@
 
 .shipment-info-card,
 .shipment-route-card {
-    background: #ffffff;
+    background: var(--brand-surface);
     border: 1px solid #e3eaf1;
     border-radius: 24px;
-    box-shadow: 0 18px 44px rgba(23, 40, 59, 0.04);
+    box-shadow: 0 18px 44px var(--brand-shadow);
     padding: 26px;
 }
 
@@ -1106,7 +1106,7 @@
 .shipment-info-grid span,
 .shipment-driver-main span,
 .shipment-route-step span {
-    color: #9aa9ba;
+    color: var(--brand-muted);
     font-size: 0.82rem;
     font-weight: 700;
 }
@@ -1114,7 +1114,7 @@
 .shipment-info-grid strong,
 .shipment-driver-main strong,
 .shipment-route-step strong {
-    color: #17283b;
+    color: var(--brand-ink-soft);
     font-weight: 900;
 }
 
@@ -1132,7 +1132,7 @@
 }
 
 .shipment-driver-main div span::before {
-    background: #73e700;
+    background: var(--brand-accent);
     border-radius: 999px;
     content: "";
     display: inline-block;
@@ -1160,7 +1160,7 @@
 }
 
 .shipment-route-step::before {
-    background: #73e700;
+    background: var(--brand-accent);
     content: "";
     height: 100%;
     left: 10px;
@@ -1175,7 +1175,7 @@
 }
 
 .shipment-route-node {
-    background: #73e700;
+    background: var(--brand-accent);
     border-radius: 999px;
     display: block;
     height: 22px;
@@ -1185,7 +1185,7 @@
 }
 
 .shipment-route-node::after {
-    background: #ffffff;
+    background: var(--brand-surface);
     border-radius: 999px;
     content: "";
     height: 7px;
@@ -1203,9 +1203,9 @@
 
 .shipment-route-step-muted .shipment-route-node {
     align-items: center;
-    background: #ffffff;
+    background: var(--brand-surface);
     border: 1px solid #e3eaf1;
-    color: #17283b;
+    color: var(--brand-ink-soft);
     display: flex;
     height: 28px;
     justify-content: center;
@@ -1217,8 +1217,8 @@
 }
 
 .tm-page {
-    background: #f7f8fa;
-    color: #090b12;
+    background: var(--brand-surface-warm);
+    color: var(--brand-ink);
     min-height: calc(100vh - 72px);
     padding: 18px 24px;
     text-align: left;
@@ -1244,14 +1244,14 @@
 }
 
 .tm-page-heading .MuiTypography-root {
-    color: #05070d;
+    color: var(--brand-ink);
     font-size: 1.45rem;
     font-weight: 900;
     letter-spacing: 0;
 }
 
 .tm-heading-kicker {
-    color: #2563eb;
+    color: var(--brand-accent);
     font-size: 0.76rem;
     font-weight: 900;
     text-transform: uppercase;
@@ -1264,16 +1264,16 @@
 }
 
 .tm-add-new.MuiButton-root {
-    background: #2563eb;
+    background: var(--brand-accent);
     border-radius: 8px;
-    box-shadow: 0 12px 20px rgba(37, 99, 235, 0.18);
+    box-shadow: 0 12px 20px rgba(63, 134, 217, 0.18);
     font-weight: 800;
     min-height: 42px;
     text-transform: none;
 }
 
 .tm-add-new.MuiButton-root:hover {
-    background: #1d4ed8;
+    background: var(--brand-accent-strong);
 }
 
 .tm-metrics-grid {
@@ -1283,10 +1283,10 @@
 }
 
 .tm-card {
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
+    background: var(--brand-surface);
+    border: 1px solid var(--brand-border);
     border-radius: 8px;
-    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.03);
+    box-shadow: 0 8px 22px var(--brand-shadow);
 }
 
 .tm-order-overview,
@@ -1323,8 +1323,8 @@
 .tm-card-actions .MuiButton-root,
 .tm-toolbar-actions .MuiButton-root,
 .tm-manual-load .MuiButton-root {
-    border-color: #e1e5ea;
-    color: #111827;
+    border-color: var(--brand-border);
+    color: var(--brand-ink);
     font-weight: 750;
     text-transform: none;
 }
@@ -1333,10 +1333,10 @@
 .tm-icon-button,
 .tm-pagination button {
     align-items: center;
-    background: #ffffff;
-    border: 1px solid #e1e5ea;
+    background: var(--brand-surface);
+    border: 1px solid var(--brand-border);
     border-radius: 8px;
-    color: #111827;
+    color: var(--brand-ink);
     cursor: pointer;
     display: inline-flex;
     height: 38px;
@@ -1360,7 +1360,7 @@
 
 .tm-total-line strong,
 .tm-revenue-layout strong {
-    color: #05070d;
+    color: var(--brand-ink);
     font-size: 3.15rem;
     font-weight: 900;
     letter-spacing: 0;
@@ -1385,7 +1385,7 @@
 .tm-order-stats span,
 .tm-revenue-legend span {
     align-items: center;
-    color: #05070d;
+    color: var(--brand-ink);
     display: flex;
     gap: 8px;
     white-space: nowrap;
@@ -1406,11 +1406,11 @@
 }
 
 .tm-violet {
-    background: #2563eb;
+    background: var(--brand-accent);
 }
 
 .tm-orange {
-    background: #ff8d55;
+    background: var(--brand-accent);
 }
 
 .tm-green {
@@ -1418,7 +1418,7 @@
 }
 
 .tm-blue {
-    background: #60a5fa;
+    background: var(--brand-accent);
 }
 
 .tm-progress-bar {
@@ -1434,11 +1434,11 @@
 }
 
 .tm-progress-violet {
-    background-image: repeating-linear-gradient(90deg, #2563eb 0 1px, #bfdbfe 1px 3px);
+    background-image: repeating-linear-gradient(90deg, var(--brand-accent) 0 1px, var(--brand-accent-border) 1px 3px);
 }
 
 .tm-progress-orange {
-    background-image: repeating-linear-gradient(90deg, #ff9866 0 1px, #ffd7c5 1px 3px);
+    background-image: repeating-linear-gradient(90deg, var(--brand-accent) 0 1px, var(--brand-accent-border) 1px 3px);
 }
 
 .tm-progress-green {
@@ -1446,7 +1446,7 @@
 }
 
 .tm-progress-blue {
-    background-image: repeating-linear-gradient(90deg, #60a5fa 0 1px, #dbeafe 1px 3px);
+    background-image: repeating-linear-gradient(90deg, var(--brand-accent) 0 1px, var(--brand-accent-border) 1px 3px);
 }
 
 .tm-revenue-layout {
@@ -1469,8 +1469,8 @@
 
 .tm-gauge {
     background:
-        radial-gradient(circle at 50% 100%, #ffffff 0 38%, transparent 39%),
-        conic-gradient(from 270deg, #2563eb 0 48%, #ff9562 48% 70%, transparent 70% 100%);
+        radial-gradient(circle at 50% 100%, var(--brand-surface) 0 38%, transparent 39%),
+        conic-gradient(from 270deg, var(--brand-accent) 0 48%, var(--brand-accent) 48% 70%, transparent 70% 100%);
     border-radius: 180px 180px 0 0;
     height: 130px;
     margin-top: 28px;
@@ -1521,14 +1521,14 @@
 }
 
 .tm-tabs .tm-tab-active {
-    background: #eff6ff;
-    border-color: #2563eb;
-    color: #1d4ed8;
+    background: var(--brand-accent-soft);
+    border-color: var(--brand-accent);
+    color: var(--brand-accent-strong);
 }
 
 .tm-manual-load {
-    border-top: 1px solid #eef1f4;
-    background: #fbfcfd;
+    border-top: 1px solid var(--brand-border);
+    background: var(--brand-accent-wash);
     padding: 12px 24px;
 }
 
@@ -1546,8 +1546,8 @@
 
 .tm-orders-table th,
 .tm-orders-table td {
-    border-right: 1px solid #eef1f4;
-    border-top: 1px solid #eef1f4;
+    border-right: 1px solid var(--brand-border);
+    border-top: 1px solid var(--brand-border);
     overflow: hidden;
     padding: 10px 8px;
     text-align: left;
@@ -1603,7 +1603,7 @@
 }
 
 .tm-orders-table th {
-    background: #fbfcfd;
+    background: var(--brand-accent-wash);
     color: #5e6570;
     font-size: 0.9rem;
     font-weight: 760;
@@ -1622,7 +1622,7 @@
 }
 
 .tm-orders-table .tm-empty-row {
-    color: #64748b;
+    color: var(--brand-muted);
     font-weight: 700;
     padding: 28px 14px;
     text-align: center;
@@ -1661,7 +1661,7 @@
 .tm-user-avatar {
     align-items: center;
     border-radius: 999px;
-    color: #ffffff;
+    color: var(--brand-surface);
     display: inline-flex;
     font-size: 0.72rem;
     font-weight: 900;
@@ -1672,11 +1672,11 @@
 }
 
 .tm-logo-avatar {
-    background: #1e40af;
+    background: var(--brand-accent-deep);
 }
 
 .tm-user-avatar {
-    background: linear-gradient(135deg, #60a5fa, #1d4ed8);
+    background: linear-gradient(135deg, var(--brand-accent), var(--brand-accent-strong));
 }
 
 .tm-driver-avatar {
@@ -1684,7 +1684,7 @@
 }
 
 .tm-arrow {
-    color: #64748b;
+    color: var(--brand-muted);
     padding: 0 8px;
 }
 
@@ -1704,7 +1704,7 @@
 }
 
 .tm-clickable-row:hover td {
-    background: #f8fbff;
+    background: var(--brand-accent-wash);
 }
 
 .tm-actions-cell {
@@ -1718,7 +1718,7 @@
     background: transparent;
     border: 0;
     border-radius: 8px;
-    color: #111827;
+    color: var(--brand-ink);
     cursor: pointer;
     display: inline-flex;
     height: 32px;
@@ -1729,14 +1729,14 @@
 
 .tm-row-action-button:hover,
 .tm-row-action-button:focus-visible {
-    background: #eaf2ff;
-    color: #1d4ed8;
+    background: var(--brand-accent-soft);
+    color: var(--brand-accent-strong);
     outline: none;
 }
 
 .tm-status-created {
-    background: #eaf2ff !important;
-    color: #1d4ed8 !important;
+    background: var(--brand-accent-soft) !important;
+    color: var(--brand-accent-strong) !important;
 }
 
 .tm-status-reroute {
@@ -1755,18 +1755,18 @@
 }
 
 .tm-status-return {
-    background: #fff7ed !important;
-    color: #c2410c !important;
+    background: var(--brand-accent-soft) !important;
+    color: var(--brand-accent-deep) !important;
 }
 
 .tm-status-redirect {
-    background: #f1f5f9 !important;
+    background: var(--brand-surface-warm) !important;
     color: #334155 !important;
 }
 
 .tm-status-pending {
-    background: #fff0df !important;
-    color: #c2410c !important;
+    background: var(--brand-accent-soft) !important;
+    color: var(--brand-accent-deep) !important;
 }
 
 .tm-status-shipping {
@@ -1781,7 +1781,7 @@
 }
 
 .tm-status-returned {
-    background: #f1f5f9 !important;
+    background: var(--brand-surface-warm) !important;
     color: #334155 !important;
 }
 
@@ -1791,8 +1791,8 @@
 }
 
 .tm-table-footer {
-    border-top: 1px solid #eef1f4;
-    color: #4b5563;
+    border-top: 1px solid var(--brand-border);
+    color: var(--brand-ink-soft);
     padding: 18px 24px;
 }
 
@@ -1801,13 +1801,13 @@
 }
 
 .tm-pagination .tm-page-active {
-    background: #f1f5f9;
-    color: #111827;
+    background: var(--brand-surface-warm);
+    color: var(--brand-ink);
     font-weight: 900;
 }
 
 .shipment-details-subtitle {
-    color: #64748b;
+    color: var(--brand-muted);
     display: block;
     font-size: 0.86rem;
     font-weight: 700;
@@ -1822,14 +1822,14 @@
 }
 
 .shipment-details-summary div {
-    background: #ffffff;
+    background: var(--brand-surface);
     border: 1px solid #dbe3ef;
     border-radius: 8px;
     padding: 13px 14px;
 }
 
 .shipment-details-summary span {
-    color: #64748b;
+    color: var(--brand-muted);
     display: block;
     font-size: 0.78rem;
     font-weight: 700;
@@ -1837,7 +1837,7 @@
 }
 
 .shipment-details-summary strong {
-    color: #111827;
+    color: var(--brand-ink);
     display: block;
     font-size: 0.94rem;
     overflow: hidden;
@@ -1846,7 +1846,7 @@
 }
 
 .shipment-details-section {
-    border-top: 1px solid #eef1f4;
+    border-top: 1px solid var(--brand-border);
     margin-top: 16px;
     padding-top: 16px;
 }
@@ -1926,14 +1926,14 @@
 }
 
 .shipment-edit-section-header .MuiTypography-root {
-    color: #111827;
+    color: var(--brand-ink);
     font-size: 1rem;
     font-weight: 900;
 }
 
 .shipment-edit-loader {
     align-items: center;
-    color: #64748b;
+    color: var(--brand-muted);
     display: flex;
     font-weight: 800;
     gap: 12px;
@@ -1998,10 +1998,10 @@
 }
 
 .shipment-details-segment {
-    background: #ffffff;
+    background: var(--brand-surface);
     border: 1px solid #dfe7f2;
     border-radius: 8px;
-    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.045);
+    box-shadow: 0 12px 28px var(--brand-shadow);
     overflow: hidden;
     padding: 18px;
     position: relative;
@@ -2016,12 +2016,12 @@
 }
 
 .shipment-details-info-segment {
-    background: #f8fbff;
-    border-color: #bfdbfe;
+    background: var(--brand-accent-wash);
+    border-color: var(--brand-accent-border);
 }
 
 .shipment-details-info-segment::before {
-    background: linear-gradient(90deg, #2563eb, #0f766e);
+    background: linear-gradient(90deg, var(--brand-accent), #0f766e);
     height: 5px;
 }
 
@@ -2035,8 +2035,8 @@
 }
 
 .shipment-details-person-sender {
-    background: #f8fbff;
-    border-color: #bfdbfe;
+    background: var(--brand-accent-wash);
+    border-color: var(--brand-accent-border);
 }
 
 .shipment-details-person-recipient {
@@ -2050,7 +2050,7 @@
 }
 
 .shipment-details-person-sender::before {
-    background: #2563eb;
+    background: var(--brand-accent);
 }
 
 .shipment-details-person-recipient::before {
@@ -2063,7 +2063,7 @@
 }
 
 .shipment-details-person-sender .shipment-edit-section-header .MuiTypography-root {
-    color: #1d4ed8;
+    color: var(--brand-accent-strong);
 }
 
 .shipment-details-person-recipient .shipment-edit-section-header .MuiTypography-root {
@@ -2081,12 +2081,12 @@
 }
 
 .shipment-details-dangerous-good {
-    background: #fff8f1;
-    border-color: #fed7aa;
+    background: var(--brand-accent-wash);
+    border-color: var(--brand-accent-border);
 }
 
 .shipment-details-dangerous-good::before {
-    background: #f97316;
+    background: var(--brand-accent);
     height: 4px;
 }
 
@@ -2095,18 +2095,18 @@
 }
 
 .shipment-details-dangerous-good .shipment-edit-section-header .MuiTypography-root {
-    color: #b45309;
+    color: var(--brand-accent-deep);
 }
 
 .shipment-dangerous-chip-active {
-    background: #ffedd5 !important;
-    color: #c2410c !important;
+    background: var(--brand-accent-soft) !important;
+    color: var(--brand-accent-deep) !important;
     font-weight: 900 !important;
 }
 
 .shipment-dangerous-chip-empty {
-    background: #f1f5f9 !important;
-    color: #475569 !important;
+    background: var(--brand-surface-warm) !important;
+    color: var(--brand-ink-soft) !important;
     font-weight: 900 !important;
 }
 
@@ -2117,8 +2117,8 @@
 }
 
 .shipment-dangerous-good-grid div {
-    background: #ffffff;
-    border: 1px solid #fed7aa;
+    background: var(--brand-surface);
+    border: 1px solid var(--brand-accent-border);
     border-radius: 8px;
     min-width: 0;
     padding: 12px;
@@ -2134,7 +2134,7 @@
 }
 
 .shipment-dangerous-good-grid strong {
-    color: #111827;
+    color: var(--brand-ink);
     display: block;
     font-size: 0.9rem;
     font-weight: 900;
@@ -2151,8 +2151,8 @@
 }
 
 .shipment-dangerous-good-flags .MuiChip-root {
-    background: #ffffff;
-    border: 1px solid #fed7aa;
+    background: var(--brand-surface);
+    border: 1px solid var(--brand-accent-border);
     color: #7c2d12;
     font-weight: 850;
 }
@@ -2165,15 +2165,15 @@
 }
 
 .shipment-dangerous-good-notes div {
-    background: #ffffff;
-    border: 1px solid #fed7aa;
+    background: var(--brand-surface);
+    border: 1px solid var(--brand-accent-border);
     border-radius: 8px;
     min-width: 0;
     padding: 12px;
 }
 
 .shipment-dangerous-good-notes p {
-    color: #374151;
+    color: var(--brand-ink-soft);
     font-size: 0.86rem;
     font-weight: 700;
     line-height: 1.45;
@@ -2181,8 +2181,8 @@
 }
 
 .shipment-dangerous-good-empty {
-    background: #ffffff;
-    border: 1px dashed #fdba74;
+    background: var(--brand-surface);
+    border: 1px dashed var(--brand-accent);
     border-radius: 8px;
     color: #9a3412;
     font-size: 0.9rem;
@@ -2192,7 +2192,7 @@
 
 .shipment-cc-side-header {
     align-items: center;
-    border-bottom: 1px solid #eef1f4;
+    border-bottom: 1px solid var(--brand-border);
     display: flex;
     justify-content: space-between;
     margin: -4px -4px 12px;
@@ -2200,13 +2200,13 @@
 }
 
 .shipment-cc-side-header .MuiTypography-root {
-    color: #111827;
+    color: var(--brand-ink);
     font-size: 1rem;
     font-weight: 900;
 }
 
 .shipment-cc-side-header span {
-    color: #64748b;
+    color: var(--brand-muted);
     display: block;
     font-size: 0.8rem;
     font-weight: 800;
@@ -2222,7 +2222,7 @@
 
 .shipment-cc-side-empty {
     align-items: center;
-    color: #64748b;
+    color: var(--brand-muted);
     display: flex;
     flex-direction: column;
     font-weight: 800;
@@ -2250,8 +2250,8 @@
 }
 
 .shipment-cc-timeline-dot {
-    background: #2563eb;
-    border: 4px solid #dbeafe;
+    background: var(--brand-accent);
+    border: 4px solid var(--brand-accent-border);
     border-radius: 999px;
     height: 14px;
     left: -8px;
@@ -2268,20 +2268,20 @@
 }
 
 .shipment-cc-timeline-top strong {
-    color: #111827;
+    color: var(--brand-ink);
     font-size: 0.9rem;
     font-weight: 900;
 }
 
 .shipment-cc-timeline-top span {
-    color: #64748b;
+    color: var(--brand-muted);
     font-size: 0.78rem;
     font-weight: 800;
     white-space: nowrap;
 }
 
 .shipment-cc-timeline-item p {
-    color: #475569;
+    color: var(--brand-ink-soft);
     font-size: 0.86rem;
     margin: 8px 0;
 }
@@ -2299,13 +2299,13 @@
 }
 
 .shipment-cc-timeline-item dt {
-    color: #64748b;
+    color: var(--brand-muted);
     font-size: 0.75rem;
     font-weight: 800;
 }
 
 .shipment-cc-timeline-item dd {
-    color: #111827;
+    color: var(--brand-ink);
     font-size: 0.78rem;
     font-weight: 850;
     margin: 0;
@@ -2314,8 +2314,8 @@
 
 .shipment-cc-courier {
     align-items: center;
-    background: #f8fbff;
-    border: 1px solid #dbeafe;
+    background: var(--brand-accent-wash);
+    border: 1px solid var(--brand-accent-border);
     border-radius: 8px;
     display: flex;
     gap: 14px;
@@ -2324,9 +2324,9 @@
 
 .shipment-cc-courier-icon {
     align-items: center;
-    background: #1d4ed8;
+    background: var(--brand-accent-strong);
     border-radius: 8px;
-    color: #ffffff;
+    color: var(--brand-surface);
     display: flex;
     flex: 0 0 44px;
     height: 44px;
@@ -2335,7 +2335,7 @@
 }
 
 .shipment-cc-courier span {
-    color: #64748b;
+    color: var(--brand-muted);
     display: block;
     font-size: 0.78rem;
     font-weight: 800;
@@ -2343,14 +2343,14 @@
 }
 
 .shipment-cc-courier strong {
-    color: #111827;
+    color: var(--brand-ink);
     display: block;
     font-size: 1.05rem;
     font-weight: 900;
 }
 
 .shipment-cc-courier p {
-    color: #475569;
+    color: var(--brand-ink-soft);
     font-size: 0.86rem;
     margin: 4px 0 0;
 }
