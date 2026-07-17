@@ -2,13 +2,13 @@ import React from "react";
 import {fireEvent, render, screen} from "@testing-library/react";
 import {MemoryRouter} from "react-router-dom";
 import pl from "../../i18n/translate";
-import HomeDashboard from "./HomeDashboard";
+import OperationalDashboard from "./OperationalDashboard";
 
-test("opens shipment details using the selected lookup criterion", async () => {
+test("opens shipment details from the operational dashboard using the selected lookup criterion", async () => {
     const onOpenTab = jest.fn();
     render(
         <MemoryRouter>
-            <HomeDashboard onOpenTab={onOpenTab} operationalProfile="warehouse" />
+            <OperationalDashboard onOpenTab={onOpenTab} />
         </MemoryRouter>,
     );
 

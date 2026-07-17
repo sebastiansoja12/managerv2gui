@@ -19,6 +19,7 @@ export type CurrentUserDto = {
     role: string;
     departmentCode: string;
     language: string;
+    apiKey: string | null;
     rolePermissions: RolePermissionApi[];
     deleted: boolean;
     operatorId?: OperatorIdDto | null;
@@ -33,4 +34,13 @@ export type ChangePasswordRequest = {
 
 export type ChangeLanguageRequest = {
     language: string;
+};
+
+export type ChangeFullNameRequest = {
+    firstName: string;
+    lastName: string;
+};
+
+export type GeneratedApiKeyResponse = {
+    apiKey: string;
 };

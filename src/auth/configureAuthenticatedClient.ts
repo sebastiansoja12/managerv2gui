@@ -75,12 +75,17 @@ const setXsrfHeader = (config: AxiosRequestConfig, token: string | null) => {
 
 const xsrfHeaders = (token: string | null) => token ? {[XSRF_HEADER_NAME]: token} : undefined;
 
+export const resolveRequestPath = (url: string, apiBaseUrl?: string) => {
+    const resolvedServerUrl = new URL(apiBaseUrl || "/", window.location.origin);
+    return new URL(url, resolvedServerUrl).pathname;
+};
+
 const isAuthLifecycleRequest = (url?: string) => {
     if (!url) {
         return false;
     }
 
-    const path = new URL(url, serverUrl || window.location.origin).pathname;
+    const path = resolveRequestPath(url, serverUrl);
     return AUTH_LIFECYCLE_PATHS.some((authPath) => path.endsWith(authPath));
 };
 

@@ -1,6 +1,18 @@
 import React, {ChangeEvent, useEffect, useMemo, useState} from "react";
-import {Alert, Button, Chip, Snackbar, TextField, Typography} from "components/ui";
-import {Key, Person, Refresh} from "components/ui/icons";
+import {
+    Alert,
+    Button,
+    Chip,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    IconButton,
+    Snackbar,
+    TextField,
+    Typography,
+} from "components/ui";
+import {Close, ContentCopy, DeleteOutline, Edit, Key, Person, Refresh, Save, SecurityOutlined} from "components/ui/icons";
 import AuthService from "../../hooks/AuthService";
 import {ApiErrorResponse} from "../../api/ApiResult";
 import {CurrentUserDto} from "../../auth/UserProfileDto";
@@ -12,14 +24,18 @@ type Notice = {
     message: string;
 };
 
-function UserProfile() {
+export default function UserProfile() {
     const [user, setUser] = useState<CurrentUserDto | null>(null);
     const [currentPassword, setCurrentPassword] = useState<string>("");
     const [newPassword, setNewPassword] = useState<string>("");
     const [repeatPassword, setRepeatPassword] = useState<string>("");
+    const [firstName, setFirstName] = useState<string>("");
+    const [lastName, setLastName] = useState<string>("");
+    const [editingFullName, setEditingFullName] = useState<boolean>(false);
+    const [fullNameBusy, setFullNameBusy] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
+    const [apiKeyBusy, setApiKeyBusy] = useState<boolean>(false);
     const [notice, setNotice] = useState<Notice | null>(null);
-
 
     const permissions = useMemo(() => user?.rolePermissions || [], [user]);
 
@@ -33,6 +49,8 @@ function UserProfile() {
         try {
             const response = await AuthService.me();
             setUser(response.data);
+            setFirstName(response.data.firstName || "");
+            setLastName(response.data.lastName || "");
         } catch (error) {
             showError(error, pl.userProfile.messages.loadError);
         } finally {
@@ -69,59 +87,208 @@ function UserProfile() {
         }
     };
 
+    const regenerateApiKey = async () => {
+        setApiKeyBusy(true);
+        try {
+            const response = await AuthService.generateApiKey();
+            setUser((currentUser) => currentUser ? {...currentUser, apiKey: response.data.apiKey} : currentUser);
+            setNotice({severity: "success", message: pl.userProfile.messages.apiKeyGenerated});
+        } catch (error) {
+            showError(error, pl.userProfile.messages.apiKeyGenerationError);
+        } finally {
+            setApiKeyBusy(false);
+        }
+    };
+
+    const startFullNameEditing = () => {
+        setFirstName(user?.firstName || "");
+        setLastName(user?.lastName || "");
+        setEditingFullName(true);
+    };
+
+    const cancelFullNameEditing = () => {
+        setFirstName(user?.firstName || "");
+        setLastName(user?.lastName || "");
+        setEditingFullName(false);
+    };
+
+    const changeFullName = async (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        const normalizedFirstName = firstName.trim();
+        const normalizedLastName = lastName.trim();
+
+        if (!normalizedFirstName || !normalizedLastName) {
+            setNotice({severity: "error", message: pl.userProfile.messages.fullNameFieldsRequired});
+            return;
+        }
+
+        setFullNameBusy(true);
+        try {
+            await AuthService.changeFullName({firstName: normalizedFirstName, lastName: normalizedLastName});
+            setUser((currentUser) => currentUser ? {
+                ...currentUser,
+                firstName: normalizedFirstName,
+                lastName: normalizedLastName,
+            } : currentUser);
+            setFirstName(normalizedFirstName);
+            setLastName(normalizedLastName);
+            setEditingFullName(false);
+            setNotice({severity: "success", message: pl.userProfile.messages.fullNameChanged});
+        } catch (error) {
+            showError(error, pl.userProfile.messages.fullNameChangeError);
+        } finally {
+            setFullNameBusy(false);
+        }
+    };
+
+    const copyApiKey = async () => {
+        if (!user?.apiKey) {
+            return;
+        }
+
+        try {
+            if (!navigator.clipboard) {
+                throw new Error("Clipboard API is unavailable");
+            }
+            await navigator.clipboard.writeText(user.apiKey);
+            setNotice({severity: "success", message: pl.userProfile.messages.apiKeyCopied});
+        } catch (error) {
+            showError(error, pl.userProfile.messages.apiKeyCopyError);
+        }
+    };
+
+    const deleteApiKey = async () => {
+        if (!user?.apiKey || !window.confirm(pl.userProfile.messages.apiKeyDeleteConfirmation)) {
+            return;
+        }
+
+        setApiKeyBusy(true);
+        try {
+            await AuthService.deleteApiKey();
+            setUser((currentUser) => currentUser ? {...currentUser, apiKey: null} : currentUser);
+            setNotice({severity: "success", message: pl.userProfile.messages.apiKeyDeleted});
+        } catch (error) {
+            showError(error, pl.userProfile.messages.apiKeyDeleteError);
+        } finally {
+            setApiKeyBusy(false);
+        }
+    };
+
     return (
-        <div className="user-profile-page">
+        <main className="user-profile-page">
             <div className="user-profile-shell">
-                <div className="user-profile-header">
-                    <div className="user-profile-title">
-                        <span className="user-profile-title-icon"><Person /></span>
-                        <div>
-                            <Typography variant="h4">{pl.userProfile.title}</Typography>
-                            <p>{pl.userProfile.subtitle}</p>
-                        </div>
+                <header className="user-profile-header">
+                    <div className="user-profile-heading">
+                        <span className="user-profile-kicker"><Person fontSize="small" />{pl.userProfile.kicker}</span>
+                        <Typography variant="h4">{pl.userProfile.title}</Typography>
+                        <p>{pl.userProfile.subtitle}</p>
                     </div>
-                    <Button disabled={loading} startIcon={<Refresh />} variant="outlined" onClick={loadProfile}>
+                    <Button
+                        className="user-profile-refresh-button"
+                        disabled={loading}
+                        startIcon={<Refresh />}
+                        variant="outlined"
+                        onClick={loadProfile}
+                    >
                         {pl.common.refresh}
                     </Button>
-                </div>
+                </header>
 
-                <div className="user-profile-grid">
-                    <section className="user-profile-card">
-                        <Typography variant="h5">{pl.userProfile.userData}</Typography>
+                <div className="user-profile-workspace">
+                    <section className="user-profile-panel user-profile-identity-panel">
+                        <div className="user-profile-panel-header">
+                            <span>{pl.userProfile.identityKicker}</span>
+                            <Typography variant="h5">{pl.userProfile.userData}</Typography>
+                        </div>
+
                         <div className="user-profile-details">
-                            <div>
+                            <div className="user-profile-detail">
                                 <span>{pl.userProfile.fields.login}</span>
                                 <strong>{user?.username || pl.common.dash}</strong>
                             </div>
-                            <div>
+                            <div className="user-profile-detail user-profile-full-name-summary">
                                 <span>{pl.userProfile.fields.fullName}</span>
-                                <strong>{`${user?.firstName || ""} ${user?.lastName || ""}`.trim() || pl.common.dash}</strong>
+                                <div>
+                                    <strong>{`${user?.firstName || ""} ${user?.lastName || ""}`.trim() || pl.common.dash}</strong>
+                                    <IconButton
+                                        aria-label={pl.userProfile.actions.editFullName}
+                                        disabled={loading || fullNameBusy}
+                                        size="small"
+                                        title={pl.userProfile.actions.editFullName}
+                                        onClick={startFullNameEditing}
+                                    >
+                                        <Edit fontSize="small" />
+                                    </IconButton>
+                                </div>
                             </div>
-                            <div>
+                            <div className="user-profile-detail">
                                 <span>{pl.userProfile.fields.email}</span>
                                 <strong>{user?.email || pl.common.dash}</strong>
                             </div>
-                            <div>
+                            <div className="user-profile-detail">
                                 <span>{pl.userProfile.fields.role}</span>
                                 <strong>{user?.role || pl.common.dash}</strong>
                             </div>
-                            <div>
+                            <div className="user-profile-detail">
                                 <span>{pl.userProfile.fields.department}</span>
                                 <strong>{user?.departmentCode || pl.common.dash}</strong>
                             </div>
-                            <div>
-                                <span>{pl.userProfile.fields.userId}</span>
-                                <strong>{user?.userId?.value || pl.common.dash}</strong>
-                            </div>
-                            <div>
+                            <div className="user-profile-detail">
                                 <span>{pl.userProfile.fields.language}</span>
                                 <strong>{user?.language ? pl.common.languages[user.language as keyof typeof pl.common.languages] : pl.common.dash}</strong>
+                            </div>
+
+                            <div className="user-profile-api-key-detail">
+                                <div className="user-profile-api-key-label">
+                                    <span>{pl.userProfile.fields.apiKey}</span>
+                                    <small>{pl.userProfile.apiKeyHelper}</small>
+                                </div>
+                                <div className="user-profile-api-key-field" data-empty={!user?.apiKey}>
+                                    <Key fontSize="small" />
+                                    <input
+                                        aria-label={pl.userProfile.fields.apiKey}
+                                        placeholder={pl.userProfile.apiKeyMissing}
+                                        readOnly
+                                        type="text"
+                                        value={user?.apiKey || ""}
+                                    />
+                                    <div className="user-profile-api-key-actions">
+                                        <IconButton
+                                            aria-label={pl.userProfile.actions.regenerateApiKey}
+                                            disabled={loading || apiKeyBusy}
+                                            title={pl.userProfile.actions.regenerateApiKey}
+                                            onClick={regenerateApiKey}
+                                        >
+                                            <Refresh fontSize="small" />
+                                        </IconButton>
+                                        <IconButton
+                                            aria-label={pl.userProfile.actions.copyApiKey}
+                                            disabled={!user?.apiKey || apiKeyBusy}
+                                            title={pl.userProfile.actions.copyApiKey}
+                                            onClick={copyApiKey}
+                                        >
+                                            <ContentCopy fontSize="small" />
+                                        </IconButton>
+                                        <IconButton
+                                            aria-label={pl.userProfile.actions.deleteApiKey}
+                                            className="user-profile-api-key-delete"
+                                            disabled={!user?.apiKey || apiKeyBusy}
+                                            title={pl.userProfile.actions.deleteApiKey}
+                                            onClick={deleteApiKey}
+                                        >
+                                            <DeleteOutline fontSize="small" />
+                                        </IconButton>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </section>
 
-                    <section className="user-profile-card">
-                        <Typography variant="h5">{pl.userProfile.changePassword}</Typography>
+                    <section className="user-profile-panel user-profile-security-panel">
+                        <div className="user-profile-panel-header">
+                            <span><SecurityOutlined fontSize="small" />{pl.userProfile.securityKicker}</span>
+                            <Typography variant="h5">{pl.userProfile.changePassword}</Typography>
+                        </div>
                         <div className="user-profile-password">
                             <TextField
                                 fullWidth
@@ -154,8 +321,11 @@ function UserProfile() {
                     </section>
                 </div>
 
-                <section className="user-profile-card user-profile-permissions-card">
-                    <Typography variant="h5">{pl.userProfile.permissions}</Typography>
+                <section className="user-profile-panel user-profile-permissions-panel">
+                    <div className="user-profile-panel-header">
+                        <span>{pl.userProfile.permissionsKicker}</span>
+                        <Typography variant="h5">{pl.userProfile.permissions}</Typography>
+                    </div>
                     <div className="user-profile-permissions">
                         {permissions.length ? permissions.map((permission) => (
                             <Chip key={permission.role} label={permission.role} />
@@ -164,11 +334,62 @@ function UserProfile() {
                 </section>
             </div>
 
+            <Dialog
+                className="user-profile-full-name-dialog"
+                fullWidth
+                maxWidth="sm"
+                open={editingFullName}
+                onClose={fullNameBusy ? undefined : cancelFullNameEditing}
+            >
+                <form className="user-profile-full-name-form" onSubmit={changeFullName}>
+                    <DialogTitle>{pl.userProfile.actions.editFullName}</DialogTitle>
+                    <DialogContent>
+                        <p className="user-profile-full-name-description">
+                            {pl.userProfile.fullNameDialogDescription}
+                        </p>
+                        <div className="user-profile-full-name-fields">
+                            <TextField
+                                autoFocus
+                                fullWidth
+                                label={pl.userProfile.fields.firstName}
+                                size="small"
+                                value={firstName}
+                                onChange={(event: ChangeEvent<HTMLInputElement>) => setFirstName(event.target.value)}
+                            />
+                            <TextField
+                                fullWidth
+                                label={pl.userProfile.fields.lastName}
+                                size="small"
+                                value={lastName}
+                                onChange={(event: ChangeEvent<HTMLInputElement>) => setLastName(event.target.value)}
+                            />
+                        </div>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button
+                            disabled={fullNameBusy}
+                            startIcon={<Close fontSize="small" />}
+                            type="button"
+                            variant="outlined"
+                            onClick={cancelFullNameEditing}
+                        >
+                            {pl.userProfile.actions.cancelFullName}
+                        </Button>
+                        <Button
+                            disabled={fullNameBusy}
+                            startIcon={<Save fontSize="small" />}
+                            type="submit"
+                            variant="contained"
+                        >
+                            {pl.userProfile.actions.saveFullName}
+                        </Button>
+                    </DialogActions>
+                </form>
+            </Dialog>
+
             <Snackbar open={Boolean(notice)} autoHideDuration={4500} onClose={() => setNotice(null)}>
                 {notice ? <Alert severity={notice.severity} onClose={() => setNotice(null)}>{notice.message}</Alert> : undefined}
             </Snackbar>
-        </div>
+        </main>
     );
 }
-
-export default UserProfile;

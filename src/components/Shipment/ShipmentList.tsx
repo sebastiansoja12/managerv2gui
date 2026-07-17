@@ -261,11 +261,11 @@ const calculateMoneyBuckets = (shipmentsToCount: ShipmentDto[]) => {
     return Array.from(buckets.values()).sort((left, right) => right.total - left.total);
 };
 
-const formatCompactNumber = (value: number) => {
+export const formatCompactNumber = (value: number) => {
     const absoluteValue = Math.abs(value);
     const format = (scaledValue: number, maximumFractionDigits: number) => scaledValue.toLocaleString(pl.common.locale, {
         maximumFractionDigits,
-        minimumFractionDigits: scaledValue % 1 === 0 ? 0 : 1,
+        minimumFractionDigits: maximumFractionDigits > 0 && scaledValue % 1 !== 0 ? 1 : 0,
     });
 
     if (absoluteValue >= 1_000_000) {

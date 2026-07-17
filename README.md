@@ -21,7 +21,9 @@ configuration screens, plus a separate super-admin area.
 
 - Login flow and authenticated HTTP clients.
 - Tabbed application shell with route-aware tab titles.
-- Home dashboard with operational module tiles.
+- Department-aware home dashboard with shipment and return metrics, a 7/14/30-day
+  turnover chart, recent operational activity and a map of direct department
+  connections; module navigation tiles remain a separate reusable component.
 - Shipment list, create form, details/edit view and shipment history, including pickup and delivery methods.
 - Pickup-point catalog with creation, editing, lifecycle actions, filters and a location map.
 - Pickup-point selection from a searchable street/city map during shipment creation and editing; the selected point ID is stored on the shipment while its code is shown to users.
