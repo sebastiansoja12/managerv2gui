@@ -16,6 +16,7 @@ import {getBackendErrorMessage} from "../../api/errorMessage";
 import SoftwareConfigurationService from "../../hooks/SoftwareConfigurationService";
 import pl from "../../i18n/translate";
 import Software from "../SoftwareConfiguration/model/Software";
+import GeocodingConfigurationPanel from "./GeocodingConfigurationPanel";
 import {GlobalConfigurationSection, GlobalConfigurationSectionKey} from "./model/GlobalConfigurationSection";
 import "./styles/global-configuration.css";
 
@@ -56,6 +57,10 @@ const sections: GlobalConfigurationSection[] = [
     {
         key: "configuration",
         categoryAliases: ["configuration", "config", "system", "software", "global"],
+    },
+    {
+        key: "geocoding",
+        categoryAliases: [],
     },
 ];
 
@@ -228,20 +233,24 @@ function GlobalConfiguration() {
                 </div>
             </nav>
 
-            {error ? <Alert severity="error">{error}</Alert> : undefined}
-            {success ? <Alert severity="success">{success}</Alert> : undefined}
+            {activeSection.key !== "geocoding" && error ? <Alert severity="error">{error}</Alert> : undefined}
+            {activeSection.key !== "geocoding" && success ? <Alert severity="success">{success}</Alert> : undefined}
 
             <section className="global-configuration-toolbar">
                 <div>
                     <h2>{activeSectionTranslation.title}</h2>
                     <p>{activeSectionTranslation.description}</p>
                 </div>
-                <Button disabled={loading} startIcon={<Refresh />} variant="outlined" onClick={retrieveProperties}>
-                    {pl.common.refresh}
-                </Button>
+                {activeSection.key !== "geocoding" ? (
+                    <Button disabled={loading} startIcon={<Refresh />} variant="outlined" onClick={retrieveProperties}>
+                        {pl.common.refresh}
+                    </Button>
+                ) : undefined}
             </section>
 
-            {loading ? (
+            {activeSection.key === "geocoding" ? (
+                <GeocodingConfigurationPanel />
+            ) : loading ? (
                 <div className="global-configuration-loader">
                     <CircularProgress size={28} />
                     <span>{pl.globalConfiguration.page.loading}</span>
