@@ -1,6 +1,6 @@
 # Manager 2.0 GUI
 
-**Development Version 2026.3 - 10th September, 2026**
+**Development Version 2026.4 - 10th September, 2026**
 
 Manager 2.0 GUI is a React/TypeScript frontend for the Manager 2.0 logistics
 backend. It provides warehouse, shipment, process, department, courier, user and
