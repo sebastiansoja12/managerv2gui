@@ -53,6 +53,7 @@ export const isPathAllowedForProfile = (path: string, profile: OperationalProfil
         "/global-configuration",
         "/microservices",
         "/software-configurations",
+        "/users",
         "/device-pairing",
     ];
 

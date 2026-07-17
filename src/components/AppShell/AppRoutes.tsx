@@ -17,6 +17,7 @@ import ShipmentHistoryDetails from "../Shipment/ShipmentHistoryDetails";
 import ShipmentList from "../Shipment/ShipmentList";
 import SoftwareConfigurationList from "../SoftwareConfiguration/SoftwareConfigurationList";
 import UserProfile from "../UserProfile/UserProfile";
+import UsersPage from "../Users/UsersPage";
 import {isPathAllowedForProfile, OperationalProfile} from "../../config/operationalProfile";
 import pl from "../../i18n/translate";
 import {AppTabDefinition} from "./types";
@@ -57,7 +58,7 @@ function AppRoutes({onOpenTab, operationalProfile = "warehouse"}: AppRoutesProps
             <Route path="shipment-scanner" element={guarded("/shipment-scanner", <ModulePlaceholder title={pl.home.tiles.shipmentScanner.title}/>)}/>
             <Route path="courier-deliveries" element={guarded("/courier-deliveries", <ModulePlaceholder title={pl.home.tiles.courierDeliveries.title}/>)}/>
             <Route path="suppliers" element={guarded("/suppliers", <ModulePlaceholder title={pl.navigation.suppliers}/>)}/>
-            <Route path="users" element={guarded("/users", <ModulePlaceholder title={pl.navigation.users}/>)}/>
+            <Route path="users" element={guarded("/users", <UsersPage/>)}/>
             <Route path="deals" element={guarded("/deals", <ModulePlaceholder title={pl.navigation.deals}/>)}/>
             <Route path="billing" element={guarded("/billing", <ModulePlaceholder title={pl.navigation.billing}/>)}/>
             <Route path="microservices" element={guarded("/microservices", <MicroserviceStatus/>)}/>
