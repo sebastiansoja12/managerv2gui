@@ -257,6 +257,19 @@
     font-weight: 760;
 }
 
+.super-admin-editor-header-actions {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+.super-admin-compact-button {
+    min-height: 36px;
+    padding: 0 11px;
+}
+
 .super-admin-search {
     align-items: center;
     background: #fbfcfe;
@@ -427,6 +440,24 @@ button.super-admin-table-row {
 .super-admin-form-grid select:focus {
     border-color: var(--brand-accent-border);
     box-shadow: 0 0 0 3px rgba(147, 197, 253, 0.25);
+}
+
+.super-admin-user-dialog-context {
+    color: var(--brand-muted);
+    margin: 0 0 18px;
+}
+
+.super-admin-user-dialog-context span {
+    font-size: 0.82rem;
+    font-weight: 800;
+}
+
+.super-admin-user-dialog .super-admin-form-grid {
+    padding-top: 2px;
+}
+
+.super-admin-user-dialog-actions {
+    padding: 8px 24px 20px !important;
 }
 
 .super-admin-editor-section {
