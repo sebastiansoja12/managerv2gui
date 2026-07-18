@@ -960,6 +960,7 @@ export const en: typeof pl = {
             downloadLabel: "Download label",
             printLabel: "Print",
             exportToExcel: "Export to Excel",
+            changeStatus: "Change status",
         },
         metrics: {
             summaryTitle: "Shipment summary",
@@ -1092,6 +1093,9 @@ export const en: typeof pl = {
         qrLabel: {
             previewTitle: "Shipment label preview",
         },
+        statusDialog: {
+            title: "Change shipment status",
+        },
         messages: {
             operationFailed: "Operation failed",
             createError: "Could not create shipment",
@@ -1101,6 +1105,8 @@ export const en: typeof pl = {
             loadViewError: "Could not load shipment.",
             saveSuccess: "Shipment has been saved",
             saveError: "Could not save shipment",
+            statusSaveSuccess: "Shipment status has been saved",
+            statusSaveError: "Could not save shipment status",
             copyTrackingSuccess: "Tracking number has been copied",
             copyTrackingError: "Could not copy tracking number",
             documentDownloadSuccess: "Document download has started",

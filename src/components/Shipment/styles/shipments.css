@@ -2040,6 +2040,43 @@
     padding-top: 14px;
 }
 
+.shipment-status-control {
+    align-items: center;
+    background: #ffffff;
+    border: 1px solid #dfe7f2;
+    border-radius: 8px;
+    box-sizing: border-box;
+    display: flex;
+    gap: 10px;
+    justify-content: space-between;
+    min-height: 40px;
+    min-width: 0;
+    padding: 7px 10px;
+}
+
+.shipment-status-control > span {
+    color: var(--brand-muted);
+    font-size: 0.82rem;
+    font-weight: 800;
+    min-width: 0;
+}
+
+.shipment-status-control > div {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: flex-end;
+    min-width: 0;
+}
+
+.shipment-status-control .MuiButton-root {
+    border-radius: 8px;
+    font-weight: 800;
+    min-height: 30px;
+    text-transform: none;
+}
+
 .shipment-details-person-sender {
     background: var(--brand-accent-wash);
     border-color: var(--brand-accent-border);
