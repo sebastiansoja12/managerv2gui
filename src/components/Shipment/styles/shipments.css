@@ -232,6 +232,15 @@
     align-items: center;
     display: flex;
     gap: 12px;
+    min-width: 0;
+}
+
+.shipments-title .MuiBox-root {
+    min-width: 0;
+}
+
+.shipments-title .MuiTypography-root {
+    overflow-wrap: anywhere;
 }
 
 .shipments-title-icon {
@@ -1944,18 +1953,15 @@
 .shipment-cc-shell {
     display: grid;
     gap: 16px;
-    grid-template-rows: auto minmax(0, 1fr);
-    height: 100%;
     max-width: 1880px;
     min-height: 0;
+    width: 100%;
 }
 
 .shipment-cc-page {
-    --shipment-cc-footer-space: 16px;
     box-sizing: border-box;
-    height: calc(100% - var(--shipment-cc-footer-space));
-    min-height: 0;
-    overflow: hidden;
+    min-height: 100%;
+    overflow: visible;
 }
 
 .shipment-cc-page .shipments-header {
@@ -1970,7 +1976,7 @@
     grid-template-columns: minmax(0, 1fr) minmax(420px, 0.32fr);
     min-height: 0;
     min-width: 0;
-    overflow: hidden;
+    overflow: visible;
 }
 
 .shipment-cc-side {
@@ -1978,10 +1984,12 @@
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    height: 100%;
+    max-height: calc(100vh - 170px);
     min-height: 0;
     min-width: 0;
     overflow: hidden;
+    position: sticky;
+    top: 16px;
 }
 
 .shipment-cc-layout .shipment-edit-panel {
@@ -1989,12 +1997,10 @@
     border: 0;
     box-sizing: border-box;
     box-shadow: none;
-    height: 100%;
     min-height: 0;
     min-width: 0;
-    overflow: auto;
+    overflow: visible;
     padding: 0 4px 24px 0;
-    scrollbar-gutter: stable;
 }
 
 .shipment-details-segment {
@@ -2385,6 +2391,7 @@
         height: auto;
         max-height: none;
         min-height: 360px;
+        position: static;
     }
 
     .shipment-cc-layout .shipment-edit-panel {
@@ -2409,6 +2416,30 @@
     }
 }
 
+@media (max-height: 820px) {
+    .shipment-cc-side {
+        max-height: none;
+        position: static;
+    }
+}
+
+@media (max-width: 1320px) {
+    .shipment-details-summary,
+    .shipment-dangerous-good-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .shipment-details-person-sender .shipment-details-grid,
+    .shipment-details-person-recipient .shipment-details-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .shipment-details-person-sender .shipment-details-wide,
+    .shipment-details-person-recipient .shipment-details-wide {
+        grid-column: 1 / -1;
+    }
+}
+
 @media (max-width: 1180px) {
     .tm-metrics-grid {
         grid-template-columns: 1fr;
@@ -2427,6 +2458,19 @@
     .shipments-header {
         align-items: flex-start;
         flex-direction: column;
+    }
+
+    .shipments-title {
+        width: 100%;
+    }
+
+    .shipment-edit-header-actions {
+        justify-content: flex-start;
+        width: 100%;
+    }
+
+    .shipment-edit-header-actions .MuiButton-root {
+        flex: 1 1 190px;
     }
 
     .shipments-list-header {
@@ -2449,6 +2493,31 @@
     .shipments-form-grid,
     .shipments-form-grid-three {
         grid-template-columns: 1fr;
+    }
+
+    .shipment-details-summary,
+    .shipment-details-grid,
+    .shipment-details-person-sender .shipment-details-grid,
+    .shipment-details-person-recipient .shipment-details-grid,
+    .shipment-dangerous-good-grid,
+    .shipment-dangerous-good-notes {
+        grid-template-columns: 1fr;
+    }
+
+    .shipment-details-wide,
+    .shipment-details-person-sender .shipment-details-wide,
+    .shipment-details-person-recipient .shipment-details-wide {
+        grid-column: 1 / -1;
+    }
+
+    .shipment-cc-side-header {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .shipment-cc-side-header .MuiButton-root {
+        width: 100%;
     }
 
     .shipments-create-data-grid,
