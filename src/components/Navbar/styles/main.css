@@ -217,6 +217,24 @@
     color: var(--brand-surface);
 }
 
+.top-nav-version {
+    align-items: center;
+    border-top: 1px solid var(--brand-border);
+    color: var(--brand-muted);
+    display: flex;
+    font-size: 0.72rem;
+    font-weight: 760;
+    justify-content: space-between;
+    min-height: 34px;
+    padding: 6px 10px 4px;
+}
+
+.top-nav-version strong {
+    color: var(--brand-ink-soft);
+    font-size: 0.76rem;
+    font-weight: 850;
+}
+
 .top-nav-logout-item {
     color: #be123c;
 }

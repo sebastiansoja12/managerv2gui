@@ -13,6 +13,7 @@ export const pl = {
         loading: "Ładowanie...",
         actions: "Akcje",
         language: "Język",
+        version: "Wersja",
         languages: {
             pl: "Polski",
             en: "Angielski",
