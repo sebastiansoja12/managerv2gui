@@ -18,23 +18,38 @@ import {
 import {
     ArrowDropDown,
     ArrowBack,
+    Add,
+    AttachMoney,
     Block,
+    Cable,
+    ChatBubbleOutline,
+    CheckCircleOutline,
     Close,
     ContentCopy,
     Delete,
+    DocumentScanner,
     Download,
     Edit,
     InfoOutlined,
+    FactCheckOutlined,
+    History,
     LocalShipping,
+    LocationCity,
+    LocationOn,
+    Loop,
     Map,
     MoreVert,
     PersonPinCircle,
+    PersonAdd,
     QrCode2,
     Refresh,
     Route,
+    ReportProblemOutlined,
     Save,
     TableView,
     Print,
+    WarningAmberOutlined,
+    Upload,
 } from "components/ui/icons";
 import {useNavigate, useParams} from "react-router-dom";
 import ShipmentService from "../../hooks/ShipmentService";
@@ -64,7 +79,6 @@ import DangerousGoodForm, {
     createEmptyDangerousGood,
     isDangerousGoodValid,
 } from "./DangerousGoodForm";
-import ShipmentStatusControl from "./ShipmentStatusControl";
 import ShipmentReturnSummary from "./ShipmentReturnSummary";
 import {ReturnPackageDto} from "../Returns/model/ReturnPackage";
 
@@ -75,6 +89,7 @@ type Notice = {
 
 type DocumentAction = "qr" | "excel";
 type ShipmentDetailsTab = "overview" | "sender" | "recipient";
+type ShipmentWorkspaceTab = "history" | "notes" | "documents" | "related" | "audit";
 
 type RouteDetail = RouteLogRecord["routeLogRecordDetails"]["routeLogRecordDetailSet"][number];
 
@@ -115,6 +130,12 @@ const fullName = (person?: PersonApi) => {
     const value = `${person?.firstName || ""} ${person?.lastName || ""}`.trim();
     return value || pl.common.dash;
 };
+
+const personAddress = (person?: PersonApi) => (
+    [person?.street, [person?.postalCode, person?.city].filter(Boolean).join(" ")]
+        .filter(Boolean)
+        .join(", ") || pl.common.dash
+);
 
 const personsEqual = (left?: PersonApi, right?: PersonApi) => {
     const first = clonePerson(left);
@@ -216,8 +237,6 @@ const detailUser = (detail: RouteDetail) => detail.username || pl.common.dash;
 
 const detailTerminal = (detail: RouteDetail) => detail.terminalId?.value || detail.zebraId || pl.common.dash;
 
-const detailCourier = (detail?: RouteDetail | null) => valueObjectValue(detail?.supplierCode) || detail?.username || pl.shipments.table.unassigned;
-
 const formatBoolean = (value: boolean) => value ? pl.shipments.dangerousGood.yes : pl.shipments.dangerousGood.no;
 
 const detailValue = (label: string, value?: React.ReactNode) => (
@@ -234,6 +253,7 @@ const ShipmentDetails: React.FC = () => {
     const [deliveryPickupPointCode, setDeliveryPickupPointCode] = useState<string | null>(null);
     const [returnPackage, setReturnPackage] = useState<ReturnPackageDto | null>(null);
     const [activeDetailTab, setActiveDetailTab] = useState<ShipmentDetailsTab>("overview");
+    const [activeWorkspaceTab, setActiveWorkspaceTab] = useState<ShipmentWorkspaceTab>("history");
     const [departments, setDepartments] = useState<Department[]>([]);
     const [routeLog, setRouteLog] = useState<RouteLogRecord | null>(null);
     const [status, setStatus] = useState<ShipmentStatusDto>("CREATED");
@@ -276,6 +296,22 @@ const ShipmentDetails: React.FC = () => {
     const dangerousGoodMutable = shipmentDataMutable;
 
     const details = useMemo(() => routeDetails(routeLog), [routeLog]);
+    const recentDetails = useMemo(() => details.slice(0, 5), [details]);
+    const routeStops = useMemo(() => {
+        const seen = new Set<string>();
+
+        return [...details]
+            .reverse()
+            .map((detail) => detailDepartment(detail))
+            .filter((department) => department !== pl.common.dash)
+            .filter((department) => {
+                if (seen.has(department)) {
+                    return false;
+                }
+                seen.add(department);
+                return true;
+            });
+    }, [details]);
     const availableShipmentStatuses = useMemo(
         () => {
             const configuredStatuses = getConfiguredShipmentStatuses(configuredDraftStatus);
@@ -316,6 +352,23 @@ const ShipmentDetails: React.FC = () => {
         shipment
         && draftShipmentStatuses.includes(shipment.shipmentStatus)
     );
+    const shipmentWarnings = useMemo(() => {
+        if (!shipment) {
+            return [];
+        }
+
+        const warnings: string[] = [];
+        if (shipment.locked) {
+            warnings.push(pl.shipments.dashboard.lockedWarning);
+        }
+        if (shipment.dangerousGood) {
+            warnings.push(pl.shipments.dashboard.dangerousGoodWarning);
+        }
+        if (showCancellationWindow && cancellationWindowTimeLeft === 0) {
+            warnings.push(pl.shipments.dashboard.cancellationExpiredWarning);
+        }
+        return warnings;
+    }, [cancellationWindowTimeLeft, shipment, showCancellationWindow]);
     const historyPath = decodedTrackingNumber
         ? `/shipments/tracking/${encodeURIComponent(decodedTrackingNumber)}/history`
         : `/shipments/${shipmentId || shipment?.shipmentId.value || ""}/history`;
@@ -379,6 +432,16 @@ const ShipmentDetails: React.FC = () => {
         window.requestAnimationFrame(() => {
             document.getElementById(tab === "overview" ? "shipment-overview" : `shipment-${tab}`)
                 ?.scrollIntoView({behavior: "smooth", block: "start"});
+        });
+    };
+
+    const openWorkspaceTab = (tab: ShipmentWorkspaceTab) => {
+        setOperationMenuAnchor(null);
+        setActiveDetailTab("overview");
+        setActiveWorkspaceTab(tab);
+        window.requestAnimationFrame(() => {
+            document.getElementById("shipment-workspace")
+                ?.scrollIntoView({behavior: "smooth", block: "center"});
         });
     };
 
@@ -902,7 +965,7 @@ const ShipmentDetails: React.FC = () => {
 
         return (
             <div className="shipment-cc-timeline">
-                {details.map((detail) => {
+                {recentDetails.map((detail) => {
                     const statusKey = detailStatus(detail);
 
                     return (
@@ -914,7 +977,7 @@ const ShipmentDetails: React.FC = () => {
                                     <span>{formatDateTime(detail.timestamp)}</span>
                                 </div>
                                 <Chip className={`tm-status tm-status-${String(statusKey).toLowerCase()}`} label={detailStatusLabel(statusKey)} size="small" />
-                                <p>{shipmentEventDescription(detail.description)}</p>
+                                <p>{shipmentEventDescription(detail.description, statusKey)}</p>
                                 <dl>
                                     <div><dt>{pl.shipments.routeHistory.department}</dt><dd>{detailDepartment(detail)}</dd></div>
                                     <div><dt>{pl.shipments.routeHistory.user}</dt><dd>{detailUser(detail)}</dd></div>
@@ -926,6 +989,97 @@ const ShipmentDetails: React.FC = () => {
                 })}
             </div>
         );
+    };
+
+    const partySummary = (personType: PersonType, person: PersonApi) => (
+        <article className="shipment-dashboard-party">
+            <div className="shipment-dashboard-party-heading">
+                <span className="shipment-dashboard-party-icon"><PersonPinCircle fontSize="small" /></span>
+                <div>
+                    <span>{personType === "SENDER" ? pl.shipments.form.sections.sender : pl.shipments.form.sections.receiver}</span>
+                    <strong>{fullName(person)}</strong>
+                </div>
+            </div>
+            <p>{personAddress(person)}</p>
+            <p>{person.telephoneNumber || pl.common.dash}</p>
+            <p>{person.email || pl.common.dash}</p>
+            <button type="button" onClick={() => selectDetailTab(personType === "SENDER" ? "sender" : "recipient")}>
+                {pl.shipments.dashboard.showFullData}
+            </button>
+        </article>
+    );
+
+    const workspaceTabs: Array<{
+        id: ShipmentWorkspaceTab;
+        label: string;
+        count?: number;
+        icon: React.ReactNode;
+    }> = [
+        {id: "history", label: pl.shipments.dashboard.workspace.history, count: details.length, icon: <History fontSize="small" />},
+        {id: "notes", label: pl.shipments.dashboard.workspace.notes, count: 0, icon: <ChatBubbleOutline fontSize="small" />},
+        {id: "documents", label: pl.shipments.dashboard.workspace.documents, count: 0, icon: <DocumentScanner fontSize="small" />},
+        {id: "related", label: pl.shipments.dashboard.workspace.related, count: shipment?.shipmentRelatedId?.value ? 1 : 0, icon: <Cable fontSize="small" />},
+        {id: "audit", label: pl.shipments.dashboard.workspace.audit, icon: <FactCheckOutlined fontSize="small" />},
+    ];
+
+    const renderWorkspaceContent = () => {
+        if (activeWorkspaceTab === "history") {
+            if (!details.length) {
+                return <div className="shipment-workspace-empty">{pl.shipments.dashboard.workspace.emptyHistory}</div>;
+            }
+
+            return (
+                <div className="shipment-workspace-table-wrap">
+                    <table className="shipment-workspace-table">
+                        <thead>
+                            <tr>
+                                <th>{pl.shipments.dashboard.workspace.dateTime}</th>
+                                <th>{pl.shipments.dashboard.workspace.operation}</th>
+                                <th>{pl.shipments.routeHistory.department}</th>
+                                <th>{pl.shipments.routeHistory.user}</th>
+                                <th>{pl.shipments.routeHistory.terminal}</th>
+                                <th>{pl.shipments.dashboard.workspace.details}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {details.map((detail) => (
+                                <tr key={`${detail.id}-${detail.processType}-${detail.timestamp}`}>
+                                    <td><i className={`shipment-workspace-status-dot tm-status-${String(detailStatus(detail)).toLowerCase()}`} />{formatDateTime(detail.timestamp)}</td>
+                                    <td><strong>{detail.processType || pl.shipments.routeHistory.defaultOperation}</strong></td>
+                                    <td>{detailDepartment(detail)}</td>
+                                    <td>{detailUser(detail)}</td>
+                                    <td>{detailTerminal(detail)}</td>
+                                    <td>{shipmentEventDescription(detail.description, detailStatus(detail))}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            );
+        }
+
+        if (activeWorkspaceTab === "related" && shipment?.shipmentRelatedId?.value) {
+            return (
+                <div className="shipment-workspace-related">
+                    <div>
+                        <span>{pl.shipments.summary.relatedShipment}</span>
+                        <strong>#{shipment.shipmentRelatedId.value}</strong>
+                    </div>
+                    <Button variant="outlined" onClick={() => navigate(`/shipments/${shipment.shipmentRelatedId?.value}/edit`)}>
+                        {pl.shipments.actions.details}
+                    </Button>
+                </div>
+            );
+        }
+
+        const emptyMessages: Record<Exclude<ShipmentWorkspaceTab, "history">, string> = {
+            notes: pl.shipments.dashboard.workspace.emptyNotes,
+            documents: pl.shipments.dashboard.workspace.emptyDocuments,
+            related: pl.shipments.dashboard.workspace.emptyRelated,
+            audit: pl.shipments.dashboard.workspace.emptyAudit,
+        };
+
+        return <div className="shipment-workspace-empty">{emptyMessages[activeWorkspaceTab]}</div>;
     };
 
     return (
@@ -998,6 +1152,41 @@ const ShipmentDetails: React.FC = () => {
                             open={Boolean(operationMenuAnchor)}
                             onClose={() => setOperationMenuAnchor(null)}
                         >
+                            <MenuItem
+                                className="shipment-document-menu-item"
+                                disabled={!shipmentStatusMutable || savingStatus}
+                                onClick={() => {
+                                    setOperationMenuAnchor(null);
+                                    openStatusDialog();
+                                }}
+                            >
+                                {savingStatus ? <CircularProgress size={18} /> : <Edit fontSize="small" />}
+                                {pl.shipments.actions.changeStatus}
+                            </MenuItem>
+                            <MenuItem className="shipment-document-menu-item" disabled>
+                                <PersonAdd fontSize="small" />
+                                {pl.shipments.actions.assignCourier}
+                            </MenuItem>
+                            <MenuItem className="shipment-document-menu-item" disabled>
+                                <LocationCity fontSize="small" />
+                                {pl.shipments.actions.changeDepartment}
+                            </MenuItem>
+                            <MenuItem className="shipment-document-menu-item" disabled>
+                                <Loop fontSize="small" />
+                                {pl.shipments.actions.reroute}
+                            </MenuItem>
+                            <MenuItem className="shipment-document-menu-item" onClick={() => openWorkspaceTab("notes")}>
+                                <ChatBubbleOutline fontSize="small" />
+                                {pl.shipments.actions.addNote}
+                            </MenuItem>
+                            <MenuItem className="shipment-document-menu-item" onClick={() => openWorkspaceTab("documents")}>
+                                <DocumentScanner fontSize="small" />
+                                {pl.shipments.actions.addDocument}
+                            </MenuItem>
+                            <MenuItem className="shipment-document-menu-item shipment-operation-danger" disabled>
+                                <ReportProblemOutlined fontSize="small" />
+                                {pl.shipments.actions.markProblematic}
+                            </MenuItem>
                             <MenuItem className="shipment-document-menu-item" disabled={!shipment} onClick={createSimilarShipment}>
                                 <ContentCopy fontSize="small" />
                                 {pl.shipments.actions.createSimilar}
@@ -1039,212 +1228,231 @@ const ShipmentDetails: React.FC = () => {
                     <a href="#shipment-history">{pl.shipments.detailTabs.history}</a>
                 </nav>
 
+                {!loadingShipment && shipment ? <ShipmentReturnSummary returnPackage={returnPackage} /> : null}
+
                 {loadingShipment ? (
                     <div className="shipments-panel shipment-edit-loader">
                         <CircularProgress size={30} />
                         <span>{pl.shipments.page.editLoadingSubtitle}</span>
                     </div>
                 ) : shipment ? (
-                    <div className="shipment-cc-layout">
-                        <main className="shipments-panel shipment-edit-panel">
+                    <div className="shipment-dashboard-layout">
+                        <main className="shipment-dashboard-main">
                             {activeDetailTab === "overview" ? (
                                 <>
-                                    <section id="shipment-overview" className="shipment-edit-section shipment-details-segment shipment-details-info-segment">
-                                <div className="shipment-edit-section-header">
-                                    <Typography variant="h6">{pl.shipments.form.sections.shipmentData}</Typography>
-                                    <Chip className={`tm-status tm-status-${shipment.shipmentStatus.toLowerCase()}`} label={pl.shipments.status[shipment.shipmentStatus]} size="small" />
-                                </div>
+                                    <section id="shipment-overview" className="shipment-dashboard-card shipment-dashboard-data-card">
+                                        <div className="shipment-dashboard-card-header">
+                                            <div className="shipment-dashboard-card-title">
+                                                <span><LocalShipping fontSize="small" /></span>
+                                                <Typography variant="h6">{pl.shipments.form.sections.shipmentData}</Typography>
+                                            </div>
+                                            <Chip className={`tm-status tm-status-${shipment.shipmentStatus.toLowerCase()}`} label={pl.shipments.status[shipment.shipmentStatus]} size="small" />
+                                        </div>
 
-                                <div className={`shipment-details-summary shipment-edit-summary shipment-details-summary-with-origin${showCancellationWindow ? " shipment-details-summary-with-cancellation" : ""}`}>
-                                    <div>
-                                        <span>{pl.shipments.summary.tracking}</span>
-                                        <strong>{shipment.trackingNumber?.value || pl.common.dash}</strong>
-                                    </div>
-                                    <div>
-                                        <span>{pl.shipments.summary.id}</span>
-                                        <strong>#{shipment.shipmentId.value}</strong>
-                                    </div>
-                                    <div>
-                                        <span>{pl.shipments.summary.type}</span>
-                                        <strong>{pl.shipments.type[shipment.shipmentType]}</strong>
-                                    </div>
-                                    <div>
-                                        <span>{pl.shipments.summary.relatedShipment}</span>
-                                        <strong>{shipment.shipmentRelatedId?.value ? `#${shipment.shipmentRelatedId.value}` : pl.common.dash}</strong>
-                                    </div>
-                                    <div>
-                                        <span>{pl.shipments.summary.size}</span>
-                                        <strong>{pl.shipments.size[shipment.shipmentSize]}</strong>
-                                    </div>
-                                    <div>
-                                        <span>{pl.shipments.summary.originDepartment}</span>
-                                        <strong>{originDepartment?.departmentCode?.value || pl.common.dash}</strong>
-                                    </div>
-                                    <div>
-                                        <span>{pl.shipments.summary.pickupPoint}</span>
-                                        <strong>{shipment.pickupPointId?.value || pl.common.dash}</strong>
-                                    </div>
-                                    <div>
-                                        <span>{pl.shipments.summary.deliveryPickupPoint}</span>
-                                        <strong>{deliveryPickupPointCode || pl.common.dash}</strong>
-                                    </div>
-                                    <div>
-                                        <span>{pl.shipments.summary.destination}</span>
-                                        <div className="shipment-destination-control">
-                                            <strong className="shipment-destination-value">
-                                                {departmentCodeValue(shipment.destination) || pl.common.dash}
-                                            </strong>
-                                            <IconButton
-                                                aria-expanded={Boolean(destinationInfoAnchor)}
-                                                aria-haspopup="dialog"
-                                                aria-label={pl.shipments.summary.showDepartmentDetails}
-                                                className="shipment-destination-info-button"
-                                                size="small"
-                                                onClick={(event) => setDestinationInfoAnchor((currentAnchor) => (
-                                                    currentAnchor ? null : event.currentTarget
-                                                ))}
-                                            >
-                                                <InfoOutlined fontSize="small" />
-                                            </IconButton>
-                                            <Menu
-                                                anchorEl={destinationInfoAnchor}
-                                                aria-label={pl.shipments.summary.departmentDetailsTitle}
-                                                className="shipment-department-popover"
-                                                open={Boolean(destinationInfoAnchor)}
-                                                role="dialog"
-                                                onClose={() => setDestinationInfoAnchor(null)}
-                                            >
-                                                <div className="shipment-department-popover-header">
-                                                    <InfoOutlined fontSize="small" />
-                                                    <strong>{pl.shipments.summary.departmentDetailsTitle}</strong>
+                                        <div className="shipment-dashboard-facts shipment-dashboard-facts-primary">
+                                            <div><span>{pl.shipments.summary.tracking}</span><strong>{shipment.trackingNumber?.value || pl.common.dash}</strong></div>
+                                            <div><span>{pl.shipments.summary.id}</span><strong>#{shipment.shipmentId.value}</strong></div>
+                                            <div><span>{pl.shipments.summary.type}</span><strong>{pl.shipments.type[shipment.shipmentType]}</strong></div>
+                                            <div><span>{pl.shipments.summary.relatedShipment}</span><strong>{shipment.shipmentRelatedId?.value ? `#${shipment.shipmentRelatedId.value}` : pl.common.dash}</strong></div>
+                                            <div className="shipment-dashboard-person-fact">
+                                                <span>{pl.shipments.form.sections.sender}</span>
+                                                <strong>{fullName(sender)}</strong>
+                                                <small>{personAddress(sender)}</small>
+                                            </div>
+                                            <div className="shipment-dashboard-person-fact">
+                                                <span>{pl.shipments.form.sections.receiver}</span>
+                                                <strong>{fullName(recipient)}</strong>
+                                                <small>{personAddress(recipient)}</small>
+                                            </div>
+                                            <div><span>{pl.shipments.summary.originDepartment}</span><strong>{originDepartment?.departmentCode?.value || pl.common.dash}</strong></div>
+                                            <div>
+                                                <span>{pl.shipments.summary.destination}</span>
+                                                <div className="shipment-destination-control">
+                                                    <strong className="shipment-destination-value">{departmentCodeValue(shipment.destination) || pl.common.dash}</strong>
+                                                    <IconButton
+                                                        aria-expanded={Boolean(destinationInfoAnchor)}
+                                                        aria-haspopup="dialog"
+                                                        aria-label={pl.shipments.summary.showDepartmentDetails}
+                                                        className="shipment-destination-info-button"
+                                                        size="small"
+                                                        onClick={(event) => setDestinationInfoAnchor((currentAnchor) => currentAnchor ? null : event.currentTarget)}
+                                                    >
+                                                        <InfoOutlined fontSize="small" />
+                                                    </IconButton>
+                                                    <Menu
+                                                        anchorEl={destinationInfoAnchor}
+                                                        aria-label={pl.shipments.summary.departmentDetailsTitle}
+                                                        className="shipment-department-popover"
+                                                        open={Boolean(destinationInfoAnchor)}
+                                                        role="dialog"
+                                                        onClose={() => setDestinationInfoAnchor(null)}
+                                                    >
+                                                        <div className="shipment-department-popover-header">
+                                                            <InfoOutlined fontSize="small" />
+                                                            <strong>{pl.shipments.summary.departmentDetailsTitle}</strong>
+                                                        </div>
+                                                        {destinationDepartment ? (
+                                                            <dl className="shipment-department-popover-details">
+                                                                <div><dt>{pl.shipments.form.fields.city}</dt><dd>{destinationDepartment.address.city || pl.common.dash}</dd></div>
+                                                                <div><dt>{pl.shipments.form.fields.street}</dt><dd>{destinationDepartment.address.street || pl.common.dash}</dd></div>
+                                                            </dl>
+                                                        ) : <p className="shipment-department-popover-empty">{pl.shipments.summary.departmentDetailsUnavailable}</p>}
+                                                    </Menu>
                                                 </div>
-                                                {destinationDepartment ? (
-                                                    <dl className="shipment-department-popover-details">
-                                                        <div>
-                                                            <dt>{pl.shipments.form.fields.city}</dt>
-                                                            <dd>{destinationDepartment.address.city || pl.common.dash}</dd>
-                                                        </div>
-                                                        <div>
-                                                            <dt>{pl.shipments.form.fields.street}</dt>
-                                                            <dd>{destinationDepartment.address.street || pl.common.dash}</dd>
-                                                        </div>
-                                                    </dl>
-                                                ) : (
-                                                    <p className="shipment-department-popover-empty">
-                                                        {pl.shipments.summary.departmentDetailsUnavailable}
-                                                    </p>
-                                                )}
-                                            </Menu>
+                                            </div>
+                                            <div><span>{pl.shipments.summary.createdAt}</span><strong>{formatDateTime(shipment.createdAt || undefined)}</strong></div>
+                                            <div><span>{pl.shipments.dashboard.plannedDelivery}</span><strong>{pl.common.dash}</strong></div>
+                                            <div><span>{pl.shipments.summary.status}</span><strong>{pl.shipments.status[shipment.shipmentStatus]}</strong></div>
+                                            <div><span>{pl.shipments.dashboard.service}</span><strong>{pl.shipments.priority[shipment.shipmentPriority]}</strong></div>
                                         </div>
-                                    </div>
-                                    <div>
-                                        <span>{pl.shipments.summary.price}</span>
-                                        <strong>{formatPrice(shipment)}</strong>
-                                    </div>
-                                    <div>
-                                        <span>{pl.shipments.summary.status}</span>
-                                        <strong>{pl.shipments.status[shipment.shipmentStatus]}</strong>
-                                    </div>
-                                    <div>
-                                        <span>{pl.shipments.summary.createdAt}</span>
-                                        <strong>{formatDateTime(shipment.createdAt || undefined)}</strong>
-                                    </div>
-                                    <div>
-                                        <span>{pl.shipments.summary.updatedAt}</span>
-                                        <strong>{formatDateTime(shipment.updatedAt || undefined)}</strong>
-                                    </div>
-                                    {showCancellationWindow ? (
-                                        <div>
-                                            <span>{pl.shipments.summary.cancellationWindow}</span>
-                                            <strong className="shipment-cancellation-window-value">
-                                                {formatCancellationTimeLeft(cancellationWindowTimeLeft)}
-                                            </strong>
-                                        </div>
-                                    ) : null}
-                                </div>
 
+                                        <div className="shipment-dashboard-metrics">
+                                            <div><span>{pl.shipments.summary.size}</span><strong>{pl.shipments.size[shipment.shipmentSize]}</strong></div>
+                                            <div><span>{pl.shipments.dashboard.weight}</span><strong>{pl.common.dash}</strong></div>
+                                            <div><span>{pl.shipments.dashboard.dimensions}</span><strong>{pl.common.dash}</strong></div>
+                                            <div><span>{pl.shipments.dashboard.volume}</span><strong>{pl.common.dash}</strong></div>
+                                            <div><span>{pl.shipments.dashboard.pieces}</span><strong>{pl.common.dash}</strong></div>
+                                            <div><span>{pl.shipments.dashboard.declaredValue}</span><strong>{formatPrice(shipment)}</strong></div>
+                                        </div>
+
+                                        <div className="shipment-dashboard-additional">
+                                            <strong>{pl.shipments.dashboard.additionalInformation}</strong>
+                                            <div>
+                                                <span>{pl.shipments.summary.pickupPoint}: <b>{shipment.pickupPointId?.value || pl.common.dash}</b></span>
+                                                <span>{pl.shipments.summary.deliveryPickupPoint}: <b>{deliveryPickupPointCode || pl.common.dash}</b></span>
+                                                <span>{pl.shipments.form.fields.pickupMethod}: <b>{shipment.pickupMethod ? pl.shipments.pickupMethod[shipment.pickupMethod] : pl.common.dash}</b></span>
+                                                <span>{pl.shipments.form.fields.deliveryMethod}: <b>{shipment.deliveryMethod ? pl.shipments.deliveryMethod[shipment.deliveryMethod] : pl.common.dash}</b></span>
+                                                <span>{pl.shipments.form.fields.priority}: <b>{pl.shipments.priority[shipment.shipmentPriority]}</b></span>
+                                                <span>{pl.shipments.form.fields.issuerCountry}: <b>{shipment.originCountry || pl.common.dash}</b></span>
+                                                <span>{pl.shipments.form.fields.receiverCountry}: <b>{shipment.destinationCountry || pl.common.dash}</b></span>
+                                                <span>{pl.shipments.summary.updatedAt}: <b>{formatDateTime(shipment.updatedAt || undefined)}</b></span>
+                                                <span>{pl.shipments.dashboard.insurance}: <b>{pl.common.dash}</b></span>
+                                                <span>{pl.shipments.dashboard.containerNumber}: <b>{pl.common.dash}</b></span>
+                                                <span>{pl.shipments.dashboard.waybillNumber}: <b>{pl.common.dash}</b></span>
+                                                {showCancellationWindow ? <span>{pl.shipments.summary.cancellationWindow}: <b>{formatCancellationTimeLeft(cancellationWindowTimeLeft)}</b></span> : null}
+                                            </div>
+                                        </div>
                                     </section>
 
-                                    <div className="shipment-details-operations-grid shipment-details-operations-separated">
-                                        <ShipmentStatusControl
-                                            disabled={savingStatus || !shipmentStatusMutable}
-                                            status={shipment.shipmentStatus}
-                                            onChangeStatus={openStatusDialog}
-                                        />
+                                    <div className="shipment-dashboard-lower-grid">
+                                        <section className="shipment-dashboard-card shipment-workspace" id="shipment-workspace">
+                                            <div className="shipment-workspace-tabs" role="tablist" aria-label={pl.shipments.dashboard.workspace.history}>
+                                                {workspaceTabs.map((tab) => (
+                                                    <button
+                                                        aria-controls={`shipment-workspace-panel-${tab.id}`}
+                                                        aria-selected={activeWorkspaceTab === tab.id}
+                                                        className={activeWorkspaceTab === tab.id ? "shipment-workspace-tab-active" : ""}
+                                                        id={`shipment-workspace-tab-${tab.id}`}
+                                                        key={tab.id}
+                                                        role="tab"
+                                                        type="button"
+                                                        onClick={() => setActiveWorkspaceTab(tab.id)}
+                                                    >
+                                                        {tab.icon}
+                                                        <span>{tab.label}</span>
+                                                        {tab.count !== undefined ? <small>{tab.count}</small> : null}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                            <div
+                                                aria-labelledby={`shipment-workspace-tab-${activeWorkspaceTab}`}
+                                                id={`shipment-workspace-panel-${activeWorkspaceTab}`}
+                                                role="tabpanel"
+                                            >
+                                                {renderWorkspaceContent()}
+                                            </div>
+                                        </section>
 
                                     </div>
-
-                                    <ShipmentReturnSummary returnPackage={returnPackage} />
-
-                                    <section className="shipment-cc-courier shipment-details-segment">
-                                <div className="shipment-cc-courier-icon">
-                                    <PersonPinCircle />
-                                </div>
-                                <div className="shipment-cc-courier-copy">
-                                    <span>{pl.shipments.summary.currentCourier}</span>
-                                    <strong>{detailCourier(currentCourierDetail)}</strong>
-                                    <p>
-                                        {currentCourierDetail
-                                            ? pl.shipments.summary.lastActivity
-                                                .replace("{date}", formatDateTime(currentCourierDetail.timestamp))
-                                                .replace("{department}", detailDepartment(currentCourierDetail))
-                                            : pl.shipments.summary.noCourierInfo}
-                                    </p>
-                                    {currentCourierDetail ? (
-                                        <dl className="shipment-cc-courier-meta">
-                                            <div>
-                                                <dt>{pl.shipments.summary.courierCode}</dt>
-                                                <dd>{detailCourier(currentCourierDetail)}</dd>
-                                            </div>
-                                            <div>
-                                                <dt>{pl.shipments.routeHistory.department}</dt>
-                                                <dd>{detailDepartment(currentCourierDetail)}</dd>
-                                            </div>
-                                            <div>
-                                                <dt>{pl.shipments.routeHistory.user}</dt>
-                                                <dd>{detailUser(currentCourierDetail)}</dd>
-                                            </div>
-                                            <div>
-                                                <dt>{pl.shipments.routeHistory.terminal}</dt>
-                                                <dd>{detailTerminal(currentCourierDetail)}</dd>
-                                            </div>
-                                            <div>
-                                                <dt>{pl.shipments.summary.lastOperation}</dt>
-                                                <dd>{detailStatusLabel(detailStatus(currentCourierDetail))}</dd>
-                                            </div>
-                                        </dl>
-                                    ) : null}
-                                </div>
-                                    </section>
 
                                     {renderDangerousGood()}
+
+                                    <div className="shipment-dashboard-bottom-tools">
+                                        <section className="shipment-dashboard-card shipment-operator-notes">
+                                            <div className="shipment-dashboard-card-title"><span><ChatBubbleOutline fontSize="small" /></span><Typography variant="h6">{pl.shipments.dashboard.operatorNotes}</Typography></div>
+                                            <div className="shipment-operator-note-form">
+                                                <textarea aria-label={pl.shipments.dashboard.operatorNotes} disabled placeholder={pl.shipments.dashboard.notePlaceholder} />
+                                                <label><input disabled type="checkbox" /> {pl.shipments.dashboard.internalNote}</label>
+                                                <Button disabled startIcon={<Add fontSize="small" />}>{pl.shipments.actions.addNote}</Button>
+                                            </div>
+                                        </section>
+
+                                        <section className="shipment-dashboard-card shipment-attachments">
+                                            <div className="shipment-attachments-header">
+                                                <div className="shipment-dashboard-card-title"><span><DocumentScanner fontSize="small" /></span><Typography variant="h6">{pl.shipments.dashboard.attachments}</Typography></div>
+                                                <Button disabled size="small" startIcon={<Upload fontSize="small" />} variant="outlined">{pl.shipments.dashboard.addAttachment}</Button>
+                                            </div>
+                                            <p>{pl.shipments.dashboard.noAttachments}</p>
+                                        </section>
+                                    </div>
                                 </>
                             ) : null}
-                            {activeDetailTab === "sender"
-                                ? personFields(pl.shipments.form.sections.sender, "SENDER", sender)
-                                : null}
-                            {activeDetailTab === "recipient"
-                                ? personFields(pl.shipments.form.sections.receiver, "RECIPIENT", recipient)
-                                : null}
+                            {activeDetailTab === "sender" ? personFields(pl.shipments.form.sections.sender, "SENDER", sender) : null}
+                            {activeDetailTab === "recipient" ? personFields(pl.shipments.form.sections.receiver, "RECIPIENT", recipient) : null}
                         </main>
 
-                        <aside className="shipments-panel shipment-cc-side" id="shipment-history">
-                            <div className="shipment-cc-side-header">
-                                <div>
-                                    <Typography variant="h6">{pl.shipments.routeHistory.title}</Typography>
-                                    <span>{details.length} {pl.shipments.postCount}</span>
+                        <aside className="shipment-dashboard-workflow">
+                            <section className="shipment-dashboard-card shipment-dashboard-next-operation">
+                                <div className="shipment-dashboard-card-title"><span><CheckCircleOutline fontSize="small" /></span><Typography variant="h6">{pl.shipments.dashboard.nextOperation}</Typography></div>
+                                <span>{pl.shipments.dashboard.currentStage}</span>
+                                <strong>{pl.shipments.status[shipment.shipmentStatus]}</strong>
+                                <p>{pl.shipments.dashboard.nextOperationUnavailable}</p>
+                                {currentCourierDetail ? <small>{pl.shipments.summary.lastActivity.replace("{date}", formatDateTime(currentCourierDetail.timestamp)).replace("{department}", detailDepartment(currentCourierDetail))}</small> : null}
+                                <Button disabled fullWidth startIcon={<Route fontSize="small" />}>{pl.shipments.dashboard.startOperation}</Button>
+                            </section>
+
+                            <section className={`shipment-dashboard-card shipment-dashboard-warnings${shipmentWarnings.length ? " shipment-dashboard-warnings-active" : ""}`}>
+                                <div className="shipment-dashboard-card-title"><span><WarningAmberOutlined fontSize="small" /></span><Typography variant="h6">{pl.shipments.dashboard.warnings}</Typography></div>
+                                {shipmentWarnings.length ? (
+                                    <ul>{shipmentWarnings.map((warning) => <li key={warning}>{warning}</li>)}</ul>
+                                ) : <p><CheckCircleOutline fontSize="small" /> {pl.shipments.dashboard.noWarnings}</p>}
+                            </section>
+
+                            <section className="shipment-dashboard-card shipment-dashboard-route">
+                                <div className="shipment-dashboard-card-title"><span><Route fontSize="small" /></span><Typography variant="h6">{pl.shipments.dashboard.shipmentRoute}</Typography></div>
+                                {routeStops.length ? (
+                                    <ol>{routeStops.map((stop, index) => (
+                                        <li className={index === routeStops.length - 1 ? "shipment-dashboard-route-current" : ""} key={stop}>
+                                            <i />
+                                            <span>{stop}</span>
+                                            {index === routeStops.length - 1 ? <small>{pl.shipments.dashboard.currentStop}</small> : null}
+                                        </li>
+                                    ))}</ol>
+                                ) : <p><LocationOn fontSize="small" /> {pl.shipments.dashboard.routeEmpty}</p>}
+                            </section>
+                        </aside>
+
+                        <aside className="shipment-dashboard-right-rail">
+                            <section className="shipment-dashboard-card shipment-cc-side" id="shipment-history">
+                                <div className="shipment-cc-side-header">
+                                    <div>
+                                        <Typography variant="h6">{pl.shipments.routeHistory.title}</Typography>
+                                        <span>{pl.shipments.dashboard.recentEvents.replace("{count}", String(recentDetails.length))}</span>
+                                    </div>
+                                    <Button disabled={!shipment} size="small" startIcon={<Map fontSize="small" />} variant="outlined" onClick={() => navigate(historyPath)}>
+                                        {pl.shipments.routeHistory.openDetails}
+                                    </Button>
                                 </div>
-                                <Button
-                                    disabled={!shipment}
-                                    size="small"
-                                    startIcon={<Map fontSize="small" />}
-                                    variant="outlined"
-                                    onClick={() => navigate(historyPath)}
-                                >
-                                    {pl.shipments.routeHistory.openDetails}
-                                </Button>
-                            </div>
-                            {renderRouteHistory()}
+                                {renderRouteHistory()}
+                            </section>
+
+                            <section className="shipment-dashboard-card shipment-dashboard-finance">
+                                <div className="shipment-dashboard-card-title"><span><AttachMoney fontSize="small" /></span><Typography variant="h6">{pl.shipments.dashboard.financialData}</Typography></div>
+                                <dl>
+                                    <div><dt>{pl.shipments.dashboard.basePrice}</dt><dd>{formatPrice(shipment)}</dd></div>
+                                    <div><dt>{pl.shipments.dashboard.surcharges}</dt><dd>{pl.common.dash}</dd></div>
+                                    <div className="shipment-dashboard-finance-total"><dt>{pl.shipments.dashboard.total}</dt><dd>{formatPrice(shipment)}</dd></div>
+                                    <div><dt>{pl.shipments.dashboard.paymentMethod}</dt><dd>{pl.shipments.dashboard.unavailable}</dd></div>
+                                    <div><dt>{pl.shipments.dashboard.paymentStatus}</dt><dd>{pl.shipments.dashboard.unavailable}</dd></div>
+                                    <div><dt>{pl.shipments.dashboard.invoice}</dt><dd>{pl.shipments.dashboard.unavailable}</dd></div>
+                                </dl>
+                            </section>
+
+                            <section className="shipment-dashboard-card shipment-dashboard-parties">
+                                <div className="shipment-dashboard-card-title"><span><PersonPinCircle fontSize="small" /></span><Typography variant="h6">{pl.shipments.dashboard.parties}</Typography></div>
+                                {partySummary("SENDER", sender)}
+                                {partySummary("RECIPIENT", recipient)}
+                            </section>
                         </aside>
                     </div>
                 ) : (
