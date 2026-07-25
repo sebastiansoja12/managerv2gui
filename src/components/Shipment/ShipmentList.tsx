@@ -32,7 +32,7 @@ import {
 import {useNavigate} from "react-router-dom";
 import ShipmentService from "../../hooks/ShipmentService";
 import {ApiErrorResponse} from "../../api/ApiResult";
-import {ShipmentDto, ShipmentStatusDto} from "./dto/ShipmentDto";
+import {departmentCodeValue, ShipmentDto, ShipmentStatusDto} from "./dto/ShipmentDto";
 import pl from "../../i18n/translate";
 import {AppTabDefinition} from "../AppShell/types";
 import "./styles/shipments.css";
@@ -98,7 +98,7 @@ const mapShipmentToRow = (shipment: ShipmentDto): ShipmentRow => ({
     deliveryDate: formatDeliveryDate(shipment.signature?.signedAt),
     price: formatPrice(shipment),
     user: shipmentTranslations.table.unassigned,
-    destination: shipment.destination || shipment.recipient?.city || "-",
+    destination: departmentCodeValue(shipment.destination) || shipment.recipient?.city || "-",
     status: shipment.shipmentStatus,
 });
 

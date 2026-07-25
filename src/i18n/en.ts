@@ -1018,6 +1018,12 @@ export const en: typeof pl = {
                 dangerousGood: "Dangerous good",
                 status: "Status",
             },
+            actions: {
+                editSender: "Edit sender",
+                editRecipient: "Edit recipient",
+                saveSender: "Save sender",
+                saveRecipient: "Save recipient",
+            },
             fields: {
                 shipmentStatus: "Shipment status",
                 shipmentType: "Shipment type",
@@ -1065,7 +1071,7 @@ export const en: typeof pl = {
             relatedShipment: "Parent shipment",
             currentCourier: "Current courier",
             lastActivity: "Last activity: {date} · {department}",
-            noCourierInfo: "No courier information in route tracker",
+            noCourierInfo: "No courier information",
         },
         routeHistory: {
             title: "Shipment history",
@@ -1105,6 +1111,10 @@ export const en: typeof pl = {
             loadViewError: "Could not load shipment.",
             saveSuccess: "Shipment has been saved",
             saveError: "Could not save shipment",
+            senderSaveSuccess: "Sender data has been saved",
+            senderSaveError: "Could not save sender data",
+            recipientSaveSuccess: "Recipient data has been saved",
+            recipientSaveError: "Could not save recipient data",
             statusSaveSuccess: "Shipment status has been saved",
             statusSaveError: "Could not save shipment status",
             copyTrackingSuccess: "Tracking number has been copied",

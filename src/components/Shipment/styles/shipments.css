@@ -1940,6 +1940,29 @@
     font-weight: 900;
 }
 
+.shipment-edit-section-actions {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+.shipment-edit-section-action.MuiButton-root {
+    min-width: 136px;
+}
+
+.shipment-person-dialog-grid {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    padding-top: 8px;
+}
+
+.shipment-person-dialog-wide {
+    grid-column: span 2;
+}
+
 .shipment-edit-loader {
     align-items: center;
     color: var(--brand-muted);
@@ -2657,5 +2680,18 @@
 
     .shipment-edit-header-actions .MuiButton-root {
         width: 100%;
+    }
+
+    .shipment-edit-section-actions,
+    .shipment-edit-section-action.MuiButton-root {
+        width: 100%;
+    }
+
+    .shipment-person-dialog-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .shipment-person-dialog-wide {
+        grid-column: 1 / -1;
     }
 }

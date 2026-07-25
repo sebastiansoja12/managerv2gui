@@ -7,6 +7,7 @@ import {ApiErrorResponse} from "../../api/ApiResult";
 import RouteLogRecord from "../RouteLog/model/RouteLogRecord";
 import {ShipmentDto, ShipmentStatusDto} from "./dto/ShipmentDto";
 import pl from "../../i18n/translate";
+import {valueObjectValue} from "../../utils/valueObject";
 import "./styles/shipments.css";
 
 type RouteDetail = RouteLogRecord["routeLogRecordDetails"]["routeLogRecordDetailSet"][number];
@@ -45,7 +46,7 @@ const routeDetails = (routeLog: RouteLogRecord | null): RouteDetail[] => {
 
 const detailStatus = (detail: RouteDetail) => detail.shipmentStatus || detail.parcelStatus || pl.common.dash;
 const detailStatusLabel = (status: string) => pl.shipments.status[status as ShipmentStatusDto] || status;
-const detailDepartment = (detail: RouteDetail) => detail.departmentCode || detail.depotCode || pl.common.dash;
+const detailDepartment = (detail: RouteDetail) => valueObjectValue(detail.departmentCode) || valueObjectValue(detail.depotCode) || pl.common.dash;
 const detailTerminal = (detail: RouteDetail) => detail.terminalId?.value || detail.zebraId || pl.common.dash;
 
 const fullName = (person?: ShipmentDto["sender"]) => {

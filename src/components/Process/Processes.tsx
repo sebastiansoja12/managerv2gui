@@ -6,6 +6,7 @@ import ProcessLogService from "../../hooks/ProcessLogService";
 import {ApiErrorResponse} from "../../api/ApiResult";
 import pl from "../../i18n/translate";
 import {CommunicationLogDto, ProcessLogDto} from "./dto/ProcessLogDto";
+import {valueObjectValue} from "../../utils/valueObject";
 import "./styles/processes.css";
 
 const formatDateTime = (date?: string | null) => {
@@ -48,7 +49,7 @@ const userLabel = (processLog: ProcessLogDto) => {
 };
 
 const departmentLabel = (processLog: ProcessLogDto) =>
-    primaryCommunication(processLog)?.departmentCode || processLog.deviceInformation?.departmentCode || pl.common.dash;
+    valueObjectValue(primaryCommunication(processLog)?.departmentCode) || valueObjectValue(processLog.deviceInformation?.departmentCode) || pl.common.dash;
 
 const statusLabel = (status?: string | null) =>
     status ? pl.processes.status[status as keyof typeof pl.processes.status] || status : pl.processes.status.IN_PROGRESS;

@@ -103,6 +103,14 @@ const updatePerson = (shipmentId: string, personType: PersonType, data: PersonAp
     });
 };
 
+const updateSender = (shipmentId: string, data: PersonApi) => {
+    return updatePerson(shipmentId, "SENDER", data);
+};
+
+const updateRecipient = (shipmentId: string, data: PersonApi) => {
+    return updatePerson(shipmentId, "RECIPIENT", data);
+};
+
 const updateCountries = (shipmentId: string, data: CountryRequestApi) => {
     return client.put<CountryRequestApi, ShipmentResponseInformation>("/shipments/countries", data, {
         shipmentId,
@@ -130,6 +138,8 @@ const ShipmentService = {
     changeSignature,
     exists,
     updatePerson,
+    updateSender,
+    updateRecipient,
     updateCountries,
     changeShipmentType,
 };
