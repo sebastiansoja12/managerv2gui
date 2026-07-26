@@ -192,7 +192,7 @@ const ShipmentHistoryDetails: React.FC = () => {
                                                     <span className={`shipment-history-status tm-status tm-status-${String(statusKey).toLowerCase()}`}>
                                                         {detailStatusLabel(statusKey)}
                                                     </span>
-                                                    <p>{shipmentEventDescription(detail.description)}</p>
+                                                    <p>{shipmentEventDescription(detail.description, statusKey)}</p>
                                                     <dl>
                                                         <div><dt>{pl.shipments.routeHistory.department}</dt><dd>{detailDepartment(detail)}</dd></div>
                                                         <div><dt>{pl.shipments.routeHistory.user}</dt><dd>{detailUser(detail)}</dd></div>
