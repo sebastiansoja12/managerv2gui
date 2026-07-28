@@ -15,6 +15,10 @@ jest.mock("../../hooks/OperatorConfigurationService", () => ({
     },
 }));
 
+jest.mock("../../auth/AuthState", () => ({
+    useAuthState: () => ({user: {departmentCode: "KT1"}}),
+}));
+
 const shipmentConfigurationApi: ShipmentConfigurationApi = {
     validationConfiguration: {
         validateAddressData: true,
@@ -49,6 +53,7 @@ const shipmentConfigurationApi: ShipmentConfigurationApi = {
         pickupCutoffTime: "16:00",
     },
     trackingNumberRule: {
+        prefixMode: "CUSTOM",
         key: "MGR",
         separator: "-",
         source: "SEQUENCE",
@@ -155,5 +160,71 @@ describe("ShipmentConfigurationPanel", () => {
 
         expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
         expect(screen.getByText("CLIENT-20260814-582104")).toBeInTheDocument();
+    });
+
+    it("uses the current department code as the tracking number prefix", async () => {
+        render(<ShipmentConfigurationPanel />);
+
+        await waitForConfigurationLoad();
+        fireEvent.click(screen.getByRole("button", {
+            name: pl.globalConfiguration.shipmentConfiguration.trackingNumber.configure,
+        }));
+
+        fireEvent.change(screen.getByLabelText(
+            pl.globalConfiguration.shipmentConfiguration.trackingNumber.prefixModeLabel,
+        ), {target: {value: "departmentCode"}});
+
+        expect(screen.getByText("KT1-20260814-000042")).toBeInTheDocument();
+        fireEvent.click(screen.getByRole("button", {
+            name: pl.globalConfiguration.shipmentConfiguration.trackingNumber.save,
+        }));
+        fireEvent.click(screen.getByRole("button", {name: pl.common.saveChanges}));
+
+        await waitFor(() => {
+            expect(operatorConfigurationServiceMock.updateCurrentShipmentConfiguration).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    trackingNumberRule: expect.objectContaining({
+                        prefixMode: "DEPARTMENT_CODE",
+                        key: "KT1",
+                    }),
+                }),
+            );
+        });
+        expect(await screen.findByText(pl.globalConfiguration.shipmentConfiguration.messages.saved))
+            .toBeInTheDocument();
+    });
+
+    it("allows saving a tracking number rule without a prefix", async () => {
+        render(<ShipmentConfigurationPanel />);
+
+        await waitForConfigurationLoad();
+        fireEvent.click(screen.getByRole("button", {
+            name: pl.globalConfiguration.shipmentConfiguration.trackingNumber.configure,
+        }));
+
+        fireEvent.change(screen.getByLabelText(
+            pl.globalConfiguration.shipmentConfiguration.trackingNumber.prefixModeLabel,
+        ), {target: {value: "none"}});
+
+        const saveRuleButton = screen.getByRole("button", {
+            name: pl.globalConfiguration.shipmentConfiguration.trackingNumber.save,
+        });
+        expect(saveRuleButton).toBeEnabled();
+        expect(screen.getByText("20260814-000042")).toBeInTheDocument();
+        fireEvent.click(saveRuleButton);
+        fireEvent.click(screen.getByRole("button", {name: pl.common.saveChanges}));
+
+        await waitFor(() => {
+            expect(operatorConfigurationServiceMock.updateCurrentShipmentConfiguration).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    trackingNumberRule: expect.objectContaining({
+                        prefixMode: "NONE",
+                        key: "",
+                    }),
+                }),
+            );
+        });
+        expect(await screen.findByText(pl.globalConfiguration.shipmentConfiguration.messages.saved))
+            .toBeInTheDocument();
     });
 });
