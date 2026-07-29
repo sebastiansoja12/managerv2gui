@@ -27,8 +27,9 @@ import {
     ShipmentCreateRequestApi,
     ShipmentPriorityDto,
     shipmentPriorities,
-    shipmentSizes,
     ShipmentSizeDto,
+    LengthUnitDto,
+    WeightUnitDto,
 } from "./dto/ShipmentDto";
 import pl from "../../i18n/translate";
 import {PickupPointSummary} from "../PickupPoints/model/PickupPoint";
@@ -55,7 +56,6 @@ const emptyPerson: PersonApi = {
     street: "",
 };
 
-const initialShipmentSize: ShipmentSizeDto = "SMALL";
 const initialShipmentPriority: ShipmentPriorityDto = "MEDIUM";
 const initialPriceAmount = "15";
 const initialCurrency = "PLN";
@@ -63,6 +63,35 @@ const initialIssuerCountryCode = "PL";
 const initialReceiverCountryCode = "PL";
 const initialPickupMethod: PickupMethodDto = "DEPARTMENT";
 const initialDeliveryMethod: DeliveryMethodDto = "COURIER";
+const lengthUnits: LengthUnitDto[] = ["MM", "CM", "M"];
+const weightUnits: WeightUnitDto[] = ["G", "KG"];
+
+const legacySizeForPickupPointSearch = (
+    length: string,
+    width: string,
+    height: string,
+    lengthUnit: LengthUnitDto,
+    weight: string,
+    weightUnit: WeightUnitDto,
+): ShipmentSizeDto => {
+    const lengthValue = Number(length);
+    const widthValue = Number(width);
+    const heightValue = Number(height);
+    const weightValue = Number(weight);
+    if (![lengthValue, widthValue, heightValue, weightValue].every(Number.isFinite)) {
+        return "SMALL";
+    }
+    const unitScale = lengthUnit === "MM" ? 0.1 : lengthUnit === "M" ? 100 : 1;
+    const maximumDimensionCm = Math.max(lengthValue, widthValue, heightValue) * unitScale;
+    const weightKg = weightUnit === "G" ? weightValue / 1000 : weightValue;
+    const capacities: Array<[ShipmentSizeDto, number, number]> = [
+        ["SMALL", 20, 20], ["TINY", 40, 40], ["MEDIUM", 60, 60],
+        ["AVERAGE", 80, 80], ["BIG", 100, 100],
+    ];
+    return capacities.find(([, maxDimensionCm, maxWeightKg]) => (
+        maximumDimensionCm <= maxDimensionCm && weightKg <= maxWeightKg
+    ))?.[0] || "CUSTOM";
+};
 
 const clonePerson = (person?: PersonApi): PersonApi => ({
     ...emptyPerson,
@@ -78,7 +107,17 @@ const ShipmentCreate: React.FC = () => {
     const [loading, setLoading] = useState<boolean>(false);
     const [sender, setSender] = useState<PersonApi>(() => clonePerson(similarShipment?.sender));
     const [recipient, setRecipient] = useState<PersonApi>(() => clonePerson(similarShipment?.recipient));
-    const [shipmentSize, setShipmentSize] = useState<ShipmentSizeDto>(similarShipment?.shipmentSize || initialShipmentSize);
+    const [length, setLength] = useState<string>(similarShipment?.dimensions?.length?.toString() || "");
+    const [width, setWidth] = useState<string>(similarShipment?.dimensions?.width?.toString() || "");
+    const [height, setHeight] = useState<string>(similarShipment?.dimensions?.height?.toString() || "");
+    const [lengthUnit, setLengthUnit] = useState<LengthUnitDto>(similarShipment?.dimensions?.unit || "CM");
+    const [weight, setWeight] = useState<string>(similarShipment?.weight?.value?.toString() || "");
+    const [weightUnit, setWeightUnit] = useState<WeightUnitDto>(similarShipment?.weight?.unit || "KG");
+    const [contentDescription, setContentDescription] = useState<string>(similarShipment?.contentDescription || "");
+    const [customerReference, setCustomerReference] = useState<string>(similarShipment?.customerReference || "");
+    const [declaredValueAmount, setDeclaredValueAmount] = useState<string>(
+        similarShipment?.declaredValue?.amount?.toString() || "",
+    );
     const [shipmentPriority, setShipmentPriority] = useState<ShipmentPriorityDto>(similarShipment?.shipmentPriority || initialShipmentPriority);
     const [priceAmount, setPriceAmount] = useState<string>(similarShipment?.priceAmount || initialPriceAmount);
     const [currency, setCurrency] = useState<string>(similarShipment?.currency || initialCurrency);
@@ -168,7 +207,21 @@ const ShipmentCreate: React.FC = () => {
     const createRequest = (): ShipmentCreateRequestApi => ({
         sender,
         recipient,
-        shipmentSize,
+        dimensions: {
+            length: Number(length),
+            width: Number(width),
+            height: Number(height),
+            unit: lengthUnit,
+        },
+        weight: {
+            value: Number(weight),
+            unit: weightUnit,
+        },
+        ...(customerReference.trim() ? {customerReference: customerReference.trim()} : {}),
+        ...(contentDescription.trim() ? {contentDescription: contentDescription.trim()} : {}),
+        ...(declaredValueAmount.trim() ? {
+            declaredValue: {amount: Number(declaredValueAmount), currency},
+        } : {}),
         price: {
             amount: Number(priceAmount) || 0,
             currency,
@@ -190,7 +243,15 @@ const ShipmentCreate: React.FC = () => {
     const resetForm = () => {
         setSender({...emptyPerson});
         setRecipient({...emptyPerson});
-        setShipmentSize(initialShipmentSize);
+        setLength("");
+        setWidth("");
+        setHeight("");
+        setLengthUnit("CM");
+        setWeight("");
+        setWeightUnit("KG");
+        setContentDescription("");
+        setCustomerReference("");
+        setDeclaredValueAmount("");
         setShipmentPriority(initialShipmentPriority);
         setPriceAmount(initialPriceAmount);
         setCurrency(initialCurrency);
@@ -212,6 +273,16 @@ const ShipmentCreate: React.FC = () => {
     };
 
     const createShipment = async () => {
+        const dimensionsAndWeight = [length, width, height, weight].map(Number);
+        if (!dimensionsAndWeight.every((value) => Number.isFinite(value) && value > 0)) {
+            setNotice({severity: "error", message: shipmentTranslations.messages.measurementsRequired});
+            return;
+        }
+        if (declaredValueAmount.trim()
+            && (!Number.isFinite(Number(declaredValueAmount)) || Number(declaredValueAmount) < 0)) {
+            setNotice({severity: "error", message: shipmentTranslations.messages.declaredValueInvalid});
+            return;
+        }
         if (deliveryMethod !== "COURIER" && !deliveryPickupPoint) {
             setNotice({severity: "error", message: shipmentTranslations.messages.deliveryPickupPointRequired});
             return;
@@ -237,6 +308,19 @@ const ShipmentCreate: React.FC = () => {
             setLoading(false);
         }
     };
+
+    const openDeliveryPointMap = () => {
+        const values = [length, width, height, weight].map(Number);
+        if (!values.every((value) => Number.isFinite(value) && value > 0)) {
+            setNotice({severity: "error", message: shipmentTranslations.messages.measurementsRequired});
+            return;
+        }
+        setDeliveryMapOpen(true);
+    };
+
+    const deliveryPointSearchSize = legacySizeForPickupPointSearch(
+        length, width, height, lengthUnit, weight, weightUnit,
+    );
 
     return (
         <div className="shipments-page shipments-create-page">
@@ -264,10 +348,33 @@ const ShipmentCreate: React.FC = () => {
                     </div>
 
                     <div className="shipments-form-grid-three shipments-create-data-grid">
-                        {selectField(shipmentTranslations.form.fields.size, shipmentSize, shipmentSizes, (value) => {
-                            setShipmentSize(value);
+                        {textField(shipmentTranslations.form.fields.length, length, (value) => {
+                            setLength(value);
                             setDeliveryPickupPoint(null);
-                        }, (option) => shipmentTranslations.size[option])}
+                        }, "number")}
+                        {textField(shipmentTranslations.form.fields.width, width, (value) => {
+                            setWidth(value);
+                            setDeliveryPickupPoint(null);
+                        }, "number")}
+                        {textField(shipmentTranslations.form.fields.height, height, (value) => {
+                            setHeight(value);
+                            setDeliveryPickupPoint(null);
+                        }, "number")}
+                        {selectField(shipmentTranslations.form.fields.lengthUnit, lengthUnit, lengthUnits, (value) => {
+                            setLengthUnit(value);
+                            setDeliveryPickupPoint(null);
+                        })}
+                        {textField(shipmentTranslations.form.fields.weight, weight, (value) => {
+                            setWeight(value);
+                            setDeliveryPickupPoint(null);
+                        }, "number")}
+                        {selectField(shipmentTranslations.form.fields.weightUnit, weightUnit, weightUnits, (value) => {
+                            setWeightUnit(value);
+                            setDeliveryPickupPoint(null);
+                        })}
+                        {textField(shipmentTranslations.form.fields.contentDescription, contentDescription, setContentDescription)}
+                        {textField(shipmentTranslations.form.fields.customerReference, customerReference, setCustomerReference)}
+                        {textField(shipmentTranslations.form.fields.declaredValue, declaredValueAmount, setDeclaredValueAmount, "number")}
                         {selectField(shipmentTranslations.form.fields.priority, shipmentPriority, shipmentPriorities, setShipmentPriority, (option) => shipmentTranslations.priority[option])}
                         {textField(shipmentTranslations.form.fields.amount, priceAmount, setPriceAmount, "number")}
                         {textField(shipmentTranslations.form.fields.currency, currency, setCurrency)}
@@ -284,7 +391,7 @@ const ShipmentCreate: React.FC = () => {
                                 setDeliveryPickupPoint(null);
                             }, (option) => shipmentTranslations.deliveryMethod[option])}
                             {deliveryMethod !== "COURIER" && (
-                                <Button variant="outlined" startIcon={<Map />} onClick={() => setDeliveryMapOpen(true)}>
+                                <Button variant="outlined" startIcon={<Map />} onClick={openDeliveryPointMap}>
                                     {shipmentTranslations.deliveryPointMap.open}
                                 </Button>
                             )}
@@ -347,7 +454,7 @@ const ShipmentCreate: React.FC = () => {
                     }}
                     receiverCountryCode={receiverCountryCode}
                     selectedPointId={deliveryPickupPoint?.pickupPointId.value || null}
-                    shipmentSize={shipmentSize}
+                    shipmentSize={deliveryPointSearchSize}
                 />
             )}
 

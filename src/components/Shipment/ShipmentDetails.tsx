@@ -654,7 +654,11 @@ const ShipmentDetails: React.FC = () => {
         const similarShipment: ShipmentCreateInitialState = {
             sender: clonePerson(shipment.sender),
             recipient: clonePerson(shipment.recipient),
-            shipmentSize: shipment.shipmentSize,
+            dimensions: shipment.dimensions,
+            weight: shipment.weight,
+            customerReference: shipment.customerReference,
+            contentDescription: shipment.contentDescription,
+            declaredValue: shipment.declaredValue,
             shipmentPriority: shipment.shipmentPriority,
             priceAmount: String(shipment.price?.amount ?? ""),
             currency: shipment.price?.currency || "PLN",
@@ -1307,12 +1311,11 @@ const ShipmentDetails: React.FC = () => {
                                         </div>
 
                                         <div className="shipment-dashboard-metrics">
-                                            <div><span>{pl.shipments.summary.size}</span><strong>{pl.shipments.size[shipment.shipmentSize]}</strong></div>
-                                            <div><span>{pl.shipments.dashboard.weight}</span><strong>{pl.common.dash}</strong></div>
-                                            <div><span>{pl.shipments.dashboard.dimensions}</span><strong>{pl.common.dash}</strong></div>
+                                            <div><span>{pl.shipments.dashboard.weight}</span><strong>{shipment.weight ? `${shipment.weight.value} ${shipment.weight.unit}` : pl.common.dash}</strong></div>
+                                            <div><span>{pl.shipments.dashboard.dimensions}</span><strong>{shipment.dimensions ? `${shipment.dimensions.length} × ${shipment.dimensions.width} × ${shipment.dimensions.height} ${shipment.dimensions.unit}` : pl.common.dash}</strong></div>
                                             <div><span>{pl.shipments.dashboard.volume}</span><strong>{pl.common.dash}</strong></div>
                                             <div><span>{pl.shipments.dashboard.pieces}</span><strong>{pl.common.dash}</strong></div>
-                                            <div><span>{pl.shipments.dashboard.declaredValue}</span><strong>{formatPrice(shipment)}</strong></div>
+                                            <div><span>{pl.shipments.dashboard.declaredValue}</span><strong>{shipment.declaredValue ? `${shipment.declaredValue.amount.toLocaleString(pl.common.locale)} ${shipment.declaredValue.currency}` : pl.common.dash}</strong></div>
                                         </div>
 
                                         <div className="shipment-dashboard-additional">

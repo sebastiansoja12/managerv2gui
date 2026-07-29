@@ -15,6 +15,22 @@ export interface MoneyApi {
     currency: string;
 }
 
+export type LengthUnitDto = "MM" | "CM" | "M";
+
+export type WeightUnitDto = "G" | "KG";
+
+export interface DimensionsApi {
+    length: number;
+    width: number;
+    height: number;
+    unit: LengthUnitDto;
+}
+
+export interface WeightApi {
+    value: number;
+    unit: WeightUnitDto;
+}
+
 export interface PersonApi {
     firstName: string;
     lastName: string;
@@ -99,7 +115,12 @@ export interface ShipmentDto {
     operatorId?: OperatorIdDto | null;
     sender: PersonApi;
     recipient: PersonApi;
-    shipmentSize: ShipmentSizeDto;
+    shipmentSize?: ShipmentSizeDto | null;
+    dimensions?: DimensionsApi | null;
+    weight?: WeightApi | null;
+    customerReference?: string | null;
+    contentDescription?: string | null;
+    declaredValue?: MoneyApi | null;
     destination: DepartmentCodeValue;
     originDepartmentId?: DepartmentIdDto | null;
     pickupPointId?: PickupPointIdDto | null;
@@ -134,7 +155,11 @@ export interface TrackingNumberDto {
 export interface ShipmentCreateRequestApi {
     sender: PersonApi;
     recipient: PersonApi;
-    shipmentSize: ShipmentSizeDto;
+    dimensions: DimensionsApi;
+    weight: WeightApi;
+    customerReference?: string;
+    contentDescription?: string;
+    declaredValue?: MoneyApi;
     price: MoneyApi;
     dangerousGood?: DangerousGoodApi;
     shipmentPriority: ShipmentPriorityDto;
@@ -154,7 +179,12 @@ export interface ShipmentCreateResponseDto {
 export interface ShipmentCreateInitialState {
     sender: PersonApi;
     recipient: PersonApi;
-    shipmentSize: ShipmentSizeDto;
+    shipmentSize?: ShipmentSizeDto;
+    dimensions?: DimensionsApi | null;
+    weight?: WeightApi | null;
+    customerReference?: string | null;
+    contentDescription?: string | null;
+    declaredValue?: MoneyApi | null;
     shipmentPriority: ShipmentPriorityDto;
     priceAmount: string;
     currency: string;
