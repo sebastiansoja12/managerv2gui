@@ -120,6 +120,9 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
     const [appliedLookupTrackingNumber, setAppliedLookupTrackingNumber] = useState<string>("");
     const [appliedLookupId, setAppliedLookupId] = useState<string>("");
     const [activeStatus, setActiveStatus] = useState<ShipmentStatusDto>(DEFAULT_STATUS_FILTER);
+    const [dangerousGoodsFilter, setDangerousGoodsFilter] = useState<"ALL" | "YES" | "NO">("ALL");
+    const [unNumberFilter, setUnNumberFilter] = useState<string>("");
+    const [hazardClassFilter, setHazardClassFilter] = useState<string>("");
     const [shipments, setShipments] = useState<ShipmentDto[]>(shipmentListCache.shipments);
     const [notice, setNotice] = useState<Notice | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
@@ -133,8 +136,22 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
             .filter((shipment) => {
                 const trackingNumber = shipment.trackingNumber?.value || "";
                 return !appliedLookupTrackingNumber || trackingNumber.toLowerCase().includes(appliedLookupTrackingNumber.toLowerCase());
-            });
-    }, [activeStatus, appliedLookupId, appliedLookupTrackingNumber, shipments]);
+            })
+            .filter((shipment) => dangerousGoodsFilter === "ALL"
+                || (dangerousGoodsFilter === "YES" ? Boolean(shipment.dangerousGood) : !shipment.dangerousGood))
+            .filter((shipment) => !unNumberFilter
+                || shipment.dangerousGood?.unNumber.toLowerCase().includes(unNumberFilter.trim().toLowerCase()))
+            .filter((shipment) => !hazardClassFilter
+                || shipment.dangerousGood?.hazardClass.toLowerCase().includes(hazardClassFilter.trim().toLowerCase()));
+    }, [
+        activeStatus,
+        appliedLookupId,
+        appliedLookupTrackingNumber,
+        dangerousGoodsFilter,
+        hazardClassFilter,
+        shipments,
+        unNumberFilter,
+    ]);
 
     const shipmentRows = useMemo(() => {
         return visibleShipments.map(mapShipmentToRow);
@@ -431,6 +448,29 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
                         <Button disabled={!appliedLookupId && !appliedLookupTrackingNumber} variant="text" onClick={clearLocalFilters}>
                             {shipmentTranslations.table.clearFilters}
                         </Button>
+                        <TextField
+                            label={shipmentTranslations.table.hasDangerousGoods}
+                            select
+                            size="small"
+                            value={dangerousGoodsFilter}
+                            onChange={(event) => setDangerousGoodsFilter(event.target.value as "ALL" | "YES" | "NO")}
+                        >
+                            <MenuItem value="ALL">{pl.common.all}</MenuItem>
+                            <MenuItem value="YES">{shipmentTranslations.dangerousGood.yes}</MenuItem>
+                            <MenuItem value="NO">{shipmentTranslations.dangerousGood.no}</MenuItem>
+                        </TextField>
+                        <TextField
+                            label={shipmentTranslations.form.fields.unNumber}
+                            size="small"
+                            value={unNumberFilter}
+                            onChange={(event) => setUnNumberFilter(event.target.value)}
+                        />
+                        <TextField
+                            label={shipmentTranslations.form.fields.hazardClass}
+                            size="small"
+                            value={hazardClassFilter}
+                            onChange={(event) => setHazardClassFilter(event.target.value)}
+                        />
                     </div>
 
                     <div className="tm-table-wrap">
@@ -446,6 +486,7 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
                                 <th><Person fontSize="small" /> {shipmentTranslations.table.columns.user}</th>
                                 <th><Route fontSize="small" /> {shipmentTranslations.table.columns.destination}</th>
                                 <th>{shipmentTranslations.table.columns.status}</th>
+                                <th>{shipmentTranslations.table.columns.dangerousGoods}</th>
                                 <th />
                             </tr>
                             </thead>
@@ -484,6 +525,19 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
                                                 size="small"
                                             />
                                         </td>
+                                        <td>
+                                            <Chip
+                                                aria-label={shipment.dangerousGood
+                                                    ? shipmentTranslations.dangerousGood.presentAccessible
+                                                    : shipmentTranslations.dangerousGood.absentAccessible}
+                                                className={shipment.dangerousGood
+                                                    ? "shipment-dangerous-chip-active"
+                                                    : "shipment-dangerous-chip-empty"}
+                                                label={shipment.dangerousGood?.unNumber
+                                                    || shipmentTranslations.dangerousGood.emptyStatus}
+                                                size="small"
+                                            />
+                                        </td>
                                         <td className="tm-actions-cell">
                                             <button
                                                 aria-label={shipmentTranslations.table.rowActions.replace("{id}", row.id)}
@@ -499,7 +553,7 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
                             })}
                             {!loading && shipmentRows.length === 0 ? (
                                 <tr>
-                                    <td className="tm-empty-row" colSpan={10}>{shipmentTranslations.table.empty}</td>
+                                    <td className="tm-empty-row" colSpan={11}>{shipmentTranslations.table.empty}</td>
                                 </tr>
                             ) : undefined}
                             </tbody>
