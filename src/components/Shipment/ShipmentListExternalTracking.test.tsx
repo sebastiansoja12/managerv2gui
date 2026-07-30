@@ -120,9 +120,6 @@ describe("external tracking search", () => {
         render(<MemoryRouter><ShipmentList/></MemoryRouter>);
 
         fireEvent.click(screen.getByRole("button", {name: pl.shipments.actions.filters}));
-        fireEvent.change(screen.getByLabelText(pl.shipments.form.fields.size), {
-            target: {value: "BIG"},
-        });
         fireEvent.change(screen.getByLabelText(pl.shipments.table.columns.sender), {
             target: {value: "Anna Nowak"},
         });
@@ -132,7 +129,6 @@ describe("external tracking search", () => {
         fireEvent.click(await screen.findByRole("button", {name: pl.shipments.filters.apply}));
 
         await waitFor(() => expect(ShipmentService.search).toHaveBeenCalledWith(expect.objectContaining({
-            shipmentSizes: ["BIG"],
             senderName: "Anna Nowak",
             minPrice: 25.5,
             page: 0,

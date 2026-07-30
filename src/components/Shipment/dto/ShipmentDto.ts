@@ -115,7 +115,6 @@ export interface ShipmentDto {
     operatorId?: OperatorIdDto | null;
     sender: PersonApi;
     recipient: PersonApi;
-    shipmentSize?: ShipmentSizeDto | null;
     dimensions?: DimensionsApi | null;
     weight?: WeightApi | null;
     customerReference?: string | null;
@@ -179,7 +178,6 @@ export interface ShipmentCreateResponseDto {
 export interface ShipmentCreateInitialState {
     sender: PersonApi;
     recipient: PersonApi;
-    shipmentSize?: ShipmentSizeDto;
     dimensions?: DimensionsApi | null;
     weight?: WeightApi | null;
     customerReference?: string | null;
@@ -228,7 +226,6 @@ export interface ShipmentSearchRequestApi {
     shipmentId?: string | null;
     trackingNumber?: string | null;
     shipmentStatuses?: ShipmentStatusDto[];
-    shipmentSizes?: ShipmentSizeDto[];
     shipmentPriorities?: ShipmentPriorityDto[];
     senderName?: string | null;
     recipientName?: string | null;
@@ -296,8 +293,6 @@ export type DeliveryMethodDto = "COURIER" | "PICKUP_POINT" | "LOCKER";
 export type ShipmentTypeDto = "PARENT" | "CHILD";
 
 export type SignatureMethod = "DIGITAL" | "HANDWRITTEN" | "BIOMETRIC" | "NONE";
-
-export const shipmentSizes: ShipmentSizeDto[] = ["TINY", "SMALL", "MEDIUM", "AVERAGE", "BIG", "CUSTOM", "TEST"];
 
 export const shipmentPriorities: ShipmentPriorityDto[] = ["LOW", "MEDIUM", "HIGH", "EXPRESS"];
 
