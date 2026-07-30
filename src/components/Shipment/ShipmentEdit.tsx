@@ -19,11 +19,14 @@ import ShipmentService from "../../hooks/ShipmentService";
 import {ApiErrorResponse} from "../../api/ApiResult";
 import {
     departmentCodeValue,
+    LengthUnitDto,
     PersonApi,
     PersonType,
     ShipmentDto,
     shipmentChangeStatuses,
     ShipmentStatusDto,
+    ShipmentUpdateRequestApi,
+    WeightUnitDto,
 } from "./dto/ShipmentDto";
 import pl from "../../i18n/translate";
 import "./styles/shipments.css";
@@ -81,6 +84,16 @@ const ShipmentEdit: React.FC = () => {
     const [status, setStatus] = useState<ShipmentStatusDto>("CREATED");
     const [sender, setSender] = useState<PersonApi>({...emptyPerson});
     const [recipient, setRecipient] = useState<PersonApi>({...emptyPerson});
+    const [length, setLength] = useState<string>("");
+    const [width, setWidth] = useState<string>("");
+    const [height, setHeight] = useState<string>("");
+    const [lengthUnit, setLengthUnit] = useState<LengthUnitDto>("CM");
+    const [weight, setWeight] = useState<string>("");
+    const [weightUnit, setWeightUnit] = useState<WeightUnitDto>("KG");
+    const [contentDescription, setContentDescription] = useState<string>("");
+    const [customerReference, setCustomerReference] = useState<string>("");
+    const [declaredValueAmount, setDeclaredValueAmount] = useState<string>("");
+    const [declaredValueCurrency, setDeclaredValueCurrency] = useState<string>("PLN");
     const [loading, setLoading] = useState<boolean>(true);
     const [saving, setSaving] = useState<boolean>(false);
     const [savingPersonType, setSavingPersonType] = useState<PersonType | null>(null);
@@ -92,6 +105,18 @@ const ShipmentEdit: React.FC = () => {
     const decodedTrackingNumber = trackingNumber ? decodeURIComponent(trackingNumber) : "";
     const personDialogSource = personDialogType === "SENDER" ? shipment?.sender : shipment?.recipient;
     const personDialogChanged = personDialogType ? !personsEqual(personDialogSource, personDraft) : false;
+    const shipmentDetailsChanged = Boolean(shipment && (
+        length !== String(shipment.dimensions?.length ?? "")
+        || width !== String(shipment.dimensions?.width ?? "")
+        || height !== String(shipment.dimensions?.height ?? "")
+        || lengthUnit !== (shipment.dimensions?.unit || "CM")
+        || weight !== String(shipment.weight?.value ?? "")
+        || weightUnit !== (shipment.weight?.unit || "KG")
+        || contentDescription !== (shipment.contentDescription || "")
+        || customerReference !== (shipment.customerReference || "")
+        || declaredValueAmount !== String(shipment.declaredValue?.amount ?? "")
+        || declaredValueCurrency !== (shipment.declaredValue?.currency || "PLN")
+    ));
 
     const showError = (error: unknown, fallback = pl.shipments.messages.operationFailed) => {
         const apiError = error as ApiErrorResponse;
@@ -106,6 +131,16 @@ const ShipmentEdit: React.FC = () => {
         setStatus(data.shipmentStatus);
         setSender(clonePerson(data.sender));
         setRecipient(clonePerson(data.recipient));
+        setLength(String(data.dimensions?.length ?? ""));
+        setWidth(String(data.dimensions?.width ?? ""));
+        setHeight(String(data.dimensions?.height ?? ""));
+        setLengthUnit(data.dimensions?.unit || "CM");
+        setWeight(String(data.weight?.value ?? ""));
+        setWeightUnit(data.weight?.unit || "KG");
+        setContentDescription(data.contentDescription || "");
+        setCustomerReference(data.customerReference || "");
+        setDeclaredValueAmount(String(data.declaredValue?.amount ?? ""));
+        setDeclaredValueCurrency(data.declaredValue?.currency || "PLN");
         setPersonDialogType(null);
         setPersonDraft({...emptyPerson});
     };
@@ -148,9 +183,53 @@ const ShipmentEdit: React.FC = () => {
             return;
         }
 
+        if (shipmentDetailsChanged) {
+            const measurements = [length, width, height, weight].map(Number);
+            if (!measurements.every((value) => Number.isFinite(value) && value > 0)) {
+                setNotice({severity: "error", message: pl.shipments.messages.measurementsRequired});
+                return;
+            }
+            if (declaredValueAmount.trim()
+                && (!Number.isFinite(Number(declaredValueAmount)) || Number(declaredValueAmount) < 0)) {
+                setNotice({severity: "error", message: pl.shipments.messages.declaredValueInvalid});
+                return;
+            }
+        }
+
         setSaving(true);
         try {
-            if (status !== shipment.shipmentStatus) {
+            if (shipmentDetailsChanged) {
+                const request: ShipmentUpdateRequestApi = {
+                    shipmentId: shipment.shipmentId,
+                    sender,
+                    recipient,
+                    destination: {value: departmentCodeValue(shipment.destination)},
+                    dimensions: {
+                        length: Number(length),
+                        width: Number(width),
+                        height: Number(height),
+                        unit: lengthUnit,
+                    },
+                    weight: {value: Number(weight), unit: weightUnit},
+                    ...(contentDescription.trim() ? {contentDescription: contentDescription.trim()} : {}),
+                    ...(customerReference.trim() ? {customerReference: customerReference.trim()} : {}),
+                    ...(declaredValueAmount.trim() ? {
+                        declaredValue: {amount: Number(declaredValueAmount), currency: declaredValueCurrency},
+                    } : {}),
+                    price: shipment.price,
+                    dangerousGood: shipment.dangerousGood || null,
+                    shipmentPriority: shipment.shipmentPriority,
+                    shipmentStatus: status,
+                    issuerCountryCode: shipment.originCountry || "PL",
+                    receiverCountryCode: shipment.destinationCountry || "DE",
+                    shipmentConfiguration: {
+                        forceUpdate: false,
+                        publishInReturnManager: false,
+                        customRerouteDepartment: true,
+                    },
+                };
+                await ShipmentService.update(request);
+            } else if (status !== shipment.shipmentStatus) {
                 await ShipmentService.updateStatus({
                     shipmentId: shipment.shipmentId,
                     shipmentStatus: status,
@@ -161,9 +240,14 @@ const ShipmentEdit: React.FC = () => {
                 ? await ShipmentService.getByTrackingNumber(shipment.trackingNumber.value)
                 : await ShipmentService.get(shipment.shipmentId.value);
             applyShipment(response.data);
-            setNotice({severity: "success", message: pl.shipments.messages.statusSaveSuccess});
+            setNotice({
+                severity: "success",
+                message: shipmentDetailsChanged ? pl.shipments.messages.saveSuccess : pl.shipments.messages.statusSaveSuccess,
+            });
         } catch (error) {
-            showError(error, pl.shipments.messages.statusSaveError);
+            showError(error, shipmentDetailsChanged
+                ? pl.shipments.messages.saveError
+                : pl.shipments.messages.statusSaveError);
         } finally {
             setSaving(false);
         }
@@ -314,7 +398,8 @@ const ShipmentEdit: React.FC = () => {
                             {pl.common.refresh}
                         </Button>
                         <Button
-                            disabled={loading || saving || !shipment || status === shipment.shipmentStatus}
+                            disabled={loading || saving || !shipment
+                                || (status === shipment.shipmentStatus && !shipmentDetailsChanged)}
                             startIcon={<Save />}
                             variant="contained"
                             onClick={saveShipment}
@@ -354,6 +439,38 @@ const ShipmentEdit: React.FC = () => {
                                 <div>
                                     <span>{pl.shipments.summary.priority}</span>
                                     <strong>{pl.shipments.priority[shipment.shipmentPriority]}</strong>
+                                </div>
+                            </section>
+
+                            <section className="shipment-edit-section">
+                                <div className="shipment-edit-section-header">
+                                    <Typography variant="h6">{pl.shipments.form.sections.shipmentData}</Typography>
+                                </div>
+                                <div className="shipment-details-grid">
+                                    <TextField label={pl.shipments.form.fields.length} size="small" type="number" value={length}
+                                        onChange={(event) => setLength(event.target.value)} />
+                                    <TextField label={pl.shipments.form.fields.width} size="small" type="number" value={width}
+                                        onChange={(event) => setWidth(event.target.value)} />
+                                    <TextField label={pl.shipments.form.fields.height} size="small" type="number" value={height}
+                                        onChange={(event) => setHeight(event.target.value)} />
+                                    <TextField label={pl.shipments.form.fields.lengthUnit} select size="small" value={lengthUnit}
+                                        onChange={(event) => setLengthUnit(event.target.value as LengthUnitDto)}>
+                                        {(["MM", "CM", "M"] as const).map((unit) => <MenuItem key={unit} value={unit}>{unit}</MenuItem>)}
+                                    </TextField>
+                                    <TextField label={pl.shipments.form.fields.weight} size="small" type="number" value={weight}
+                                        onChange={(event) => setWeight(event.target.value)} />
+                                    <TextField label={pl.shipments.form.fields.weightUnit} select size="small" value={weightUnit}
+                                        onChange={(event) => setWeightUnit(event.target.value as WeightUnitDto)}>
+                                        {(["G", "KG"] as const).map((unit) => <MenuItem key={unit} value={unit}>{unit}</MenuItem>)}
+                                    </TextField>
+                                    <TextField label={pl.shipments.form.fields.contentDescription} size="small" value={contentDescription}
+                                        onChange={(event) => setContentDescription(event.target.value)} />
+                                    <TextField label={pl.shipments.form.fields.customerReference} size="small" value={customerReference}
+                                        onChange={(event) => setCustomerReference(event.target.value)} />
+                                    <TextField label={pl.shipments.form.fields.declaredValue} size="small" type="number" value={declaredValueAmount}
+                                        onChange={(event) => setDeclaredValueAmount(event.target.value)} />
+                                    <TextField label={pl.shipments.form.fields.currency} size="small" value={declaredValueCurrency}
+                                        onChange={(event) => setDeclaredValueCurrency(event.target.value.toUpperCase())} />
                                 </div>
                             </section>
 

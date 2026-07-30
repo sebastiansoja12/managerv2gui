@@ -201,7 +201,11 @@ export interface ShipmentUpdateRequestApi {
     sender: PersonApi;
     recipient: PersonApi;
     destination: DepartmentCodeDto;
-    shipmentSize: ShipmentSizeDto;
+    dimensions: DimensionsApi;
+    weight: WeightApi;
+    contentDescription?: string;
+    declaredValue?: MoneyApi;
+    customerReference?: string;
     price: MoneyApi;
     dangerousGood: DangerousGoodApi | null;
     shipmentPriority: ShipmentPriorityDto;
