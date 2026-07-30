@@ -8,6 +8,7 @@ jest.mock('axios', () => ({
   __esModule: true,
   default: {
     create: jest.fn(() => ({
+      defaults: {},
       get: jest.fn(),
       interceptors: {
         request: {
@@ -19,6 +20,8 @@ jest.mock('axios', () => ({
       },
       post: jest.fn(),
       put: jest.fn(),
+      patch: jest.fn(),
+      delete: jest.fn(),
       request: jest.fn(),
     })),
   },
