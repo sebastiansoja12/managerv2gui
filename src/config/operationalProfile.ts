@@ -30,6 +30,10 @@ export const isPathAllowedForProfile = (path: string, profile: OperationalProfil
         return true;
     }
 
+    if (/^\/deliveries\/[^/]+\/edit$/.test(path)) {
+        return profile === "warehouse";
+    }
+
     const courierPaths = [
         "/shipment-control-center",
         "/shipment-details",
@@ -52,6 +56,7 @@ export const isPathAllowedForProfile = (path: string, profile: OperationalProfil
         "/couriers",
         "/processes",
         "/returns",
+        "/deliveries",
         "/analytics",
         "/global-configuration",
         "/microservices",

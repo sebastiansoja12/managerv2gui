@@ -210,6 +210,7 @@ function Navbar({
                 {label: pl.home.tiles.shipmentDetails.title, path: '/shipment-details', icon: LocalShipping},
                 {label: pl.navigation.shipmentList, path: '/shipments/list', icon: ShoppingCart},
                 {label: pl.navigation.returns, path: '/returns', icon: Loop},
+                {label: pl.navigation.deliveries, path: '/deliveries', icon: LocalShipping},
                 {label: pl.navigation.shipmentCreate, path: '/shipments/create', icon: LocalShipping},
                 {label: pl.navigation.shipmentScanner, path: '/shipment-scanner', icon: WarehouseRounded},
                 {label: pl.navigation.courierDeliveries, path: '/courier-deliveries', icon: LocalShipping},

@@ -28,9 +28,9 @@ configuration screens, plus a separate super-admin area.
 - Pickup-point catalog with creation, editing, lifecycle actions, filters and a location map.
 - Pickup-point selection from a searchable street/city map during shipment creation and editing; the selected point ID is stored on the shipment while its code is shown to users.
 - Shipment history map with department routes and translated event labels.
-- Dangerous goods form and shipment dangerous-good handling.
 - Shipment document download, QR label preview and print support.
 - Return registration, list and detail views, processing/completion/cancellation actions, reason updates and token validation.
+- Delivery register with recent deliveries, an edit screen with step history and delivery method, and a cancel action. It uses Manager `GET /deliveries`, `GET /deliveries/{id}`, `PUT /deliveries/{id}/method`, and `POST /deliveries/{id}/cancel`.
 - Department list and department creation.
 - Courier list, details and courier creation.
 - Process list and process details.
