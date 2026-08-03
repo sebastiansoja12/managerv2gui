@@ -3,11 +3,8 @@ import {
     Alert,
     Box,
     Button,
-    Checkbox,
-    FormControlLabel,
     MenuItem,
     Snackbar,
-    Stack,
     TextField,
     Typography,
 } from "components/ui";
@@ -17,15 +14,16 @@ import ShipmentService from "../../hooks/ShipmentService";
 import {ApiErrorResponse} from "../../api/ApiResult";
 import {
     countryCodes,
-    DangerousGoodApi,
     DeliveryMethodDto,
     deliveryMethods,
+    PackagingTypeDto,
     PersonApi,
     PickupMethodDto,
     pickupMethods,
     ShipmentCreateInitialState,
     ShipmentCreateRequestApi,
     ShipmentPriorityDto,
+    ShipmentServiceLevelDto,
     shipmentPriorities,
     ShipmentSizeDto,
     LengthUnitDto,
@@ -33,7 +31,6 @@ import {
 } from "./dto/ShipmentDto";
 import pl from "../../i18n/translate";
 import {PickupPointSummary} from "../PickupPoints/model/PickupPoint";
-import DangerousGoodForm, {createEmptyDangerousGood, isDangerousGoodValid} from "./DangerousGoodForm";
 import ShipmentDeliveryPointMapDialog from "./ShipmentDeliveryPointMapDialog";
 import "./styles/shipments.css";
 
@@ -54,17 +51,18 @@ const emptyPerson: PersonApi = {
     city: "",
     postalCode: "",
     street: "",
+    countryCode: "PL",
 };
 
 const initialShipmentPriority: ShipmentPriorityDto = "MEDIUM";
 const initialPriceAmount = "15";
 const initialCurrency = "PLN";
-const initialIssuerCountryCode = "PL";
-const initialReceiverCountryCode = "PL";
 const initialPickupMethod: PickupMethodDto = "DEPARTMENT";
 const initialDeliveryMethod: DeliveryMethodDto = "COURIER";
 const lengthUnits: LengthUnitDto[] = ["MM", "CM", "M"];
 const weightUnits: WeightUnitDto[] = ["G", "KG"];
+const packagingTypes: Array<PackagingTypeDto | ""> = ["", "ENVELOPE", "BAG", "BOX", "TUBE", "CRATE", "OTHER"];
+const serviceLevels: Array<ShipmentServiceLevelDto | ""> = ["", "ECONOMY", "STANDARD", "EXPRESS"];
 
 const legacySizeForPickupPointSearch = (
     length: string,
@@ -96,6 +94,7 @@ const legacySizeForPickupPointSearch = (
 const clonePerson = (person?: PersonApi): PersonApi => ({
     ...emptyPerson,
     ...(person || {}),
+    countryCode: person?.countryCode || "PL",
 });
 
 const ShipmentCreate: React.FC = () => {
@@ -118,22 +117,27 @@ const ShipmentCreate: React.FC = () => {
     const [declaredValueAmount, setDeclaredValueAmount] = useState<string>(
         similarShipment?.declaredValue?.amount?.toString() || "",
     );
+    const [declaredValueCurrency, setDeclaredValueCurrency] = useState<string>(
+        similarShipment?.declaredValue?.currency || similarShipment?.currency || initialCurrency,
+    );
     const [shipmentPriority, setShipmentPriority] = useState<ShipmentPriorityDto>(similarShipment?.shipmentPriority || initialShipmentPriority);
+    const [packagingType, setPackagingType] = useState<PackagingTypeDto | "">(similarShipment?.packagingType || "");
+    const [serviceLevel, setServiceLevel] = useState<ShipmentServiceLevelDto | "">(similarShipment?.serviceLevel || "");
     const [priceAmount, setPriceAmount] = useState<string>(similarShipment?.priceAmount || initialPriceAmount);
     const [currency, setCurrency] = useState<string>(similarShipment?.currency || initialCurrency);
-    const [issuerCountryCode, setIssuerCountryCode] = useState<string>(similarShipment?.issuerCountryCode || initialIssuerCountryCode);
-    const [receiverCountryCode, setReceiverCountryCode] = useState<string>(similarShipment?.receiverCountryCode || initialReceiverCountryCode);
     const [pickupMethod, setPickupMethod] = useState<PickupMethodDto>(similarShipment?.pickupMethod || initialPickupMethod);
     const [deliveryMethod, setDeliveryMethod] = useState<DeliveryMethodDto>(similarShipment?.deliveryMethod || initialDeliveryMethod);
     const [deliveryMapOpen, setDeliveryMapOpen] = useState(false);
     const [deliveryPickupPoint, setDeliveryPickupPoint] = useState<PickupPointSummary | null>(null);
+    const [deliveryPickupPointId, setDeliveryPickupPointId] = useState<string>(
+        similarShipment?.deliveryPickupPointId?.value || "",
+    );
     const [pickupPointId, setPickupPointId] = useState<string>(similarShipment?.pickupPointId || "");
-    const [dangerousEnabled, setDangerousEnabled] = useState<boolean>(Boolean(similarShipment?.dangerousGood));
-    const [dangerousGood, setDangerousGood] = useState<DangerousGoodApi>(() => (
-        similarShipment?.dangerousGood
-            ? {...similarShipment.dangerousGood}
-            : createEmptyDangerousGood()
-    ));
+
+    const clearDeliveryPickupPoint = () => {
+        setDeliveryPickupPoint(null);
+        setDeliveryPickupPointId("");
+    };
 
     const textField = (
         label: string,
@@ -200,6 +204,17 @@ const ShipmentCreate: React.FC = () => {
                 {textField(shipmentTranslations.form.fields.city, person.city, (value) => handlePersonChange(person, setPerson, "city", value))}
                 {textField(shipmentTranslations.form.fields.postalCode, person.postalCode, (value) => handlePersonChange(person, setPerson, "postalCode", value))}
                 {textField(shipmentTranslations.form.fields.street, person.street, (value) => handlePersonChange(person, setPerson, "street", value))}
+                {selectField(
+                    tone === "sender" ? shipmentTranslations.form.fields.issuerCountry : shipmentTranslations.form.fields.receiverCountry,
+                    person.countryCode || "PL",
+                    countryCodes,
+                    (value) => {
+                        setPerson({...person, countryCode: value});
+                        if (tone === "receiver") {
+                            clearDeliveryPickupPoint();
+                        }
+                    },
+                )}
             </div>
         </div>
     );
@@ -220,23 +235,22 @@ const ShipmentCreate: React.FC = () => {
         ...(customerReference.trim() ? {customerReference: customerReference.trim()} : {}),
         ...(contentDescription.trim() ? {contentDescription: contentDescription.trim()} : {}),
         ...(declaredValueAmount.trim() ? {
-            declaredValue: {amount: Number(declaredValueAmount), currency},
+            declaredValue: {amount: Number(declaredValueAmount), currency: declaredValueCurrency},
         } : {}),
         price: {
             amount: Number(priceAmount) || 0,
             currency,
         },
-        ...(dangerousEnabled ? {dangerousGood} : {}),
         shipmentPriority,
-        issuerCountryCode,
-        receiverCountryCode,
+        ...(packagingType ? {packagingType} : {}),
+        ...(serviceLevel ? {serviceLevel} : {}),
         pickupMethod,
         deliveryMethod,
         ...(["PICKUP_POINT", "LOCKER"].includes(pickupMethod) && pickupPointId.trim()
             ? {pickupPointId: {value: pickupPointId.trim()}}
             : {}),
-        ...(deliveryMethod !== "COURIER" && deliveryPickupPoint
-            ? {deliveryPickupPointId: deliveryPickupPoint.pickupPointId}
+        ...(deliveryMethod !== "COURIER" && deliveryPickupPointId
+            ? {deliveryPickupPointId: {value: deliveryPickupPointId}}
             : {}),
     });
 
@@ -252,18 +266,18 @@ const ShipmentCreate: React.FC = () => {
         setContentDescription("");
         setCustomerReference("");
         setDeclaredValueAmount("");
+        setDeclaredValueCurrency(initialCurrency);
         setShipmentPriority(initialShipmentPriority);
+        setPackagingType("");
+        setServiceLevel("");
         setPriceAmount(initialPriceAmount);
         setCurrency(initialCurrency);
-        setIssuerCountryCode(initialIssuerCountryCode);
-        setReceiverCountryCode(initialReceiverCountryCode);
         setPickupMethod(initialPickupMethod);
         setDeliveryMethod(initialDeliveryMethod);
         setDeliveryMapOpen(false);
         setDeliveryPickupPoint(null);
+        setDeliveryPickupPointId("");
         setPickupPointId("");
-        setDangerousEnabled(false);
-        setDangerousGood(createEmptyDangerousGood());
     };
 
     const showError = (error: unknown) => {
@@ -283,12 +297,8 @@ const ShipmentCreate: React.FC = () => {
             setNotice({severity: "error", message: shipmentTranslations.messages.declaredValueInvalid});
             return;
         }
-        if (deliveryMethod !== "COURIER" && !deliveryPickupPoint) {
+        if (deliveryMethod !== "COURIER" && !deliveryPickupPointId) {
             setNotice({severity: "error", message: shipmentTranslations.messages.deliveryPickupPointRequired});
-            return;
-        }
-        if (dangerousEnabled && !isDangerousGoodValid(dangerousGood)) {
-            setNotice({severity: "error", message: shipmentTranslations.dangerousGood.invalid});
             return;
         }
         setLoading(true);
@@ -350,45 +360,45 @@ const ShipmentCreate: React.FC = () => {
                     <div className="shipments-form-grid-three shipments-create-data-grid">
                         {textField(shipmentTranslations.form.fields.length, length, (value) => {
                             setLength(value);
-                            setDeliveryPickupPoint(null);
+                            clearDeliveryPickupPoint();
                         }, "number")}
                         {textField(shipmentTranslations.form.fields.width, width, (value) => {
                             setWidth(value);
-                            setDeliveryPickupPoint(null);
+                            clearDeliveryPickupPoint();
                         }, "number")}
                         {textField(shipmentTranslations.form.fields.height, height, (value) => {
                             setHeight(value);
-                            setDeliveryPickupPoint(null);
+                            clearDeliveryPickupPoint();
                         }, "number")}
                         {selectField(shipmentTranslations.form.fields.lengthUnit, lengthUnit, lengthUnits, (value) => {
                             setLengthUnit(value);
-                            setDeliveryPickupPoint(null);
+                            clearDeliveryPickupPoint();
                         })}
                         {textField(shipmentTranslations.form.fields.weight, weight, (value) => {
                             setWeight(value);
-                            setDeliveryPickupPoint(null);
+                            clearDeliveryPickupPoint();
                         }, "number")}
                         {selectField(shipmentTranslations.form.fields.weightUnit, weightUnit, weightUnits, (value) => {
                             setWeightUnit(value);
-                            setDeliveryPickupPoint(null);
+                            clearDeliveryPickupPoint();
                         })}
                         {textField(shipmentTranslations.form.fields.contentDescription, contentDescription, setContentDescription)}
                         {textField(shipmentTranslations.form.fields.customerReference, customerReference, setCustomerReference)}
                         {textField(shipmentTranslations.form.fields.declaredValue, declaredValueAmount, setDeclaredValueAmount, "number")}
+                        {textField(shipmentTranslations.form.fields.declaredValueCurrency, declaredValueCurrency, setDeclaredValueCurrency)}
                         {selectField(shipmentTranslations.form.fields.priority, shipmentPriority, shipmentPriorities, setShipmentPriority, (option) => shipmentTranslations.priority[option])}
+                        {selectField(shipmentTranslations.form.fields.packagingType, packagingType, packagingTypes,
+                            setPackagingType, (option) => option ? shipmentTranslations.packagingType[option] : pl.common.dash)}
+                        {selectField(shipmentTranslations.form.fields.serviceLevel, serviceLevel, serviceLevels,
+                            setServiceLevel, (option) => option ? shipmentTranslations.serviceLevel[option] : pl.common.dash)}
                         {textField(shipmentTranslations.form.fields.amount, priceAmount, setPriceAmount, "number")}
                         {textField(shipmentTranslations.form.fields.currency, currency, setCurrency)}
-                        {selectField(shipmentTranslations.form.fields.issuerCountry, issuerCountryCode, countryCodes, setIssuerCountryCode)}
-                        {selectField(shipmentTranslations.form.fields.receiverCountry, receiverCountryCode, countryCodes, (value) => {
-                            setReceiverCountryCode(value);
-                            setDeliveryPickupPoint(null);
-                        })}
                         {selectField(shipmentTranslations.form.fields.pickupMethod, pickupMethod, pickupMethods, setPickupMethod, (option) => shipmentTranslations.pickupMethod[option])}
                         <div className="shipment-delivery-method-field">
                             {selectField(shipmentTranslations.form.fields.deliveryMethod, deliveryMethod, deliveryMethods, (value) => {
                                 setDeliveryMethod(value);
                                 setDeliveryMapOpen(false);
-                                setDeliveryPickupPoint(null);
+                                clearDeliveryPickupPoint();
                             }, (option) => shipmentTranslations.deliveryMethod[option])}
                             {deliveryMethod !== "COURIER" && (
                                 <Button variant="outlined" startIcon={<Map />} onClick={openDeliveryPointMap}>
@@ -396,14 +406,16 @@ const ShipmentCreate: React.FC = () => {
                                 </Button>
                             )}
                         </div>
-                        {deliveryMethod !== "COURIER" && deliveryPickupPoint ? (
+                        {deliveryMethod !== "COURIER" && deliveryPickupPointId ? (
                             <div className="shipment-delivery-point-selection">
                                 <span>{shipmentTranslations.deliveryPointMap.selected}</span>
-                                <strong>{deliveryPickupPoint.code} · {deliveryPickupPoint.name}</strong>
-                                <small>{deliveryPickupPoint.address
-                                    ? `${deliveryPickupPoint.address.street} ${deliveryPickupPoint.address.buildingNumber}, ${deliveryPickupPoint.address.city}`
-                                    : pl.common.dash}</small>
-                                <Button onClick={() => setDeliveryPickupPoint(null)} variant="text">
+                                <strong>{deliveryPickupPoint
+                                    ? `${deliveryPickupPoint.code} · ${deliveryPickupPoint.name}`
+                                    : similarShipment?.deliveryPickupPointCode || deliveryPickupPointId}</strong>
+                                {deliveryPickupPoint?.address ? <small>
+                                    {`${deliveryPickupPoint.address.street} ${deliveryPickupPoint.address.buildingNumber}, ${deliveryPickupPoint.address.city}`}
+                                </small> : null}
+                                <Button onClick={clearDeliveryPickupPoint} variant="text">
                                     {shipmentTranslations.deliveryPointMap.removeSelection}
                                 </Button>
                             </div>
@@ -416,25 +428,6 @@ const ShipmentCreate: React.FC = () => {
                     {personFields(shipmentTranslations.form.sections.sender, sender, setSender, "sender")}
                     {personFields(shipmentTranslations.form.sections.receiver, recipient, setRecipient, "receiver")}
 
-                    <div className="shipments-section shipments-create-section shipments-create-section-dangerous">
-                        <Stack direction="row" alignItems="center" justifyContent="space-between" gap={2}>
-                            <div className="shipments-section-title">{shipmentTranslations.form.sections.dangerousGood}</div>
-                            <FormControlLabel
-                                control={<Checkbox checked={dangerousEnabled} onChange={(event) => {
-                                    setDangerousEnabled(event.target.checked);
-                                    setDeliveryPickupPoint(null);
-                                    if (!event.target.checked) {
-                                        setDangerousGood(createEmptyDangerousGood());
-                                    }
-                                }} />}
-                                label={shipmentTranslations.form.fields.containsDangerousGoods}
-                            />
-                        </Stack>
-                        {dangerousEnabled ? (
-                            <DangerousGoodForm value={dangerousGood} onChange={setDangerousGood} />
-                        ) : null}
-                    </div>
-
                     <div className="shipments-actions">
                         <Button disabled={loading} variant="contained" startIcon={<Save />} onClick={createShipment}>
                             {shipmentTranslations.actions.create}
@@ -446,14 +439,14 @@ const ShipmentCreate: React.FC = () => {
             {deliveryMapOpen && deliveryMethod !== "COURIER" && (
                 <ShipmentDeliveryPointMapDialog
                     deliveryMethod={deliveryMethod}
-                    hasDangerousGoods={dangerousEnabled}
                     onClose={() => setDeliveryMapOpen(false)}
                     onSelect={(point) => {
                         setDeliveryPickupPoint(point);
+                        setDeliveryPickupPointId(point.pickupPointId.value);
                         setDeliveryMapOpen(false);
                     }}
-                    receiverCountryCode={receiverCountryCode}
-                    selectedPointId={deliveryPickupPoint?.pickupPointId.value || null}
+                    receiverCountryCode={recipient.countryCode || "PL"}
+                    selectedPointId={deliveryPickupPointId || null}
                     shipmentSize={deliveryPointSearchSize}
                 />
             )}

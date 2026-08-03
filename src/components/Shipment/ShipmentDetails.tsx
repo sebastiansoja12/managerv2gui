@@ -26,7 +26,6 @@ import {
     CheckCircleOutline,
     Close,
     ContentCopy,
-    Delete,
     DocumentScanner,
     Download,
     Edit,
@@ -62,7 +61,6 @@ import {getBackendErrorMessage} from "../../api/errorMessage";
 import RouteLogRecord from "../RouteLog/model/RouteLogRecord";
 import {
     departmentCodeValue,
-    DangerousGoodApi,
     PersonApi,
     PersonType,
     ShipmentCreateInitialState,
@@ -75,10 +73,6 @@ import pl from "../../i18n/translate";
 import {valueObjectValue} from "../../utils/valueObject";
 import {shipmentEventDescription} from "./shipmentEventDescription";
 import "./styles/shipments.css";
-import DangerousGoodForm, {
-    createEmptyDangerousGood,
-    isDangerousGoodValid,
-} from "./DangerousGoodForm";
 import ShipmentReturnSummary from "./ShipmentReturnSummary";
 import {ReturnPackageDto} from "../Returns/model/ReturnPackage";
 
@@ -237,8 +231,6 @@ const detailUser = (detail: RouteDetail) => detail.username || pl.common.dash;
 
 const detailTerminal = (detail: RouteDetail) => detail.terminalId?.value || detail.zebraId || pl.common.dash;
 
-const formatBoolean = (value: boolean) => value ? pl.shipments.dangerousGood.yes : pl.shipments.dangerousGood.no;
-
 const detailValue = (label: string, value?: React.ReactNode) => (
     <div className="shipment-detail-value">
         <span>{label}</span>
@@ -271,10 +263,6 @@ const ShipmentDetails: React.FC = () => {
     const [personDraft, setPersonDraft] = useState<PersonApi>({...emptyPerson});
     const [statusDialogOpen, setStatusDialogOpen] = useState<boolean>(false);
     const [cancelShipmentDialogOpen, setCancelShipmentDialogOpen] = useState<boolean>(false);
-    const [dangerousGoodDialogOpen, setDangerousGoodDialogOpen] = useState<boolean>(false);
-    const [dangerousGoodDeleteDialogOpen, setDangerousGoodDeleteDialogOpen] = useState<boolean>(false);
-    const [dangerousGoodDraft, setDangerousGoodDraft] = useState<DangerousGoodApi>(createEmptyDangerousGood());
-    const [savingDangerousGood, setSavingDangerousGood] = useState<boolean>(false);
     const [downloadingDocument, setDownloadingDocument] = useState<DocumentAction | null>(null);
     const [operationMenuAnchor, setOperationMenuAnchor] = useState<HTMLElement | null>(null);
     const [qrMenuAnchor, setQrMenuAnchor] = useState<HTMLElement | null>(null);
@@ -293,7 +281,6 @@ const ShipmentDetails: React.FC = () => {
         && !["SENT", "DELIVERY", "RETURN"].includes(shipment.shipmentStatus)
     );
     const shipmentStatusMutable = Boolean(shipment && !["DELIVERY", "CANCELED"].includes(shipment.shipmentStatus));
-    const dangerousGoodMutable = shipmentDataMutable;
 
     const details = useMemo(() => routeDetails(routeLog), [routeLog]);
     const recentDetails = useMemo(() => details.slice(0, 5), [details]);
@@ -360,9 +347,6 @@ const ShipmentDetails: React.FC = () => {
         const warnings: string[] = [];
         if (shipment.locked) {
             warnings.push(pl.shipments.dashboard.lockedWarning);
-        }
-        if (shipment.dangerousGood) {
-            warnings.push(pl.shipments.dashboard.dangerousGoodWarning);
         }
         if (showCancellationWindow && cancellationWindowTimeLeft === 0) {
             warnings.push(pl.shipments.dashboard.cancellationExpiredWarning);
@@ -660,76 +644,19 @@ const ShipmentDetails: React.FC = () => {
             contentDescription: shipment.contentDescription,
             declaredValue: shipment.declaredValue,
             shipmentPriority: shipment.shipmentPriority,
+            packagingType: shipment.packagingType,
+            serviceLevel: shipment.serviceLevel,
             priceAmount: String(shipment.price?.amount ?? ""),
             currency: shipment.price?.currency || "PLN",
-            issuerCountryCode: shipment.sender.countryCode || "PL",
-            receiverCountryCode: shipment.recipient.countryCode || "DE",
             pickupMethod: shipment.pickupMethod || "DEPARTMENT",
             deliveryMethod: shipment.deliveryMethod || "COURIER",
             pickupPointId: shipment.pickupPointId?.value,
-            dangerousGood: shipment.dangerousGood ? {...shipment.dangerousGood} : null,
+            deliveryPickupPointId: shipment.deliveryPickupPointId,
+            deliveryPickupPointCode,
         };
 
         setOperationMenuAnchor(null);
         navigate("/shipments/create", {state: {similarShipment}});
-    };
-
-    const openDangerousGoodDialog = () => {
-        if (!dangerousGoodMutable) {
-            return;
-        }
-        setDangerousGoodDraft(shipment?.dangerousGood
-            ? {...shipment.dangerousGood}
-            : createEmptyDangerousGood());
-        setDangerousGoodDialogOpen(true);
-    };
-
-    const saveDangerousGood = async (replace: boolean) => {
-        if (!shipment || !dangerousGoodMutable) {
-            return;
-        }
-        if (!isDangerousGoodValid(dangerousGoodDraft)) {
-            setNotice({severity: "error", message: pl.shipments.dangerousGood.invalid});
-            return;
-        }
-        setSavingDangerousGood(true);
-        try {
-            const current = shipment.dangerousGood;
-            const patch = current
-                ? Object.fromEntries(
-                    (Object.keys(dangerousGoodDraft) as Array<keyof DangerousGoodApi>)
-                        .filter((field) => dangerousGoodDraft[field] !== current[field])
-                        .map((field) => [field, dangerousGoodDraft[field]])
-                ) as Partial<DangerousGoodApi>
-                : dangerousGoodDraft;
-            const response = current && !replace
-                ? await ShipmentService.patchDangerousGood(shipment.shipmentId.value, patch)
-                : await ShipmentService.putDangerousGood(shipment.shipmentId.value, dangerousGoodDraft);
-            setShipment({...shipment, dangerousGood: response.data});
-            setDangerousGoodDialogOpen(false);
-            setNotice({severity: "success", message: pl.shipments.messages.dangerousGoodSaveSuccess});
-        } catch (error) {
-            showError(error, pl.shipments.messages.dangerousGoodSaveError);
-        } finally {
-            setSavingDangerousGood(false);
-        }
-    };
-
-    const deleteDangerousGood = async () => {
-        if (!shipment || !dangerousGoodMutable) {
-            return;
-        }
-        setSavingDangerousGood(true);
-        try {
-            await ShipmentService.deleteDangerousGood(shipment.shipmentId.value);
-            setShipment({...shipment, dangerousGood: null});
-            setDangerousGoodDeleteDialogOpen(false);
-            setNotice({severity: "success", message: pl.shipments.messages.dangerousGoodDeleteSuccess});
-        } catch (error) {
-            showError(error, pl.shipments.messages.dangerousGoodDeleteError);
-        } finally {
-            setSavingDangerousGood(false);
-        }
     };
 
     const savePerson = async () => {
@@ -819,134 +746,6 @@ const ShipmentDetails: React.FC = () => {
             </div>
         </section>
     );
-
-    const renderDangerousGood = () => {
-        const dangerousGood = shipment?.dangerousGood;
-        const optionalDetails = dangerousGood ? [
-            [pl.shipments.form.fields.hazardDivision, dangerousGood.hazardDivision],
-            [pl.shipments.form.fields.subsidiaryRisk, dangerousGood.subsidiaryRisk],
-            [pl.shipments.form.fields.packingGroup, dangerousGood.packingGroup],
-            [pl.shipments.form.fields.transportCategory, dangerousGood.transportCategory],
-            [pl.shipments.form.fields.tunnelRestrictionCode, dangerousGood.tunnelRestrictionCode],
-            [pl.shipments.form.fields.flashPoint, dangerousGood.flashPoint],
-            [pl.shipments.form.fields.emergencyContact, dangerousGood.emergencyContact],
-            [pl.shipments.form.fields.emergencyContact24h, dangerousGood.emergencyContact24h],
-            [pl.shipments.form.fields.safetyDataSheetReference, dangerousGood.safetyDataSheetReference],
-            [pl.shipments.form.fields.declarationDocumentReference, dangerousGood.declarationDocumentReference],
-            [pl.shipments.form.fields.hazardSymbols, dangerousGood.hazardSymbols],
-            [pl.shipments.form.fields.countryOfOrigin, dangerousGood.countryOfOrigin],
-        ].filter(([, value]) => value !== null && value !== undefined && value !== "") : [];
-
-        return (
-            <section className="shipment-edit-section shipment-details-segment shipment-details-dangerous-good">
-                <div className="shipment-edit-section-header">
-                    <Typography variant="h6">{pl.shipments.form.sections.dangerousGood}</Typography>
-                    <div>
-                        <Chip
-                            className={dangerousGood ? "shipment-dangerous-chip-active" : "shipment-dangerous-chip-empty"}
-                            label={dangerousGood ? pl.shipments.dangerousGood.active : pl.shipments.dangerousGood.emptyStatus}
-                            size="small"
-                        />
-                        <Button
-                            disabled={!dangerousGoodMutable}
-                            size="small"
-                            startIcon={<Edit />}
-                            onClick={openDangerousGoodDialog}
-                        >
-                            {dangerousGood ? pl.common.edit : pl.common.add}
-                        </Button>
-                        {dangerousGood ? (
-                            <Button
-                                color="error"
-                                disabled={!dangerousGoodMutable}
-                                size="small"
-                                startIcon={<Delete />}
-                                onClick={() => setDangerousGoodDeleteDialogOpen(true)}
-                            >
-                                {pl.common.delete}
-                            </Button>
-                        ) : null}
-                    </div>
-                </div>
-
-                {dangerousGood ? (
-                    <>
-                        <div className="shipment-dangerous-good-grid">
-                            <div>
-                                <span>{pl.shipments.form.fields.unNumber}</span>
-                                <strong>{dangerousGood.unNumber}</strong>
-                            </div>
-                            <div>
-                                <span>{pl.shipments.form.fields.properShippingName}</span>
-                                <strong>{dangerousGood.properShippingName}</strong>
-                            </div>
-                            <div>
-                                <span>{pl.shipments.form.fields.hazardClass}</span>
-                                <strong>{dangerousGood.hazardClass}</strong>
-                            </div>
-                            <div>
-                                <span>{pl.shipments.form.fields.quantity}</span>
-                                <strong>{`${dangerousGood.quantity} ${dangerousGood.quantityUnit}`}</strong>
-                            </div>
-                            <div>
-                                <span>{pl.shipments.form.fields.packageCount}</span>
-                                <strong>{dangerousGood.packageCount}</strong>
-                            </div>
-                            <div>
-                                <span>{pl.shipments.form.fields.packagingType}</span>
-                                <strong>{dangerousGood.packagingType}</strong>
-                            </div>
-                            <div>
-                                <span>{pl.shipments.form.fields.regulationType}</span>
-                                <strong>{dangerousGood.regulationType}</strong>
-                            </div>
-                            <div>
-                                <span>{pl.shipments.form.fields.transportMode}</span>
-                                <strong>{dangerousGood.transportMode}</strong>
-                            </div>
-                            {optionalDetails.map(([label, value]) => (
-                                <div key={String(label)}>
-                                    <span>{label}</span>
-                                    <strong>{String(value)}</strong>
-                                </div>
-                            ))}
-                        </div>
-
-                        <div className="shipment-dangerous-good-flags">
-                            <Chip label={`${pl.shipments.form.fields.limitedQuantity}: ${formatBoolean(dangerousGood.limitedQuantity)}`} size="small" />
-                            <Chip label={`${pl.shipments.form.fields.exceptedQuantity}: ${formatBoolean(dangerousGood.exceptedQuantity)}`} size="small" />
-                            <Chip label={`${pl.shipments.form.fields.environmentallyHazardous}: ${formatBoolean(dangerousGood.environmentallyHazardous)}`} size="small" />
-                            <Chip label={`${pl.shipments.form.fields.marinePollutant}: ${formatBoolean(dangerousGood.marinePollutant)}`} size="small" />
-                            <Chip label={`${pl.shipments.form.fields.flammable}: ${formatBoolean(dangerousGood.flammable)}`} size="small" />
-                            <Chip label={`${pl.shipments.form.fields.corrosive}: ${formatBoolean(dangerousGood.corrosive)}`} size="small" />
-                            <Chip label={`${pl.shipments.form.fields.toxic}: ${formatBoolean(dangerousGood.toxic)}`} size="small" />
-                        </div>
-
-                        {dangerousGood.description || dangerousGood.storageRequirements || dangerousGood.handlingInstructions ? (
-                            <div className="shipment-dangerous-good-notes">
-                            {dangerousGood.description ? <div>
-                                <span>{pl.shipments.form.fields.description}</span>
-                                <p>{dangerousGood.description}</p>
-                            </div> : null}
-                            {dangerousGood.storageRequirements ? <div>
-                                <span>{pl.shipments.form.fields.storageRequirements}</span>
-                                <p>{dangerousGood.storageRequirements}</p>
-                            </div> : null}
-                            {dangerousGood.handlingInstructions ? <div>
-                                <span>{pl.shipments.form.fields.handlingInstructions}</span>
-                                <p>{dangerousGood.handlingInstructions}</p>
-                            </div> : null}
-                            </div>
-                        ) : null}
-                    </>
-                ) : (
-                    <div className="shipment-dangerous-good-empty">
-                        {pl.shipments.dangerousGood.empty}
-                    </div>
-                )}
-            </section>
-        );
-    };
 
     const renderRouteHistory = () => {
         if (loadingRouteLog) {
@@ -1368,7 +1167,6 @@ const ShipmentDetails: React.FC = () => {
 
                                     </div>
 
-                                    {renderDangerousGood()}
 
                                     <div className="shipment-dashboard-bottom-tools">
                                         <section className="shipment-dashboard-card shipment-operator-notes">
@@ -1648,74 +1446,6 @@ const ShipmentDetails: React.FC = () => {
                         {personDialogType === "SENDER"
                             ? pl.shipments.form.actions.saveSender
                             : pl.shipments.form.actions.saveRecipient}
-                    </Button>
-                </DialogActions>
-            </Dialog>
-
-            <Dialog
-                fullWidth
-                maxWidth="lg"
-                open={dangerousGoodDialogOpen}
-                onClose={() => !savingDangerousGood && setDangerousGoodDialogOpen(false)}
-            >
-                <DialogTitle>{pl.shipments.dangerousGood.editorTitle}</DialogTitle>
-                <DialogContent>
-                    <DangerousGoodForm
-                        disabled={!dangerousGoodMutable || savingDangerousGood}
-                        value={dangerousGoodDraft}
-                        onChange={setDangerousGoodDraft}
-                    />
-                </DialogContent>
-                <DialogActions>
-                    <Button
-                        disabled={savingDangerousGood}
-                        onClick={() => setDangerousGoodDialogOpen(false)}
-                        variant="outlined"
-                    >
-                        {pl.common.cancel}
-                    </Button>
-                    <Button
-                        disabled={!dangerousGoodMutable || savingDangerousGood}
-                        startIcon={savingDangerousGood ? <CircularProgress size={18} /> : <Save />}
-                        variant="contained"
-                        onClick={() => saveDangerousGood(false)}
-                    >
-                        {pl.common.saveChanges}
-                    </Button>
-                    {shipment?.dangerousGood ? (
-                        <Button
-                            disabled={!dangerousGoodMutable || savingDangerousGood}
-                            variant="outlined"
-                            onClick={() => saveDangerousGood(true)}
-                        >
-                            {pl.shipments.dangerousGood.replace}
-                        </Button>
-                    ) : null}
-                </DialogActions>
-            </Dialog>
-
-            <Dialog
-                open={dangerousGoodDeleteDialogOpen}
-                onClose={() => !savingDangerousGood && setDangerousGoodDeleteDialogOpen(false)}
-            >
-                <DialogTitle>{pl.shipments.dangerousGood.deleteTitle}</DialogTitle>
-                <DialogContent>{pl.shipments.dangerousGood.deleteConfirmation}</DialogContent>
-                <DialogActions>
-                    <Button
-                        disabled={savingDangerousGood}
-                        onClick={() => setDangerousGoodDeleteDialogOpen(false)}
-                        variant="outlined"
-                    >
-                        {pl.common.cancel}
-                    </Button>
-                    <Button
-                        color="error"
-                        disabled={!dangerousGoodMutable || savingDangerousGood}
-                        startIcon={savingDangerousGood ? <CircularProgress size={18} /> : <Delete />}
-                        variant="contained"
-                        onClick={deleteDangerousGood}
-                    >
-                        {pl.common.delete}
                     </Button>
                 </DialogActions>
             </Dialog>
