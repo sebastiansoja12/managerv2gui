@@ -662,8 +662,8 @@ const ShipmentDetails: React.FC = () => {
             shipmentPriority: shipment.shipmentPriority,
             priceAmount: String(shipment.price?.amount ?? ""),
             currency: shipment.price?.currency || "PLN",
-            issuerCountryCode: shipment.originCountry || "PL",
-            receiverCountryCode: shipment.destinationCountry || "DE",
+            issuerCountryCode: shipment.sender.countryCode || "PL",
+            receiverCountryCode: shipment.recipient.countryCode || "DE",
             pickupMethod: shipment.pickupMethod || "DEPARTMENT",
             deliveryMethod: shipment.deliveryMethod || "COURIER",
             pickupPointId: shipment.pickupPointId?.value,
@@ -1326,8 +1326,8 @@ const ShipmentDetails: React.FC = () => {
                                                 <span>{pl.shipments.form.fields.pickupMethod}: <b>{shipment.pickupMethod ? pl.shipments.pickupMethod[shipment.pickupMethod] : pl.common.dash}</b></span>
                                                 <span>{pl.shipments.form.fields.deliveryMethod}: <b>{shipment.deliveryMethod ? pl.shipments.deliveryMethod[shipment.deliveryMethod] : pl.common.dash}</b></span>
                                                 <span>{pl.shipments.form.fields.priority}: <b>{pl.shipments.priority[shipment.shipmentPriority]}</b></span>
-                                                <span>{pl.shipments.form.fields.issuerCountry}: <b>{shipment.originCountry || pl.common.dash}</b></span>
-                                                <span>{pl.shipments.form.fields.receiverCountry}: <b>{shipment.destinationCountry || pl.common.dash}</b></span>
+                                                <span>{pl.shipments.form.fields.issuerCountry}: <b>{shipment.sender.countryCode || pl.common.dash}</b></span>
+                                                <span>{pl.shipments.form.fields.receiverCountry}: <b>{shipment.recipient.countryCode || pl.common.dash}</b></span>
                                                 <span>{pl.shipments.summary.updatedAt}: <b>{formatDateTime(shipment.updatedAt || undefined)}</b></span>
                                                 <span>{pl.shipments.dashboard.insurance}: <b>{pl.common.dash}</b></span>
                                                 <span>{pl.shipments.dashboard.containerNumber}: <b>{pl.common.dash}</b></span>
