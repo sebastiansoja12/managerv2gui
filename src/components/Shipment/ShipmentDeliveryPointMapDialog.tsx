@@ -13,7 +13,6 @@ type Props = {
     deliveryMethod: Exclude<DeliveryMethodDto, "COURIER">;
     receiverCountryCode: string;
     shipmentSize: ShipmentSizeDto;
-    hasDangerousGoods: boolean;
     selectedPointId: string | null;
     onSelect: (point: PickupPointSummary) => void;
     onClose: () => void;
@@ -45,7 +44,6 @@ const ShipmentDeliveryPointMapDialog: React.FC<Props> = ({
     deliveryMethod,
     receiverCountryCode,
     shipmentSize,
-    hasDangerousGoods,
     selectedPointId,
     onSelect,
     onClose,
@@ -87,7 +85,7 @@ const ShipmentDeliveryPointMapDialog: React.FC<Props> = ({
                     type: pointType(deliveryMethod),
                     countryCode: receiverCountryCode,
                     shipmentSize,
-                    hasDangerousGoods,
+                    hasDangerousGoods: false,
                     query: appliedQuery.trim() || undefined,
                     size: PAGE_SIZE,
                 };
@@ -123,7 +121,7 @@ const ShipmentDeliveryPointMapDialog: React.FC<Props> = ({
         return () => {
             active = false;
         };
-    }, [appliedQuery, deliveryMethod, hasDangerousGoods, receiverCountryCode, shipmentSize,
+    }, [appliedQuery, deliveryMethod, receiverCountryCode, shipmentSize,
         translations.pointsLoadError]);
 
     useEffect(() => {

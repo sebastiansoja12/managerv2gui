@@ -32,7 +32,6 @@ const shipment = {
     shipmentStatus: "CREATED",
     shipmentType: "PARENT",
     price: {amount: 15, currency: "PLN"},
-    dangerousGood: null,
     sender: {...person, countryCode: "PL"},
     recipient: {...person, countryCode: "DE"},
     pickupMethod: "DEPARTMENT",

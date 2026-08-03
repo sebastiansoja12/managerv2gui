@@ -217,7 +217,6 @@ const ShipmentEdit: React.FC = () => {
                         declaredValue: {amount: Number(declaredValueAmount), currency: declaredValueCurrency},
                     } : {}),
                     price: shipment.price,
-                    dangerousGood: shipment.dangerousGood || null,
                     shipmentPriority: shipment.shipmentPriority,
                     shipmentStatus: status,
                     issuerCountryCode: shipment.sender.countryCode || "PL",

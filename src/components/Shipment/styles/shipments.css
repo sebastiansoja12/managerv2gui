@@ -432,20 +432,6 @@
     background: var(--accent);
 }
 
-.shipments-create-section-dangerous {
-    background: color-mix(in srgb, var(--warning) 8%, var(--surface));
-    border-color: color-mix(in srgb, var(--warning) 36%, var(--border));
-}
-
-.shipments-create-section-dangerous .shipments-section-title,
-.shipments-create-section-dangerous .shipments-section-title::before {
-    color: var(--warning);
-}
-
-.shipments-create-section-dangerous .shipments-section-title::before {
-    background: var(--warning);
-}
-
 .shipments-create-section .shipments-form-grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
 }
@@ -2278,121 +2264,6 @@
     grid-column: span 2;
 }
 
-.shipment-details-dangerous-good {
-    background: var(--brand-accent-wash);
-    border-color: var(--brand-accent-border);
-}
-
-.shipment-details-dangerous-good::before {
-    background: var(--brand-accent);
-    height: 4px;
-}
-
-.shipment-details-dangerous-good .shipment-edit-section-header {
-    margin-top: 2px;
-}
-
-.shipment-details-dangerous-good .shipment-edit-section-header [data-ui="typography"] {
-    color: var(--brand-accent-deep);
-}
-
-.shipment-dangerous-chip-active {
-    background: var(--brand-accent-soft) !important;
-    color: var(--brand-accent-deep) !important;
-    font-weight: 900 !important;
-}
-
-.shipment-dangerous-chip-empty {
-    background: var(--brand-surface-warm) !important;
-    color: var(--brand-ink-soft) !important;
-    font-weight: 900 !important;
-}
-
-.shipment-dangerous-good-grid {
-    display: grid;
-    gap: 12px;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-}
-
-.shipment-dangerous-good-grid div {
-    background: var(--brand-surface);
-    border: 1px solid var(--brand-accent-border);
-    border-radius: 8px;
-    min-width: 0;
-    padding: 12px;
-}
-
-.shipment-dangerous-good-grid span,
-.shipment-dangerous-good-notes span {
-    color: #9a3412;
-    display: block;
-    font-size: 0.76rem;
-    font-weight: 850;
-    margin-bottom: 6px;
-}
-
-.shipment-dangerous-good-grid strong {
-    color: var(--brand-ink);
-    display: block;
-    font-size: 0.9rem;
-    font-weight: 900;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.shipment-dangerous-good-flags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 12px;
-}
-
-.shipment-dangerous-good-flags [data-ui="chip"] {
-    background: color-mix(in srgb, var(--danger) 12%, var(--brand-surface));
-    border: 1px solid color-mix(in srgb, var(--danger) 48%, var(--brand-border));
-    color: var(--danger);
-    font-weight: 850;
-}
-
-.shipment-dangerous-good-flags [data-ui="chip-label"] {
-    color: inherit;
-    font-weight: 900;
-}
-
-.shipment-dangerous-good-notes {
-    display: grid;
-    gap: 10px;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    margin-top: 12px;
-}
-
-.shipment-dangerous-good-notes div {
-    background: var(--brand-surface);
-    border: 1px solid var(--brand-accent-border);
-    border-radius: 8px;
-    min-width: 0;
-    padding: 12px;
-}
-
-.shipment-dangerous-good-notes p {
-    color: var(--brand-ink-soft);
-    font-size: 0.86rem;
-    font-weight: 700;
-    line-height: 1.45;
-    margin: 0;
-}
-
-.shipment-dangerous-good-empty {
-    background: var(--brand-surface);
-    border: 1px dashed var(--brand-accent);
-    border-radius: 8px;
-    color: #9a3412;
-    font-size: 0.9rem;
-    font-weight: 800;
-    padding: 14px;
-}
-
 .shipment-cc-side-header {
     align-items: center;
     border-bottom: 1px solid var(--brand-border);
@@ -2621,8 +2492,7 @@
 }
 
 @media (max-width: 1320px) {
-    .shipment-details-summary,
-    .shipment-dangerous-good-grid {
+.shipment-details-summary {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
@@ -2691,13 +2561,10 @@
     .shipments-form-grid-three {
         grid-template-columns: 1fr;
     }
-
-    .shipment-details-summary,
-    .shipment-details-grid,
-    .shipment-details-person-sender .shipment-details-grid,
-    .shipment-details-person-recipient .shipment-details-grid,
-    .shipment-dangerous-good-grid,
-    .shipment-dangerous-good-notes {
+.shipment-details-summary,
+.shipment-details-grid,
+.shipment-details-person-sender .shipment-details-grid,
+.shipment-details-person-recipient .shipment-details-grid {
         grid-template-columns: 1fr;
     }
 
@@ -2859,11 +2726,6 @@
     .shipment-details-person-sender .shipment-details-wide,
     .shipment-details-person-recipient .shipment-details-wide {
         grid-column: 1 / -1;
-    }
-
-    .shipment-dangerous-good-grid,
-    .shipment-dangerous-good-notes {
-        grid-template-columns: 1fr;
     }
 
     .shipment-details-section-header,
@@ -3058,11 +2920,9 @@
     background: color-mix(in srgb, var(--brand-surface) 94%, var(--brand-accent));
     border-color: color-mix(in srgb, var(--brand-accent) 38%, var(--brand-border));
 }
-
 .shipment-cc-page .shipment-details-info-segment .shipment-edit-section-header,
 .shipment-cc-page .shipment-details-person-sender .shipment-edit-section-header,
-.shipment-cc-page .shipment-details-person-recipient .shipment-edit-section-header,
-.shipment-cc-page .shipment-details-dangerous-good .shipment-edit-section-header {
+.shipment-cc-page .shipment-details-person-recipient .shipment-edit-section-header {
     margin-top: 2px;
 }
 
@@ -3295,50 +3155,6 @@
     overflow-wrap: anywhere;
 }
 
-.shipment-cc-page .shipment-details-dangerous-good {
-    background: color-mix(in srgb, var(--brand-warning) 7%, var(--brand-surface));
-    border-color: color-mix(in srgb, var(--brand-warning) 42%, var(--brand-border));
-}
-
-.shipment-cc-page .shipment-details-dangerous-good::before {
-    background: var(--brand-warning);
-}
-
-.shipment-cc-page .shipment-details-dangerous-good .shipment-edit-section-header [data-ui="typography"] {
-    color: var(--brand-warning);
-}
-
-.shipment-cc-page .shipment-details-dangerous-good .shipment-edit-section-header > div {
-    align-items: center;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    justify-content: flex-end;
-}
-
-.shipment-cc-page .shipment-dangerous-good-grid div,
-.shipment-cc-page .shipment-dangerous-good-notes div {
-    background: color-mix(in srgb, var(--brand-surface-warm) 35%, var(--brand-surface));
-    border-color: color-mix(in srgb, var(--brand-warning) 34%, var(--brand-border));
-    border-radius: 12px;
-}
-
-.shipment-cc-page .shipment-dangerous-good-grid span,
-.shipment-cc-page .shipment-dangerous-good-notes span {
-    color: var(--brand-warning);
-}
-
-.shipment-cc-page .shipment-dangerous-good-grid strong {
-    color: var(--brand-ink);
-}
-
-.shipment-cc-page .shipment-dangerous-good-empty {
-    background: color-mix(in srgb, var(--brand-warning) 10%, var(--brand-surface));
-    border-color: color-mix(in srgb, var(--brand-warning) 54%, var(--brand-border));
-    border-radius: 12px;
-    color: var(--brand-warning);
-}
-
 .shipment-cc-page .shipment-cc-side {
     background: color-mix(in srgb, var(--brand-surface) 92%, var(--brand-surface-warm));
     border: 1px solid var(--brand-border);
@@ -3490,9 +3306,7 @@
         align-items: flex-start;
         gap: 12px;
     }
-
-    .shipment-cc-page .shipment-edit-section-actions,
-    .shipment-cc-page .shipment-details-dangerous-good .shipment-edit-section-header > div {
+.shipment-cc-page .shipment-edit-section-actions {
         justify-content: flex-start;
         width: 100%;
     }
@@ -3851,12 +3665,10 @@
 .shipment-cc-page .shipment-edit-header-actions {
     gap: 6px;
 }
-
 .shipment-cc-page .shipment-edit-header-actions [data-ui="button"],
 .shipment-cc-page .shipment-cc-side-header [data-ui="button"],
 .shipment-cc-page .shipment-edit-section-actions [data-ui="button"],
-.shipment-cc-page .shipment-status-control [data-ui="button"],
-.shipment-cc-page .shipment-details-dangerous-good [data-ui="button"] {
+.shipment-cc-page .shipment-status-control [data-ui="button"] {
     border-radius: 6px;
     box-shadow: none;
     transform: none;
@@ -3993,21 +3805,6 @@
 
 .shipment-cc-page .shipment-detail-value strong {
     font-size: 0.95rem;
-}
-
-.shipment-cc-page .shipment-details-dangerous-good {
-    background: color-mix(in srgb, var(--brand-warning) 4%, var(--brand-surface));
-    border-radius: 7px;
-}
-
-.shipment-cc-page .shipment-dangerous-good-grid div,
-.shipment-cc-page .shipment-dangerous-good-notes div {
-    background: var(--brand-surface);
-    border-radius: 6px;
-}
-
-.shipment-cc-page .shipment-dangerous-good-empty {
-    border-radius: 6px;
 }
 
 .shipment-cc-page .shipment-cc-side {
@@ -4529,11 +4326,6 @@
 .shipment-dashboard-lower-grid {
     grid-column: 1 / 10;
     grid-row: 2;
-}
-
-.shipment-dashboard-main > .shipment-details-dangerous-good {
-    grid-column: 1 / 10;
-    grid-row: 3;
 }
 
 .shipment-dashboard-bottom-tools {
@@ -5178,11 +4970,6 @@
         grid-row: 2;
     }
 
-    .shipment-dashboard-main > .shipment-details-dangerous-good {
-        grid-column: 1 / -1;
-        grid-row: 3;
-    }
-
     .shipment-dashboard-bottom-tools {
         grid-column: 1 / -1;
         grid-row: 4;
@@ -5225,11 +5012,6 @@
     .shipment-dashboard-lower-grid {
         grid-column: 1;
         grid-row: 3;
-    }
-
-    .shipment-dashboard-main > .shipment-details-dangerous-good {
-        grid-column: 1;
-        grid-row: 4;
     }
 
     .shipment-dashboard-bottom-tools {

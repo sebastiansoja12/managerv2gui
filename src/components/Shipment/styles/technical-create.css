@@ -151,14 +151,6 @@
     border-right: 1px solid var(--border) !important;
 }
 
-.app-main-content .shipments-create-section-dangerous {
-    grid-column: 1 / -1;
-}
-
-.app-main-content .shipments-create-section-dangerous .shipments-section-title {
-    margin-bottom: 0;
-}
-
 .app-main-content .shipments-create-section .shipments-section-title {
     color: var(--muted-foreground) !important;
     font-family: var(--font-mono);
@@ -168,11 +160,9 @@
     letter-spacing: 0.085em;
     margin-bottom: 14px;
 }
-
 .app-main-content .shipments-create-section .shipments-section-title::before,
 .app-main-content .shipments-create-section-sender .shipments-section-title::before,
-.app-main-content .shipments-create-section-receiver .shipments-section-title::before,
-.app-main-content .shipments-create-section-dangerous .shipments-section-title::before {
+.app-main-content .shipments-create-section-receiver .shipments-section-title::before {
     background: var(--primary) !important;
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 9%, transparent);
     height: 5px;
@@ -236,11 +226,9 @@
     .app-main-content .shipments-create-section-sender {
         border-right: 0 !important;
     }
-
-    .app-main-content .shipments-create-section-dangerous,
-    .app-main-content .shipments-create-page .shipments-actions,
-    .app-main-content .shipments-create-data-grid,
-    .app-main-content .shipments-create-panel .shipments-panel-title {
+.app-main-content .shipments-create-page .shipments-actions,
+.app-main-content .shipments-create-data-grid,
+.app-main-content .shipments-create-panel .shipments-panel-title {
         grid-column: 1;
     }
 }
