@@ -583,7 +583,6 @@ function Navbar({
 
                     <AppTabs
                         activePath={activePath}
-                        onCloseAllTabs={onCloseAllTabs}
                         onCloseTab={onCloseTab}
                         onSelectTab={onSelectTab}
                         openTabs={openTabs}
@@ -598,6 +597,17 @@ function Navbar({
             </div>
 
             <div className="top-nav-actions">
+                <button
+                    aria-label={pl.app.tabs.closeAll}
+                    className="app-close-tabs-button"
+                    disabled={!openTabs.length}
+                    onClick={onCloseAllTabs}
+                    title={pl.app.tabs.closeAll}
+                    type="button"
+                >
+                    <span aria-hidden="true" className="app-close-tabs-icon">×</span>
+                    <span>{pl.app.tabs.closeAll}</span>
+                </button>
                 <div className="top-nav-search-control">
                     <button
                         aria-controls="top-nav-tracking-search"
