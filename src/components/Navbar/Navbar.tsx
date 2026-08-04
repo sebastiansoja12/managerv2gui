@@ -27,7 +27,7 @@ import {
     TaskAlt,
     WarehouseRounded,
 } from "components/ui/icons";
-import {isPathAllowedForProfile, operationalProfiles, OperationalProfile} from "../../config/operationalProfile";
+import {isPathAllowedForProfile, isReturnPath, operationalProfiles, OperationalProfile} from "../../config/operationalProfile";
 import {getAppEnvironment} from "../../config/appEnvironment";
 import {getAppVersion} from "../../config/appVersion";
 import {AppTabDefinition} from "../AppShell/types";
@@ -40,6 +40,7 @@ import pl from "../../i18n/translate";
 import {Language, translations} from "../../i18n";
 import {clearStoredTabs} from "../AppShell/tabStorage";
 import {AppTheme, useAppTheme} from "../../theme/ThemeProvider";
+import {useOperatorCapabilities} from "../AppShell/OperatorCapabilitiesContext";
 
 type NavbarItem = AppTabDefinition & {
     icon: React.ElementType;
@@ -183,6 +184,7 @@ function Navbar({
     const navbarRef = React.useRef<HTMLElement>(null);
     const quickNavRef = React.useRef<HTMLElement>(null);
     const {user} = useAuthState();
+    const {returnsStatus} = useOperatorCapabilities();
     const {theme, setTheme} = useAppTheme();
 
     const environment = getAppEnvironment();
@@ -241,6 +243,8 @@ function Navbar({
             ],
         },
     ];
+    const isVisiblePath = (path: string) => isPathAllowedForProfile(path, operationalProfile)
+        && (!isReturnPath(path) || returnsStatus === "available");
 
     const updateDockIndicator = React.useCallback(() => {
         const navigation = quickNavRef.current;
@@ -329,7 +333,7 @@ function Navbar({
     };
 
     const renderPanelItem = (item: NavbarItem) => {
-        if (!isPathAllowedForProfile(item.path, operationalProfile)) {
+        if (!isVisiblePath(item.path)) {
             return null;
         }
 
@@ -348,7 +352,7 @@ function Navbar({
     };
 
     const renderDockItem = (item: NavbarItem) => {
-        if (!isPathAllowedForProfile(item.path, operationalProfile)) {
+        if (!isVisiblePath(item.path)) {
             return null;
         }
 
@@ -395,7 +399,7 @@ function Navbar({
             </section>
 
             {menus.map((menu) => {
-                const visibleItems = menu.items.filter((item) => isPathAllowedForProfile(item.path, operationalProfile));
+                const visibleItems = menu.items.filter((item) => isVisiblePath(item.path));
                 if (!visibleItems.length) {
                     return null;
                 }
@@ -413,7 +417,7 @@ function Navbar({
 
     const renderCategoryPanel = (menu: NavbarMenu) => {
         const Icon = menu.icon;
-        const visibleItems = menu.items.filter((item) => isPathAllowedForProfile(item.path, operationalProfile));
+        const visibleItems = menu.items.filter((item) => isVisiblePath(item.path));
         return (
             <nav aria-label={menu.label} className="top-nav-options-panel top-nav-category-panel">
                 <span className="top-nav-options-title"><Icon fontSize="small" />{menu.label}</span>
@@ -550,7 +554,7 @@ function Navbar({
                         <span aria-hidden="true" className="top-nav-dock-active-indicator" />
                         {mainItems.map(renderDockItem)}
                         {menus.map((menu) => {
-                            const visibleItems = menu.items.filter((item) => isPathAllowedForProfile(item.path, operationalProfile));
+                            const visibleItems = menu.items.filter((item) => isVisiblePath(item.path));
                             if (!visibleItems.length) {
                                 return null;
                             }

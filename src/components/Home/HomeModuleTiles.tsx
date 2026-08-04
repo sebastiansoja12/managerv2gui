@@ -20,6 +20,7 @@ import {useNavigate} from "react-router-dom";
 import {isPathAllowedForProfile, OperationalProfile} from "../../config/operationalProfile";
 import pl from "../../i18n/translate";
 import {AppTabDefinition} from "../AppShell/types";
+import {useOperatorCapabilities} from "../AppShell/OperatorCapabilitiesContext";
 import "./styles/home-module-menu.css";
 
 type HomeTileKey = keyof typeof pl.home.tiles;
@@ -57,8 +58,10 @@ const homeTiles: HomeTile[] = [
 
 function HomeModuleTiles({onOpenTab, operationalProfile}: HomeModuleTilesProps) {
     const navigate = useNavigate();
+    const {returnsStatus} = useOperatorCapabilities();
     const [open, setOpen] = useState(false);
-    const visibleTiles = homeTiles.filter((tile) => isPathAllowedForProfile(tile.path, operationalProfile));
+    const visibleTiles = homeTiles.filter((tile) => isPathAllowedForProfile(tile.path, operationalProfile)
+        && (tile.key !== "returns" || returnsStatus === "available"));
 
     useEffect(() => {
         if (!open) {

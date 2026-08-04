@@ -17,6 +17,8 @@ export const setOperationalProfile = (profile: OperationalProfile) => {
     localStorage.setItem(STORAGE_KEY, profile);
 };
 
+export const isReturnPath = (path: string) => path === "/returns" || path.startsWith("/returns/");
+
 export const isPathAllowedForProfile = (path: string, profile: OperationalProfile) => {
     if (path === "/" || path === "/login" || path === "/profile") {
         return true;

@@ -23,6 +23,7 @@ import ReturnService from "../../hooks/ReturnService";
 import ShipmentService from "../../hooks/ShipmentService";
 import pl from "../../i18n/translate";
 import {AppTabDefinition} from "../AppShell/types";
+import {useOperatorCapabilities} from "../AppShell/OperatorCapabilitiesContext";
 import {DepartmentRelation} from "../Departments/model/DepartmentRelation";
 import {ReturnPackageDto} from "../Returns/model/ReturnPackage";
 import {ShipmentDto, ShipmentStatusDto} from "../Shipment/dto/ShipmentDto";
@@ -198,6 +199,8 @@ function TurnoverChart({currency, periodDays, series}: TurnoverChartProps) {
 function OperationalDashboard({onOpenTab}: OperationalDashboardProps) {
     const navigate = useNavigate();
     const {user} = useAuthState();
+    const {returnsStatus} = useOperatorCapabilities();
+    const returnsAvailable = returnsStatus === "available";
     const [lookupCriterion, setLookupCriterion] = useState<ShipmentLookupCriterion>("TRACKING_NUMBER");
     const [lookupValue, setLookupValue] = useState("");
     const [periodDays, setPeriodDays] = useState<DashboardPeriodDays>(7);
@@ -225,7 +228,7 @@ function OperationalDashboard({onOpenTab}: OperationalDashboardProps) {
         const departmentsRequest = DepartmentService.getAll().then((response) => response.data);
         Promise.allSettled([
             loadShipments(),
-            departmentsRequest.then((loadedDepartments) => {
+            returnsAvailable ? departmentsRequest.then((loadedDepartments) => {
                 const currentDepartment = loadedDepartments.find(
                     (department) => department.departmentCode?.value === departmentCode,
                 );
@@ -233,7 +236,7 @@ function OperationalDashboard({onOpenTab}: OperationalDashboardProps) {
                     throw new Error(pl.returns.messages.departmentsLoadError);
                 }
                 return ReturnService.getAllByDepartment(String(currentDepartment.departmentId));
-            }),
+            }) : Promise.resolve([] as ReturnPackageDto[]),
             departmentsRequest,
             DeliveryNetworkService.getCurrentNetwork().then((response) => response.data),
         ]).then(([shipmentResult, returnResult, departmentResult, relationResult]) => {
@@ -271,7 +274,7 @@ function OperationalDashboard({onOpenTab}: OperationalDashboardProps) {
         return () => {
             ignore = true;
         };
-    }, [departmentCode, reloadKey]);
+    }, [departmentCode, reloadKey, returnsAvailable]);
 
     const periodShipments = useMemo(
         () => shipmentsInPeriod(shipments, periodDays),
@@ -459,12 +462,12 @@ function OperationalDashboard({onOpenTab}: OperationalDashboardProps) {
                     <strong>{loading ? <i className="home-metric-loading" /> : deliveredShipmentCount.toLocaleString(pl.common.locale)}</strong>
                     <small>{pl.home.dashboard.metrics.completedFlow}</small>
                 </article>
-                <article className="home-metric-card is-rose">
+                {returnsAvailable ? <article className="home-metric-card is-rose">
                     <span className="home-metric-icon"><Loop fontSize="small" /></span>
                     <span>{pl.home.dashboard.metrics.returns}</span>
                     <strong>{loading ? <i className="home-metric-loading" /> : activeReturnCount.toLocaleString(pl.common.locale)}</strong>
                     <small>{pl.home.dashboard.metrics.activeReturns}</small>
-                </article>
+                </article> : null}
                 <article className="home-metric-card is-amber">
                     <span className="home-metric-icon"><AttachMoney fontSize="small" /></span>
                     <span>{pl.home.dashboard.metrics.turnover}</span>
@@ -543,7 +546,7 @@ function OperationalDashboard({onOpenTab}: OperationalDashboardProps) {
                     </div>
                 </section>
 
-                <section className="home-panel home-activity-panel">
+                {returnsAvailable ? <section className="home-panel home-activity-panel">
                     <header className="home-panel-header home-list-header">
                         <div>
                             <span className="home-panel-kicker"><Loop fontSize="small" />{pl.home.dashboard.returns.kicker}</span>
@@ -570,7 +573,7 @@ function OperationalDashboard({onOpenTab}: OperationalDashboardProps) {
                         ))}
                         {!loading && !recentReturns.length ? <div className="home-list-empty">{pl.home.dashboard.returns.empty}</div> : undefined}
                     </div>
-                </section>
+                </section> : null}
             </section>
 
         </main>

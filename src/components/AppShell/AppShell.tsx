@@ -10,6 +10,7 @@ import {getTabTitle, normalizePath} from "./tabConfig";
 import {AppTabDefinition} from "./types";
 import {
     getOperationalProfile,
+    isReturnPath,
     OperationalProfile,
     setOperationalProfile,
 } from "../../config/operationalProfile";
@@ -27,6 +28,7 @@ import {clearStoredTabs, OPEN_TABS_STORAGE_KEY} from "./tabStorage";
 import {OrganizationChatDockProvider} from "../Chat/ChatDockContext";
 import OrganizationChatDock from "../Chat/OrganizationChatDock";
 import HomeModuleTiles from "../Home/HomeModuleTiles";
+import {useOperatorCapabilities} from "./OperatorCapabilitiesContext";
 
 const homeTab = (): AppTabDefinition => ({
     label: pl.navigation.home,
@@ -95,16 +97,23 @@ function AppShell() {
     const [pendingOperationalProfile, setPendingOperationalProfile] = React.useState<OperationalProfile | null>(null);
     const [language, updateLanguage] = React.useState<Language>(getLanguage);
     const authState = useAuthState();
+    const {returnsStatus} = useOperatorCapabilities();
 
     const activePath = normalizePath(location.pathname);
     const loginRoute = location.pathname === "/login";
     const authenticated = authState.status === "authenticated";
+    const returnsAvailable = returnsStatus === "available";
+    const visibleTabs = returnsAvailable ? openTabs : openTabs.filter((tab) => !isReturnPath(tab.path));
 
     React.useEffect(() => {
         void initializeAuthSession();
     }, []);
 
     const openTab = (tab: AppTabDefinition) => {
+        if (isReturnPath(tab.path) && !returnsAvailable) {
+            return;
+        }
+
         const normalizedTab = {
             ...tab,
             path: normalizePath(tab.path),
@@ -162,7 +171,7 @@ function AppShell() {
     };
 
     React.useEffect(() => {
-        if (loginRoute) {
+        if (loginRoute || (isReturnPath(activePath) && !returnsAvailable)) {
             return;
         }
 
@@ -174,7 +183,15 @@ function AppShell() {
 
             return currentTabs.concat({label, path: activePath});
         });
-    }, [activePath, loginRoute]);
+    }, [activePath, loginRoute, returnsAvailable]);
+
+    React.useEffect(() => {
+        if (!authenticated || loginRoute || returnsStatus !== "unavailable") {
+            return;
+        }
+
+        setOpenTabs((currentTabs) => currentTabs.filter((tab) => !isReturnPath(tab.path)));
+    }, [authenticated, loginRoute, returnsStatus]);
 
     React.useEffect(() => subscribeLanguage(updateLanguage), []);
 
@@ -261,7 +278,7 @@ function AppShell() {
                 onOperationalProfileChange={changeOperationalProfile}
                 onSelectTab={navigate}
                 operationalProfile={operationalProfile}
-                openTabs={openTabs}
+                openTabs={visibleTabs}
             />
             <div className="app-main-content">
                 <AppRoutes onOpenTab={openTab} operationalProfile={operationalProfile}/>

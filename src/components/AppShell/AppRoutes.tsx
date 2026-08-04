@@ -27,6 +27,7 @@ import UsersPage from "../Users/UsersPage";
 import {isPathAllowedForProfile, OperationalProfile} from "../../config/operationalProfile";
 import pl from "../../i18n/translate";
 import {AppTabDefinition} from "./types";
+import {useOperatorCapabilities} from "./OperatorCapabilitiesContext";
 
 type AppRoutesProps = {
     onOpenTab?: (tab: AppTabDefinition) => void;
@@ -34,10 +35,17 @@ type AppRoutesProps = {
 };
 
 function AppRoutes({onOpenTab, operationalProfile = "warehouse"}: AppRoutesProps) {
+    const {returnsStatus} = useOperatorCapabilities();
     const guarded = (path: string, element: React.ReactElement) => (
         isPathAllowedForProfile(path, operationalProfile)
             ? element
             : <ModulePlaceholder forbidden title={pl.modules.placeholder.forbiddenTitle}/>
+    );
+    const guardedReturns = (element: React.ReactElement) => (
+        returnsStatus === "loading" ? null
+            : returnsStatus === "available" ? guarded("/returns", element)
+                : <ModulePlaceholder description={pl.modules.placeholder.returnDisabledDescription}
+                                     forbidden title={pl.modules.placeholder.forbiddenTitle}/>
     );
 
     return (
@@ -58,10 +66,10 @@ function AppRoutes({onOpenTab, operationalProfile = "warehouse"}: AppRoutesProps
             <Route path="analytics" element={guarded("/analytics", <ModulePlaceholder title={pl.home.tiles.analytics.title}/>)}/>
             <Route path="processes" element={guarded("/processes", <Processes/>)}/>
             <Route path="processes/:processId" element={guarded("/processes/1", <ProcessDetails/>)}/>
-            <Route path="returns" element={guarded("/returns", <Returns onOpenTab={onOpenTab}/>)}/>
+            <Route path="returns" element={guardedReturns(<Returns onOpenTab={onOpenTab}/>)}/>
             <Route path="deliveries" element={guarded("/deliveries", <Deliveries/>)}/>
             <Route path="deliveries/:deliveryId/edit" element={guarded("/deliveries/1/edit", <DeliveryEdit/>)}/>
-            <Route path="returns/:returnId" element={guarded("/returns", <Returns onOpenTab={onOpenTab}/>)}/>
+            <Route path="returns/:returnId" element={guardedReturns(<Returns onOpenTab={onOpenTab}/>)}/>
             <Route path="couriers" element={guarded("/couriers", <Couriers/>)}/>
             <Route path="couriers/:supplierCode" element={guarded("/couriers", <CourierDetails/>)}/>
             <Route path="vehicles" element={guarded("/vehicles", <ModulePlaceholder title={pl.home.tiles.vehicles.title}/>)}/>

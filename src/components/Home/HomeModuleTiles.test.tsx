@@ -2,6 +2,7 @@ import React from "react";
 import {fireEvent, render, screen} from "@testing-library/react";
 import {MemoryRouter} from "react-router-dom";
 import pl from "../../i18n/translate";
+import {OperatorCapabilitiesContext} from "../AppShell/OperatorCapabilitiesContext";
 import HomeModuleTiles from "./HomeModuleTiles";
 
 test("opens and closes the global module drawer from the compact edge handle", () => {
@@ -25,4 +26,18 @@ test("opens and closes the global module drawer from the compact edge handle", (
         "aria-expanded",
         "false",
     );
+});
+
+test("hides returns when the operator has no return capability", () => {
+    render(
+        <OperatorCapabilitiesContext.Provider value={{returnsStatus: "unavailable"}}>
+            <MemoryRouter>
+                <HomeModuleTiles operationalProfile="warehouse" />
+            </MemoryRouter>
+        </OperatorCapabilitiesContext.Provider>,
+    );
+
+    fireEvent.click(screen.getByRole("button", {name: pl.home.dashboard.quickLinks.open}));
+
+    expect(screen.queryByText(pl.home.tiles.returns.title)).not.toBeInTheDocument();
 });
