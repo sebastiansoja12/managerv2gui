@@ -1,12 +1,13 @@
-import React, {ChangeEvent, useEffect, useMemo, useState} from "react";
+import React, {ChangeEvent, useEffect, useMemo, useRef, useState} from "react";
 import {
     Alert,
     Button,
     Chip,
     CircularProgress,
-    ListItemIcon,
-    ListItemText,
-    Menu,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
     MenuItem,
     Snackbar,
     TextField,
@@ -16,21 +17,17 @@ import {
     AccessTime,
     Add,
     AttachMoney,
-    ContentCopy,
-    Edit,
-    FileDownload,
     FilterList,
-    GridView,
     InfoOutlined,
-    MoreVert,
-    OpenInFull,
     Person,
+    Print,
+    QrCode2,
     Route,
-    Tune,
-    ViewList,
+    TableView,
 } from "components/ui/icons";
-import {useNavigate} from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 import ShipmentService from "../../hooks/ShipmentService";
+import DocumentService from "../../hooks/DocumentService";
 import TrackingService from "../../hooks/TrackingService";
 import {ApiErrorResponse} from "../../api/ApiResult";
 import {
@@ -48,6 +45,7 @@ import {
 } from "./dto/ShipmentDto";
 import pl from "../../i18n/translate";
 import {AppTabDefinition} from "../AppShell/types";
+import {exportShipmentExcel} from "./shipmentExcelExport";
 import "./styles/shipments.css";
 
 type Notice = {
@@ -64,6 +62,7 @@ type ShipmentRow = {
     price: string;
     user: string;
     destination: string;
+    relatedShipmentId: string | null;
     status: ShipmentStatusDto;
 };
 
@@ -124,6 +123,7 @@ const mapShipmentToRow = (shipment: ShipmentDto): ShipmentRow => ({
     price: formatPrice(shipment),
     user: shipmentTranslations.table.unassigned,
     destination: departmentCodeValue(shipment.destination) || shipment.recipient?.city || "-",
+    relatedShipmentId: shipment.shipmentRelatedId?.value || null,
     status: shipment.shipmentStatus,
 });
 
@@ -158,135 +158,6 @@ const loadInitialShipments = () => {
     }
 
     return shipmentListCache.promise;
-};
-
-const shipmentsFromWeek = (shipments: ShipmentDto[], weeksBack: number) => {
-    const end = new Date();
-    end.setDate(end.getDate() - (weeksBack * 7));
-    const start = new Date(end);
-    start.setDate(start.getDate() - 7);
-
-    return shipments.filter((shipment) => {
-        if (!shipment.createdAt) {
-            return false;
-        }
-
-        const createdAt = new Date(shipment.createdAt);
-        return !Number.isNaN(createdAt.getTime()) && createdAt >= start && createdAt <= end;
-    });
-};
-
-const amountValue = (shipment: ShipmentDto) => {
-    const amount = Number(shipment.price?.amount || 0);
-    return Number.isFinite(amount) ? amount : 0;
-};
-
-const calculateShipmentValue = (shipmentsToCount: ShipmentDto[]) => shipmentsToCount.reduce(
-    (sum, shipment) => sum + amountValue(shipment),
-    0
-);
-
-const calculateTrendPercent = (currentValue: number, previousValue: number) => {
-    if (previousValue === 0) {
-        return currentValue > 0 ? 100 : 0;
-    }
-
-    return ((currentValue - previousValue) / previousValue) * 100;
-};
-
-const formatTrendPercent = (value: number) => {
-    const prefix = value > 0 ? "+" : "";
-    return `${prefix}${value.toLocaleString(pl.common.locale, {
-        maximumFractionDigits: 1,
-        minimumFractionDigits: 1,
-    })}%`;
-};
-
-const trendClassName = (value: number) => {
-    if (value > 0) {
-        return "tm-trend-up";
-    }
-
-    if (value < 0) {
-        return "tm-trend-down";
-    }
-
-    return "tm-trend-neutral";
-};
-
-const trendIndicator = (value: number) => {
-    if (value > 0) {
-        return "↑";
-    }
-
-    if (value < 0) {
-        return "↓";
-    }
-
-    return "→";
-};
-
-type MoneyBucket = {
-    currency: string;
-    total: number;
-    standard: number;
-    express: number;
-};
-
-const calculateMoneyBuckets = (shipmentsToCount: ShipmentDto[]) => {
-    const buckets = new Map<string, MoneyBucket>();
-
-    shipmentsToCount.forEach((shipment) => {
-        const amount = amountValue(shipment);
-        const currency = shipment.price?.currency || "PLN";
-        const bucket = buckets.get(currency) || {
-            currency,
-            total: 0,
-            standard: 0,
-            express: 0,
-        };
-
-        bucket.total += amount;
-        if (shipment.shipmentPriority === "EXPRESS") {
-            bucket.express += amount;
-        } else {
-            bucket.standard += amount;
-        }
-        buckets.set(currency, bucket);
-    });
-
-    return Array.from(buckets.values()).sort((left, right) => right.total - left.total);
-};
-
-export const formatCompactNumber = (value: number) => {
-    const absoluteValue = Math.abs(value);
-    const format = (scaledValue: number, maximumFractionDigits: number) => scaledValue.toLocaleString(pl.common.locale, {
-        maximumFractionDigits,
-        minimumFractionDigits: maximumFractionDigits > 0 && scaledValue % 1 !== 0 ? 1 : 0,
-    });
-
-    if (absoluteValue >= 1_000_000) {
-        return `${format(value / 1_000_000, 1)}M`;
-    }
-
-    if (absoluteValue >= 1_000) {
-        return `${format(value / 1_000, absoluteValue >= 100_000 ? 0 : 1)}K`;
-    }
-
-    return value.toLocaleString(pl.common.locale, {
-        maximumFractionDigits: 0,
-    });
-};
-
-const formatMoneyBuckets = (buckets: MoneyBucket[], key: keyof Pick<MoneyBucket, "total" | "standard" | "express">) => {
-    if (!buckets.length) {
-        return `0 PLN`;
-    }
-
-    return buckets
-        .filter((bucket) => bucket[key] > 0)
-        .map((bucket) => `${formatCompactNumber(bucket[key])} ${bucket.currency}`)
-        .join(" + ") || `0 ${buckets[0].currency}`;
 };
 
 type ShipmentStatusFilter = ShipmentStatusDto | "ALL";
@@ -325,8 +196,10 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
     const [trackingProvider, setTrackingProvider] = useState<TrackingProviderId | "">("");
     const [externalLoading, setExternalLoading] = useState(false);
     const [externalResult, setExternalResult] = useState<ExternalTrackingResult | null>(null);
-    const [actionMenuAnchor, setActionMenuAnchor] = useState<HTMLElement | null>(null);
-    const [actionShipment, setActionShipment] = useState<ShipmentDto | null>(null);
+    const [selectedShipmentId, setSelectedShipmentId] = useState<string | null>(null);
+    const [documentLoading, setDocumentLoading] = useState<"excel" | "label" | null>(null);
+    const [qrPreviewUrl, setQrPreviewUrl] = useState<string | null>(null);
+    const qrPreviewRef = useRef<HTMLIFrameElement | null>(null);
 
     const displayedShipments = readModelSearchResults || shipments;
 
@@ -348,6 +221,7 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
     const shipmentRows = useMemo(() => {
         return visibleShipments.map(mapShipmentToRow);
     }, [visibleShipments]);
+    const selectedShipment = visibleShipments.find((shipment) => shipment.shipmentId.value === selectedShipmentId) || null;
 
     const statusCounts = useMemo(() => {
         const counts = shipmentTranslations.statusTabs.reduce((result, status) => {
@@ -360,45 +234,6 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
         });
         return counts;
     }, [displayedShipments]);
-
-    const shipmentMetrics = useMemo(() => {
-        const total = shipments.length;
-        const created = shipments.filter((shipment) => shipment.shipmentStatus === "CREATED").length;
-        const delivered = shipments.filter((shipment) => shipment.shipmentStatus === "DELIVERY").length;
-        const sent = shipments.filter((shipment) => shipment.shipmentStatus === "SENT").length;
-        const handling = Math.max(total - created - delivered - sent, 0);
-        const moneyBuckets = calculateMoneyBuckets(shipments);
-        const standardValue = moneyBuckets.reduce((sum, bucket) => sum + bucket.standard, 0);
-        const expressValue = moneyBuckets.reduce((sum, bucket) => sum + bucket.express, 0);
-        const valueTotal = standardValue + expressValue;
-
-        return {
-            created,
-            delivered,
-            expressValue,
-            handling,
-            moneyBuckets,
-            sent,
-            standardValue,
-            total,
-            valueTotal,
-        };
-    }, [shipments]);
-
-    const currentWeekShipments = useMemo(() => shipmentsFromWeek(shipments, 0), [shipments]);
-    const previousWeekShipments = useMemo(() => shipmentsFromWeek(shipments, 1), [shipments]);
-    const currentWeekValue = useMemo(() => calculateShipmentValue(currentWeekShipments), [currentWeekShipments]);
-    const previousWeekValue = useMemo(() => calculateShipmentValue(previousWeekShipments), [previousWeekShipments]);
-    const shipmentTrend = calculateTrendPercent(currentWeekShipments.length, previousWeekShipments.length);
-    const valueTrend = calculateTrendPercent(currentWeekValue, previousWeekValue);
-    const valueShareTotal = shipmentMetrics.standardValue + shipmentMetrics.expressValue;
-    const standardGaugeShare = valueShareTotal > 0 ? (shipmentMetrics.standardValue / valueShareTotal) * 100 : 0;
-    const progressSegments = [
-        {className: "tm-progress-violet", count: shipmentMetrics.sent, label: shipmentTranslations.metrics.sent},
-        {className: "tm-progress-orange", count: shipmentMetrics.created, label: shipmentTranslations.metrics.created},
-        {className: "tm-progress-green", count: shipmentMetrics.delivered, label: shipmentTranslations.metrics.delivered},
-        {className: "tm-progress-blue", count: shipmentMetrics.handling, label: shipmentTranslations.metrics.handling},
-    ];
 
     const normalizeShipmentId = (value: string): string => {
         const trimmedValue = value.trim();
@@ -608,40 +443,53 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
         navigate(tab.path);
     };
 
-    const openActionMenu = (event: React.MouseEvent<HTMLButtonElement>, shipment: ShipmentDto) => {
-        event.stopPropagation();
-        setActionMenuAnchor(event.currentTarget);
-        setActionShipment(shipment);
-    };
-
-    const closeActionMenu = () => {
-        setActionMenuAnchor(null);
-        setActionShipment(null);
-    };
-
-    const handleOpenActionShipment = () => {
-        const shipment = actionShipment;
-        closeActionMenu();
-        if (shipment) {
-            openShipmentDetails(shipment);
+    const openRelatedShipment = (shipmentId: string) => {
+        const tab = {
+            label: `${pl.home.tiles.shipmentDetails.title} #${shipmentId}`,
+            path: `/shipments/${shipmentId}/edit`,
+        };
+        if (onOpenTab) {
+            onOpenTab(tab);
+        } else {
+            navigate(tab.path);
         }
     };
 
-    const copyTrackingNumber = async () => {
-        const trackingNumber = actionShipment?.trackingNumber?.value;
-        closeActionMenu();
-
-        if (!trackingNumber) {
+    const exportSelectedShipment = async () => {
+        if (!selectedShipment) {
             return;
         }
-
+        setDocumentLoading("excel");
         try {
-            await navigator.clipboard.writeText(trackingNumber);
-            setNotice({severity: "success", message: shipmentTranslations.messages.copyTrackingSuccess});
+            await exportShipmentExcel(selectedShipment);
+            setNotice({severity: "success", message: shipmentTranslations.messages.documentDownloadSuccess});
         } catch (error) {
-            setNotice({severity: "error", message: shipmentTranslations.messages.copyTrackingError});
+            setNotice({severity: "error", message: shipmentTranslations.messages.excelExportError});
+        } finally {
+            setDocumentLoading(null);
         }
     };
+
+    const showSelectedLabel = async () => {
+        if (!selectedShipment) {
+            return;
+        }
+        setDocumentLoading("label");
+        try {
+            const label = await DocumentService.getQrLabel(selectedShipment.shipmentId.value);
+            setQrPreviewUrl(URL.createObjectURL(label.blob));
+        } catch (error) {
+            setNotice({severity: "error", message: shipmentTranslations.messages.qrCodeDownloadError});
+        } finally {
+            setDocumentLoading(null);
+        }
+    };
+
+    useEffect(() => () => {
+        if (qrPreviewUrl) {
+            URL.revokeObjectURL(qrPreviewUrl);
+        }
+    }, [qrPreviewUrl]);
 
     useEffect(() => {
         let active = true;
@@ -677,7 +525,7 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
     }, []);
 
     return (
-        <div className="tm-page">
+        <div className="tm-page tm-page-shipment-catalog">
             <div className="tm-content">
                 <div className="tm-top-row">
                     <div className="tm-page-heading">
@@ -697,78 +545,6 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
                     </Button>
                 </div>
 
-                <div className="tm-metrics-grid">
-                    <section className="tm-card tm-order-overview">
-                        <div className="tm-card-header">
-                            <Typography variant="h5">{shipmentTranslations.metrics.summaryTitle}</Typography>
-                            <div className="tm-card-actions">
-                                <Button size="small" variant="outlined">{shipmentTranslations.metrics.week}</Button>
-                                <button type="button"><OpenInFull fontSize="small" /></button>
-                            </div>
-                        </div>
-                        <span className="tm-muted">{shipmentTranslations.metrics.allShipments}</span>
-                        <div className="tm-total-line">
-                            <strong>{shipmentMetrics.total.toLocaleString(pl.common.locale)}</strong>
-                            <b className={trendClassName(shipmentTrend)}>
-                                {trendIndicator(shipmentTrend)} {formatTrendPercent(shipmentTrend)}
-                            </b>
-                            <span>{shipmentTranslations.metrics.comparedToLastWeek}</span>
-                        </div>
-                        <div className="tm-order-stats">
-                            <span><i className="tm-violet" />{shipmentTranslations.metrics.sent} <strong>{shipmentMetrics.sent}</strong></span>
-                            <span><i className="tm-orange" />{shipmentTranslations.metrics.created} <strong>{shipmentMetrics.created}</strong></span>
-                            <span><i className="tm-green" />{shipmentTranslations.metrics.delivered} <strong>{shipmentMetrics.delivered}</strong></span>
-                            <span><i className="tm-blue" />{shipmentTranslations.metrics.handling} <strong>{shipmentMetrics.handling}</strong></span>
-                        </div>
-                        <div className="tm-progress-bar">
-                            {progressSegments.some((segment) => segment.count > 0)
-                                ? progressSegments
-                                    .filter((segment) => segment.count > 0)
-                                    .map((segment) => (
-                                        <span
-                                            aria-label={`${segment.label}: ${segment.count}`}
-                                            className={segment.className}
-                                            key={segment.className}
-                                            style={{flexGrow: segment.count}}
-                                        />
-                                    ))
-                                : <span className="tm-progress-empty" />}
-                        </div>
-                    </section>
-
-                    <section className="tm-card tm-revenue-card">
-                        <div className="tm-card-header">
-                            <Typography variant="h5">{shipmentTranslations.metrics.valueTitle}</Typography>
-                            <div className="tm-card-actions">
-                                <Button size="small" variant="outlined">{shipmentTranslations.metrics.lastMonth}</Button>
-                                <button type="button"><OpenInFull fontSize="small" /></button>
-                            </div>
-                        </div>
-                        <div className="tm-revenue-layout">
-                            <div>
-                                <span className="tm-muted">{shipmentTranslations.metrics.totalValue}</span>
-                                <strong>{formatMoneyBuckets(shipmentMetrics.moneyBuckets, "total")}</strong>
-                                <div className="tm-loss-line">
-                                    <b className={trendClassName(valueTrend)}>
-                                        {trendIndicator(valueTrend)} {formatTrendPercent(valueTrend)}
-                                    </b>
-                                    <span>{shipmentTranslations.metrics.comparedToLastWeek}</span>
-                                </div>
-                            </div>
-                            <div
-                                className="tm-gauge"
-                                style={{"--standard-share": `${standardGaugeShare}%`} as React.CSSProperties}
-                            >
-                                <span />
-                            </div>
-                        </div>
-                        <div className="tm-revenue-legend">
-                            <span><i className="tm-violet" />{shipmentTranslations.metrics.standard} <strong>{formatMoneyBuckets(shipmentMetrics.moneyBuckets, "standard")}</strong></span>
-                            <span><i className="tm-orange" />{shipmentTranslations.metrics.express} <strong>{formatMoneyBuckets(shipmentMetrics.moneyBuckets, "express")}</strong></span>
-                        </div>
-                    </section>
-                </div>
-
                 <section className="tm-card tm-orders-card">
                     <div className="tm-orders-header">
                         <Typography variant="h5">{shipmentTranslations.table.title}</Typography>
@@ -781,10 +557,6 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
                             >
                                 {shipmentTranslations.actions.filters}
                             </Button>
-                            <Button startIcon={<Tune />} variant="outlined">{shipmentTranslations.actions.manage}</Button>
-                            <Button startIcon={<FileDownload />} variant="outlined">{shipmentTranslations.actions.export}</Button>
-                            <button className="tm-icon-button" type="button"><ViewList fontSize="small" /></button>
-                            <button className="tm-icon-button" type="button"><GridView fontSize="small" /></button>
                         </div>
                     </div>
 
@@ -994,77 +766,111 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
                         </section>
                     ) : undefined}
 
-                    <div className="tm-table-wrap">
-                        <table className="tm-orders-table">
-                            <thead>
-                            <tr>
-                                <th><span className="tm-checkbox" /> {shipmentTranslations.table.columns.id}</th>
-                                <th>{shipmentTranslations.summary.dimensions}</th>
-                                <th><Person fontSize="small" /> {shipmentTranslations.table.columns.sender}</th>
-                                <th><Person fontSize="small" /> {shipmentTranslations.table.columns.recipient}</th>
-                                <th><AccessTime fontSize="small" /> {shipmentTranslations.table.columns.deliveryDate}</th>
-                                <th><AttachMoney fontSize="small" /> {shipmentTranslations.table.columns.price}</th>
-                                <th><Person fontSize="small" /> {shipmentTranslations.table.columns.user}</th>
-                                <th className="tm-destination-heading"><Route fontSize="small" /> {shipmentTranslations.table.columns.destination}</th>
-                                <th>{shipmentTranslations.table.columns.status}</th>
-                                <th />
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {visibleShipments.map((shipment) => {
-                                const row = mapShipmentToRow(shipment);
-                                return (
-                                    <tr className="tm-clickable-row" key={row.id} onClick={() => openShipmentDetails(shipment)}>
-                                        <td><span className="tm-checkbox" /> {row.id}</td>
-                                        <td>{row.dimensions}</td>
-                                        <td>
-                                            <span className="tm-entity">
-                                                <span className="tm-logo-avatar">{avatarFor(row.sender)}</span>
-                                                <span>{row.sender}</span>
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <span className="tm-entity">
-                                                <span className="tm-user-avatar">{avatarFor(row.recipient)}</span>
-                                                <span>{row.recipient}</span>
-                                            </span>
-                                        </td>
-                                        <td className="tm-muted-cell">{row.deliveryDate}</td>
-                                        <td>{row.price}</td>
-                                        <td>
-                                            <span className="tm-entity">
-                                                <span className="tm-user-avatar tm-driver-avatar">{avatarFor(row.user)}</span>
-                                                <span>{row.user}</span>
-                                            </span>
-                                        </td>
-                                        <td className="tm-destination-cell">{row.destination}</td>
-                                        <td>
-                                            <Chip
-                                                className={statusClassName(row.status)}
-                                                label={shipmentTranslations.status[row.status]}
-                                                size="small"
-                                            />
-                                        </td>
-                                        <td className="tm-actions-cell">
-                                            <button
-                                                aria-label={shipmentTranslations.table.rowActions.replace("{id}", row.id)}
-                                                className="tm-row-action-button"
-                                                type="button"
-                                                onClick={(event) => openActionMenu(event, shipment)}
-                                            >
-                                                <MoreVert fontSize="small" />
-                                            </button>
-                                        </td>
-                                    </tr>
-                                );
-                            })}
-                            {!loading && shipmentRows.length === 0 ? (
+                    <div className="tm-results-layout">
+                        <div className="tm-table-wrap">
+                            <table className="tm-orders-table">
+                                <thead>
                                 <tr>
-                                    <td className="tm-empty-row" colSpan={11}>{shipmentTranslations.table.empty}</td>
+                                    <th>{shipmentTranslations.table.columns.id}</th>
+                                    <th>{shipmentTranslations.summary.dimensions}</th>
+                                    <th><Person fontSize="small" /> {shipmentTranslations.table.columns.sender}</th>
+                                    <th><Person fontSize="small" /> {shipmentTranslations.table.columns.recipient}</th>
+                                    <th><AccessTime fontSize="small" /> {shipmentTranslations.table.columns.deliveryDate}</th>
+                                    <th><AttachMoney fontSize="small" /> {shipmentTranslations.table.columns.price}</th>
+                                    <th><Person fontSize="small" /> {shipmentTranslations.table.columns.user}</th>
+                                    <th className="tm-destination-heading"><Route fontSize="small" /> {shipmentTranslations.table.columns.destination}</th>
+                                    <th>{shipmentTranslations.table.columns.status}</th>
+                                    <th>{shipmentTranslations.table.columns.relatedShipment}</th>
                                 </tr>
-                            ) : undefined}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                {visibleShipments.map((shipment) => {
+                                    const row = mapShipmentToRow(shipment);
+                                    return (
+                                        <tr
+                                            aria-selected={selectedShipmentId === shipment.shipmentId.value}
+                                            className="tm-clickable-row"
+                                            key={row.id}
+                                            onClick={() => setSelectedShipmentId(shipment.shipmentId.value)}
+                                            onKeyDown={(event) => {
+                                                if (event.key === "Enter" || event.key === " ") {
+                                                    event.preventDefault();
+                                                    setSelectedShipmentId(shipment.shipmentId.value);
+                                                }
+                                            }}
+                                            tabIndex={0}
+                                        >
+                                            <td>{row.id}</td>
+                                            <td>{row.dimensions}</td>
+                                            <td>
+                                                <span className="tm-entity">
+                                                    <span className="tm-logo-avatar">{avatarFor(row.sender)}</span>
+                                                    <span>{row.sender}</span>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span className="tm-entity">
+                                                    <span className="tm-user-avatar">{avatarFor(row.recipient)}</span>
+                                                    <span>{row.recipient}</span>
+                                                </span>
+                                            </td>
+                                            <td className="tm-muted-cell">{row.deliveryDate}</td>
+                                            <td>{row.price}</td>
+                                            <td>
+                                                <span className="tm-entity">
+                                                    <span className="tm-user-avatar tm-driver-avatar">{avatarFor(row.user)}</span>
+                                                    <span>{row.user}</span>
+                                                </span>
+                                            </td>
+                                            <td className="tm-destination-cell">{row.destination}</td>
+                                            <td>
+                                                <Chip
+                                                    className={statusClassName(row.status)}
+                                                    label={shipmentTranslations.status[row.status]}
+                                                    size="small"
+                                                />
+                                            </td>
+                                            <td>
+                                                {row.relatedShipmentId ? (
+                                                    <Link
+                                                        className="tm-related-shipment-link"
+                                                        onClick={(event) => {
+                                                            event.preventDefault();
+                                                            event.stopPropagation();
+                                                            openRelatedShipment(row.relatedShipmentId!);
+                                                        }}
+                                                        to={`/shipments/${row.relatedShipmentId}/edit`}
+                                                    >
+                                                        #{row.relatedShipmentId}
+                                                    </Link>
+                                                ) : pl.common.dash}
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                                {!loading && shipmentRows.length === 0 ? (
+                                    <tr>
+                                        <td className="tm-empty-row" colSpan={10}>{shipmentTranslations.table.empty}</td>
+                                    </tr>
+                                ) : undefined}
+                                </tbody>
+                            </table>
+                        </div>
+                        <aside className="tm-selection-actions" aria-label={shipmentTranslations.table.selectedActions}>
+                            <strong>{shipmentTranslations.table.selectedActions}</strong>
+                            <span className="tm-selection-id">
+                                {selectedShipment ? `#${selectedShipment.shipmentId.value}` : shipmentTranslations.table.selectShipment}
+                            </span>
+                            <Button disabled={!selectedShipment} startIcon={<InfoOutlined />} variant="contained" onClick={() => selectedShipment && openShipmentDetails(selectedShipment)}>
+                                {shipmentTranslations.actions.display}
+                            </Button>
+                            <Button disabled={!selectedShipment || Boolean(documentLoading)} startIcon={documentLoading === "excel" ? <CircularProgress size={18} /> : <TableView />} variant="outlined" onClick={exportSelectedShipment}>
+                                {shipmentTranslations.actions.exportToExcel}
+                            </Button>
+                            <Button disabled={!selectedShipment || Boolean(documentLoading)} startIcon={documentLoading === "label" ? <CircularProgress size={18} /> : <QrCode2 />} variant="outlined" onClick={showSelectedLabel}>
+                                {shipmentTranslations.actions.showLabel}
+                            </Button>
+                        </aside>
                     </div>
 
                     <div className="tm-table-footer">
@@ -1080,30 +886,21 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
                 </section>
             </div>
 
-            <Menu
-                anchorEl={actionMenuAnchor}
-                open={Boolean(actionMenuAnchor)}
-                onClose={closeActionMenu}
-            >
-                <MenuItem onClick={handleOpenActionShipment}>
-                    <ListItemIcon>
-                        <InfoOutlined fontSize="small" />
-                    </ListItemIcon>
-                    <ListItemText>{shipmentTranslations.actions.details}</ListItemText>
-                </MenuItem>
-                <MenuItem onClick={handleOpenActionShipment}>
-                    <ListItemIcon>
-                        <Edit fontSize="small" />
-                    </ListItemIcon>
-                    <ListItemText>{shipmentTranslations.actions.edit}</ListItemText>
-                </MenuItem>
-                <MenuItem onClick={copyTrackingNumber}>
-                    <ListItemIcon>
-                        <ContentCopy fontSize="small" />
-                    </ListItemIcon>
-                    <ListItemText>{shipmentTranslations.actions.copyTracking}</ListItemText>
-                </MenuItem>
-            </Menu>
+            <Dialog fullWidth maxWidth="md" open={Boolean(qrPreviewUrl)} onClose={() => setQrPreviewUrl(null)}>
+                <DialogTitle>{shipmentTranslations.qrLabel.previewTitle}</DialogTitle>
+                <DialogContent className="shipment-qr-preview-content">
+                    {qrPreviewUrl ? <iframe className="shipment-qr-preview-frame" ref={qrPreviewRef} src={qrPreviewUrl} title={shipmentTranslations.qrLabel.previewTitle} /> : null}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setQrPreviewUrl(null)}>{pl.common.close}</Button>
+                    <Button startIcon={<Print />} variant="contained" onClick={() => {
+                        qrPreviewRef.current?.contentWindow?.focus();
+                        qrPreviewRef.current?.contentWindow?.print();
+                    }}>
+                        {shipmentTranslations.actions.printLabel}
+                    </Button>
+                </DialogActions>
+            </Dialog>
 
             <Snackbar open={Boolean(notice)} autoHideDuration={4500} onClose={() => setNotice(null)}>
                 {notice ? <Alert severity={notice.severity} onClose={() => setNotice(null)}>{notice.message}</Alert> : undefined}
