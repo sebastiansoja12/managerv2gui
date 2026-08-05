@@ -52,7 +52,9 @@ import {
 } from "components/ui/icons";
 import {useNavigate, useParams} from "react-router-dom";
 import ShipmentService from "../../hooks/ShipmentService";
+import DeliveryService from "../../hooks/DeliveryService";
 import DocumentService from "../../hooks/DocumentService";
+import ShipmentContentService from "../../hooks/ShipmentContentService";
 import DepartmentService from "../../hooks/DepartmentService";
 import OperatorConfigurationService from "../../hooks/OperatorConfigurationService";
 import PickupPointService from "../../hooks/PickupPointService";
@@ -75,6 +77,15 @@ import {shipmentEventDescription} from "./shipmentEventDescription";
 import "./styles/shipments.css";
 import ShipmentReturnSummary from "./ShipmentReturnSummary";
 import {ReturnPackageDto} from "../Returns/model/ReturnPackage";
+import {Delivery} from "../Deliveries/model/Delivery";
+import {ShipmentDocument, ShipmentNote} from "./dto/ShipmentContentDto";
+import {
+    deliveryLifecycleLabel,
+    deliveryMethodLabel,
+    deliveryOutcomeLabel,
+    deliveryStatusLabel,
+    formatDeliveryDateTime,
+} from "../Deliveries/deliveryLabels";
 
 type Notice = {
     severity: "success" | "error" | "info";
@@ -242,6 +253,11 @@ const ShipmentDetails: React.FC = () => {
     const navigate = useNavigate();
     const {shipmentId, trackingNumber} = useParams();
     const [shipment, setShipment] = useState<ShipmentDto | null>(null);
+    const [delivery, setDelivery] = useState<Delivery | null>(null);
+    const [loadingDelivery, setLoadingDelivery] = useState<boolean>(false);
+    const [deliveryError, setDeliveryError] = useState<string | null>(null);
+    const [deliveryReloadKey, setDeliveryReloadKey] = useState<number>(0);
+    const [deliveryHistoryOpen, setDeliveryHistoryOpen] = useState<boolean>(false);
     const [deliveryPickupPointCode, setDeliveryPickupPointCode] = useState<string | null>(null);
     const [returnPackage, setReturnPackage] = useState<ReturnPackageDto | null>(null);
     const [activeDetailTab, setActiveDetailTab] = useState<ShipmentDetailsTab>("overview");
@@ -264,12 +280,26 @@ const ShipmentDetails: React.FC = () => {
     const [statusDialogOpen, setStatusDialogOpen] = useState<boolean>(false);
     const [cancelShipmentDialogOpen, setCancelShipmentDialogOpen] = useState<boolean>(false);
     const [downloadingDocument, setDownloadingDocument] = useState<DocumentAction | null>(null);
+    const [shipmentNotes, setShipmentNotes] = useState<ShipmentNote[]>([]);
+    const [shipmentDocuments, setShipmentDocuments] = useState<ShipmentDocument[]>([]);
+    const [loadingNotes, setLoadingNotes] = useState(false);
+    const [loadingDocuments, setLoadingDocuments] = useState(false);
+    const [notesError, setNotesError] = useState<string | null>(null);
+    const [documentsError, setDocumentsError] = useState<string | null>(null);
+    const [contentReloadKey, setContentReloadKey] = useState(0);
+    const [noteDraft, setNoteDraft] = useState("");
+    const [internalNote, setInternalNote] = useState(false);
+    const [savingNote, setSavingNote] = useState(false);
+    const [uploadingDocument, setUploadingDocument] = useState(false);
+    const [downloadingAttachmentId, setDownloadingAttachmentId] = useState<string | null>(null);
     const [operationMenuAnchor, setOperationMenuAnchor] = useState<HTMLElement | null>(null);
     const [qrMenuAnchor, setQrMenuAnchor] = useState<HTMLElement | null>(null);
     const [destinationInfoAnchor, setDestinationInfoAnchor] = useState<HTMLElement | null>(null);
     const [qrPreviewUrl, setQrPreviewUrl] = useState<string | null>(null);
     const [notice, setNotice] = useState<Notice | null>(null);
     const qrPreviewRef = useRef<HTMLIFrameElement | null>(null);
+    const noteInputRef = useRef<HTMLTextAreaElement | null>(null);
+    const attachmentInputRef = useRef<HTMLInputElement | null>(null);
 
     const validShipmentId = Boolean(shipmentId && /^\d+$/.test(shipmentId) && !/^0+$/.test(shipmentId));
     const decodedTrackingNumber = trackingNumber ? decodeURIComponent(trackingNumber) : "";
@@ -419,14 +449,84 @@ const ShipmentDetails: React.FC = () => {
         });
     };
 
-    const openWorkspaceTab = (tab: ShipmentWorkspaceTab) => {
+    const openNoteForm = () => {
         setOperationMenuAnchor(null);
         setActiveDetailTab("overview");
-        setActiveWorkspaceTab(tab);
+        setActiveWorkspaceTab("notes");
         window.requestAnimationFrame(() => {
-            document.getElementById("shipment-workspace")
-                ?.scrollIntoView({behavior: "smooth", block: "center"});
+            noteInputRef.current?.scrollIntoView({behavior: "smooth", block: "center"});
+            noteInputRef.current?.focus();
         });
+    };
+
+    const openDocumentPicker = () => {
+        setOperationMenuAnchor(null);
+        attachmentInputRef.current?.click();
+    };
+
+    const addShipmentNote = async () => {
+        if (!shipment) {
+            return;
+        }
+        const body = noteDraft.trim();
+        if (!body || body.length > 4000) {
+            setNotice({severity: "error", message: pl.shipments.dashboard.noteValidationError});
+            return;
+        }
+
+        setSavingNote(true);
+        try {
+            const response = await ShipmentContentService.addNote(shipment.shipmentId.value, {body, internal: internalNote});
+            setShipmentNotes((current) => [response.data, ...current]);
+            setNoteDraft("");
+            setInternalNote(false);
+            setNotesError(null);
+            setActiveWorkspaceTab("notes");
+            setNotice({severity: "success", message: pl.shipments.dashboard.noteAdded});
+        } catch (error) {
+            showError(error, pl.shipments.dashboard.noteAddError);
+        } finally {
+            setSavingNote(false);
+        }
+    };
+
+    const uploadShipmentDocument = async (event: ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        event.target.value = "";
+        if (!shipment || !file) {
+            return;
+        }
+        if (file.size === 0 || file.size > 5 * 1024 * 1024) {
+            setNotice({severity: "error", message: pl.shipments.dashboard.documentSizeError});
+            return;
+        }
+
+        setUploadingDocument(true);
+        try {
+            const response = await ShipmentContentService.addDocument(shipment.shipmentId.value, file);
+            setShipmentDocuments((current) => [response.data, ...current]);
+            setDocumentsError(null);
+            setActiveWorkspaceTab("documents");
+            setNotice({severity: "success", message: pl.shipments.dashboard.documentAdded});
+        } catch (error) {
+            showError(error, pl.shipments.dashboard.documentAddError);
+        } finally {
+            setUploadingDocument(false);
+        }
+    };
+
+    const downloadShipmentDocument = async (shipmentDocument: ShipmentDocument) => {
+        if (!shipment) {
+            return;
+        }
+        setDownloadingAttachmentId(shipmentDocument.documentId);
+        try {
+            await ShipmentContentService.downloadDocument(shipment.shipmentId.value, shipmentDocument);
+        } catch (error) {
+            showError(error, pl.shipments.dashboard.documentDownloadError);
+        } finally {
+            setDownloadingAttachmentId(null);
+        }
     };
 
     const printQrLabel = () => {
@@ -458,6 +558,7 @@ const ShipmentDetails: React.FC = () => {
                 ? await ShipmentService.getControlCenterByTrackingNumber(decodedTrackingNumber)
                 : await ShipmentService.getControlCenter(shipmentId || "");
             applyShipment(response.data.shipment);
+            setDeliveryReloadKey((current) => current + 1);
             setRouteLog(response.data.routeLog);
             setReturnPackage(response.data.returnPackage ?? null);
         } catch (error) {
@@ -472,6 +573,106 @@ const ShipmentDetails: React.FC = () => {
         loadShipment();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [shipmentId, trackingNumber]);
+
+    useEffect(() => {
+        setNoteDraft("");
+        setInternalNote(false);
+    }, [shipment?.shipmentId.value]);
+
+    useEffect(() => {
+        const currentShipmentId = shipment?.shipmentId.value;
+        setShipmentNotes([]);
+        setShipmentDocuments([]);
+        setNotesError(null);
+        setDocumentsError(null);
+        if (!currentShipmentId) {
+            setLoadingNotes(false);
+            setLoadingDocuments(false);
+            return;
+        }
+
+        let active = true;
+        setLoadingNotes(true);
+        setLoadingDocuments(true);
+        ShipmentContentService.listNotes(currentShipmentId)
+            .then((response) => {
+                if (active) {
+                    setShipmentNotes(response.data);
+                }
+            })
+            .catch((error: unknown) => {
+                if (active) {
+                    setNotesError(getBackendErrorMessage(error, pl.shipments.dashboard.workspace.notesLoadError));
+                }
+            })
+            .finally(() => {
+                if (active) {
+                    setLoadingNotes(false);
+                }
+            });
+        ShipmentContentService.listDocuments(currentShipmentId)
+            .then((response) => {
+                if (active) {
+                    setShipmentDocuments(response.data);
+                }
+            })
+            .catch((error: unknown) => {
+                if (active) {
+                    setDocumentsError(getBackendErrorMessage(error, pl.shipments.dashboard.workspace.documentsLoadError));
+                }
+            })
+            .finally(() => {
+                if (active) {
+                    setLoadingDocuments(false);
+                }
+            });
+
+        return () => {
+            active = false;
+        };
+    }, [contentReloadKey, shipment?.shipmentId.value]);
+
+    useEffect(() => {
+        const currentShipmentId = shipment?.shipmentId.value;
+        if (!currentShipmentId) {
+            setDelivery(null);
+            setLoadingDelivery(false);
+            setDeliveryError(null);
+            return;
+        }
+
+        let active = true;
+        setLoadingDelivery(true);
+        setDeliveryError(null);
+        DeliveryService.getByShipmentId(currentShipmentId)
+            .then((response) => {
+                if (active) {
+                    setDelivery(response.data);
+                }
+            })
+            .catch((error: unknown) => {
+                if (!active) {
+                    return;
+                }
+                const apiError = error as {status?: number; response?: {status?: number}};
+                if (apiError.status === 404 || apiError.response?.status === 404) {
+                    setDelivery(null);
+                    setDeliveryError(null);
+                } else {
+                    setDelivery(null);
+                    setDeliveryError(getBackendErrorMessage(error, pl.deliveries.loadDetailsError));
+                }
+            })
+            .finally(() => {
+                if (active) {
+                    setLoadingDelivery(false);
+                }
+            });
+
+        return () => {
+            active = false;
+        };
+    }, [deliveryReloadKey, shipment?.shipmentId.value]);
 
     useEffect(() => {
         DepartmentService.getAll()
@@ -819,8 +1020,8 @@ const ShipmentDetails: React.FC = () => {
         icon: React.ReactNode;
     }> = [
         {id: "history", label: pl.shipments.dashboard.workspace.history, count: details.length, icon: <History fontSize="small" />},
-        {id: "notes", label: pl.shipments.dashboard.workspace.notes, count: 0, icon: <ChatBubbleOutline fontSize="small" />},
-        {id: "documents", label: pl.shipments.dashboard.workspace.documents, count: 0, icon: <DocumentScanner fontSize="small" />},
+        {id: "notes", label: pl.shipments.dashboard.workspace.notes, count: shipmentNotes.length, icon: <ChatBubbleOutline fontSize="small" />},
+        {id: "documents", label: pl.shipments.dashboard.workspace.documents, count: shipmentDocuments.length, icon: <DocumentScanner fontSize="small" />},
         {id: "related", label: pl.shipments.dashboard.workspace.related, count: shipment?.shipmentRelatedId?.value ? 1 : 0, icon: <Cable fontSize="small" />},
         {id: "audit", label: pl.shipments.dashboard.workspace.audit, icon: <FactCheckOutlined fontSize="small" />},
     ];
@@ -861,6 +1062,70 @@ const ShipmentDetails: React.FC = () => {
             );
         }
 
+        if (activeWorkspaceTab === "notes") {
+            if (loadingNotes) {
+                return <div className="shipment-workspace-empty"><CircularProgress size={22} />{pl.shipments.dashboard.workspace.loadingNotes}</div>;
+            }
+            if (notesError) {
+                return <div className="shipment-workspace-empty" role="alert"><span>{notesError}</span><Button onClick={() => setContentReloadKey((current) => current + 1)}>{pl.deliveries.retry}</Button></div>;
+            }
+            if (!shipmentNotes.length) {
+                return <div className="shipment-workspace-empty">{pl.shipments.dashboard.workspace.emptyNotes}</div>;
+            }
+            return (
+                <div className="shipment-content-list">
+                    {shipmentNotes.map((note) => (
+                        <article className="shipment-content-item" key={note.noteId}>
+                            <div className="shipment-content-meta">
+                                <time dateTime={note.createdAt}>{formatDateTime(note.createdAt)}</time>
+                                <span>{pl.shipments.dashboard.workspace.author}: {note.authorUserId}</span>
+                                {note.internal ? <Chip label={pl.shipments.dashboard.internalNote} size="small" /> : null}
+                            </div>
+                            <p>{note.body}</p>
+                        </article>
+                    ))}
+                </div>
+            );
+        }
+
+        if (activeWorkspaceTab === "documents") {
+            if (loadingDocuments) {
+                return <div className="shipment-workspace-empty"><CircularProgress size={22} />{pl.shipments.dashboard.workspace.loadingDocuments}</div>;
+            }
+            if (documentsError) {
+                return <div className="shipment-workspace-empty" role="alert"><span>{documentsError}</span><Button onClick={() => setContentReloadKey((current) => current + 1)}>{pl.deliveries.retry}</Button></div>;
+            }
+            if (!shipmentDocuments.length) {
+                return <div className="shipment-workspace-empty">{pl.shipments.dashboard.workspace.emptyDocuments}</div>;
+            }
+            return (
+                <div className="shipment-content-list">
+                    {shipmentDocuments.map((shipmentDocument) => (
+                        <article className="shipment-content-item shipment-content-document" key={shipmentDocument.documentId}>
+                            <div>
+                                <strong>{shipmentDocument.filename}</strong>
+                                <div className="shipment-content-meta">
+                                    <time dateTime={shipmentDocument.createdAt}>{formatDateTime(shipmentDocument.createdAt)}</time>
+                                    <span>{pl.shipments.dashboard.workspace.author}: {shipmentDocument.uploadedByUserId}</span>
+                                    <span>{pl.shipments.dashboard.sizeKilobytes.replace("{size}", String(Math.ceil(shipmentDocument.sizeBytes / 1024)))}</span>
+                                </div>
+                            </div>
+                            <Button
+                                aria-label={`${pl.shipments.dashboard.downloadAttachment}: ${shipmentDocument.filename}`}
+                                disabled={downloadingAttachmentId === shipmentDocument.documentId}
+                                onClick={() => downloadShipmentDocument(shipmentDocument)}
+                                size="small"
+                                startIcon={downloadingAttachmentId === shipmentDocument.documentId ? <CircularProgress size={16} /> : <Download fontSize="small" />}
+                                variant="outlined"
+                            >
+                                {pl.shipments.dashboard.downloadAttachment}
+                            </Button>
+                        </article>
+                    ))}
+                </div>
+            );
+        }
+
         if (activeWorkspaceTab === "related" && shipment?.shipmentRelatedId?.value) {
             return (
                 <div className="shipment-workspace-related">
@@ -885,8 +1150,20 @@ const ShipmentDetails: React.FC = () => {
         return <div className="shipment-workspace-empty">{emptyMessages[activeWorkspaceTab]}</div>;
     };
 
+    const latestDeliveryStep = delivery?.steps.reduce((latest, step) => (
+        !latest || step.stepNumber > latest.stepNumber ? step : latest
+    ), undefined as Delivery["steps"][number] | undefined);
+
     return (
         <div className="shipments-page shipment-cc-page">
+            <input
+                accept=".pdf,.png,.jpg,.jpeg,.txt,.docx,.xlsx"
+                aria-label={pl.shipments.dashboard.addAttachment}
+                hidden
+                onChange={uploadShipmentDocument}
+                ref={attachmentInputRef}
+                type="file"
+            />
             <div className="shipments-shell shipment-cc-shell">
                 <div className="shipments-header">
                     <div className="shipments-title">
@@ -978,11 +1255,11 @@ const ShipmentDetails: React.FC = () => {
                                 <Loop fontSize="small" />
                                 {pl.shipments.actions.reroute}
                             </MenuItem>
-                            <MenuItem className="shipment-document-menu-item" onClick={() => openWorkspaceTab("notes")}>
+                            <MenuItem className="shipment-document-menu-item" disabled={!shipment} onClick={openNoteForm}>
                                 <ChatBubbleOutline fontSize="small" />
                                 {pl.shipments.actions.addNote}
                             </MenuItem>
-                            <MenuItem className="shipment-document-menu-item" onClick={() => openWorkspaceTab("documents")}>
+                            <MenuItem className="shipment-document-menu-item" disabled={!shipment || uploadingDocument || loadingDocuments} onClick={openDocumentPicker}>
                                 <DocumentScanner fontSize="small" />
                                 {pl.shipments.actions.addDocument}
                             </MenuItem>
@@ -1167,23 +1444,119 @@ const ShipmentDetails: React.FC = () => {
 
                                     </div>
 
+                                    <section className="shipment-dashboard-card shipment-dashboard-delivery" aria-label={pl.deliveries.informationTitle}>
+                                        <div className="shipment-dashboard-card-header">
+                                            <div className="shipment-dashboard-card-title">
+                                                <span><LocalShipping fontSize="small" /></span>
+                                                <Typography variant="h6">{pl.deliveries.informationTitle}</Typography>
+                                            </div>
+                                            {delivery ? <Chip className={`tm-status tm-status-${String(delivery.deliveryStatus || "unknown").toLowerCase()}`}
+                                                label={deliveryStatusLabel(delivery.deliveryStatus)} size="small" /> : null}
+                                        </div>
+
+                                        <div className="shipment-delivery-content">
+                                            {loadingDelivery ? (
+                                                <div className="shipment-delivery-state"><CircularProgress size={22} />{pl.deliveries.loadingDetails}</div>
+                                            ) : deliveryError ? (
+                                                <div className="shipment-delivery-state shipment-delivery-error" role="alert">
+                                                    <span>{deliveryError}</span>
+                                                    <Button variant="outlined" size="small" onClick={() => setDeliveryReloadKey((current) => current + 1)}>
+                                                        {pl.deliveries.retry}
+                                                    </Button>
+                                                </div>
+                                            ) : delivery ? (
+                                                <>
+                                                    <div className="shipment-delivery-facts">
+                                                        <div><span>{pl.deliveries.columns.id}</span><strong title={delivery.id}>{delivery.id}</strong></div>
+                                                        <div><span>{pl.deliveries.lifecycleLabel}</span><strong>{deliveryLifecycleLabel(delivery.lifecycleStatus)}</strong></div>
+                                                        <div><span>{pl.deliveries.methodLabel}</span><strong>{deliveryMethodLabel(delivery.method)}</strong></div>
+                                                        <div><span>{pl.deliveries.columns.created}</span><strong>{formatDeliveryDateTime(delivery.createdAt)}</strong></div>
+                                                        <div><span>{pl.deliveries.plannedLabel}</span><strong>{formatDeliveryDateTime(delivery.plannedAt)}</strong></div>
+                                                        <div><span>{pl.deliveries.deliveredLabel}</span><strong>{formatDeliveryDateTime(delivery.deliveredAt)}</strong></div>
+                                                        <div><span>{pl.deliveries.columns.steps}</span><strong>{delivery.steps.length}</strong></div>
+                                                    </div>
+                                                    {latestDeliveryStep ? (
+                                                        <div className="shipment-delivery-latest-step">
+                                                            <div className="shipment-delivery-step-heading">
+                                                                <strong>{pl.deliveries.historyTitle}</strong>
+                                                                <span>{formatDeliveryDateTime(latestDeliveryStep.attemptedAt)}</span>
+                                                            </div>
+                                                            <div className="shipment-delivery-step-summary">
+                                                                <Chip
+                                                                    className={`tm-status tm-status-${String(latestDeliveryStep.deliveryStatus || "unknown").toLowerCase()}`}
+                                                                    label={deliveryStatusLabel(latestDeliveryStep.deliveryStatus)}
+                                                                    size="small"
+                                                                />
+                                                                <span>{deliveryOutcomeLabel(latestDeliveryStep.outcome)}</span>
+                                                            </div>
+                                                            <div className="shipment-delivery-step-facts">
+                                                                <div><span>{pl.deliveries.userLabel}</span><strong>{latestDeliveryStep.userId || pl.common.dash}</strong></div>
+                                                                <div><span>{pl.deliveries.departmentLabel}</span><strong>{latestDeliveryStep.departmentId || pl.common.dash}</strong></div>
+                                                                <div><span>{pl.deliveries.courierLabel}</span><strong>{latestDeliveryStep.supplierId || pl.common.dash}</strong></div>
+                                                            </div>
+                                                        </div>
+                                                    ) : null}
+                                                    <div className="shipment-delivery-actions">
+                                                        <Button
+                                                            startIcon={<History fontSize="small" />}
+                                                            variant="outlined"
+                                                            onClick={() => setDeliveryHistoryOpen(true)}
+                                                        >
+                                                            {pl.deliveries.showAttempts}
+                                                        </Button>
+                                                        <Button variant="outlined" onClick={() => navigate(`/deliveries/${encodeURIComponent(delivery.id)}/edit`)}>
+                                                            {pl.deliveries.detailsTitle}
+                                                        </Button>
+                                                    </div>
+                                                </>
+                                            ) : (
+                                                <div className="shipment-delivery-state">{pl.deliveries.noDeliveryForShipment}</div>
+                                            )}
+                                        </div>
+                                    </section>
+
 
                                     <div className="shipment-dashboard-bottom-tools">
                                         <section className="shipment-dashboard-card shipment-operator-notes">
                                             <div className="shipment-dashboard-card-title"><span><ChatBubbleOutline fontSize="small" /></span><Typography variant="h6">{pl.shipments.dashboard.operatorNotes}</Typography></div>
                                             <div className="shipment-operator-note-form">
-                                                <textarea aria-label={pl.shipments.dashboard.operatorNotes} disabled placeholder={pl.shipments.dashboard.notePlaceholder} />
-                                                <label><input disabled type="checkbox" /> {pl.shipments.dashboard.internalNote}</label>
-                                                <Button disabled startIcon={<Add fontSize="small" />}>{pl.shipments.actions.addNote}</Button>
+                                                <textarea
+                                                    aria-label={pl.shipments.dashboard.operatorNotes}
+                                                    maxLength={4000}
+                                                    onChange={(event) => setNoteDraft(event.target.value)}
+                                                    placeholder={pl.shipments.dashboard.notePlaceholder}
+                                                    ref={noteInputRef}
+                                                    value={noteDraft}
+                                                />
+                                                <label><input checked={internalNote} onChange={(event) => setInternalNote(event.target.checked)} type="checkbox" /> {pl.shipments.dashboard.internalNote}</label>
+                                                <Button disabled={!noteDraft.trim() || savingNote || loadingNotes || !shipment} onClick={addShipmentNote} startIcon={savingNote ? <CircularProgress size={16} /> : <Add fontSize="small" />}>{pl.shipments.actions.addNote}</Button>
                                             </div>
                                         </section>
 
                                         <section className="shipment-dashboard-card shipment-attachments">
                                             <div className="shipment-attachments-header">
                                                 <div className="shipment-dashboard-card-title"><span><DocumentScanner fontSize="small" /></span><Typography variant="h6">{pl.shipments.dashboard.attachments}</Typography></div>
-                                                <Button disabled size="small" startIcon={<Upload fontSize="small" />} variant="outlined">{pl.shipments.dashboard.addAttachment}</Button>
+                                                <Button disabled={uploadingDocument || loadingDocuments || !shipment} onClick={openDocumentPicker} size="small" startIcon={uploadingDocument ? <CircularProgress size={16} /> : <Upload fontSize="small" />} variant="outlined">{pl.shipments.dashboard.addAttachment}</Button>
                                             </div>
-                                            <p>{pl.shipments.dashboard.noAttachments}</p>
+                                            {loadingDocuments ? <p>{pl.shipments.dashboard.workspace.loadingDocuments}</p> : documentsError ? (
+                                                <p role="alert">{documentsError}</p>
+                                            ) : shipmentDocuments.length ? (
+                                                <ul className="shipment-attachment-list">
+                                                    {shipmentDocuments.slice(0, 3).map((shipmentDocument) => (
+                                                        <li key={shipmentDocument.documentId}>
+                                                            <span title={shipmentDocument.filename}>{shipmentDocument.filename}</span>
+                                                            <Button
+                                                                aria-label={`${pl.shipments.dashboard.downloadAttachment}: ${shipmentDocument.filename}`}
+                                                                disabled={downloadingAttachmentId === shipmentDocument.documentId}
+                                                                onClick={() => downloadShipmentDocument(shipmentDocument)}
+                                                                size="small"
+                                                            >
+                                                                {downloadingAttachmentId === shipmentDocument.documentId ? <CircularProgress size={16} /> : <Download fontSize="small" />}
+                                                            </Button>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            ) : <p>{pl.shipments.dashboard.noAttachments}</p>}
                                         </section>
                                     </div>
                                 </>
@@ -1260,6 +1633,59 @@ const ShipmentDetails: React.FC = () => {
                     <Alert severity="error">{pl.shipments.messages.loadViewError}</Alert>
                 )}
             </div>
+
+            <Dialog
+                className="shipment-delivery-history-dialog"
+                fullWidth
+                maxWidth="md"
+                open={deliveryHistoryOpen}
+                onClose={() => setDeliveryHistoryOpen(false)}
+            >
+                <DialogTitle className="shipment-delivery-history-title">
+                    <History fontSize="small" />
+                    <span>{pl.deliveries.attemptsDialogTitle}</span>
+                </DialogTitle>
+                <DialogContent className="shipment-delivery-history-content">
+                    {delivery?.steps.length ? (
+                        [...delivery.steps]
+                            .sort((first, second) => first.stepNumber - second.stepNumber)
+                            .map((step) => (
+                                <article className="shipment-delivery-history-item" key={`${step.stepNumber}-${step.attemptedAt}`}>
+                                    <header>
+                                        <div className="shipment-delivery-history-item-heading">
+                                            <strong>{pl.deliveries.stepNumberLabel} {step.stepNumber}</strong>
+                                            <Chip
+                                                className={`tm-status tm-status-${String(step.deliveryStatus || "unknown").toLowerCase()}`}
+                                                label={deliveryStatusLabel(step.deliveryStatus)}
+                                                size="small"
+                                            />
+                                            <span>{deliveryOutcomeLabel(step.outcome)}</span>
+                                        </div>
+                                        <time>{formatDeliveryDateTime(step.attemptedAt)}</time>
+                                    </header>
+                                    <div className="shipment-delivery-history-facts">
+                                        <div><span>{pl.deliveries.userLabel}</span><strong>{step.userId || pl.common.dash}</strong></div>
+                                        <div><span>{pl.deliveries.departmentLabel}</span><strong>{step.departmentId || pl.common.dash}</strong></div>
+                                        <div><span>{pl.deliveries.courierLabel}</span><strong>{step.supplierId || pl.common.dash}</strong></div>
+                                        <div><span>{pl.deliveries.vehicleLabel}</span><strong>{step.vehicleId || pl.common.dash}</strong></div>
+                                        <div><span>{pl.deliveries.methodLabel}</span><strong>{deliveryMethodLabel(step.method)}</strong></div>
+                                    </div>
+                                    {step.comment ? (
+                                        <p><strong>{pl.deliveries.commentLabel}:</strong> {step.comment}</p>
+                                    ) : null}
+                                    {step.failureReason ? (
+                                        <p><strong>{pl.deliveries.failureReasonLabel}:</strong> {step.failureReason}</p>
+                                    ) : null}
+                                </article>
+                            ))
+                    ) : (
+                        <div className="shipment-delivery-history-empty">{pl.deliveries.noSteps}</div>
+                    )}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setDeliveryHistoryOpen(false)}>{pl.common.close}</Button>
+                </DialogActions>
+            </Dialog>
 
             <Dialog
                 fullWidth

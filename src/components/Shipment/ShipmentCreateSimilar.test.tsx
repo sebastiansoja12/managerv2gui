@@ -2,9 +2,11 @@ import React from "react";
 import {fireEvent, render, screen, waitFor} from "@testing-library/react";
 import {MemoryRouter, Route, Routes} from "react-router-dom";
 import DepartmentService from "../../hooks/DepartmentService";
+import DeliveryService from "../../hooks/DeliveryService";
 import OperatorConfigurationService from "../../hooks/OperatorConfigurationService";
 import PickupPointService from "../../hooks/PickupPointService";
 import ShipmentService from "../../hooks/ShipmentService";
+import ShipmentContentService from "../../hooks/ShipmentContentService";
 import pl from "../../i18n/translate";
 import ShipmentCreate from "./ShipmentCreate";
 import ShipmentDetails from "./ShipmentDetails";
@@ -15,11 +17,18 @@ jest.mock("../../hooks/ShipmentService", () => ({__esModule: true, default: {
 jest.mock("../../hooks/DepartmentService", () => ({__esModule: true, default: {
     getAll: jest.fn(),
 }}));
+jest.mock("../../hooks/DeliveryService", () => ({__esModule: true, default: {
+    getByShipmentId: jest.fn(),
+}}));
 jest.mock("../../hooks/OperatorConfigurationService", () => ({__esModule: true, default: {
     getCurrentShipmentConfiguration: jest.fn(),
 }}));
 jest.mock("../../hooks/PickupPointService", () => ({__esModule: true, default: {
     getById: jest.fn(),
+}}));
+jest.mock("../../hooks/ShipmentContentService", () => ({__esModule: true, default: {
+    listNotes: jest.fn(),
+    listDocuments: jest.fn(),
 }}));
 
 it("copies all reusable shipment fields into the new create request", async () => {
@@ -50,8 +59,11 @@ it("copies all reusable shipment fields into the new create request", async () =
     });
     (ShipmentService.create as jest.Mock).mockReturnValue(new Promise(() => undefined));
     (DepartmentService.getAll as jest.Mock).mockResolvedValue({data: []});
+    (DeliveryService.getByShipmentId as jest.Mock).mockRejectedValue({status: 404});
     (OperatorConfigurationService.getCurrentShipmentConfiguration as jest.Mock).mockResolvedValue({data: {}});
     (PickupPointService.getById as jest.Mock).mockResolvedValue({data: {code: "BER-001"}});
+    (ShipmentContentService.listNotes as jest.Mock).mockResolvedValue({data: []});
+    (ShipmentContentService.listDocuments as jest.Mock).mockResolvedValue({data: []});
 
     render(
         <MemoryRouter initialEntries={[`/shipments/${shipment.shipmentId.value}/edit`]}>
