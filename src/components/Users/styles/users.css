@@ -148,6 +148,7 @@
 
 .users-role { border-radius: 7px; display: inline-flex; font-size: 0.82rem; font-weight: 900; padding: 8px 10px; }
 .users-role-admin { background: #fee2e2; color: #b91c1c; }
+.users-role-superadmin { background: #fce7f3; color: #9d174d; }
 .users-role-manager { background: #fef3c7; color: #a16207; }
 .users-role-supplier { background: #ede9fe; color: #6d28d9; }
 .users-role-user { background: #e0f2fe; color: #0369a1; }

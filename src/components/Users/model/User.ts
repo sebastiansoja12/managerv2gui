@@ -1,4 +1,4 @@
-export type UserRole = "USER" | "MANAGER" | "ADMIN" | "SUPPLIER";
+export type UserRole = "USER" | "MANAGER" | "ADMIN" | "SUPERADMIN" | "SUPPLIER";
 
 export type UserPermission =
     | "ROLE_ADMIN_READ"

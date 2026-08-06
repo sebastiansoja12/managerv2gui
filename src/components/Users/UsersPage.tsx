@@ -18,6 +18,13 @@ import UserCreateDialog from "./UserCreateDialog";
 import UserEditDialog from "./UserEditDialog";
 import UserPermissionsDialog from "./UserPermissionsDialog";
 import UserRoleDialog from "./UserRoleDialog";
+import {
+    assignableRoles,
+    canAccessDepartment,
+    canManageUser,
+    canManageUsers as canRoleManageUsers,
+    isAdministrator as isAdministratorRole,
+} from "./model/UserRoleAccess";
 import "./styles/users.css";
 
 const userIdValue = (user: User) => user.userId.value;
@@ -37,8 +44,9 @@ function UsersPage() {
     const [roleUser, setRoleUser] = useState<User>();
     const [permissionsUser, setPermissionsUser] = useState<User>();
     const [selectedUserId, setSelectedUserId] = useState<string>("");
-    const isAdministrator = currentUser?.role === "ADMIN";
-    const canManageUsers = isAdministrator || currentUser?.role === "MANAGER";
+    const isAdministrator = isAdministratorRole(currentUser?.role);
+    const canManageUsers = canRoleManageUsers(currentUser?.role);
+    const rolesToAssign = assignableRoles(currentUser?.role);
 
     const loadUsers = (clearNotice = true) => {
         setLoading(true);
@@ -67,19 +75,24 @@ function UsersPage() {
 
     const availableDepartments = useMemo(() => departments
         .filter((department) => department.status === "ACTIVE")
+        .filter((department) => canAccessDepartment(currentUser?.role, currentUser?.departmentCode, department.departmentCode?.value))
         .map((department) => ({
             code: department.departmentCode?.value || "",
             label: `${department.departmentCode?.value || ""} - ${department.address?.city || pl.common.dash}`,
         }))
         .filter((department) => Boolean(department.code))
-        .sort((left, right) => left.label.localeCompare(right.label, pl.common.locale)), [departments]);
+        .sort((left, right) => left.label.localeCompare(right.label, pl.common.locale)), [currentUser, departments]);
+
+    const visibleUsers = useMemo(() => users.filter((user) => (
+        canAccessDepartment(currentUser?.role, currentUser?.departmentCode, user.departmentCode)
+    )), [currentUser, users]);
 
     const filteredUsers = useMemo(() => {
         const normalizedQuery = query.trim().toLowerCase();
         if (!normalizedQuery) {
-            return users;
+            return visibleUsers;
         }
-        return users.filter((user) => [
+        return visibleUsers.filter((user) => [
             user.firstName,
             user.lastName,
             user.username,
@@ -87,7 +100,7 @@ function UsersPage() {
             user.departmentCode,
             user.role,
         ].some((value) => value?.toLowerCase().includes(normalizedQuery)));
-    }, [query, users]);
+    }, [query, visibleUsers]);
 
     const selectedUser = useMemo(() => filteredUsers.find((user) => String(userIdValue(user)) === selectedUserId)
         || filteredUsers[0]
@@ -203,7 +216,8 @@ function UsersPage() {
             .finally(() => setSaving(false));
     };
 
-    const adminCount = users.filter((user) => user.role === "ADMIN").length;
+    const adminCount = users.filter((user) => isAdministratorRole(user.role)).length;
+    const canManageSelectedUser = canManageUsers && canManageUser(currentUser, selectedUser);
     const managerCount = users.filter((user) => user.role === "MANAGER").length;
 
     return (
@@ -215,7 +229,7 @@ function UsersPage() {
                     <p>{pl.usersManagement.page.subtitle}</p>
                 </div>
                 <div className="users-stats">
-                    <div><PeopleAlt fontSize="small"/><span>{pl.usersManagement.stats.users}</span><strong>{users.length}</strong></div>
+                    <div><PeopleAlt fontSize="small"/><span>{pl.usersManagement.stats.users}</span><strong>{visibleUsers.length}</strong></div>
                     <div><AdminPanelSettings fontSize="small"/><span>{pl.usersManagement.stats.admins}</span><strong>{adminCount}</strong></div>
                     <div><ManageAccounts fontSize="small"/><span>{pl.usersManagement.stats.managers}</span><strong>{managerCount}</strong></div>
                 </div>
@@ -321,7 +335,7 @@ function UsersPage() {
                         <tbody>
                         <tr>
                             <td>
-                                <button disabled={!selectedUser || !canManageUsers} onClick={() => openEditUser(selectedUser)} type="button">
+                                <button disabled={!selectedUser || !canManageSelectedUser} onClick={() => openEditUser(selectedUser)} type="button">
                                     <Edit fontSize="small"/>
                                     <span>{pl.usersManagement.actions.edit}</span>
                                 </button>
@@ -329,7 +343,7 @@ function UsersPage() {
                         </tr>
                         <tr>
                             <td>
-                                <button disabled={!selectedUser || !isAdministrator} onClick={() => openRoleUser(selectedUser)} type="button">
+                                <button disabled={!selectedUser || !isAdministrator || !canManageSelectedUser} onClick={() => openRoleUser(selectedUser)} type="button">
                                     <ManageAccounts fontSize="small"/>
                                     <span>{pl.usersManagement.actions.role}</span>
                                 </button>
@@ -337,7 +351,7 @@ function UsersPage() {
                         </tr>
                         <tr>
                             <td>
-                                <button disabled={!selectedUser || !canManageUsers} onClick={() => openPermissionsUser(selectedUser)} type="button">
+                                <button disabled={!selectedUser || !canManageSelectedUser} onClick={() => openPermissionsUser(selectedUser)} type="button">
                                     <VpnKey fontSize="small"/>
                                     <span>{pl.usersManagement.actions.permissions}</span>
                                 </button>
@@ -355,6 +369,7 @@ function UsersPage() {
                 onClose={() => setCreateDialogOpen(false)}
                 onSave={createUser}
                 open={createDialogOpen}
+                roles={rolesToAssign}
                 saving={saving}
             />
             <UserEditDialog
@@ -372,6 +387,7 @@ function UsersPage() {
                 onClose={() => setRoleUser(undefined)}
                 onSave={saveRole}
                 open={Boolean(roleUser)}
+                roles={rolesToAssign}
                 saving={saving}
                 user={roleUser}
             />
