@@ -1,20 +1,19 @@
 import React from "react";
 import {Navigate, Route, Routes} from "react-router-dom";
-import {initializeAuthSession} from "../../auth/AuthSession";
-import {useAuthState} from "../../auth/AuthState";
+import {initializePlatformOwnerSession, usePlatformOwnerSession} from "./auth/PlatformOwnerSession";
 import SuperAdminLogin from "./auth/SuperAdminLogin";
 import SuperAdminOperatorsPage from "./operators/SuperAdminOperatorsPage";
 import "./styles/super-admin.css";
 
 function SuperAdminApplication() {
-    const authState = useAuthState();
-    const authenticated = authState.status === "authenticated";
+    const platformOwnerSession = usePlatformOwnerSession();
+    const authenticated = platformOwnerSession.status === "authenticated";
 
     React.useEffect(() => {
-        void initializeAuthSession();
+        void initializePlatformOwnerSession();
     }, []);
 
-    if (authState.status === "initializing") {
+    if (platformOwnerSession.status === "initializing") {
         return null;
     }
 

@@ -10,6 +10,12 @@ type CsrfResponse = {
     token?: string | null;
 };
 
+type AuthenticatedClientOptions = {
+    refreshSession?: boolean;
+    refreshPath?: string;
+    onUnauthenticated?: () => void;
+};
+
 const AUTH_LIFECYCLE_PATHS = ["/auth/login", "/auth/refresh", "/auth/logout", "/auth/csrf"];
 const UNSAFE_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 const XSRF_COOKIE_NAME = "XSRF-TOKEN";
@@ -25,7 +31,7 @@ const refreshClient = axios.create({
     xsrfHeaderName: XSRF_HEADER_NAME,
 });
 
-let refreshPromise: Promise<void> | null = null;
+const refreshPromises = new Map<string, Promise<void>>();
 let csrfPromise: Promise<string | null> | null = null;
 let csrfToken: string | null = null;
 
@@ -94,22 +100,32 @@ const isUnsafeRequest = (request?: AxiosRequestConfig) => {
     return !!method && UNSAFE_METHODS.has(method);
 };
 
-const refreshAccessToken = () => {
-    if (!refreshPromise) {
-        refreshPromise = ensureCsrfToken()
-            .then((token) => refreshClient.post<void>("/auth/refresh", undefined, {
-                headers: xsrfHeaders(token),
-            }))
-            .then(() => undefined)
-            .finally(() => {
-                refreshPromise = null;
-            });
+const refreshAccessToken = (refreshPath: string) => {
+    const pendingRefresh = refreshPromises.get(refreshPath);
+    if (pendingRefresh) {
+        return pendingRefresh;
     }
 
+    const refreshPromise = ensureCsrfToken()
+        .then((token) => refreshClient.post<void>(refreshPath, undefined, {
+            headers: xsrfHeaders(token),
+        }))
+        .then(() => undefined)
+        .finally(() => {
+            refreshPromises.delete(refreshPath);
+        });
+    refreshPromises.set(refreshPath, refreshPromise);
     return refreshPromise;
 };
 
-export const configureAuthenticatedClient = (http: AxiosInstance) => {
+export const configureAuthenticatedClient = (
+    http: AxiosInstance,
+    {
+        refreshSession = true,
+        refreshPath = "/auth/refresh",
+        onUnauthenticated = setUnauthenticated,
+    }: AuthenticatedClientOptions = {},
+) => {
     http.defaults.withCredentials = true;
     http.defaults.withXSRFToken = true;
     http.defaults.xsrfCookieName = XSRF_COOKIE_NAME;
@@ -149,12 +165,17 @@ export const configureAuthenticatedClient = (http: AxiosInstance) => {
                 return Promise.reject(error);
             }
 
+            if (!refreshSession) {
+                onUnauthenticated();
+                return Promise.reject(error);
+            }
+
             request._authRetry = true;
             try {
-                await refreshAccessToken();
+                await refreshAccessToken(refreshPath);
                 return http.request(request);
             } catch (refreshError) {
-                setUnauthenticated();
+                onUnauthenticated();
                 return Promise.reject(refreshError);
             }
         },
