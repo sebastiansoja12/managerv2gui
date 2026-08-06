@@ -9,6 +9,11 @@ export type CreateOperatorDepartmentRequest = {
     street: string;
     postalCode: string;
     countryCode: string;
+    taxId: string;
+    telephoneNumber: string;
+    openingHours: string;
+    email: string;
+    departmentType: string;
 };
 
 export type CreateOperatorCourierRequest = {
@@ -19,63 +24,28 @@ export type CreateOperatorCourierRequest = {
     departmentCode: string;
 };
 
-const listFromResponse = <T>(value: unknown): T[] => {
-    if (Array.isArray(value)) {
-        return value as T[];
-    }
-
-    if (!value || typeof value !== "object") {
-        return [];
-    }
-
-    const payload = value as Record<string, unknown>;
-    for (const key of ["items", "content", "users", "departments", "couriers", "suppliers", "data"]) {
-        if (Array.isArray(payload[key])) {
-            return payload[key] as T[];
-        }
-    }
-
-    return [];
+export type CreatedValueResponse = {
+    value: string | number;
 };
 
-const responseStatus = (error: unknown) => (error as {response?: {status?: number}})?.response?.status;
-
-const getDirectoryList = <T>(operatorId: string | number, endpoint: string, fallbackEndpoint: string) => (
-    http.get<unknown>(endpoint)
-        .catch((error) => {
-            if (![400, 404, 405].includes(responseStatus(error) || 0)) {
-                throw error;
-            }
-
-            return http.get<unknown>(fallbackEndpoint, {params: {operatorId}});
-        })
-        .then((response) => listFromResponse<T>(response.data))
-        .catch((error) => {
-            if (responseStatus(error) === 404) {
-                return [] as T[];
-            }
-            throw error;
-        })
-);
-
 const getUsers = (operatorId: string | number) => (
-    getDirectoryList<User>(operatorId, `/operators/${operatorId}/users`, "/users")
+    http.get<User[]>(`/operators/${operatorId}/users`).then((response) => response.data)
 );
 
 const getDepartments = (operatorId: string | number) => (
-    getDirectoryList<Department>(operatorId, `/operators/${operatorId}/departments`, "/departments")
+    http.get<Department[]>(`/operators/${operatorId}/departments`).then((response) => response.data)
 );
 
 const getCouriers = (operatorId: string | number) => (
-    getDirectoryList<CourierDto>(operatorId, `/operators/${operatorId}/couriers`, "/suppliers")
+    http.get<CourierDto[]>(`/operators/${operatorId}/couriers`).then((response) => response.data)
 );
 
 const createDepartment = (operatorId: string | number, request: CreateOperatorDepartmentRequest) => (
-    http.post(`/operators/${operatorId}/departments`, request)
+    http.post<CreatedValueResponse>(`/operators/${operatorId}/departments`, request)
 );
 
 const createCourier = (operatorId: string | number, request: CreateOperatorCourierRequest) => (
-    http.post(`/operators/${operatorId}/couriers`, request)
+    http.post<CreatedValueResponse>(`/operators/${operatorId}/couriers`, request)
 );
 
 const OperatorDirectoryService = {

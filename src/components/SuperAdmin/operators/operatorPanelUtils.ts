@@ -1,4 +1,4 @@
-import {CreateOperatorRequest, Operator, OperatorDraft, UpdateOperatorRequest} from "../../Operators/model/Operator";
+import {CreateOperatorRequest, Operator, OperatorDraft, ShippingCapabilities, UpdateOperatorRequest} from "../../Operators/model/Operator";
 
 export const getOperatorIdValue = (operator: Operator) => String(operator.operatorId?.value ?? "");
 
@@ -37,4 +37,22 @@ export const toUpdateRequest = (draft: OperatorDraft): UpdateOperatorRequest => 
     foundedDate: draft.foundedDate,
     configuration: draft.configuration,
     status: draft.status,
+});
+
+export const withCapability = (
+    draft: OperatorDraft,
+    key: keyof ShippingCapabilities,
+    value: boolean,
+): OperatorDraft => ({
+    ...draft,
+    supportsLockers: key === "supportsParcelLockers" ? value : draft.supportsLockers,
+    supportsInternationalShipping: key === "supportsInternationalShipping" ? value : draft.supportsInternationalShipping,
+    supportsCashOnDelivery: key === "supportsCashOnDelivery" ? value : draft.supportsCashOnDelivery,
+    configuration: {
+        ...draft.configuration,
+        shippingCapabilities: {
+            ...draft.configuration.shippingCapabilities,
+            [key]: value,
+        },
+    },
 });
