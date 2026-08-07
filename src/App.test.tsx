@@ -3,6 +3,20 @@ import { render, screen } from '@testing-library/react';
 import App from './App';
 import http from './http-common';
 
+jest.mock('./hooks/ImpersonationService', () => ({
+  __esModule: true,
+  default: {
+    getCurrent: () => Promise.resolve(null),
+  },
+}));
+
+jest.mock('./hooks/MaintenanceService', () => ({
+  __esModule: true,
+  default: {
+    getPublicStatus: () => Promise.resolve({enabled: false}),
+  },
+}));
+
 test('renders manager navigation', async () => {
   (http.get as jest.Mock)
       .mockResolvedValueOnce({data: {token: 'csrf-token'}, status: 200})
