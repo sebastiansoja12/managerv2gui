@@ -50,6 +50,7 @@ import {
 } from "./dto/ShipmentDto";
 import pl from "../../i18n/translate";
 import {valueObjectValue} from "../../utils/valueObject";
+import {shipmentEventDescription} from "./shipmentEventDescription";
 import "./styles/shipments.css";
 import DangerousGoodForm, {
     createEmptyDangerousGood,
@@ -142,7 +143,9 @@ const detailStatus = (detail: RouteDetail) => detail.shipmentStatus || detail.pa
 
 const detailStatusLabel = (status: string) => pl.shipments.status[status as ShipmentStatusDto] || status;
 
-const detailDepartment = (detail: RouteDetail) => valueObjectValue(detail.departmentCode) || valueObjectValue(detail.depotCode) || pl.common.dash;
+const detailDepartment = (detail: RouteDetail) => valueObjectValue(detail.departmentId) || valueObjectValue(detail.departmentCode) || valueObjectValue(detail.depotCode) || pl.common.dash;
+
+const detailUser = (detail: RouteDetail) => detail.username || pl.common.dash;
 
 const detailTerminal = (detail: RouteDetail) => detail.terminalId?.value || detail.zebraId || pl.common.dash;
 
@@ -699,10 +702,10 @@ const ShipmentDetails: React.FC = () => {
                                     <span>{formatDateTime(detail.timestamp)}</span>
                                 </div>
                                 <Chip className={`tm-status tm-status-${String(statusKey).toLowerCase()}`} label={detailStatusLabel(statusKey)} size="small" />
-                                <p>{detail.description || pl.shipments.routeHistory.noDescription}</p>
+                                <p>{shipmentEventDescription(detail.description)}</p>
                                 <dl>
                                     <div><dt>{pl.shipments.routeHistory.department}</dt><dd>{detailDepartment(detail)}</dd></div>
-                                    <div><dt>{pl.shipments.routeHistory.user}</dt><dd>{detail.username || pl.common.dash}</dd></div>
+                                    <div><dt>{pl.shipments.routeHistory.user}</dt><dd>{detailUser(detail)}</dd></div>
                                     <div><dt>{pl.shipments.routeHistory.terminal}</dt><dd>{detailTerminal(detail)}</dd></div>
                                 </dl>
                             </div>
