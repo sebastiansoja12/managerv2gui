@@ -1,10 +1,130 @@
-**Manager 2.0 GUI - Development Version 2026.3  - 6th July, 2026**
+# Manager 2.0 GUI
 
-## Shipment history map
+**Development Version 2026.3 - 6th July, 2026**
 
-The shipment history view uses Leaflet with OpenStreetMap tiles. The tile provider can be changed at build time without changing the source code:
+Manager 2.0 GUI is a React/TypeScript frontend for the Manager 2.0 logistics
+backend. It provides warehouse, shipment, process, department, courier, user and
+configuration screens, plus a separate super-admin area.
 
-- `REACT_APP_MAP_TILE_URL` — Leaflet tile URL template.
-- `REACT_APP_MAP_TILE_ATTRIBUTION` — attribution displayed on the map.
+## Technology
 
-If the variables are not set, the application uses `https://tile.openstreetmap.org/{z}/{x}/{y}.png` and displays the required OpenStreetMap attribution.
+- React 18 with TypeScript
+- Create React App / `react-scripts`
+- Material UI
+- React Router
+- Axios HTTP clients
+- Leaflet for shipment route maps
+- QR code generation for shipment labels
+- Jest and React Testing Library
+
+## Main Features
+
+- Login flow and authenticated HTTP clients.
+- Tabbed application shell with route-aware tab titles.
+- Home dashboard with operational module tiles.
+- Shipment list, create form, details/edit view and shipment history.
+- Shipment history map with department routes and translated event labels.
+- Dangerous goods form and shipment dangerous-good handling.
+- Shipment document download, QR label preview and print support.
+- Department list and department creation.
+- Courier list, details and courier creation.
+- Process list and process details.
+- User management with create, edit, role and permission dialogs.
+- Device pairing.
+- Global configuration, geocoding configuration and integration configuration panels.
+- Software configuration list.
+- Microservice status page.
+- User profile page.
+- Super-admin application with its own login and operator management UI.
+- Polish, English and German translations.
+
+Some routes are placeholders for planned modules, for example analytics,
+vehicles, pallets, scanner, courier deliveries, suppliers, deals, billing and
+support.
+
+## Project Structure
+
+| Path | Purpose |
+| --- | --- |
+| `src/components` | Application pages and UI modules. |
+| `src/components/AppShell` | Main layout, routing, tabs and tab persistence. |
+| `src/auth` | Authentication session and user profile types. |
+| `src/hooks` | API service hooks and domain-specific HTTP wrappers. |
+| `src/api` | Shared backend client and API result/error helpers. |
+| `src/config` | Application version, environment and operational profile settings. |
+| `src/i18n` | `pl`, `en`, `de` translations and language helpers. |
+| `src/theme` | Shared visual theme. |
+| `src/utils` | Small shared utilities. |
+| `docker/nginx` | Nginx configuration used by the production Docker image. |
+
+## Configuration
+
+The project uses Create React App environment variables. Local defaults are kept
+in `.env`.
+
+Important variables:
+
+- `REACT_APP_SERVER_URL` - main Manager API, default `http://localhost:8080/v2/api`
+- `REACT_APP_MANAGER_API_URL` - manager API alias
+- `REACT_APP_GATEWAY_URL` - gateway URL, default `http://localhost:8088/gateway`
+- `REACT_APP_SOFTWARE_CONFIGURATION_URL` - software configuration service
+- `REACT_APP_DELIVERY_PROTECTION_URL` - delivery protection service
+- `REACT_APP_RETURNING_TRACK_MANAGER_URL` - returning service
+- `REACT_APP_ROUTE_TRACKER_FLOW_URL` - route tracker service
+- `REACT_APP_VERSION` - displayed application version
+- `REACT_APP_MAP_TILE_URL` - Leaflet tile URL template
+- `REACT_APP_MAP_TILE_ATTRIBUTION` - attribution displayed on the map
+
+If the map tile variables are not set, the application uses
+`https://tile.openstreetmap.org/{z}/{x}/{y}.png` with OpenStreetMap attribution.
+
+## Available Scripts
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Start the development server:
+
+```bash
+npm start
+```
+
+Run tests:
+
+```bash
+npm test -- --watchAll=false
+```
+
+Build production assets:
+
+```bash
+npm run build
+```
+
+## Docker
+
+The Docker image builds the React app with Node 20 and serves the generated
+static files with Nginx on port `80`.
+
+```bash
+docker build -t manager-v2-gui .
+```
+
+Relevant build arguments:
+
+- `REACT_APP_SERVER_URL`
+- `REACT_APP_GATEWAY_URL`
+- `REACT_APP_VERSION`
+- `REACT_APP_ENVIRONMENT`
+
+## Backend Expectations
+
+For local development the frontend expects the Manager backend on
+`http://localhost:8080/v2/api` and the Gateway on `http://localhost:8088/gateway`.
+Authentication is cookie/JWT based and the backend CORS configuration must allow
+the GUI origin, usually `http://localhost:3000`.
+
+Release notes are maintained in `CHANGELOG.md`.
