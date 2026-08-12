@@ -11,6 +11,9 @@ export default interface RouteLogRecord {
             terminalId?: { value: string | number };
             version: string;
             username: string;
+            userId?: ValueObject<number>;
+            supplierId?: ValueObject<number>;
+            departmentId?: ValueObject<number>;
             supplierCode?: ValueObject<string>;
             depotCode: ValueObject<string>;
             departmentCode?: ValueObject<string>;
