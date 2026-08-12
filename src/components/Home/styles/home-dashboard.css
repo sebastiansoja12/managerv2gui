@@ -128,8 +128,22 @@
 .home-tracking-lookup-form {
     display: grid;
     gap: 10px;
-    grid-template-columns: minmax(220px, 1fr) auto auto;
+    grid-template-columns: minmax(170px, 0.35fr) minmax(220px, 1fr) auto auto;
     min-width: 0;
+}
+
+.home-tracking-criterion {
+    min-width: 0;
+}
+
+.home-tracking-criterion .MuiInputBase-root {
+    background: var(--brand-surface);
+    border-radius: 8px;
+    min-height: 44px;
+}
+
+.home-tracking-criterion .MuiInputLabel-root {
+    font-weight: 700;
 }
 
 .home-tracking-lookup-form input {

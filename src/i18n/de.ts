@@ -107,6 +107,7 @@ export const de: typeof pl = {
         shipmentScanner: "Sendungen scannen",
         courierDeliveries: "Sendungen transportieren",
         devicePairing: "Mein Gerät",
+        integrations: "Integrationen",
         mainAriaLabel: "Hauptnavigation",
         defaultUserName: "Admin",
         defaultUserRole: "S. ADMIN",
@@ -129,10 +130,19 @@ export const de: typeof pl = {
             title: "Sendung finden",
             inputLabel: "Trackingnummer der Sendung",
             placeholder: "Sendungsnummer eingeben",
+            criterionLabel: "Suchen nach",
+            shipmentIdInputLabel: "Sendungs-ID",
+            shipmentIdPlaceholder: "Sendungs-ID eingeben",
+            criteria: {
+                trackingNumber: "Trackingnummer",
+                shipmentId: "Sendungs-ID",
+            },
             search: "Suchen",
             showHistory: "Historie anzeigen",
             detailsTabLabel: "Sendungsdetails {trackingNumber}",
             historyTabLabel: "Sendungshistorie {trackingNumber}",
+            detailsByIdTabLabel: "Sendungsdetails #{shipmentId}",
+            historyByIdTabLabel: "Sendungshistorie #{shipmentId}",
         },
         tiles: {
             shipmentDetails: {
@@ -178,6 +188,10 @@ export const de: typeof pl = {
             analytics: {
                 title: "Analytik",
                 description: "Berichte, Kennzahlen und Zustand der Operationen.",
+            },
+            integrations: {
+                title: "Integrationen",
+                description: "Externe Anbieter für die Sendungsverfolgung konfigurieren.",
             },
             shipmentScanner: {
                 title: "Sendungen scannen",
@@ -676,6 +690,10 @@ export const de: typeof pl = {
                 title: "Geolokalisierung",
                 description: "Verbindungen zu Geocoding-Anbietern und API-Zugangsdaten.",
             },
+            integrations: {
+                title: "Integrationen",
+                description: "Verbindungen zu externen Diensten außerhalb der Geolokalisierung.",
+            },
         },
         columns: {
             name: "Eigenschaft",
@@ -935,6 +953,56 @@ export const de: typeof pl = {
             FAILURE: "Fehler",
         },
     },
+    integrations: {
+        title: "Integrationen",
+        subtitle: "Verbindungen zu externen Diensten hinzufügen und konfigurieren.",
+        loading: "Integrationen werden geladen...",
+        emptyTitle: "Keine Integrationen konfiguriert",
+        emptyDescription: "Fügen Sie eine Integration hinzu und geben Sie die benötigten Felder ein.",
+        inPost: {
+            title: "InPost Global Tracking",
+            subtitle: "OAuth und Umgebung für die InPost-Sendungsverfolgung konfigurieren.",
+            description: "Globale Sendungsverfolgung über die InPost-API.",
+        },
+        fields: {
+            environment: "Umgebung",
+            enabled: "Integration aktiv",
+            clientId: "Client ID",
+            clientSecret: "Client Secret",
+            apiKey: "API-Schlüssel",
+            secretConfigured: "Ein Secret ist gespeichert. Leer lassen, um es beizubehalten.",
+            secretRequired: "Client Secret eingeben.",
+        },
+        environments: {stage: "Test (Stage)", production: "Produktion"},
+        status: {enabled: "Aktiv", disabled: "Inaktiv"},
+        columns: {status: "Status", integration: "Integration", credentials: "Zugangsdaten"},
+        credentials: {configured: "Geheime Zugangsdaten konfiguriert", notRequired: "Keine geheimen Zugangsdaten"},
+        dialog: {
+            title: "Integration hinzufügen",
+            editTitle: "Integration bearbeiten",
+            description: "Wählen Sie eine Integration. Das Formular zeigt automatisch die benötigten Felder.",
+            editDescription: "Ändern Sie die Einstellungen oder testen Sie die Verbindung vor dem Speichern.",
+            providerLabel: "Integration",
+            noAvailableProviders: "Alle verfügbaren Integrationen sind bereits konfiguriert.",
+            enabledHint: "Die Integration steht den Systemprozessen zur Verfügung.",
+        },
+        actions: {
+            add: "Integration hinzufügen",
+            addFirst: "Erste Integration hinzufügen",
+            edit: "Bearbeiten",
+            testConnection: "Verbindung testen",
+            testing: "Verbindung wird getestet...",
+            saving: "Wird gespeichert...",
+            saveChanges: "Änderungen speichern",
+        },
+        messages: {
+            loadError: "Integrationskonfiguration konnte nicht geladen werden",
+            saved: "Konfiguration gespeichert",
+            saveError: "Konfiguration konnte nicht gespeichert werden",
+            connectionSuccess: "Verbindung erfolgreich",
+            connectionError: "Verbindungstest fehlgeschlagen",
+        },
+    },
     shipments: {
         page: {
             title: "Sendungen",
@@ -1010,6 +1078,20 @@ export const de: typeof pl = {
                 status: "Status",
                 dangerousGoods: "Gefahrgut",
             },
+        },
+        externalSearch: {
+            source: "Suchquelle",
+            system: "System",
+            external: "Externer Anbieter",
+            provider: "Anbieter",
+            search: "Tracking prüfen",
+            providerLoadError: "Verfügbare Anbieter konnten nicht geladen werden",
+            noProviders: "Keine aktiven und konfigurierten Anbieter",
+            resultTitle: "Externer Status",
+            currentStatus: "Aktueller Status",
+            updatedAt: "Letzte Aktualisierung",
+            events: "Ereignisverlauf",
+            noEvents: "Keine Ereignisse vorhanden",
         },
         form: {
             sections: {

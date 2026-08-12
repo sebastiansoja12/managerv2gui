@@ -106,6 +106,7 @@ export const pl = {
         shipmentScanner: "Skanowanie przesyłek",
         courierDeliveries: "Przewożenie przesyłek",
         devicePairing: "Moje urządzenie",
+        integrations: "Integracje",
         mainAriaLabel: "Główna nawigacja",
         defaultUserName: "Admin",
         defaultUserRole: "S. ADMIN",
@@ -128,10 +129,19 @@ export const pl = {
             title: "Znajdź przesyłkę",
             inputLabel: "Numer trackingowy przesyłki",
             placeholder: "Wpisz numer przesyłki",
+            criterionLabel: "Szukaj po",
+            shipmentIdInputLabel: "ID przesyłki",
+            shipmentIdPlaceholder: "Wpisz ID przesyłki",
+            criteria: {
+                trackingNumber: "Numer trackingowy",
+                shipmentId: "ID przesyłki",
+            },
             search: "Wyszukaj",
             showHistory: "Wyświetl historię",
             detailsTabLabel: "Szczegóły przesyłki {trackingNumber}",
             historyTabLabel: "Historia przesyłki {trackingNumber}",
+            detailsByIdTabLabel: "Szczegóły przesyłki #{shipmentId}",
+            historyByIdTabLabel: "Historia przesyłki #{shipmentId}",
         },
         tiles: {
             shipmentDetails: {
@@ -177,6 +187,10 @@ export const pl = {
             analytics: {
                 title: "Analityka",
                 description: "Raporty, wskaźniki i widok kondycji operacji.",
+            },
+            integrations: {
+                title: "Integracje",
+                description: "Konfiguracja zewnętrznych dostawców śledzenia przesyłek.",
             },
             shipmentScanner: {
                 title: "Skanowanie przesyłek",
@@ -675,6 +689,10 @@ export const pl = {
                 title: "Geolokalizacja",
                 description: "Połączenia z dostawcami geokodowania i dane dostępowe do ich API.",
             },
+            integrations: {
+                title: "Integracje",
+                description: "Połączenia z zewnętrznymi usługami niezwiązanymi z geolokalizacją.",
+            },
         },
         columns: {
             name: "Właściwość",
@@ -934,6 +952,56 @@ export const pl = {
             FAILURE: "Błąd",
         },
     },
+    integrations: {
+        title: "Integracje",
+        subtitle: "Dodawaj i konfiguruj połączenia z zewnętrznymi usługami.",
+        loading: "Ładowanie integracji...",
+        emptyTitle: "Brak skonfigurowanych integracji",
+        emptyDescription: "Dodaj integrację i podaj dane wymagane przez wybranego dostawcę.",
+        inPost: {
+            title: "InPost Global Tracking",
+            subtitle: "Konfiguracja OAuth i środowiska usługi śledzenia InPost.",
+            description: "Globalne śledzenie przesyłek przez API InPost.",
+        },
+        fields: {
+            environment: "Środowisko",
+            enabled: "Integracja aktywna",
+            clientId: "Client ID",
+            clientSecret: "Client Secret",
+            apiKey: "Klucz API",
+            secretConfigured: "Sekret jest zapisany. Pozostaw pole puste, aby go zachować.",
+            secretRequired: "Wprowadź sekret klienta.",
+        },
+        environments: {stage: "Testowe (Stage)", production: "Produkcyjne"},
+        status: {enabled: "Aktywna", disabled: "Nieaktywna"},
+        columns: {status: "Status", integration: "Integracja", credentials: "Dane dostępowe"},
+        credentials: {configured: "Dane poufne skonfigurowane", notRequired: "Brak danych poufnych"},
+        dialog: {
+            title: "Dodaj integrację",
+            editTitle: "Edytuj integrację",
+            description: "Wybierz integrację. Formularz automatycznie pokaże pola wymagane przez dostawcę.",
+            editDescription: "Zmień konfigurację integracji lub sprawdź połączenie przed zapisem.",
+            providerLabel: "Integracja",
+            noAvailableProviders: "Wszystkie dostępne integracje są już skonfigurowane.",
+            enabledHint: "Integracja będzie dostępna w operacjach systemu.",
+        },
+        actions: {
+            add: "Dodaj integrację",
+            addFirst: "Dodaj pierwszą integrację",
+            edit: "Edytuj",
+            testConnection: "Testuj połączenie",
+            testing: "Testowanie...",
+            saving: "Zapisywanie...",
+            saveChanges: "Zapisz zmiany",
+        },
+        messages: {
+            loadError: "Nie udało się pobrać konfiguracji integracji",
+            saved: "Konfiguracja została zapisana",
+            saveError: "Nie udało się zapisać konfiguracji",
+            connectionSuccess: "Połączenie działa poprawnie",
+            connectionError: "Test połączenia nie powiódł się",
+        },
+    },
     shipments: {
         page: {
             title: "Przesyłki",
@@ -1009,6 +1077,20 @@ export const pl = {
                 status: "Status",
                 dangerousGoods: "Towary niebezpieczne",
             },
+        },
+        externalSearch: {
+            source: "Źródło wyszukiwania",
+            system: "System",
+            external: "Zewnętrzny dostawca",
+            provider: "Dostawca",
+            search: "Sprawdź tracking",
+            providerLoadError: "Nie udało się pobrać dostępnych dostawców",
+            noProviders: "Brak aktywnych i skonfigurowanych dostawców",
+            resultTitle: "Status zewnętrzny",
+            currentStatus: "Aktualny status",
+            updatedAt: "Ostatnia aktualizacja",
+            events: "Historia zdarzeń",
+            noEvents: "Brak zdarzeń do wyświetlenia",
         },
         form: {
             sections: {
