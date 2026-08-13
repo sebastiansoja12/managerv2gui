@@ -3492,6 +3492,147 @@
     }
 }
 
+/* Shipment details additions: separate people tabs, department context and courier metadata. */
+.shipment-cc-page #shipment-overview,
+.shipment-cc-page #shipment-sender,
+.shipment-cc-page #shipment-recipient,
+.shipment-cc-page #shipment-history {
+    scroll-margin-top: 24px;
+}
+
+.shipment-cc-page .shipment-detail-tabs {
+    gap: 26px;
+}
+
+.shipment-cc-page .shipment-detail-tabs a {
+    font-weight: 800;
+}
+
+.shipment-cc-page .shipment-detail-tabs button {
+    background: transparent;
+    border: 0;
+    border-bottom: 3px solid transparent;
+    color: var(--brand-muted);
+    cursor: pointer;
+    flex: 0 0 auto;
+    font: inherit;
+    font-size: 0.86rem;
+    font-weight: 800;
+    padding: 14px 0 11px;
+    transition: color 160ms ease, border-color 160ms ease;
+}
+
+.shipment-cc-page .shipment-detail-tabs button:hover,
+.shipment-cc-page .shipment-detail-tabs button.shipment-detail-tab-active {
+    border-bottom-color: var(--brand-accent);
+    color: var(--brand-ink);
+}
+
+.shipment-cc-page .shipment-detail-tabs button:focus-visible {
+    outline: 2px solid var(--brand-accent);
+    outline-offset: 3px;
+}
+
+.shipment-cc-page .shipment-details-summary > div > span[title] {
+    cursor: help;
+    display: block;
+}
+
+.shipment-cc-page .shipment-destination-value {
+    border-bottom: 1px dashed color-mix(in srgb, var(--brand-accent) 68%, var(--brand-border));
+    display: inline-block;
+    max-width: 100%;
+}
+
+.shipment-cc-page .shipment-status-control {
+    min-width: 0;
+}
+
+.shipment-cc-page .shipment-details-operations-separated {
+    background: transparent;
+    border: 0;
+    display: grid;
+    gap: 18px;
+    grid-template-columns: minmax(0, 1fr);
+    overflow: visible;
+}
+
+.shipment-cc-page .shipment-details-operations-separated .shipment-status-control,
+.shipment-cc-page .shipment-details-operations-separated .shipment-type-control {
+    border: 1px solid var(--brand-border);
+    border-radius: 7px;
+    min-height: 82px;
+}
+
+.shipment-cc-page .shipment-details-operations-separated .shipment-status-control {
+    border-right: 1px solid var(--brand-border);
+}
+
+.shipment-cc-page .shipment-cc-courier {
+    align-items: flex-start;
+    flex-wrap: wrap;
+}
+
+.shipment-cc-page .shipment-cc-courier-copy {
+    flex: 1 1 260px;
+}
+
+.shipment-cc-page .shipment-cc-courier-meta {
+    border-top: 1px solid color-mix(in srgb, var(--brand-accent) 26%, var(--brand-border));
+    display: grid;
+    flex: 1 1 100%;
+    gap: 10px;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    margin: 14px 0 0 62px;
+    padding-top: 13px;
+}
+
+.shipment-cc-page .shipment-cc-courier-meta div {
+    min-width: 0;
+}
+
+.shipment-cc-page .shipment-cc-courier-meta dt {
+    color: var(--brand-muted);
+    font-size: 0.64rem;
+    font-weight: 850;
+    letter-spacing: 0.08em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.shipment-cc-page .shipment-cc-courier-meta dd {
+    color: var(--brand-ink);
+    font-size: 0.78rem;
+    font-weight: 850;
+    margin: 4px 0 0;
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 980px) {
+    .shipment-cc-page .shipment-cc-courier-meta {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 760px) {
+    .shipment-cc-page .shipment-details-operations-separated {
+        grid-template-columns: 1fr;
+    }
+
+    .shipment-cc-page .shipment-cc-courier-meta {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        margin-left: 0;
+    }
+}
+
+@media (max-width: 520px) {
+    .shipment-cc-page .shipment-cc-courier-meta {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* Reference layout language: calm surfaces, thin separators, and content-first spacing. */
 .shipment-cc-page {
     background: var(--brand-surface-warm);
@@ -4149,4 +4290,9 @@
     .shipment-status-dialog-actions [data-ui="button"] {
         width: 100%;
     }
+}
+
+/* Keep the separated status and shipment type cards visually distinct. */
+.shipment-cc-page .shipment-details-operations-separated {
+    gap: 18px !important;
 }
