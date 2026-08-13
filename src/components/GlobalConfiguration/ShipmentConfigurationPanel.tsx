@@ -448,10 +448,45 @@ const mapDraftToApi = (
     },
 });
 
-export function ShipmentConfigurationPanel() {
+export type ShipmentConfigurationSource = {
+    load: () => Promise<ShipmentConfigurationApi>;
+    save: (configuration: ShipmentConfigurationApi) => Promise<ShipmentConfigurationApi>;
+};
+
+type ShipmentConfigurationPanelProps = {
+    source?: ShipmentConfigurationSource;
+    departmentCode?: string;
+    persistLocally?: boolean;
+};
+
+const currentOperatorSource: ShipmentConfigurationSource = {
+    load: async () => (await OperatorConfigurationService.getCurrentShipmentConfiguration()).data,
+    save: async (configuration) => (
+        await OperatorConfigurationService.updateCurrentShipmentConfiguration(configuration)
+    ).data,
+};
+
+const rememberConfiguration = (persistLocally: boolean, configuration: ShipmentConfigurationDraft) => {
+    if (!persistLocally) {
+        return;
+    }
+    try {
+        window.localStorage.setItem(SHIPMENT_CONFIGURATION_STORAGE_KEY, JSON.stringify(configuration));
+    } catch {
+        // Local cache is only a convenience for the current browser.
+    }
+};
+
+export function ShipmentConfigurationPanel({
+    source = currentOperatorSource,
+    departmentCode: departmentCodeOverride,
+    persistLocally = true,
+}: ShipmentConfigurationPanelProps = {}) {
     const {user} = useAuthState();
-    const departmentCode = user?.departmentCode || "";
-    const [configuration, setConfiguration] = useState<ShipmentConfigurationDraft>(readShipmentConfiguration);
+    const departmentCode = departmentCodeOverride ?? user?.departmentCode ?? "";
+    const [configuration, setConfiguration] = useState<ShipmentConfigurationDraft>(
+        () => persistLocally ? readShipmentConfiguration() : defaultShipmentConfiguration,
+    );
     const [saved, setSaved] = useState(false);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -478,14 +513,14 @@ export function ShipmentConfigurationPanel() {
             try {
                 setLoading(true);
                 setError(null);
-                const response = await OperatorConfigurationService.getCurrentShipmentConfiguration();
+                const loadedConfiguration = await source.load();
                 if (!active) {
                     return;
                 }
 
-                const nextConfiguration = mapApiToDraft(response.data, departmentCode);
+                const nextConfiguration = mapApiToDraft(loadedConfiguration, departmentCode);
                 setConfiguration(nextConfiguration);
-                window.localStorage.setItem(SHIPMENT_CONFIGURATION_STORAGE_KEY, JSON.stringify(nextConfiguration));
+                rememberConfiguration(persistLocally, nextConfiguration);
             } catch (exception) {
                 if (active) {
                     setError(getBackendErrorMessage(
@@ -505,7 +540,7 @@ export function ShipmentConfigurationPanel() {
         return () => {
             active = false;
         };
-    }, [departmentCode, shipmentConfiguration.messages.loadError]);
+    }, [departmentCode, persistLocally, shipmentConfiguration.messages.loadError, source]);
 
     const updateConfiguration = <Key extends keyof ShipmentConfigurationDraft>(
         field: Key,
@@ -522,12 +557,10 @@ export function ShipmentConfigurationPanel() {
         try {
             setSaving(true);
             setError(null);
-            const response = await OperatorConfigurationService.updateCurrentShipmentConfiguration(
-                mapDraftToApi(configuration, departmentCode),
-            );
-            const nextConfiguration = mapApiToDraft(response.data, departmentCode);
+            const savedConfiguration = await source.save(mapDraftToApi(configuration, departmentCode));
+            const nextConfiguration = mapApiToDraft(savedConfiguration, departmentCode);
             setConfiguration(nextConfiguration);
-            window.localStorage.setItem(SHIPMENT_CONFIGURATION_STORAGE_KEY, JSON.stringify(nextConfiguration));
+            rememberConfiguration(persistLocally, nextConfiguration);
             setSaved(true);
         } catch (exception) {
             setError(getBackendErrorMessage(exception, shipmentConfiguration.messages.saveError));
