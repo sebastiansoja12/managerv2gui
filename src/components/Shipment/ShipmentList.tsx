@@ -39,7 +39,7 @@ import {
     TrackingProvider,
     TrackingProviderId,
 } from "../GlobalConfiguration/model/TrackingIntegration";
-import {departmentCodeValue, ShipmentDto, ShipmentStatusDto} from "./dto/ShipmentDto";
+import {departmentCodeValue, ShipmentDto, ShipmentSearchRequestApi, ShipmentStatusDto} from "./dto/ShipmentDto";
 import pl from "../../i18n/translate";
 import {AppTabDefinition} from "../AppShell/types";
 import "./styles/shipments.css";
@@ -66,10 +66,16 @@ const shipmentListCache: {loaded: boolean; shipments: ShipmentDto[]} = {
     loaded: false,
     shipments: [],
 };
+const shipmentTrendCache: {loaded: boolean; currentWeekShipments: ShipmentDto[]; previousWeekShipments: ShipmentDto[]} = {
+    loaded: false,
+    currentWeekShipments: [],
+    previousWeekShipments: [],
+};
 const trackingProviderCache: {loaded: boolean; providers: TrackingProvider[]} = {
     loaded: false,
     providers: [],
 };
+const SHIPMENT_PAGE_SIZE = 100;
 
 const formatPersonName = (firstName?: string, lastName?: string, fallback = "-") => {
     const fullName = `${firstName || ""} ${lastName || ""}`.trim();
@@ -117,6 +123,170 @@ const statusClassName = (status: ShipmentStatusDto) => `tm-status tm-status-${st
 
 const avatarFor = (name: string) => name.trim().slice(0, 1).toUpperCase() || "?";
 
+const loadShipments = async (criteria: ShipmentSearchRequestApi = {}) => {
+    const collectedShipments: ShipmentDto[] = [];
+    let page = 0;
+
+    while (true) {
+        const response = await ShipmentService.search({
+            ...criteria,
+            page,
+            size: SHIPMENT_PAGE_SIZE,
+        });
+
+        collectedShipments.push(...response.data);
+
+        if (response.data.length < SHIPMENT_PAGE_SIZE) {
+            break;
+        }
+
+        page += 1;
+    }
+
+    return collectedShipments;
+};
+
+const toApiLocalDateTime = (date: Date) => {
+    const pad = (value: number) => value.toString().padStart(2, "0");
+
+    return [
+        date.getFullYear(),
+        pad(date.getMonth() + 1),
+        pad(date.getDate()),
+    ].join("-") + `T${[
+        pad(date.getHours()),
+        pad(date.getMinutes()),
+        pad(date.getSeconds()),
+    ].join(":")}`;
+};
+
+const weekRange = (weeksBack: number) => {
+    const end = new Date();
+    end.setMilliseconds(0);
+    const start = new Date(end);
+    start.setDate(start.getDate() - 7);
+    start.setDate(start.getDate() - (weeksBack * 7));
+    end.setDate(end.getDate() - (weeksBack * 7));
+
+    return {
+        createdFrom: toApiLocalDateTime(start),
+        createdTo: toApiLocalDateTime(end),
+    };
+};
+
+const amountValue = (shipment: ShipmentDto) => {
+    const amount = Number(shipment.price?.amount || 0);
+    return Number.isFinite(amount) ? amount : 0;
+};
+
+const calculateShipmentValue = (shipmentsToCount: ShipmentDto[]) => shipmentsToCount.reduce(
+    (sum, shipment) => sum + amountValue(shipment),
+    0
+);
+
+const calculateTrendPercent = (currentValue: number, previousValue: number) => {
+    if (previousValue === 0) {
+        return currentValue > 0 ? 100 : 0;
+    }
+
+    return ((currentValue - previousValue) / previousValue) * 100;
+};
+
+const formatTrendPercent = (value: number) => {
+    const prefix = value > 0 ? "+" : "";
+    return `${prefix}${value.toLocaleString(pl.common.locale, {
+        maximumFractionDigits: 1,
+        minimumFractionDigits: 1,
+    })}%`;
+};
+
+const trendClassName = (value: number) => {
+    if (value > 0) {
+        return "tm-trend-up";
+    }
+
+    if (value < 0) {
+        return "tm-trend-down";
+    }
+
+    return "tm-trend-neutral";
+};
+
+const trendIndicator = (value: number) => {
+    if (value > 0) {
+        return "↑";
+    }
+
+    if (value < 0) {
+        return "↓";
+    }
+
+    return "→";
+};
+
+type MoneyBucket = {
+    currency: string;
+    total: number;
+    standard: number;
+    express: number;
+};
+
+const calculateMoneyBuckets = (shipmentsToCount: ShipmentDto[]) => {
+    const buckets = new Map<string, MoneyBucket>();
+
+    shipmentsToCount.forEach((shipment) => {
+        const amount = amountValue(shipment);
+        const currency = shipment.price?.currency || "PLN";
+        const bucket = buckets.get(currency) || {
+            currency,
+            total: 0,
+            standard: 0,
+            express: 0,
+        };
+
+        bucket.total += amount;
+        if (shipment.shipmentPriority === "EXPRESS") {
+            bucket.express += amount;
+        } else {
+            bucket.standard += amount;
+        }
+        buckets.set(currency, bucket);
+    });
+
+    return Array.from(buckets.values()).sort((left, right) => right.total - left.total);
+};
+
+const formatCompactNumber = (value: number) => {
+    const absoluteValue = Math.abs(value);
+    const format = (scaledValue: number, maximumFractionDigits: number) => scaledValue.toLocaleString(pl.common.locale, {
+        maximumFractionDigits,
+        minimumFractionDigits: scaledValue % 1 === 0 ? 0 : 1,
+    });
+
+    if (absoluteValue >= 1_000_000) {
+        return `${format(value / 1_000_000, 1)}M`;
+    }
+
+    if (absoluteValue >= 1_000) {
+        return `${format(value / 1_000, absoluteValue >= 100_000 ? 0 : 1)}K`;
+    }
+
+    return value.toLocaleString(pl.common.locale, {
+        maximumFractionDigits: 0,
+    });
+};
+
+const formatMoneyBuckets = (buckets: MoneyBucket[], key: keyof Pick<MoneyBucket, "total" | "standard" | "express">) => {
+    if (!buckets.length) {
+        return `0 PLN`;
+    }
+
+    return buckets
+        .filter((bucket) => bucket[key] > 0)
+        .map((bucket) => `${formatCompactNumber(bucket[key])} ${bucket.currency}`)
+        .join(" + ") || `0 ${buckets[0].currency}`;
+};
+
 const DEFAULT_STATUS_FILTER: ShipmentStatusDto = "CREATED";
 
 type ShipmentListProps = {
@@ -140,6 +310,8 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
     const [searchSource, setSearchSource] = useState<"SYSTEM" | "EXTERNAL">("SYSTEM");
     const [trackingProviders, setTrackingProviders] = useState<TrackingProvider[]>(trackingProviderCache.providers);
     const [trackingProvider, setTrackingProvider] = useState<TrackingProviderId | "">("");
+    const [currentWeekShipments, setCurrentWeekShipments] = useState<ShipmentDto[]>(shipmentTrendCache.currentWeekShipments);
+    const [previousWeekShipments, setPreviousWeekShipments] = useState<ShipmentDto[]>(shipmentTrendCache.previousWeekShipments);
     const [externalLoading, setExternalLoading] = useState(false);
     const [externalResult, setExternalResult] = useState<ExternalTrackingResult | null>(null);
     const [actionMenuAnchor, setActionMenuAnchor] = useState<HTMLElement | null>(null);
@@ -173,11 +345,42 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
         return visibleShipments.map(mapShipmentToRow);
     }, [visibleShipments]);
 
-    const totalShipments = shipments.length;
-    const createdShipments = shipments.filter((shipment) => shipment.shipmentStatus === "CREATED").length;
-    const deliveredShipments = shipments.filter((shipment) => shipment.shipmentStatus === "DELIVERY").length;
-    const sentShipments = shipments.filter((shipment) => shipment.shipmentStatus === "SENT").length;
-    const exceptionShipments = shipments.filter((shipment) => ["REROUTE", "REDIRECT", "RETURN"].includes(shipment.shipmentStatus)).length;
+    const shipmentMetrics = useMemo(() => {
+        const total = shipments.length;
+        const created = shipments.filter((shipment) => shipment.shipmentStatus === "CREATED").length;
+        const delivered = shipments.filter((shipment) => shipment.shipmentStatus === "DELIVERY").length;
+        const sent = shipments.filter((shipment) => shipment.shipmentStatus === "SENT").length;
+        const handling = Math.max(total - created - delivered - sent, 0);
+        const moneyBuckets = calculateMoneyBuckets(shipments);
+        const standardValue = moneyBuckets.reduce((sum, bucket) => sum + bucket.standard, 0);
+        const expressValue = moneyBuckets.reduce((sum, bucket) => sum + bucket.express, 0);
+        const valueTotal = standardValue + expressValue;
+
+        return {
+            created,
+            delivered,
+            expressValue,
+            handling,
+            moneyBuckets,
+            sent,
+            standardValue,
+            total,
+            valueTotal,
+        };
+    }, [shipments]);
+
+    const currentWeekValue = useMemo(() => calculateShipmentValue(currentWeekShipments), [currentWeekShipments]);
+    const previousWeekValue = useMemo(() => calculateShipmentValue(previousWeekShipments), [previousWeekShipments]);
+    const shipmentTrend = calculateTrendPercent(currentWeekShipments.length, previousWeekShipments.length);
+    const valueTrend = calculateTrendPercent(currentWeekValue, previousWeekValue);
+    const valueShareTotal = shipmentMetrics.standardValue + shipmentMetrics.expressValue;
+    const standardGaugeShare = valueShareTotal > 0 ? (shipmentMetrics.standardValue / valueShareTotal) * 100 : 0;
+    const progressSegments = [
+        {className: "tm-progress-violet", count: shipmentMetrics.sent, label: shipmentTranslations.metrics.sent},
+        {className: "tm-progress-orange", count: shipmentMetrics.created, label: shipmentTranslations.metrics.created},
+        {className: "tm-progress-green", count: shipmentMetrics.delivered, label: shipmentTranslations.metrics.delivered},
+        {className: "tm-progress-blue", count: shipmentMetrics.handling, label: shipmentTranslations.metrics.handling},
+    ];
 
     const normalizeShipmentId = (value: string): string => {
         const trimmedValue = value.trim();
@@ -356,14 +559,11 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
         }
 
         setLoading(true);
-        ShipmentService.search({
-            page: 0,
-            size: 50,
-        })
+        loadShipments()
             .then((response) => {
                 if (active) {
                     shipmentListCache.loaded = true;
-                    shipmentListCache.shipments = response.data;
+                    shipmentListCache.shipments = response;
                     setShipments([...shipmentListCache.shipments]);
                 }
             })
@@ -375,6 +575,43 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
             .finally(() => {
                 if (active) {
                     setLoading(false);
+                }
+            });
+
+        return () => {
+            active = false;
+        };
+    }, []);
+
+    useEffect(() => {
+        let active = true;
+
+        if (shipmentTrendCache.loaded) {
+            setCurrentWeekShipments([...shipmentTrendCache.currentWeekShipments]);
+            setPreviousWeekShipments([...shipmentTrendCache.previousWeekShipments]);
+            return () => {
+                active = false;
+            };
+        }
+
+        Promise.all([
+            loadShipments(weekRange(0)),
+            loadShipments(weekRange(1)),
+        ])
+            .then(([currentWeek, previousWeek]) => {
+                if (!active) {
+                    return;
+                }
+
+                shipmentTrendCache.loaded = true;
+                shipmentTrendCache.currentWeekShipments = currentWeek;
+                shipmentTrendCache.previousWeekShipments = previousWeek;
+                setCurrentWeekShipments([...currentWeek]);
+                setPreviousWeekShipments([...previousWeek]);
+            })
+            .catch((error) => {
+                if (active) {
+                    showError(error);
                 }
             });
 
@@ -415,21 +652,31 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
                         </div>
                         <span className="tm-muted">{shipmentTranslations.metrics.allShipments}</span>
                         <div className="tm-total-line">
-                            <strong>{totalShipments.toLocaleString()}</strong>
-                            <b>↑ +10.5%</b>
+                            <strong>{shipmentMetrics.total.toLocaleString(pl.common.locale)}</strong>
+                            <b className={trendClassName(shipmentTrend)}>
+                                {trendIndicator(shipmentTrend)} {formatTrendPercent(shipmentTrend)}
+                            </b>
                             <span>{shipmentTranslations.metrics.comparedToLastWeek}</span>
                         </div>
                         <div className="tm-order-stats">
-                            <span><i className="tm-violet" />{shipmentTranslations.metrics.sent} <strong>{sentShipments}</strong></span>
-                            <span><i className="tm-orange" />{shipmentTranslations.metrics.created} <strong>{createdShipments}</strong></span>
-                            <span><i className="tm-green" />{shipmentTranslations.metrics.delivered} <strong>{deliveredShipments}</strong></span>
-                            <span><i className="tm-blue" />{shipmentTranslations.metrics.handling} <strong>{exceptionShipments}</strong></span>
+                            <span><i className="tm-violet" />{shipmentTranslations.metrics.sent} <strong>{shipmentMetrics.sent}</strong></span>
+                            <span><i className="tm-orange" />{shipmentTranslations.metrics.created} <strong>{shipmentMetrics.created}</strong></span>
+                            <span><i className="tm-green" />{shipmentTranslations.metrics.delivered} <strong>{shipmentMetrics.delivered}</strong></span>
+                            <span><i className="tm-blue" />{shipmentTranslations.metrics.handling} <strong>{shipmentMetrics.handling}</strong></span>
                         </div>
                         <div className="tm-progress-bar">
-                            <span className="tm-progress-violet" />
-                            <span className="tm-progress-orange" />
-                            <span className="tm-progress-green" />
-                            <span className="tm-progress-blue" />
+                            {progressSegments.some((segment) => segment.count > 0)
+                                ? progressSegments
+                                    .filter((segment) => segment.count > 0)
+                                    .map((segment) => (
+                                        <span
+                                            aria-label={`${segment.label}: ${segment.count}`}
+                                            className={segment.className}
+                                            key={segment.className}
+                                            style={{flexGrow: segment.count}}
+                                        />
+                                    ))
+                                : <span className="tm-progress-empty" />}
                         </div>
                     </section>
 
@@ -444,19 +691,24 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
                         <div className="tm-revenue-layout">
                             <div>
                                 <span className="tm-muted">{shipmentTranslations.metrics.totalValue}</span>
-                                <strong>{shipmentTranslations.metrics.totalValueAmount}</strong>
+                                <strong>{formatMoneyBuckets(shipmentMetrics.moneyBuckets, "total")}</strong>
                                 <div className="tm-loss-line">
-                                    <b>↓ -7.2%</b>
+                                    <b className={trendClassName(valueTrend)}>
+                                        {trendIndicator(valueTrend)} {formatTrendPercent(valueTrend)}
+                                    </b>
                                     <span>{shipmentTranslations.metrics.comparedToLastWeek}</span>
                                 </div>
                             </div>
-                            <div className="tm-gauge">
+                            <div
+                                className="tm-gauge"
+                                style={{"--standard-share": `${standardGaugeShare}%`} as React.CSSProperties}
+                            >
                                 <span />
                             </div>
                         </div>
                         <div className="tm-revenue-legend">
-                            <span><i className="tm-violet" />{shipmentTranslations.metrics.standard} <strong>{shipmentTranslations.metrics.standardAmount}</strong></span>
-                            <span><i className="tm-orange" />{shipmentTranslations.metrics.express} <strong>{shipmentTranslations.metrics.expressAmount}</strong></span>
+                            <span><i className="tm-violet" />{shipmentTranslations.metrics.standard} <strong>{formatMoneyBuckets(shipmentMetrics.moneyBuckets, "standard")}</strong></span>
+                            <span><i className="tm-orange" />{shipmentTranslations.metrics.express} <strong>{formatMoneyBuckets(shipmentMetrics.moneyBuckets, "express")}</strong></span>
                         </div>
                     </section>
                 </div>

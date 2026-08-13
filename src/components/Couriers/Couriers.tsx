@@ -2,15 +2,12 @@ import React, {useCallback, useEffect, useMemo, useState} from "react";
 import {
     Alert,
     Button,
-    Checkbox,
     CircularProgress,
     Dialog,
     DialogActions,
     DialogContent,
     DialogTitle,
-    FormControlLabel,
     IconButton,
-    Menu,
     MenuItem,
     TextField,
     Typography,
@@ -19,19 +16,23 @@ import {
     Badge,
     Block,
     CheckCircle,
+    Close,
     Edit,
     LocalShipping,
-    MoreVert,
     PersonAdd,
     Refresh,
     Save,
-    WorkspacePremium,
+    Search,
+    Settings,
 } from "@mui/icons-material";
 import {useNavigate} from "react-router-dom";
 import {getBackendErrorMessage} from "../../api/errorMessage";
+import Department from "../../class/depots/Department";
 import CourierService from "../../hooks/CourierService";
+import DepartmentService from "../../hooks/DepartmentService";
 import pl from "../../i18n/translate";
-import {CourierCreateRequest, CourierDto, DangerousGoodCertificationDto} from "./dto/CourierDto";
+import CourierConfigurationDialog from "./CourierConfigurationDialog";
+import {CourierCreateRequest, CourierDto} from "./dto/CourierDto";
 import "./styles/couriers.css";
 
 const valueOrDash = (value?: string | number | null) => value || pl.common.dash;
@@ -39,38 +40,6 @@ const valueOrDash = (value?: string | number | null) => value || pl.common.dash;
 const translateCourierStatus = (value?: string | null) => value
     ? pl.couriers.status[value as keyof typeof pl.couriers.status] || value
     : pl.common.dash;
-
-const formatDate = (value?: string | null) => {
-    if (!value) {
-        return pl.common.dash;
-    }
-
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) {
-        return value;
-    }
-
-    return date.toLocaleDateString(pl.common.locale, {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-    });
-};
-
-const toDateInputValue = (value?: string | null) => {
-    if (!value) {
-        return "";
-    }
-
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) {
-        return "";
-    }
-
-    return date.toISOString().slice(0, 10);
-};
-
-const toIsoDate = (value: string) => new Date(`${value}T00:00:00.000Z`).toISOString();
 
 const isFutureDate = (value?: string | null) => {
     if (!value) {
@@ -88,36 +57,36 @@ const hasValidCertification = (courier: CourierDto) => Boolean(
     && isFutureDate(courier.dangerousGoodCertification.expiryDate)
 );
 
-const emptyCertificationForm: DangerousGoodCertificationDto = {
-    certificateNumber: "",
-    issueDate: "",
-    expiryDate: "",
-    authority: "",
-    valid: true,
-};
-
 const emptyCreateForm = {
     supplierCode: "",
     firstName: "",
     lastName: "",
     telephoneNumber: "",
+    departmentCode: "",
 };
+
+const emptyFilters = {
+    code: "",
+    department: "",
+    status: "",
+};
+
+const departmentCodeValue = (department: Department) => department.departmentCode?.value || "";
 
 function Couriers() {
     const navigate = useNavigate();
     const [couriers, setCouriers] = useState<CourierDto[]>([]);
+    const [departments, setDepartments] = useState<Department[]>([]);
     const [selectedCode, setSelectedCode] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(false);
+    const [departmentsLoading, setDepartmentsLoading] = useState<boolean>(false);
     const [saving, setSaving] = useState<boolean>(false);
     const [error, setError] = useState<string>("");
     const [success, setSuccess] = useState<string>("");
-    const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null);
-    const [menuCourier, setMenuCourier] = useState<CourierDto | null>(null);
-    const [editing, setEditing] = useState<boolean>(false);
-    const [basicForm, setBasicForm] = useState({firstName: "", lastName: "", telephoneNumber: ""});
     const [createForm, setCreateForm] = useState({...emptyCreateForm});
     const [createDialogOpen, setCreateDialogOpen] = useState<boolean>(false);
-    const [certificationForm, setCertificationForm] = useState<DangerousGoodCertificationDto>(emptyCertificationForm);
+    const [configurationDialogOpen, setConfigurationDialogOpen] = useState<boolean>(false);
+    const [filters, setFilters] = useState({...emptyFilters});
     const createTranslations = pl.couriers.create;
 
     const selectedCourier = useMemo(
@@ -125,24 +94,51 @@ function Couriers() {
         [couriers, selectedCode]
     );
 
+    const departmentOptions = useMemo(
+        () => Array.from(new Set(couriers
+            .map((courier) => courier.departmentCode?.value)
+            .filter(Boolean) as string[])).sort((left, right) => left.localeCompare(right, pl.common.locale)),
+        [couriers]
+    );
+
+    const statusOptions = useMemo(
+        () => Array.from(new Set(couriers
+            .map((courier) => courier.status)
+            .filter(Boolean) as string[])).sort((left, right) => left.localeCompare(right, pl.common.locale)),
+        [couriers]
+    );
+
+    const filteredCouriers = useMemo(() => {
+        const normalizedCode = filters.code.trim().toLowerCase();
+        return couriers.filter((courier) => {
+            const code = courier.supplierCode?.value || "";
+            const name = `${courier.firstName || ""} ${courier.lastName || ""}`.trim();
+            const matchesCode = !normalizedCode
+                || code.toLowerCase().includes(normalizedCode)
+                || name.toLowerCase().includes(normalizedCode);
+            const matchesDepartment = !filters.department || courier.departmentCode?.value === filters.department;
+            const matchesStatus = !filters.status || courier.status === filters.status;
+            return matchesCode && matchesDepartment && matchesStatus;
+        });
+    }, [couriers, filters]);
+
     const activeCount = useMemo(() => couriers.filter((courier) => courier.status === "ACTIVE").length, [couriers]);
     const validLicenseCount = useMemo(() => couriers.filter(hasValidLicense).length, [couriers]);
+    const availableDepartments = useMemo(() => departments
+        .filter((department) => department.status === "ACTIVE")
+        .map((department) => {
+            const code = departmentCodeValue(department);
+            const city = department.address?.city || pl.common.dash;
+            return {
+                code,
+                label: `${code} - ${city}`,
+            };
+        })
+        .filter((department) => Boolean(department.code))
+        .sort((left, right) => left.label.localeCompare(right.label, pl.common.locale)), [departments]);
 
     const selectCourier = (courier: CourierDto) => {
         setSelectedCode(courier.supplierCode.value);
-        setEditing(false);
-        setBasicForm({
-            firstName: courier.firstName || "",
-            lastName: courier.lastName || "",
-            telephoneNumber: courier.telephoneNumber || "",
-        });
-        setCertificationForm(courier.dangerousGoodCertification
-            ? {
-                ...courier.dangerousGoodCertification,
-                issueDate: toDateInputValue(courier.dangerousGoodCertification.issueDate),
-                expiryDate: toDateInputValue(courier.dangerousGoodCertification.expiryDate),
-            }
-            : emptyCertificationForm);
     };
 
     const openCourierDetails = (courier: CourierDto) => {
@@ -169,26 +165,39 @@ function Couriers() {
             });
     }, []);
 
+    const retrieveDepartments = useCallback(() => {
+        setDepartmentsLoading(true);
+        DepartmentService.getAll()
+            .then((response) => {
+                setDepartments(Array.isArray(response.data) ? response.data : []);
+            })
+            .catch((exception: unknown) => {
+                setDepartments([]);
+                setError(getBackendErrorMessage(exception, pl.departments.page.loadError));
+            })
+            .finally(() => {
+                setDepartmentsLoading(false);
+            });
+    }, []);
+
     useEffect(() => {
         retrieveCouriers();
     }, [retrieveCouriers]);
 
     useEffect(() => {
-        if (selectedCourier) {
-            setBasicForm({
-                firstName: selectedCourier.firstName || "",
-                lastName: selectedCourier.lastName || "",
-                telephoneNumber: selectedCourier.telephoneNumber || "",
-            });
-            setCertificationForm(selectedCourier.dangerousGoodCertification
-                ? {
-                    ...selectedCourier.dangerousGoodCertification,
-                    issueDate: toDateInputValue(selectedCourier.dangerousGoodCertification.issueDate),
-                    expiryDate: toDateInputValue(selectedCourier.dangerousGoodCertification.expiryDate),
-                }
-                : emptyCertificationForm);
+        retrieveDepartments();
+    }, [retrieveDepartments]);
+
+    useEffect(() => {
+        if (!filteredCouriers.length) {
+            setSelectedCode("");
+            return;
         }
-    }, [selectedCourier]);
+
+        if (!selectedCode || !filteredCouriers.some((courier) => courier.supplierCode.value === selectedCode)) {
+            setSelectedCode(filteredCouriers[0].supplierCode.value);
+        }
+    }, [filteredCouriers, selectedCode]);
 
     const updateCourierInState = (supplierCode: string, patch: Partial<CourierDto>) => {
         setCouriers((previousCouriers) => previousCouriers.map((courier) => (
@@ -205,6 +214,17 @@ function Couriers() {
         }));
     };
 
+    const updateFilter = (field: keyof typeof filters, value: string) => {
+        setFilters((currentFilters) => ({
+            ...currentFilters,
+            [field]: value,
+        }));
+    };
+
+    const resetFilters = () => {
+        setFilters({...emptyFilters});
+    };
+
     const createCourierRequest = (): CourierCreateRequest => ({
         supplierCode: {
             value: createForm.supplierCode.trim(),
@@ -212,10 +232,24 @@ function Couriers() {
         firstName: createForm.firstName.trim(),
         lastName: createForm.lastName.trim(),
         telephoneNumber: createForm.telephoneNumber.trim(),
+        departmentCode: {
+            value: createForm.departmentCode.trim(),
+        },
     });
 
+    const closeCreateDialog = () => {
+        if (!saving) {
+            setCreateDialogOpen(false);
+        }
+    };
+
     const createCourier = () => {
-        if (!createForm.supplierCode.trim() || !createForm.firstName.trim() || !createForm.lastName.trim()) {
+        if (
+            !createForm.supplierCode.trim()
+            || !createForm.firstName.trim()
+            || !createForm.lastName.trim()
+            || !createForm.departmentCode.trim()
+        ) {
             setError(createTranslations.required);
             return;
         }
@@ -224,12 +258,12 @@ function Couriers() {
         setError("");
         setSuccess("");
         CourierService.create(createCourierRequest())
-            .then(() => {
+            .then((response) => {
+                const createdCode = response.data.supplierCode || createForm.supplierCode.trim();
                 setSuccess(createTranslations.success);
-                const newCode = createForm.supplierCode.trim();
                 setCreateForm({...emptyCreateForm});
                 setCreateDialogOpen(false);
-                setSelectedCode(newCode);
+                setSelectedCode(createdCode);
                 retrieveCouriers(false);
             })
             .catch((exception: unknown) => {
@@ -238,23 +272,6 @@ function Couriers() {
             .finally(() => {
                 setSaving(false);
             });
-    };
-
-    const openMenu = (event: React.MouseEvent<HTMLButtonElement>, courier: CourierDto) => {
-        event.stopPropagation();
-        setMenuAnchor(event.currentTarget);
-        setMenuCourier(courier);
-    };
-
-    const closeMenu = () => {
-        setMenuAnchor(null);
-        setMenuCourier(null);
-    };
-
-    const startEdit = (courier: CourierDto) => {
-        selectCourier(courier);
-        setEditing(true);
-        closeMenu();
     };
 
     const changeStatus = (courier: CourierDto, active: boolean) => {
@@ -271,64 +288,6 @@ function Couriers() {
             })
             .catch((exception: unknown) => {
                 setError(getBackendErrorMessage(exception, pl.couriers.page.actionError));
-            })
-            .finally(() => {
-                setSaving(false);
-                closeMenu();
-            });
-    };
-
-    const saveBasicData = () => {
-        if (!selectedCourier) {
-            return;
-        }
-
-        setSaving(true);
-        setError("");
-        setSuccess("");
-        CourierService.updateBasicData({
-            supplierCode: selectedCourier.supplierCode,
-            firstName: basicForm.firstName,
-            lastName: basicForm.lastName,
-            telephoneNumber: basicForm.telephoneNumber,
-        })
-            .then(() => {
-                updateCourierInState(selectedCourier.supplierCode.value, basicForm);
-                setEditing(false);
-                setSuccess(pl.couriers.page.basicDataSaved);
-            })
-            .catch((exception: unknown) => {
-                setError(getBackendErrorMessage(exception, pl.couriers.page.saveError));
-            })
-            .finally(() => {
-                setSaving(false);
-            });
-    };
-
-    const saveCertification = () => {
-        if (!selectedCourier) {
-            return;
-        }
-
-        setSaving(true);
-        setError("");
-        setSuccess("");
-        const certification = {
-            ...certificationForm,
-            issueDate: toIsoDate(certificationForm.issueDate),
-            expiryDate: toIsoDate(certificationForm.expiryDate),
-        };
-
-        CourierService.updateCertification({
-            supplierCode: selectedCourier.supplierCode,
-            dangerousGoodCertification: certification,
-        })
-            .then(() => {
-                updateCourierInState(selectedCourier.supplierCode.value, {dangerousGoodCertification: certification});
-                setSuccess(pl.couriers.page.certificationSaved);
-            })
-            .catch((exception: unknown) => {
-                setError(getBackendErrorMessage(exception, pl.couriers.page.saveError));
             })
             .finally(() => {
                 setSaving(false);
@@ -365,8 +324,8 @@ function Couriers() {
             {error ? <Alert severity="error">{error}</Alert> : undefined}
             {success ? <Alert severity="success">{success}</Alert> : undefined}
 
-            <section className="couriers-grid couriers-list-grid">
-                <div className="couriers-table-panel couriers-table-panel-wide">
+            <section className="couriers-workspace">
+                <div className="couriers-table-panel">
                     <div className="couriers-panel-header">
                         <Typography variant="h5">{pl.couriers.page.listTitle}</Typography>
                         <div className="couriers-table-actions">
@@ -377,6 +336,44 @@ function Couriers() {
                                 {pl.couriers.actions.refresh}
                             </Button>
                         </div>
+                    </div>
+
+                    <div className="couriers-filter-bar">
+                        <TextField
+                            InputProps={{startAdornment: <Search className="couriers-filter-icon" fontSize="small" />}}
+                            label={pl.couriers.columns.code}
+                            size="small"
+                            value={filters.code}
+                            onChange={(event) => updateFilter("code", event.target.value)}
+                        />
+                        <TextField
+                            select
+                            label={pl.couriers.columns.department}
+                            size="small"
+                            value={filters.department}
+                            onChange={(event) => updateFilter("department", event.target.value)}
+                        >
+                            <MenuItem value="">{pl.common.all}</MenuItem>
+                            {departmentOptions.map((departmentCode) => (
+                                <MenuItem key={departmentCode} value={departmentCode}>{departmentCode}</MenuItem>
+                            ))}
+                        </TextField>
+                        <TextField
+                            select
+                            label={pl.couriers.columns.status}
+                            size="small"
+                            value={filters.status}
+                            onChange={(event) => updateFilter("status", event.target.value)}
+                        >
+                            <MenuItem value="">{pl.common.all}</MenuItem>
+                            {statusOptions.map((status) => (
+                                <MenuItem key={status} value={status}>{translateCourierStatus(status)}</MenuItem>
+                            ))}
+                        </TextField>
+                        <Button variant="text" onClick={resetFilters}>{pl.departments.filters.clear}</Button>
+                        <span className="couriers-filter-count">
+                            {pl.departments.filters.results.replace("{count}", String(filteredCouriers.length))}
+                        </span>
                     </div>
 
                     {loading ? (
@@ -397,17 +394,16 @@ function Couriers() {
                                     <th>{pl.couriers.columns.license}</th>
                                     <th>{pl.couriers.columns.certification}</th>
                                     <th>{pl.couriers.columns.vehicle}</th>
-                                    <th aria-label={pl.couriers.columns.actions}></th>
                                 </tr>
                                 </thead>
                                 <tbody>
-                                {couriers.map((courier) => {
+                                {filteredCouriers.map((courier) => {
                                     const isSelected = selectedCode === courier.supplierCode.value;
                                     return (
                                         <tr
                                             className={isSelected ? "couriers-row-selected" : ""}
                                             key={courier.supplierCode.value}
-                                            onClick={() => openCourierDetails(courier)}
+                                            onClick={() => selectCourier(courier)}
                                         >
                                             <td><strong>{courier.supplierCode.value}</strong></td>
                                             <td>{courier.firstName} {courier.lastName}</td>
@@ -429,21 +425,12 @@ function Couriers() {
                                                 </span>
                                             </td>
                                             <td>{valueOrDash(courier.vehicleId?.value)}</td>
-                                            <td>
-                                                <IconButton
-                                                    aria-label={pl.couriers.columns.actions}
-                                                    disabled={saving}
-                                                    onClick={(event) => openMenu(event, courier)}
-                                                >
-                                                    <MoreVert />
-                                                </IconButton>
-                                            </td>
                                         </tr>
                                     );
                                 })}
-                                {!couriers.length ? (
+                                {!filteredCouriers.length ? (
                                     <tr>
-                                        <td className="couriers-empty-row" colSpan={9}>{pl.couriers.page.empty}</td>
+                                        <td className="couriers-empty-row" colSpan={8}>{pl.couriers.page.empty}</td>
                                     </tr>
                                 ) : undefined}
                                 </tbody>
@@ -452,141 +439,66 @@ function Couriers() {
                     )}
                 </div>
 
-                <aside className="couriers-details-panel couriers-details-panel-hidden">
-                    <div className="couriers-panel-header">
-                        <Typography variant="h5">{pl.couriers.page.detailsTitle}</Typography>
-                        {selectedCourier ? (
-                            <span className="couriers-details-code">{selectedCourier.supplierCode.value}</span>
-                        ) : undefined}
-                    </div>
-
+                <aside className="couriers-side-actions">
                     {selectedCourier ? (
                         <>
-                            <div className="couriers-details-card">
-                                <div className="couriers-person">
-                                    <span className="couriers-avatar">{selectedCourier.firstName?.slice(0, 1) || "?"}</span>
-                                    <div>
-                                        <strong>{selectedCourier.firstName} {selectedCourier.lastName}</strong>
-                                        <small>{valueOrDash(selectedCourier.telephoneNumber)}</small>
-                                    </div>
-                                </div>
-                                <div className="couriers-check-grid">
-                                    <div className={hasValidLicense(selectedCourier) ? "couriers-check-card-ok" : "couriers-check-card-bad"}>
-                                        <Badge />
-                                        <span>{hasValidLicense(selectedCourier) ? pl.couriers.checks.validLicense : pl.couriers.checks.invalidLicense}</span>
-                                        <small>{formatDate(selectedCourier.driverLicense?.drivingLicenseExpiryDate)}</small>
-                                    </div>
-                                    <div className={hasValidCertification(selectedCourier) ? "couriers-check-card-ok" : "couriers-check-card-bad"}>
-                                        <WorkspacePremium />
-                                        <span>{hasValidCertification(selectedCourier) ? pl.couriers.checks.validCertification : pl.couriers.checks.invalidCertification}</span>
-                                        <small>{formatDate(selectedCourier.dangerousGoodCertification?.expiryDate)}</small>
-                                    </div>
-                                </div>
+                            <div className="couriers-side-actions-title">
+                                <span>{pl.couriers.columns.actions}</span>
+                                <strong>{selectedCourier.supplierCode.value}</strong>
                             </div>
-
-                            <div className="couriers-form-section">
-                                <div className="couriers-section-title">
-                                    <Typography variant="h6">{pl.couriers.actions.edit}</Typography>
-                                    <Button
-                                        startIcon={<Edit />}
-                                        variant={editing ? "outlined" : "contained"}
-                                        onClick={() => setEditing((current) => !current)}
-                                    >
-                                        {editing ? pl.couriers.actions.cancelEdit : pl.couriers.actions.edit}
-                                    </Button>
-                                </div>
-                                <div className="couriers-form-grid">
-                                    <TextField
-                                        disabled={!editing || saving}
-                                        label={pl.couriers.fields.firstName}
-                                        value={basicForm.firstName}
-                                        onChange={(event) => setBasicForm({...basicForm, firstName: event.target.value})}
-                                    />
-                                    <TextField
-                                        disabled={!editing || saving}
-                                        label={pl.couriers.fields.lastName}
-                                        value={basicForm.lastName}
-                                        onChange={(event) => setBasicForm({...basicForm, lastName: event.target.value})}
-                                    />
-                                    <TextField
-                                        disabled={!editing || saving}
-                                        label={pl.couriers.fields.telephoneNumber}
-                                        value={basicForm.telephoneNumber}
-                                        onChange={(event) => setBasicForm({...basicForm, telephoneNumber: event.target.value})}
-                                    />
-                                </div>
-                                {editing ? (
-                                    <Button disabled={saving} startIcon={<Save />} variant="contained" onClick={saveBasicData}>
-                                        {pl.couriers.actions.saveBasicData}
-                                    </Button>
-                                ) : undefined}
-                            </div>
-
-                            <div className="couriers-form-section">
-                                <Typography variant="h6">{pl.couriers.actions.addCertification}</Typography>
-                                <div className="couriers-form-grid">
-                                    <TextField
-                                        disabled={saving}
-                                        label={pl.couriers.fields.certificateNumber}
-                                        value={certificationForm.certificateNumber}
-                                        onChange={(event) => setCertificationForm({...certificationForm, certificateNumber: event.target.value})}
-                                    />
-                                    <TextField
-                                        disabled={saving}
-                                        label={pl.couriers.fields.authority}
-                                        value={certificationForm.authority}
-                                        onChange={(event) => setCertificationForm({...certificationForm, authority: event.target.value})}
-                                    />
-                                    <TextField
-                                        InputLabelProps={{shrink: true}}
-                                        disabled={saving}
-                                        label={pl.couriers.fields.issueDate}
-                                        type="date"
-                                        value={certificationForm.issueDate}
-                                        onChange={(event) => setCertificationForm({...certificationForm, issueDate: event.target.value})}
-                                    />
-                                    <TextField
-                                        InputLabelProps={{shrink: true}}
-                                        disabled={saving}
-                                        label={pl.couriers.fields.expiryDate}
-                                        type="date"
-                                        value={certificationForm.expiryDate}
-                                        onChange={(event) => setCertificationForm({...certificationForm, expiryDate: event.target.value})}
-                                    />
-                                </div>
-                                <FormControlLabel
-                                    control={(
-                                        <Checkbox
-                                            checked={certificationForm.valid}
-                                            disabled={saving}
-                                            onChange={(event) => setCertificationForm({...certificationForm, valid: event.target.checked})}
-                                        />
-                                    )}
-                                    label={pl.couriers.fields.valid}
-                                />
-                                <Button disabled={saving} startIcon={<WorkspacePremium />} variant="contained" onClick={saveCertification}>
-                                    {pl.couriers.actions.saveCertification}
-                                </Button>
-                            </div>
-
-                            <dl className="couriers-meta">
+                            <dl className="couriers-selection-details">
                                 <div>
-                                    <dt>{pl.couriers.fields.driverLicenseNumber}</dt>
-                                    <dd>{valueOrDash(selectedCourier.driverLicense?.number)}</dd>
+                                    <dt>{pl.couriers.columns.name}</dt>
+                                    <dd>{selectedCourier.firstName} {selectedCourier.lastName}</dd>
                                 </div>
                                 <div>
-                                    <dt>{pl.couriers.fields.device}</dt>
-                                    <dd>{valueOrDash(selectedCourier.deviceId?.value)}</dd>
+                                    <dt>{pl.couriers.columns.department}</dt>
+                                    <dd>{valueOrDash(selectedCourier.departmentCode?.value)}</dd>
                                 </div>
                                 <div>
-                                    <dt>{pl.couriers.fields.deliveryArea}</dt>
-                                    <dd>{valueOrDash(selectedCourier.deliveryArea?.areaName)}</dd>
+                                    <dt>{pl.couriers.columns.status}</dt>
+                                    <dd>{translateCourierStatus(selectedCourier.status)}</dd>
                                 </div>
                                 <div>
-                                    <dt>{pl.couriers.fields.packageTypes}</dt>
-                                    <dd>{selectedCourier.supportedPackageTypes?.join(", ") || pl.common.dash}</dd>
+                                    <dt>{pl.couriers.columns.vehicle}</dt>
+                                    <dd>{valueOrDash(selectedCourier.vehicleId?.value)}</dd>
                                 </div>
                             </dl>
+                            <table className="couriers-actions-table">
+                                <tbody>
+                                <tr>
+                                    <td>
+                                        <button type="button" onClick={() => openCourierDetails(selectedCourier)}>
+                                            <Edit fontSize="small" />
+                                            <span>{pl.couriers.actions.edit}</span>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <button type="button" onClick={() => setConfigurationDialogOpen(true)}>
+                                            <Settings fontSize="small" />
+                                            <span>{pl.globalConfiguration.courierConfiguration.title}</span>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        {selectedCourier.status === "ACTIVE" ? (
+                                            <button className="couriers-danger-action" disabled={saving} type="button" onClick={() => changeStatus(selectedCourier, false)}>
+                                                <Block fontSize="small" />
+                                                <span>{pl.couriers.actions.deactivate}</span>
+                                            </button>
+                                        ) : (
+                                            <button disabled={saving} type="button" onClick={() => changeStatus(selectedCourier, true)}>
+                                                <CheckCircle fontSize="small" />
+                                                <span>{pl.couriers.actions.activate}</span>
+                                            </button>
+                                        )}
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
                         </>
                     ) : (
                         <div className="couriers-empty-details">{pl.couriers.page.emptyDetails}</div>
@@ -594,32 +506,29 @@ function Couriers() {
                 </aside>
             </section>
 
-            <Menu anchorEl={menuAnchor} open={Boolean(menuAnchor)} onClose={closeMenu}>
-                {menuCourier ? (
-                    <MenuItem onClick={() => startEdit(menuCourier)}>
-                        <Edit fontSize="small" />
-                        <span>{pl.couriers.actions.edit}</span>
-                    </MenuItem>
-                ) : undefined}
-                {menuCourier && menuCourier.status !== "ACTIVE" ? (
-                    <MenuItem onClick={() => changeStatus(menuCourier, true)}>
-                        <CheckCircle fontSize="small" />
-                        <span>{pl.couriers.actions.activate}</span>
-                    </MenuItem>
-                ) : undefined}
-                {menuCourier && menuCourier.status === "ACTIVE" ? (
-                    <MenuItem onClick={() => changeStatus(menuCourier, false)}>
-                        <Block fontSize="small" />
-                        <span>{pl.couriers.actions.deactivate}</span>
-                    </MenuItem>
-                ) : undefined}
-            </Menu>
-
-            <Dialog fullWidth maxWidth="sm" open={createDialogOpen} onClose={() => !saving && setCreateDialogOpen(false)}>
-                <DialogTitle>{createTranslations.title}</DialogTitle>
-                <DialogContent>
+            <Dialog
+                className="couriers-create-dialog"
+                fullWidth
+                maxWidth="md"
+                PaperProps={{className: "couriers-create-dialog-paper"}}
+                open={createDialogOpen}
+                onClose={closeCreateDialog}
+            >
+                <DialogTitle className="couriers-create-dialog-title">
+                    <span className="couriers-create-dialog-heading">
+                        <span className="couriers-create-dialog-icon">
+                            <PersonAdd />
+                        </span>
+                        <span>{createTranslations.title}</span>
+                    </span>
+                    <IconButton aria-label={pl.common.close} disabled={saving} onClick={closeCreateDialog}>
+                        <Close />
+                    </IconButton>
+                </DialogTitle>
+                <DialogContent className="couriers-create-dialog-content">
                     <div className="couriers-create-grid couriers-dialog-grid">
                         <TextField
+                            autoFocus
                             disabled={saving}
                             label={createTranslations.fields.supplierCode}
                             size="small"
@@ -647,15 +556,41 @@ function Couriers() {
                             value={createForm.telephoneNumber}
                             onChange={(event) => updateCreateField("telephoneNumber", event.target.value)}
                         />
+                        <TextField
+                            disabled={saving || departmentsLoading || !availableDepartments.length}
+                            label={pl.couriers.fields.department}
+                            required
+                            select
+                            size="small"
+                            value={createForm.departmentCode}
+                            onChange={(event) => updateCreateField("departmentCode", event.target.value)}
+                        >
+                            {departmentsLoading || !availableDepartments.length ? (
+                                <MenuItem disabled value="">
+                                    {departmentsLoading
+                                        ? createTranslations.departmentLoading
+                                        : createTranslations.departmentEmpty}
+                                </MenuItem>
+                            ) : undefined}
+                            {availableDepartments.map((department) => (
+                                <MenuItem key={department.code} value={department.code}>
+                                    {department.label}
+                                </MenuItem>
+                            ))}
+                        </TextField>
                     </div>
                 </DialogContent>
-                <DialogActions>
-                    <Button disabled={saving} onClick={() => setCreateDialogOpen(false)}>{createTranslations.cancel}</Button>
+                <DialogActions className="couriers-create-dialog-actions">
+                    <Button disabled={saving} onClick={closeCreateDialog}>{createTranslations.cancel}</Button>
                     <Button disabled={saving} startIcon={<Save />} variant="contained" onClick={createCourier}>
                         {saving ? createTranslations.saving : createTranslations.submit}
                     </Button>
                 </DialogActions>
             </Dialog>
+            <CourierConfigurationDialog
+                open={configurationDialogOpen}
+                onClose={() => setConfigurationDialogOpen(false)}
+            />
         </main>
     );
 }

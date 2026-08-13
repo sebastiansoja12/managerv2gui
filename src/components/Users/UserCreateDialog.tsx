@@ -1,5 +1,6 @@
 import React, {FormEvent, useEffect, useState} from "react";
-import {Alert, Dialog, DialogActions, DialogContent, DialogTitle, MenuItem, TextField} from "@mui/material";
+import {Close, PersonAdd} from "@mui/icons-material";
+import {Alert, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, MenuItem, TextField} from "@mui/material";
 import pl from "../../i18n/translate";
 import {CreateUserRequest, UserRole} from "./model/User";
 
@@ -15,6 +16,8 @@ const emptyRequest = (): CreateUserRequest => ({
 });
 
 type UserCreateDialogProps = {
+    departments: Array<{code: string; label: string}>;
+    departmentsLoading: boolean;
     open: boolean;
     saving: boolean;
     error?: string;
@@ -22,7 +25,7 @@ type UserCreateDialogProps = {
     onSave: (request: CreateUserRequest) => void;
 };
 
-function UserCreateDialog({open, saving, error, onClose, onSave}: UserCreateDialogProps) {
+function UserCreateDialog({departments, departmentsLoading, open, saving, error, onClose, onSave}: UserCreateDialogProps) {
     const [request, setRequest] = useState<CreateUserRequest>(emptyRequest());
 
     useEffect(() => {
@@ -43,17 +46,52 @@ function UserCreateDialog({open, saving, error, onClose, onSave}: UserCreateDial
     const invalid = Object.values(request).some((value) => !value.trim());
 
     return (
-        <Dialog fullWidth maxWidth="sm" open={open} onClose={saving ? undefined : onClose}>
+        <Dialog
+            className="users-create-dialog"
+            fullWidth
+            maxWidth="md"
+            PaperProps={{className: "users-create-dialog-paper"}}
+            open={open}
+            onClose={saving ? undefined : onClose}
+        >
             <form onSubmit={submit}>
-                <DialogTitle>{pl.usersManagement.create.title}</DialogTitle>
-                <DialogContent className="users-dialog-grid">
+                <DialogTitle className="users-create-dialog-title">
+                    <span className="users-dialog-heading">
+                        <span className="users-dialog-icon">
+                            <PersonAdd />
+                        </span>
+                        <span>{pl.usersManagement.create.title}</span>
+                    </span>
+                    <IconButton aria-label={pl.common.close} disabled={saving} onClick={onClose}>
+                        <Close />
+                    </IconButton>
+                </DialogTitle>
+                <DialogContent className="users-dialog-grid users-create-dialog-content">
                     {error ? <Alert className="users-dialog-alert" severity="error">{error}</Alert> : null}
                     <TextField autoFocus label={pl.usersManagement.fields.firstName} required value={request.firstName} onChange={(event) => updateField("firstName", event.target.value)}/>
                     <TextField label={pl.usersManagement.fields.lastName} required value={request.lastName} onChange={(event) => updateField("lastName", event.target.value)}/>
                     <TextField label={pl.usersManagement.fields.username} required value={request.username} onChange={(event) => updateField("username", event.target.value)}/>
                     <TextField autoComplete="new-password" label={pl.usersManagement.fields.password} required type="password" value={request.password} onChange={(event) => updateField("password", event.target.value)}/>
                     <TextField label={pl.usersManagement.fields.email} required type="email" value={request.email} onChange={(event) => updateField("email", event.target.value)}/>
-                    <TextField label={pl.usersManagement.fields.departmentCode} required value={request.departmentCode} onChange={(event) => updateField("departmentCode", event.target.value)}/>
+                    <TextField
+                        disabled={departmentsLoading || !departments.length}
+                        label={pl.usersManagement.fields.departmentCode}
+                        required
+                        select
+                        value={request.departmentCode}
+                        onChange={(event) => updateField("departmentCode", event.target.value)}
+                    >
+                        {departmentsLoading || !departments.length ? (
+                            <MenuItem disabled value="">
+                                {departmentsLoading
+                                    ? pl.usersManagement.create.departmentLoading
+                                    : pl.usersManagement.create.departmentEmpty}
+                            </MenuItem>
+                        ) : null}
+                        {departments.map((department) => (
+                            <MenuItem key={department.code} value={department.code}>{department.label}</MenuItem>
+                        ))}
+                    </TextField>
                     <TextField label={pl.usersManagement.fields.role} select value={request.role} onChange={(event) => updateField("role", event.target.value as UserRole)}>
                         {Object.entries(pl.usersManagement.roles).map(([role, label]) => <MenuItem key={role} value={role}>{label}</MenuItem>)}
                     </TextField>

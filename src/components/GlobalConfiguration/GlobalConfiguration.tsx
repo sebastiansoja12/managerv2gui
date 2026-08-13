@@ -2,9 +2,7 @@ import React, {useCallback, useEffect, useMemo, useState} from "react";
 import {
     Alert,
     Button,
-    Checkbox,
     CircularProgress,
-    FormControlLabel,
     TextField,
     Typography,
 } from "@mui/material";
@@ -24,26 +22,6 @@ import "./styles/global-configuration.css";
 type PropertyDraft = {
     name: string;
     value: string;
-};
-
-type CourierConfigurationDraft = {
-    copyDepartmentCodeFromDevice: boolean;
-    skipInvalidShipments: boolean;
-    generateNewReturnCodes: boolean;
-    editDeliveryArea: boolean;
-    substituteCourier: string;
-    autoGenerateLabels: boolean;
-};
-
-const COURIER_CONFIGURATION_STORAGE_KEY = "manager.globalConfiguration.courier";
-
-const defaultCourierConfiguration: CourierConfigurationDraft = {
-    copyDepartmentCodeFromDevice: false,
-    skipInvalidShipments: false,
-    generateNewReturnCodes: false,
-    editDeliveryArea: false,
-    substituteCourier: "",
-    autoGenerateLabels: false,
 };
 
 const sections: GlobalConfigurationSection[] = [
@@ -88,26 +66,9 @@ const getSectionForProperty = (property: Software) => (
     sections.find((section) => propertyBelongsToSection(property, section)) || sections[2]
 );
 
-const readCourierConfiguration = (): CourierConfigurationDraft => {
-    try {
-        const storedValue = window.localStorage.getItem(COURIER_CONFIGURATION_STORAGE_KEY);
-        if (!storedValue) {
-            return defaultCourierConfiguration;
-        }
-
-        return {
-            ...defaultCourierConfiguration,
-            ...JSON.parse(storedValue),
-        };
-    } catch {
-        return defaultCourierConfiguration;
-    }
-};
-
 function GlobalConfiguration() {
     const [properties, setProperties] = useState<Software[]>([]);
     const [drafts, setDrafts] = useState<Record<string, PropertyDraft>>({});
-    const [courierConfiguration, setCourierConfiguration] = useState<CourierConfigurationDraft>(readCourierConfiguration);
     const [loading, setLoading] = useState<boolean>(false);
     const [savingId, setSavingId] = useState<string>("");
     const [error, setError] = useState<string>("");
@@ -163,19 +124,6 @@ function GlobalConfiguration() {
                 [field]: value,
             },
         }));
-    };
-
-    const updateCourierConfiguration = (field: keyof CourierConfigurationDraft, value: string | boolean) => {
-        setCourierConfiguration((currentConfiguration) => ({
-            ...currentConfiguration,
-            [field]: value,
-        }));
-    };
-
-    const saveCourierConfiguration = () => {
-        window.localStorage.setItem(COURIER_CONFIGURATION_STORAGE_KEY, JSON.stringify(courierConfiguration));
-        setError("");
-        setSuccess(pl.globalConfiguration.courierConfiguration.messages.saved);
     };
 
     const saveProperty = (property: Software, section: GlobalConfigurationSection) => {
@@ -249,17 +197,19 @@ function GlobalConfiguration() {
                 ? <Alert severity="success">{success}</Alert>
                 : undefined}
 
-            <section className="global-configuration-toolbar">
-                <div>
-                    <h2>{activeSectionTranslation.title}</h2>
-                    <p>{activeSectionTranslation.description}</p>
-                </div>
-                {!isDedicatedConfigurationSection(activeSection.key) ? (
-                    <Button disabled={loading} startIcon={<Refresh />} variant="outlined" onClick={retrieveProperties}>
-                        {pl.common.refresh}
-                    </Button>
-                ) : undefined}
-            </section>
+            {activeSection.key !== "integrations" ? (
+                <section className="global-configuration-toolbar">
+                    <div>
+                        <h2>{activeSectionTranslation.title}</h2>
+                        <p>{activeSectionTranslation.description}</p>
+                    </div>
+                    {!isDedicatedConfigurationSection(activeSection.key) ? (
+                        <Button disabled={loading} startIcon={<Refresh />} variant="outlined" onClick={retrieveProperties}>
+                            {pl.common.refresh}
+                        </Button>
+                    ) : undefined}
+                </section>
+            ) : undefined}
 
             {activeSection.key === "geocoding" ? (
                 <GeocodingConfigurationPanel />
@@ -272,72 +222,6 @@ function GlobalConfiguration() {
                 </div>
             ) : (
                 <>
-                    {activeSection.key === "suppliers" ? (
-                        <section className="global-configuration-section global-configuration-courier-panel">
-                            <div className="global-configuration-panel-header">
-                                <h3>{pl.globalConfiguration.courierConfiguration.title}</h3>
-                                <Button startIcon={<Save />} variant="contained" onClick={saveCourierConfiguration}>
-                                    {pl.common.saveChanges}
-                                </Button>
-                            </div>
-
-                            <div className="global-configuration-courier-grid">
-                                <FormControlLabel
-                                    control={(
-                                        <Checkbox
-                                            checked={courierConfiguration.copyDepartmentCodeFromDevice}
-                                            onChange={(event) => updateCourierConfiguration("copyDepartmentCodeFromDevice", event.target.checked)}
-                                        />
-                                    )}
-                                    label={pl.globalConfiguration.courierConfiguration.fields.copyDepartmentCodeFromDevice}
-                                />
-                                <FormControlLabel
-                                    control={(
-                                        <Checkbox
-                                            checked={courierConfiguration.skipInvalidShipments}
-                                            onChange={(event) => updateCourierConfiguration("skipInvalidShipments", event.target.checked)}
-                                        />
-                                    )}
-                                    label={pl.globalConfiguration.courierConfiguration.fields.skipInvalidShipments}
-                                />
-                                <FormControlLabel
-                                    control={(
-                                        <Checkbox
-                                            checked={courierConfiguration.generateNewReturnCodes}
-                                            onChange={(event) => updateCourierConfiguration("generateNewReturnCodes", event.target.checked)}
-                                        />
-                                    )}
-                                    label={pl.globalConfiguration.courierConfiguration.fields.generateNewReturnCodes}
-                                />
-                                <FormControlLabel
-                                    control={(
-                                        <Checkbox
-                                            checked={courierConfiguration.editDeliveryArea}
-                                            onChange={(event) => updateCourierConfiguration("editDeliveryArea", event.target.checked)}
-                                        />
-                                    )}
-                                    label={pl.globalConfiguration.courierConfiguration.fields.editDeliveryArea}
-                                />
-                                <FormControlLabel
-                                    control={(
-                                        <Checkbox
-                                            checked={courierConfiguration.autoGenerateLabels}
-                                            onChange={(event) => updateCourierConfiguration("autoGenerateLabels", event.target.checked)}
-                                        />
-                                    )}
-                                    label={pl.globalConfiguration.courierConfiguration.fields.autoGenerateLabels}
-                                />
-                                <TextField
-                                    fullWidth
-                                    label={pl.globalConfiguration.courierConfiguration.fields.substituteCourier}
-                                    size="small"
-                                    value={courierConfiguration.substituteCourier}
-                                    onChange={(event) => updateCourierConfiguration("substituteCourier", event.target.value)}
-                                />
-                            </div>
-                        </section>
-                    ) : undefined}
-
                     <section className="global-configuration-section">
                         <div className="global-configuration-table-wrap">
                             <table className="global-configuration-table">

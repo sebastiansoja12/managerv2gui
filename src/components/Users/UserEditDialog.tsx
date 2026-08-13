@@ -1,9 +1,12 @@
 import React, {FormEvent, useEffect, useState} from "react";
-import {Alert, Dialog, DialogActions, DialogContent, DialogTitle, MenuItem, TextField} from "@mui/material";
+import {Close, ManageAccounts} from "@mui/icons-material";
+import {Alert, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, MenuItem, TextField} from "@mui/material";
 import pl from "../../i18n/translate";
 import {UpdateUserRequest, User, userToUpdateRequest} from "./model/User";
 
 type UserEditDialogProps = {
+    departments: Array<{code: string; label: string}>;
+    departmentsLoading: boolean;
     open: boolean;
     saving: boolean;
     error?: string;
@@ -12,7 +15,7 @@ type UserEditDialogProps = {
     onSave: (request: UpdateUserRequest) => void;
 };
 
-function UserEditDialog({open, saving, error, user, onClose, onSave}: UserEditDialogProps) {
+function UserEditDialog({departments, departmentsLoading, open, saving, error, user, onClose, onSave}: UserEditDialogProps) {
     const [request, setRequest] = useState<UpdateUserRequest | undefined>();
 
     useEffect(() => {
@@ -35,10 +38,27 @@ function UserEditDialog({open, saving, error, user, onClose, onSave}: UserEditDi
     const invalid = Object.values(request).some((value) => !value.trim());
 
     return (
-        <Dialog fullWidth maxWidth="sm" open={open} onClose={saving ? undefined : onClose}>
+        <Dialog
+            className="users-edit-dialog"
+            fullWidth
+            maxWidth="md"
+            PaperProps={{className: "users-edit-dialog-paper"}}
+            open={open}
+            onClose={saving ? undefined : onClose}
+        >
             <form onSubmit={submit}>
-                <DialogTitle>{pl.usersManagement.edit.title}</DialogTitle>
-                <DialogContent className="users-dialog-grid">
+                <DialogTitle className="users-edit-dialog-title">
+                    <span className="users-dialog-heading">
+                        <span className="users-dialog-icon">
+                            <ManageAccounts />
+                        </span>
+                        <span>{pl.usersManagement.edit.title}</span>
+                    </span>
+                    <IconButton aria-label={pl.common.close} disabled={saving} onClick={onClose}>
+                        <Close />
+                    </IconButton>
+                </DialogTitle>
+                <DialogContent className="users-dialog-grid users-edit-dialog-content">
                     {error ? <Alert className="users-dialog-alert" severity="error">{error}</Alert> : null}
                     <TextField
                         autoFocus
@@ -67,11 +87,27 @@ function UserEditDialog({open, saving, error, user, onClose, onSave}: UserEditDi
                         value={request.email}
                     />
                     <TextField
+                        disabled={departmentsLoading || !departments.length}
                         label={pl.usersManagement.fields.departmentCode}
                         onChange={(event) => updateField("departmentCode", event.target.value)}
                         required
+                        select
                         value={request.departmentCode}
-                    />
+                    >
+                        {!departments.some((department) => department.code === request.departmentCode) && request.departmentCode ? (
+                            <MenuItem value={request.departmentCode}>{request.departmentCode}</MenuItem>
+                        ) : null}
+                        {departmentsLoading || !departments.length ? (
+                            <MenuItem disabled value="">
+                                {departmentsLoading
+                                    ? pl.usersManagement.create.departmentLoading
+                                    : pl.usersManagement.create.departmentEmpty}
+                            </MenuItem>
+                        ) : null}
+                        {departments.map((department) => (
+                            <MenuItem key={department.code} value={department.code}>{department.label}</MenuItem>
+                        ))}
+                    </TextField>
                     <TextField
                         label={pl.usersManagement.fields.language}
                         onChange={(event) => updateField("language", event.target.value)}

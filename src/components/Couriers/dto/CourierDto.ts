@@ -80,6 +80,11 @@ export interface CourierCreateRequest {
     firstName: string;
     lastName: string;
     telephoneNumber: string;
+    departmentCode: DepartmentCodeDto;
+}
+
+export interface CourierCreateResponse {
+    supplierCode: string;
 }
 
 export interface CertificationUpdateRequest {
