@@ -12,8 +12,8 @@ import {
     Snackbar,
     TextField,
     Typography,
-} from "@mui/material";
-import {ArrowBack, Close, Edit, LocalShipping, Refresh, Save} from "@mui/icons-material";
+} from "components/ui";
+import {ArrowBack, Close, Edit, LocalShipping, Refresh, Save} from "components/ui/icons";
 import {useNavigate, useParams} from "react-router-dom";
 import ShipmentService from "../../hooks/ShipmentService";
 import {ApiErrorResponse} from "../../api/ApiResult";

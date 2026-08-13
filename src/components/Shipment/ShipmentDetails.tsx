@@ -12,9 +12,8 @@ import {
     Menu,
     MenuItem,
     Snackbar,
-    TextField,
     Typography,
-} from "@mui/material";
+} from "components/ui";
 import {
     ArrowDropDown,
     ArrowBack,
@@ -31,7 +30,7 @@ import {
     Save,
     TableView,
     Print,
-} from "@mui/icons-material";
+} from "components/ui/icons";
 import {useNavigate, useParams} from "react-router-dom";
 import ShipmentService from "../../hooks/ShipmentService";
 import DocumentService from "../../hooks/DocumentService";
@@ -152,6 +151,13 @@ const detailTerminal = (detail: RouteDetail) => detail.terminalId?.value || deta
 const detailCourier = (detail?: RouteDetail | null) => valueObjectValue(detail?.supplierCode) || detail?.username || pl.shipments.table.unassigned;
 
 const formatBoolean = (value: boolean) => value ? pl.shipments.dangerousGood.yes : pl.shipments.dangerousGood.no;
+
+const detailValue = (label: string, value?: React.ReactNode) => (
+    <div className="shipment-detail-value">
+        <span>{label}</span>
+        <strong>{value || pl.common.dash}</strong>
+    </div>
+);
 
 const ShipmentDetails: React.FC = () => {
     const navigate = useNavigate();
@@ -469,7 +475,10 @@ const ShipmentDetails: React.FC = () => {
     };
 
     const personFields = (title: string, personType: PersonType, person: PersonApi) => (
-        <section className={`shipment-edit-section shipment-details-segment shipment-details-person-${personType.toLowerCase()}`}>
+        <section
+            className={`shipment-edit-section shipment-details-segment shipment-details-person-${personType.toLowerCase()}`}
+            id={`shipment-${personType.toLowerCase()}`}
+        >
             <div className="shipment-edit-section-header">
                 <Typography variant="h6">{title}</Typography>
                 <div className="shipment-edit-section-actions">
@@ -488,55 +497,16 @@ const ShipmentDetails: React.FC = () => {
                 </div>
             </div>
             <div className="shipment-details-grid">
-                <TextField
-                    InputProps={{readOnly: true}}
-                    label={pl.shipments.form.fields.firstName}
-                    size="small"
-                    value={person.firstName}
-                />
-
-                <TextField
-                    InputProps={{readOnly: true}}
-                    label={pl.shipments.form.fields.lastName}
-                    size="small"
-                    value={person.lastName}
-                />
-
-                <TextField
-                    InputProps={{readOnly: true}}
-                    label={pl.shipments.form.fields.email}
-                    size="small"
-                    value={person.email}
-                />
-
-                <TextField
-                    InputProps={{readOnly: true}}
-                    label={pl.shipments.form.fields.phone}
-                    size="small"
-                    value={person.telephoneNumber}
-                />
-
-                <TextField
-                    InputProps={{readOnly: true}}
-                    label={pl.shipments.form.fields.city}
-                    size="small"
-                    value={person.city}
-                />
-
-                <TextField
-                    InputProps={{readOnly: true}}
-                    label={pl.shipments.form.fields.postalCode}
-                    size="small"
-                    value={person.postalCode}
-                />
-
-                <TextField
-                    className="shipment-details-wide"
-                    InputProps={{readOnly: true}}
-                    label={pl.shipments.form.fields.street}
-                    size="small"
-                    value={person.street}
-                />
+                {detailValue(pl.shipments.form.fields.firstName, person.firstName)}
+                {detailValue(pl.shipments.form.fields.lastName, person.lastName)}
+                {detailValue(pl.shipments.form.fields.email, person.email)}
+                {detailValue(pl.shipments.form.fields.phone, person.telephoneNumber)}
+                {detailValue(pl.shipments.form.fields.city, person.city)}
+                {detailValue(pl.shipments.form.fields.postalCode, person.postalCode)}
+                <div className="shipment-detail-value shipment-details-wide">
+                    <span>{pl.shipments.form.fields.street}</span>
+                    <strong>{person.street || pl.common.dash}</strong>
+                </div>
             </div>
         </section>
     );
@@ -778,6 +748,12 @@ const ShipmentDetails: React.FC = () => {
                     </div>
                 </div>
 
+                <nav className="shipment-detail-tabs" aria-label={pl.shipments.page.detailsTitle}>
+                    <a className="shipment-detail-tab-active" href="#shipment-overview">Przegląd</a>
+                    <a href="#shipment-sender">Nadawca i odbiorca</a>
+                    <a href="#shipment-history">Historia zdarzeń</a>
+                </nav>
+
                 {loadingShipment ? (
                     <div className="shipments-panel shipment-edit-loader">
                         <CircularProgress size={30} />
@@ -786,7 +762,7 @@ const ShipmentDetails: React.FC = () => {
                 ) : shipment ? (
                     <div className="shipment-cc-layout">
                         <main className="shipments-panel shipment-edit-panel">
-                            <section className="shipment-edit-section shipment-details-segment shipment-details-info-segment">
+                            <section id="shipment-overview" className="shipment-edit-section shipment-details-segment shipment-details-info-segment">
                                 <div className="shipment-edit-section-header">
                                     <Typography variant="h6">{pl.shipments.form.sections.shipmentData}</Typography>
                                     <Chip className={`tm-status tm-status-${shipment.shipmentStatus.toLowerCase()}`} label={pl.shipments.status[shipment.shipmentStatus]} size="small" />
@@ -829,8 +805,11 @@ const ShipmentDetails: React.FC = () => {
 
                                 <div className="shipment-details-grid shipment-details-operations-grid">
                                     <div className="shipment-status-control">
-                                        <span>{pl.shipments.form.fields.shipmentStatus}</span>
-                                        <div>
+                                        <div className="shipment-status-copy">
+                                            <span>{pl.shipments.form.fields.shipmentStatus}</span>
+                                            <strong>{pl.shipments.status[shipment.shipmentStatus]}</strong>
+                                        </div>
+                                        <div className="shipment-status-actions">
                                             <Chip
                                                 className={`tm-status tm-status-${shipment.shipmentStatus.toLowerCase()}`}
                                                 label={pl.shipments.status[shipment.shipmentStatus]}
@@ -848,20 +827,20 @@ const ShipmentDetails: React.FC = () => {
                                         </div>
                                     </div>
 
-                                    <TextField
-                                        fullWidth
-                                        label={pl.shipments.form.fields.shipmentType}
-                                        select
-                                        size="small"
-                                        value={shipmentType}
-                                        onChange={(event) => setShipmentType(event.target.value as ShipmentTypeDto)}
-                                    >
+                                    <label className="shipment-type-control">
+                                        <span>{pl.shipments.form.fields.shipmentType}</span>
+                                        <select
+                                            aria-label={pl.shipments.form.fields.shipmentType}
+                                            value={shipmentType}
+                                            onChange={(event) => setShipmentType(event.target.value as ShipmentTypeDto)}
+                                        >
                                         {shipmentTypes.map((currentShipmentType) => (
-                                            <MenuItem key={currentShipmentType} value={currentShipmentType}>
+                                            <option key={currentShipmentType} value={currentShipmentType}>
                                                 {pl.shipments.type[currentShipmentType]}
-                                            </MenuItem>
+                                            </option>
                                         ))}
-                                    </TextField>
+                                        </select>
+                                    </label>
                                 </div>
                             </section>
 
@@ -869,7 +848,7 @@ const ShipmentDetails: React.FC = () => {
                                 <div className="shipment-cc-courier-icon">
                                     <PersonPinCircle />
                                 </div>
-                                <div>
+                                <div className="shipment-cc-courier-copy">
                                     <span>{pl.shipments.summary.currentCourier}</span>
                                     <strong>{detailCourier(currentCourierDetail)}</strong>
                                     <p>
@@ -887,7 +866,7 @@ const ShipmentDetails: React.FC = () => {
                             {personFields(pl.shipments.form.sections.receiver, "RECIPIENT", recipient)}
                         </main>
 
-                        <aside className="shipments-panel shipment-cc-side">
+                        <aside className="shipments-panel shipment-cc-side" id="shipment-history">
                             <div className="shipment-cc-side-header">
                                 <div>
                                     <Typography variant="h6">{pl.shipments.routeHistory.title}</Typography>
@@ -937,32 +916,37 @@ const ShipmentDetails: React.FC = () => {
             </Dialog>
 
             <Dialog
+                className="shipment-status-dialog"
                 fullWidth
                 maxWidth="xs"
                 open={statusDialogOpen}
                 onClose={closeStatusDialog}
             >
-                <DialogTitle>{pl.shipments.statusDialog.title}</DialogTitle>
-                <DialogContent>
-                    <TextField
-                        autoFocus
-                        fullWidth
-                        label={pl.shipments.form.fields.shipmentStatus}
-                        margin="dense"
-                        select
-                        size="small"
-                        value={status}
-                        onChange={(event) => setStatus(event.target.value as ShipmentStatusDto)}
-                    >
+                <DialogTitle className="shipment-status-dialog-title">
+                    <span className="shipment-status-dialog-icon"><Route /></span>
+                    <span>
+                        <small>{pl.shipments.form.fields.shipmentStatus}</small>
+                        <strong>{pl.shipments.statusDialog.title}</strong>
+                    </span>
+                </DialogTitle>
+                <DialogContent className="shipment-status-dialog-content">
+                    <label className="shipment-status-dialog-field">
+                        <span>{pl.shipments.form.fields.shipmentStatus}</span>
+                        <select
+                            autoFocus
+                            value={status}
+                            onChange={(event) => setStatus(event.target.value as ShipmentStatusDto)}
+                        >
                         {shipmentStatuses.map((shipmentStatus) => (
-                            <MenuItem key={shipmentStatus} value={shipmentStatus}>
+                            <option key={shipmentStatus} value={shipmentStatus}>
                                 {pl.shipments.status[shipmentStatus]}
-                            </MenuItem>
+                            </option>
                         ))}
-                    </TextField>
+                        </select>
+                    </label>
                 </DialogContent>
-                <DialogActions>
-                    <Button disabled={savingStatus} onClick={closeStatusDialog}>{pl.common.cancel}</Button>
+                <DialogActions className="shipment-status-dialog-actions">
+                    <Button disabled={savingStatus} onClick={closeStatusDialog} variant="outlined">{pl.common.cancel}</Button>
                     <Button
                         startIcon={savingStatus ? <CircularProgress size={18} /> : <Save />}
                         variant="contained"
@@ -974,64 +958,80 @@ const ShipmentDetails: React.FC = () => {
             </Dialog>
 
             <Dialog
+                className="shipment-person-dialog"
                 fullWidth
                 maxWidth="md"
                 onClose={closePersonDialog}
                 open={Boolean(personDialogType)}
             >
-                <DialogTitle>
-                    {personDialogType === "SENDER"
-                        ? pl.shipments.form.actions.editSender
-                        : pl.shipments.form.actions.editRecipient}
+                <DialogTitle className="shipment-person-dialog-title">
+                    <span className="shipment-person-dialog-icon"><PersonPinCircle /></span>
+                    <span>
+                        <small>Dane osoby</small>
+                        <strong>
+                            {personDialogType === "SENDER"
+                                ? pl.shipments.form.actions.editSender
+                                : pl.shipments.form.actions.editRecipient}
+                        </strong>
+                    </span>
                 </DialogTitle>
-                <DialogContent>
+                <DialogContent className="shipment-person-dialog-content">
                     <div className="shipment-person-dialog-grid">
-                        <TextField
-                            label={pl.shipments.form.fields.firstName}
-                            onChange={(event) => updatePersonDraftField("firstName", event)}
-                            size="small"
-                            value={personDraft.firstName}
-                        />
-                        <TextField
-                            label={pl.shipments.form.fields.lastName}
-                            onChange={(event) => updatePersonDraftField("lastName", event)}
-                            size="small"
-                            value={personDraft.lastName}
-                        />
-                        <TextField
-                            label={pl.shipments.form.fields.email}
-                            onChange={(event) => updatePersonDraftField("email", event)}
-                            size="small"
-                            value={personDraft.email}
-                        />
-                        <TextField
-                            label={pl.shipments.form.fields.phone}
-                            onChange={(event) => updatePersonDraftField("telephoneNumber", event)}
-                            size="small"
-                            value={personDraft.telephoneNumber}
-                        />
-                        <TextField
-                            label={pl.shipments.form.fields.city}
-                            onChange={(event) => updatePersonDraftField("city", event)}
-                            size="small"
-                            value={personDraft.city}
-                        />
-                        <TextField
-                            label={pl.shipments.form.fields.postalCode}
-                            onChange={(event) => updatePersonDraftField("postalCode", event)}
-                            size="small"
-                            value={personDraft.postalCode}
-                        />
-                        <TextField
-                            className="shipment-person-dialog-wide"
-                            label={pl.shipments.form.fields.street}
-                            onChange={(event) => updatePersonDraftField("street", event)}
-                            size="small"
-                            value={personDraft.street}
-                        />
+                        <label className="shipment-person-dialog-field">
+                            <span>{pl.shipments.form.fields.firstName}</span>
+                            <input
+                                autoFocus
+                                value={personDraft.firstName}
+                                onChange={(event) => updatePersonDraftField("firstName", event)}
+                            />
+                        </label>
+                        <label className="shipment-person-dialog-field">
+                            <span>{pl.shipments.form.fields.lastName}</span>
+                            <input
+                                value={personDraft.lastName}
+                                onChange={(event) => updatePersonDraftField("lastName", event)}
+                            />
+                        </label>
+                        <label className="shipment-person-dialog-field">
+                            <span>{pl.shipments.form.fields.email}</span>
+                            <input
+                                type="email"
+                                value={personDraft.email}
+                                onChange={(event) => updatePersonDraftField("email", event)}
+                            />
+                        </label>
+                        <label className="shipment-person-dialog-field">
+                            <span>{pl.shipments.form.fields.phone}</span>
+                            <input
+                                inputMode="tel"
+                                value={personDraft.telephoneNumber}
+                                onChange={(event) => updatePersonDraftField("telephoneNumber", event)}
+                            />
+                        </label>
+                        <label className="shipment-person-dialog-field">
+                            <span>{pl.shipments.form.fields.city}</span>
+                            <input
+                                value={personDraft.city}
+                                onChange={(event) => updatePersonDraftField("city", event)}
+                            />
+                        </label>
+                        <label className="shipment-person-dialog-field">
+                            <span>{pl.shipments.form.fields.postalCode}</span>
+                            <input
+                                value={personDraft.postalCode}
+                                onChange={(event) => updatePersonDraftField("postalCode", event)}
+                            />
+                        </label>
+                        <label className="shipment-person-dialog-field shipment-person-dialog-wide">
+                            <span>{pl.shipments.form.fields.street}</span>
+                            <input
+                                value={personDraft.street}
+                                onChange={(event) => updatePersonDraftField("street", event)}
+                            />
+                        </label>
                     </div>
                 </DialogContent>
-                <DialogActions>
+                <DialogActions className="shipment-person-dialog-actions">
                     <Button
                         disabled={savingPersonType !== null}
                         onClick={closePersonDialog}

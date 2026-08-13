@@ -9,7 +9,7 @@ import {
     QrCodeScanner,
     SettingsOutlined,
     WarningAmberOutlined,
-} from "@mui/icons-material";
+} from "components/ui/icons";
 import pl from "../../i18n/translate";
 import "./styles/shipment-scanner.css";
 

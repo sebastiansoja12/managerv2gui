@@ -1,6 +1,6 @@
 import React, {useEffect, useMemo, useState} from "react";
-import {Alert, Box, Button, CircularProgress, Typography} from "@mui/material";
-import {ArrowBack, LocalShipping, Map, Refresh, Route} from "@mui/icons-material";
+import {Alert, Box, Button, CircularProgress, Typography} from "components/ui";
+import {ArrowBack, LocalShipping, Map, Refresh, Route} from "components/ui/icons";
 import {useNavigate, useParams} from "react-router-dom";
 import ShipmentService from "../../hooks/ShipmentService";
 import {ApiErrorResponse} from "../../api/ApiResult";

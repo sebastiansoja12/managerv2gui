@@ -11,7 +11,7 @@ import {
     Snackbar,
     TextField,
     Typography,
-} from "@mui/material";
+} from "components/ui";
 import {
     AccessTime,
     Add,
@@ -29,7 +29,7 @@ import {
     Route,
     Tune,
     ViewList,
-} from "@mui/icons-material";
+} from "components/ui/icons";
 import {useNavigate} from "react-router-dom";
 import ShipmentService from "../../hooks/ShipmentService";
 import TrackingService from "../../hooks/TrackingService";
@@ -862,7 +862,7 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
                                 <th><AccessTime fontSize="small" /> {shipmentTranslations.table.columns.deliveryDate}</th>
                                 <th><AttachMoney fontSize="small" /> {shipmentTranslations.table.columns.price}</th>
                                 <th><Person fontSize="small" /> {shipmentTranslations.table.columns.user}</th>
-                                <th><Route fontSize="small" /> {shipmentTranslations.table.columns.destination}</th>
+                                <th className="tm-destination-heading"><Route fontSize="small" /> {shipmentTranslations.table.columns.destination}</th>
                                 <th>{shipmentTranslations.table.columns.status}</th>
                                 <th>{shipmentTranslations.table.columns.dangerousGoods}</th>
                                 <th />
@@ -895,7 +895,7 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
                                                 <span>{row.user}</span>
                                             </span>
                                         </td>
-                                        <td className="tm-muted-cell">{row.destination}</td>
+                                        <td className="tm-destination-cell">{row.destination}</td>
                                         <td>
                                             <Chip
                                                 className={statusClassName(row.status)}
