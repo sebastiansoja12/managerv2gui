@@ -6,14 +6,11 @@ import {
     DialogActions,
     DialogContent,
     DialogTitle,
-    FormControl,
-    InputLabel,
     MenuItem,
-    Select,
     Switch,
     TextField,
-} from "@mui/material";
-import {Cable} from "@mui/icons-material";
+} from "components/ui";
+import {Cable} from "components/ui/icons";
 import {getBackendErrorMessage} from "../../api/errorMessage";
 import TrackingService from "../../hooks/TrackingService";
 import pl from "../../i18n/translate";
@@ -166,35 +163,31 @@ function IntegrationConfigurationDialog({
                     {!editingConfiguration && configuredProviders.size === definitions.length && definitions.length ? (
                         <Alert severity="info">{pl.integrations.dialog.noAvailableProviders}</Alert>
                     ) : undefined}
-                    <FormControl fullWidth margin="normal">
-                        <InputLabel id="tracking-integration-provider-label">
-                            {pl.integrations.dialog.providerLabel}
-                        </InputLabel>
-                        <Select
-                            disabled={Boolean(editingConfiguration)}
-                            label={pl.integrations.dialog.providerLabel}
-                            labelId="tracking-integration-provider-label"
-                            value={selectedProvider}
-                            onChange={(event) => {
-                                const provider = event.target.value as TrackingProviderId;
-                                const definition = definitions.find((item) => item.provider === provider);
-                                setSelectedProvider(provider);
-                                setValues(initialValues(definition, null));
-                                setError("");
-                                setTestSuccess("");
-                            }}
-                        >
-                            {definitions.map((definition) => (
-                                <MenuItem
-                                    disabled={!editingConfiguration && configuredProviders.has(definition.provider)}
-                                    key={definition.provider}
-                                    value={definition.provider}
-                                >
-                                    {definition.displayName}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
+                    <TextField
+                        fullWidth
+                        label={pl.integrations.dialog.providerLabel}
+                        select
+                        disabled={Boolean(editingConfiguration)}
+                        value={selectedProvider}
+                        onChange={(event) => {
+                            const provider = event.target.value as TrackingProviderId;
+                            const definition = definitions.find((item) => item.provider === provider);
+                            setSelectedProvider(provider);
+                            setValues(initialValues(definition, null));
+                            setError("");
+                            setTestSuccess("");
+                        }}
+                    >
+                        {definitions.map((definition) => (
+                            <MenuItem
+                                disabled={!editingConfiguration && configuredProviders.has(definition.provider)}
+                                key={definition.provider}
+                                value={definition.provider}
+                            >
+                                {definition.displayName}
+                            </MenuItem>
+                        ))}
+                    </TextField>
 
                     {selectedDefinition ? (
                         <div className="integration-dialog-fields">
