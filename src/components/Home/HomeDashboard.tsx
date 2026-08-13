@@ -14,8 +14,8 @@ import {
     SettingsSuggest,
     TableRows,
     Warehouse,
-} from "@mui/icons-material";
-import {MenuItem, TextField} from "@mui/material";
+} from "components/ui/icons";
+import {MenuItem, TextField} from "components/ui";
 import {useNavigate} from "react-router-dom";
 import {isPathAllowedForProfile, OperationalProfile} from "../../config/operationalProfile";
 import pl from "../../i18n/translate";
@@ -141,37 +141,44 @@ function HomeDashboard({onOpenTab, operationalProfile}: HomeDashboardProps) {
                 </div>
 
                 <form className="home-tracking-lookup-form" onSubmit={searchShipment}>
-                    <TextField
-                        className="home-tracking-criterion"
-                        label={pl.home.trackingLookup.criterionLabel}
-                        select
-                        size="small"
-                        value={lookupCriterion}
-                        onChange={(event) => {
-                            setLookupCriterion(event.target.value as ShipmentLookupCriterion);
-                            setLookupValue("");
-                        }}
-                    >
-                        <MenuItem value="TRACKING_NUMBER">
-                            {pl.home.trackingLookup.criteria.trackingNumber}
-                        </MenuItem>
-                        <MenuItem value="SHIPMENT_ID">
-                            {pl.home.trackingLookup.criteria.shipmentId}
-                        </MenuItem>
-                    </TextField>
-                    <input
-                        aria-label={lookupCriterion === "TRACKING_NUMBER"
+                    <div className="home-tracking-criterion">
+                        <span>{pl.home.trackingLookup.criterionLabel}</span>
+                        <TextField
+                            aria-label={pl.home.trackingLookup.criterionLabel}
+                            select
+                            size="small"
+                            value={lookupCriterion}
+                            onChange={(event) => {
+                                setLookupCriterion(event.target.value as ShipmentLookupCriterion);
+                                setLookupValue("");
+                            }}
+                        >
+                            <MenuItem value="TRACKING_NUMBER">
+                                {pl.home.trackingLookup.criteria.trackingNumber}
+                            </MenuItem>
+                            <MenuItem value="SHIPMENT_ID">
+                                {pl.home.trackingLookup.criteria.shipmentId}
+                            </MenuItem>
+                        </TextField>
+                    </div>
+                    <label className="home-tracking-value">
+                        <span>{lookupCriterion === "TRACKING_NUMBER"
                             ? pl.home.trackingLookup.inputLabel
-                            : pl.home.trackingLookup.shipmentIdInputLabel}
-                        inputMode={lookupCriterion === "SHIPMENT_ID" ? "numeric" : "text"}
-                        pattern={lookupCriterion === "SHIPMENT_ID" ? "[0-9]*" : undefined}
-                        placeholder={lookupCriterion === "TRACKING_NUMBER"
-                            ? pl.home.trackingLookup.placeholder
-                            : pl.home.trackingLookup.shipmentIdPlaceholder}
-                        type="text"
-                        value={lookupValue}
-                        onChange={(event) => setLookupValue(event.target.value)}
-                    />
+                            : pl.home.trackingLookup.shipmentIdInputLabel}</span>
+                        <input
+                            aria-label={lookupCriterion === "TRACKING_NUMBER"
+                                ? pl.home.trackingLookup.inputLabel
+                                : pl.home.trackingLookup.shipmentIdInputLabel}
+                            inputMode={lookupCriterion === "SHIPMENT_ID" ? "numeric" : "text"}
+                            pattern={lookupCriterion === "SHIPMENT_ID" ? "[0-9]*" : undefined}
+                            placeholder={lookupCriterion === "TRACKING_NUMBER"
+                                ? pl.home.trackingLookup.placeholder
+                                : pl.home.trackingLookup.shipmentIdPlaceholder}
+                            type="text"
+                            value={lookupValue}
+                            onChange={(event) => setLookupValue(event.target.value)}
+                        />
+                    </label>
                     <button className="home-tracking-primary" disabled={!validLookupValue} type="submit">
                         <Search fontSize="small" />
                         <span>{pl.home.trackingLookup.search}</span>

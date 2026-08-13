@@ -1,5 +1,5 @@
 import React from "react";
-import {Construction} from "@mui/icons-material";
+import {Construction} from "components/ui/icons";
 import pl from "../../i18n/translate";
 import "./styles/home-dashboard.css";
 
