@@ -1,6 +1,6 @@
 import React, {FormEvent, useEffect, useState} from "react";
-import {Close, ManageAccounts} from "@mui/icons-material";
-import {Alert, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, MenuItem, TextField} from "@mui/material";
+import {Close, ManageAccounts} from "components/ui/icons";
+import {Alert, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, MenuItem, TextField} from "components/ui";
 import pl from "../../i18n/translate";
 import {UpdateUserRequest, User, userToUpdateRequest} from "./model/User";
 
