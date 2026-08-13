@@ -12,6 +12,7 @@ import {
     Menu,
     MenuItem,
     Snackbar,
+    Tooltip,
     Typography,
 } from "components/ui";
 import {
@@ -34,6 +35,8 @@ import {
 import {useNavigate, useParams} from "react-router-dom";
 import ShipmentService from "../../hooks/ShipmentService";
 import DocumentService from "../../hooks/DocumentService";
+import DepartmentService from "../../hooks/DepartmentService";
+import Department from "../../class/depots/Department";
 import {getBackendErrorMessage} from "../../api/errorMessage";
 import RouteLogRecord from "../RouteLog/model/RouteLogRecord";
 import {
@@ -55,6 +58,7 @@ import DangerousGoodForm, {
     createEmptyDangerousGood,
     isDangerousGoodValid,
 } from "./DangerousGoodForm";
+import ShipmentStatusControl from "./ShipmentStatusControl";
 
 type Notice = {
     severity: "success" | "error" | "info";
@@ -62,6 +66,7 @@ type Notice = {
 };
 
 type DocumentAction = "qr" | "excel";
+type ShipmentDetailsTab = "overview" | "sender" | "recipient";
 
 type RouteDetail = RouteLogRecord["routeLogRecordDetails"]["routeLogRecordDetailSet"][number];
 
@@ -163,6 +168,8 @@ const ShipmentDetails: React.FC = () => {
     const navigate = useNavigate();
     const {shipmentId, trackingNumber} = useParams();
     const [shipment, setShipment] = useState<ShipmentDto | null>(null);
+    const [activeDetailTab, setActiveDetailTab] = useState<ShipmentDetailsTab>("overview");
+    const [departments, setDepartments] = useState<Department[]>([]);
     const [routeLog, setRouteLog] = useState<RouteLogRecord | null>(null);
     const [status, setStatus] = useState<ShipmentStatusDto>("CREATED");
     const [shipmentType, setShipmentType] = useState<ShipmentTypeDto>("PARENT");
@@ -198,6 +205,13 @@ const ShipmentDetails: React.FC = () => {
 
     const details = useMemo(() => routeDetails(routeLog), [routeLog]);
     const currentCourierDetail = details.find((detail) => detail.supplierCode || detail.username) || null;
+    const destinationDepartment = useMemo(() => {
+        const destinationCode = shipment ? departmentCodeValue(shipment.destination) : "";
+        return departments.find((department) => department.departmentCode?.value === destinationCode) || null;
+    }, [departments, shipment]);
+    const destinationTooltip = destinationDepartment
+        ? `${pl.shipments.form.fields.city}: ${destinationDepartment.address.city}\n${pl.shipments.form.fields.street}: ${destinationDepartment.address.street}`
+        : pl.shipments.summary.departmentDetailsUnavailable;
     const historyPath = decodedTrackingNumber
         ? `/shipments/tracking/${encodeURIComponent(decodedTrackingNumber)}/history`
         : `/shipments/${shipmentId || shipment?.shipmentId.value || ""}/history`;
@@ -256,6 +270,14 @@ const ShipmentDetails: React.FC = () => {
 
     const closeQrPreview = () => setQrPreviewUrl(null);
 
+    const selectDetailTab = (tab: ShipmentDetailsTab) => {
+        setActiveDetailTab(tab);
+        window.requestAnimationFrame(() => {
+            document.getElementById(tab === "overview" ? "shipment-overview" : `shipment-${tab}`)
+                ?.scrollIntoView({behavior: "smooth", block: "start"});
+        });
+    };
+
     const printQrLabel = () => {
         qrPreviewRef.current?.contentWindow?.focus();
         qrPreviewRef.current?.contentWindow?.print();
@@ -298,6 +320,12 @@ const ShipmentDetails: React.FC = () => {
         loadShipment();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [shipmentId, trackingNumber]);
+
+    useEffect(() => {
+        DepartmentService.getAll()
+            .then((response) => setDepartments(Array.isArray(response.data) ? response.data : []))
+            .catch(() => setDepartments([]));
+    }, []);
 
     const updatePersonDraftField = (
         field: keyof PersonApi,
@@ -749,9 +777,28 @@ const ShipmentDetails: React.FC = () => {
                 </div>
 
                 <nav className="shipment-detail-tabs" aria-label={pl.shipments.page.detailsTitle}>
-                    <a className="shipment-detail-tab-active" href="#shipment-overview">Przegląd</a>
-                    <a href="#shipment-sender">Nadawca i odbiorca</a>
-                    <a href="#shipment-history">Historia zdarzeń</a>
+                    <button
+                        className={activeDetailTab === "overview" ? "shipment-detail-tab-active" : ""}
+                        type="button"
+                        onClick={() => selectDetailTab("overview")}
+                    >
+                        {pl.shipments.detailTabs.overview}
+                    </button>
+                    <button
+                        className={activeDetailTab === "sender" ? "shipment-detail-tab-active" : ""}
+                        type="button"
+                        onClick={() => selectDetailTab("sender")}
+                    >
+                        {pl.shipments.detailTabs.sender}
+                    </button>
+                    <button
+                        className={activeDetailTab === "recipient" ? "shipment-detail-tab-active" : ""}
+                        type="button"
+                        onClick={() => selectDetailTab("recipient")}
+                    >
+                        {pl.shipments.detailTabs.recipient}
+                    </button>
+                    <a href="#shipment-history">{pl.shipments.detailTabs.history}</a>
                 </nav>
 
                 {loadingShipment ? (
@@ -762,7 +809,9 @@ const ShipmentDetails: React.FC = () => {
                 ) : shipment ? (
                     <div className="shipment-cc-layout">
                         <main className="shipments-panel shipment-edit-panel">
-                            <section id="shipment-overview" className="shipment-edit-section shipment-details-segment shipment-details-info-segment">
+                            {activeDetailTab === "overview" ? (
+                                <>
+                                    <section id="shipment-overview" className="shipment-edit-section shipment-details-segment shipment-details-info-segment">
                                 <div className="shipment-edit-section-header">
                                     <Typography variant="h6">{pl.shipments.form.sections.shipmentData}</Typography>
                                     <Chip className={`tm-status tm-status-${shipment.shipmentStatus.toLowerCase()}`} label={pl.shipments.status[shipment.shipmentStatus]} size="small" />
@@ -791,7 +840,11 @@ const ShipmentDetails: React.FC = () => {
                                     </div>
                                     <div>
                                         <span>{pl.shipments.summary.destination}</span>
-                                        <strong>{departmentCodeValue(shipment.destination) || pl.common.dash}</strong>
+                                        <Tooltip title={destinationTooltip}>
+                                            <strong className="shipment-destination-value">
+                                                {departmentCodeValue(shipment.destination) || pl.common.dash}
+                                            </strong>
+                                        </Tooltip>
                                     </div>
                                     <div>
                                         <span>{pl.shipments.summary.price}</span>
@@ -803,48 +856,32 @@ const ShipmentDetails: React.FC = () => {
                                     </div>
                                 </div>
 
-                                <div className="shipment-details-grid shipment-details-operations-grid">
-                                    <div className="shipment-status-control">
-                                        <div className="shipment-status-copy">
-                                            <span>{pl.shipments.form.fields.shipmentStatus}</span>
-                                            <strong>{pl.shipments.status[shipment.shipmentStatus]}</strong>
-                                        </div>
-                                        <div className="shipment-status-actions">
-                                            <Chip
-                                                className={`tm-status tm-status-${shipment.shipmentStatus.toLowerCase()}`}
-                                                label={pl.shipments.status[shipment.shipmentStatus]}
-                                                size="small"
-                                            />
-                                            <Button
-                                                disabled={savingStatus}
-                                                size="small"
-                                                startIcon={<Edit fontSize="small" />}
-                                                variant="outlined"
-                                                onClick={openStatusDialog}
+                                    </section>
+
+                                    <div className="shipment-details-operations-grid shipment-details-operations-separated">
+                                        <ShipmentStatusControl
+                                            disabled={savingStatus}
+                                            status={shipment.shipmentStatus}
+                                            onChangeStatus={openStatusDialog}
+                                        />
+
+                                        <label className="shipment-type-control">
+                                            <span>{pl.shipments.form.fields.shipmentType}</span>
+                                            <select
+                                                aria-label={pl.shipments.form.fields.shipmentType}
+                                                value={shipmentType}
+                                                onChange={(event) => setShipmentType(event.target.value as ShipmentTypeDto)}
                                             >
-                                                {pl.shipments.actions.changeStatus}
-                                            </Button>
-                                        </div>
+                                                {shipmentTypes.map((currentShipmentType) => (
+                                                    <option key={currentShipmentType} value={currentShipmentType}>
+                                                        {pl.shipments.type[currentShipmentType]}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </label>
                                     </div>
 
-                                    <label className="shipment-type-control">
-                                        <span>{pl.shipments.form.fields.shipmentType}</span>
-                                        <select
-                                            aria-label={pl.shipments.form.fields.shipmentType}
-                                            value={shipmentType}
-                                            onChange={(event) => setShipmentType(event.target.value as ShipmentTypeDto)}
-                                        >
-                                        {shipmentTypes.map((currentShipmentType) => (
-                                            <option key={currentShipmentType} value={currentShipmentType}>
-                                                {pl.shipments.type[currentShipmentType]}
-                                            </option>
-                                        ))}
-                                        </select>
-                                    </label>
-                                </div>
-                            </section>
-
-                            <section className="shipment-cc-courier shipment-details-segment">
+                                    <section className="shipment-cc-courier shipment-details-segment">
                                 <div className="shipment-cc-courier-icon">
                                     <PersonPinCircle />
                                 </div>
@@ -858,12 +895,42 @@ const ShipmentDetails: React.FC = () => {
                                                 .replace("{department}", detailDepartment(currentCourierDetail))
                                             : pl.shipments.summary.noCourierInfo}
                                     </p>
+                                    {currentCourierDetail ? (
+                                        <dl className="shipment-cc-courier-meta">
+                                            <div>
+                                                <dt>{pl.shipments.summary.courierCode}</dt>
+                                                <dd>{detailCourier(currentCourierDetail)}</dd>
+                                            </div>
+                                            <div>
+                                                <dt>{pl.shipments.routeHistory.department}</dt>
+                                                <dd>{detailDepartment(currentCourierDetail)}</dd>
+                                            </div>
+                                            <div>
+                                                <dt>{pl.shipments.routeHistory.user}</dt>
+                                                <dd>{detailUser(currentCourierDetail)}</dd>
+                                            </div>
+                                            <div>
+                                                <dt>{pl.shipments.routeHistory.terminal}</dt>
+                                                <dd>{detailTerminal(currentCourierDetail)}</dd>
+                                            </div>
+                                            <div>
+                                                <dt>{pl.shipments.summary.lastOperation}</dt>
+                                                <dd>{detailStatusLabel(detailStatus(currentCourierDetail))}</dd>
+                                            </div>
+                                        </dl>
+                                    ) : null}
                                 </div>
-                            </section>
+                                    </section>
 
-                            {renderDangerousGood()}
-                            {personFields(pl.shipments.form.sections.sender, "SENDER", sender)}
-                            {personFields(pl.shipments.form.sections.receiver, "RECIPIENT", recipient)}
+                                    {renderDangerousGood()}
+                                </>
+                            ) : null}
+                            {activeDetailTab === "sender"
+                                ? personFields(pl.shipments.form.sections.sender, "SENDER", sender)
+                                : null}
+                            {activeDetailTab === "recipient"
+                                ? personFields(pl.shipments.form.sections.receiver, "RECIPIENT", recipient)
+                                : null}
                         </main>
 
                         <aside className="shipments-panel shipment-cc-side" id="shipment-history">
