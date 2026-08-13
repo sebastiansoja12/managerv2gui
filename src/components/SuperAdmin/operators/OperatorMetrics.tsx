@@ -1,5 +1,5 @@
 import React from "react";
-import {CheckCircle, Inventory2, LocalShipping, TrendingUp} from "@mui/icons-material";
+import {CheckCircle, Inventory2, LocalShipping, TrendingUp} from "components/ui/icons";
 import pl from "../../../i18n/translate";
 
 type OperatorMetricsProps = {

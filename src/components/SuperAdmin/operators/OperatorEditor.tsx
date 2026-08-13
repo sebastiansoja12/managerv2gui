@@ -1,6 +1,6 @@
 import React, {useState} from "react";
-import {Close, MoreHoriz, PersonAddAlt, ToggleOff, ToggleOn} from "@mui/icons-material";
-import {Snackbar} from "@mui/material";
+import {Close, MoreHoriz, PersonAddAlt, ToggleOff, ToggleOn} from "components/ui/icons";
+import {Snackbar} from "components/ui";
 import pl from "../../../i18n/translate";
 import {
     DeliveryTimeConfiguration,
