@@ -1,6 +1,6 @@
 import React, {useState} from "react";
-import {AdminPanelSettings, Shield} from "@mui/icons-material";
-import {Alert} from "@mui/material";
+import {AdminPanelSettings, Shield} from "components/ui/icons";
+import {Alert} from "components/ui";
 import {Navigate, useNavigate} from "react-router-dom";
 import {authenticateCurrentUser} from "../../../auth/AuthSession";
 import {useAuthState} from "../../../auth/AuthState";
@@ -41,7 +41,7 @@ function SuperAdminLogin() {
                     <span><Shield fontSize="small"/></span>
                     <strong>{pl.superAdmin.brand}</strong>
                 </div>
-                <div>
+                <div className="super-admin-login-heading">
                     <span className="super-admin-kicker">{pl.superAdmin.login.kicker}</span>
                     <h1>{pl.superAdmin.login.title}</h1>
                     <p>{pl.superAdmin.login.subtitle}</p>
