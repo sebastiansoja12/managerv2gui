@@ -12,7 +12,7 @@ import {
 } from "components/ui/icons";
 import {logoutAuthSession} from "../../../auth/AuthSession";
 import pl from "../../../i18n/translate";
-import {clearGlobalAnnouncement, readGlobalAnnouncement, saveGlobalAnnouncement} from "../../Announcements/announcementStorage";
+import {clearAnnouncementDismissal, clearGlobalAnnouncement, readGlobalAnnouncement, saveGlobalAnnouncement} from "../../Announcements/announcementStorage";
 
 type SuperAdminArea = "operators" | "features" | "access" | "announcements";
 
@@ -24,9 +24,65 @@ type SuperAdminLayoutProps = {
 
 function SuperAdminLayout({children, error, onCreate}: SuperAdminLayoutProps) {
     const [activeArea, setActiveArea] = React.useState<SuperAdminArea>("operators");
-    const [announcement, setAnnouncement] = React.useState(() => readGlobalAnnouncement()?.message || "");
+    const [announcement, setAnnouncement] = React.useState("");
     const [announcementSaved, setAnnouncementSaved] = React.useState(false);
+    const [announcementSaving, setAnnouncementSaving] = React.useState(false);
+    const [announcementError, setAnnouncementError] = React.useState("");
+
+    React.useEffect(() => {
+        let mounted = true;
+        void readGlobalAnnouncement()
+            .then((currentAnnouncement) => {
+                if (mounted) {
+                    setAnnouncement(currentAnnouncement?.message || "");
+                }
+            })
+            .catch(() => {
+                if (mounted) {
+                    setAnnouncementError(pl.superAdmin.announcements.loadError);
+                }
+            });
+
+        return () => {
+            mounted = false;
+        };
+    }, []);
+
+    const publishAnnouncement = async (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        if (!announcement.trim()) {
+            return;
+        }
+
+        setAnnouncementSaving(true);
+        setAnnouncementSaved(false);
+        setAnnouncementError("");
+        try {
+            await saveGlobalAnnouncement(announcement);
+            setAnnouncementSaved(true);
+        } catch {
+            setAnnouncementError(pl.superAdmin.announcements.saveError);
+        } finally {
+            setAnnouncementSaving(false);
+        }
+    };
+
+    const removeAnnouncement = async () => {
+        setAnnouncementSaving(true);
+        setAnnouncementError("");
+        try {
+            await clearGlobalAnnouncement();
+            setAnnouncement("");
+            setAnnouncementSaved(false);
+        } catch {
+            setAnnouncementError(pl.superAdmin.announcements.clearError);
+        } finally {
+            setAnnouncementSaving(false);
+        }
+    };
+
     const logout = async () => {
+        clearAnnouncementDismissal();
         try {
             await logoutAuthSession();
         } finally {
@@ -95,10 +151,10 @@ function SuperAdminLayout({children, error, onCreate}: SuperAdminLayoutProps) {
                             </>
                         ) : null}
                         {activeArea === "announcements" ? (
-                            <form className="super-admin-announcement-panel" onSubmit={(event) => { event.preventDefault(); if (announcement.trim()) { saveGlobalAnnouncement(announcement); setAnnouncementSaved(true); } }}>
+                            <form className="super-admin-announcement-panel" onSubmit={publishAnnouncement}>
                                 <div className="super-admin-module-heading"><span className="super-admin-kicker">{pl.superAdmin.layout.kicker}</span><h2>{pl.superAdmin.announcements.title}</h2><p>{pl.superAdmin.announcements.subtitle}</p></div>
-                                <label><span>{pl.superAdmin.announcements.fieldLabel}</span><textarea value={announcement} onChange={(event) => { setAnnouncement(event.target.value); setAnnouncementSaved(false); }} placeholder={pl.superAdmin.announcements.placeholder} rows={5}/></label>
-                                <div className="super-admin-announcement-footer"><span>{announcementSaved ? <><CheckCircle fontSize="small" />{pl.superAdmin.announcements.saved}</> : pl.superAdmin.announcements.visibility}</span><div><button className="super-admin-secondary-button" onClick={() => { clearGlobalAnnouncement(); setAnnouncement(""); setAnnouncementSaved(false); }} type="button"><Close fontSize="small" />{pl.superAdmin.announcements.clear}</button><button className="super-admin-primary-button" disabled={!announcement.trim()} type="submit"><Save fontSize="small" />{pl.superAdmin.announcements.save}</button></div></div>
+                                <label><span>{pl.superAdmin.announcements.fieldLabel}</span><textarea value={announcement} onChange={(event) => { setAnnouncement(event.target.value); setAnnouncementSaved(false); setAnnouncementError(""); }} placeholder={pl.superAdmin.announcements.placeholder} rows={5}/></label>
+                                <div className="super-admin-announcement-footer"><span>{announcementError ? announcementError : announcementSaved ? <><CheckCircle fontSize="small" />{pl.superAdmin.announcements.saved}</> : pl.superAdmin.announcements.visibility}</span><div><button className="super-admin-secondary-button" disabled={announcementSaving} onClick={removeAnnouncement} type="button"><Close fontSize="small" />{pl.superAdmin.announcements.clear}</button><button className="super-admin-primary-button" disabled={announcementSaving || !announcement.trim()} type="submit"><Save fontSize="small" />{pl.superAdmin.announcements.save}</button></div></div>
                             </form>
                         ) : null}
                     </section>
