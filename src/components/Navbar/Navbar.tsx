@@ -16,7 +16,6 @@ import {
     LocalShipping,
     LocationOn,
     Loop,
-    NotificationsNone,
     Person,
     Radar,
     Search,
@@ -36,6 +35,7 @@ import './styles/main.css';
 import {logoutAuthSession} from "../../auth/AuthSession";
 import {clearAnnouncementDismissal} from "../Announcements/announcementStorage";
 import {useAuthState} from "../../auth/AuthState";
+import ImpersonationConsentNotifications from "../Impersonation/ImpersonationConsentNotifications";
 import pl from "../../i18n/translate";
 import {Language, translations} from "../../i18n";
 import {clearStoredTabs} from "../AppShell/tabStorage";
@@ -630,15 +630,7 @@ function Navbar({
                         open={searchOpen}
                     />
                 </div>
-                <span
-                    aria-label={pl.navigation.notifications}
-                    className="top-nav-action-icon top-nav-notifications-icon"
-                    role="img"
-                    title={pl.navigation.notifications}
-                >
-                    <NotificationsNone fontSize="small" />
-                    <span aria-hidden="true" className="top-nav-notification-dot" />
-                </span>
+                <ImpersonationConsentNotifications />
                 <div className="top-nav-profile-control">
                     <button
                         aria-controls="top-nav-profile-panel"
