@@ -78,6 +78,7 @@ export type CreateOperatorRequest = {
     contractEndDate: string;
     foundedDate: string;
     configuration: OperatorConfiguration;
+    geocodingConfiguration: OperatorGeocodingConfigurationDraft;
     firstDepartment: FirstDepartmentDraft;
 };
 
@@ -108,6 +109,17 @@ export type FirstDepartmentDraft = {
     countryCode: string;
     openingHours: string;
     departmentType: string;
+};
+
+export type OperatorGeocodingConfigurationDraft = {
+    apiUserName: string;
+    apiPassword: string;
+    apiKey: string;
+    clientNumber: string;
+    accessToken: string;
+    refreshToken: string;
+    enabled: boolean;
+    provider: string;
 };
 
 export type OperatorDraft = CreateOperatorRequest & {
@@ -161,7 +173,18 @@ export const defaultFirstDepartment: FirstDepartmentDraft = {
     departmentType: "BRANCH",
 };
 
-export const createEmptyOperatorDraft = (): OperatorDraft => ({
+export const defaultGeocodingConfiguration = (provider = ""): OperatorGeocodingConfigurationDraft => ({
+    apiUserName: "",
+    apiPassword: "",
+    apiKey: "",
+    clientNumber: "",
+    accessToken: "",
+    refreshToken: "",
+    enabled: true,
+    provider,
+});
+
+export const createEmptyOperatorDraft = (geocodingProvider = ""): OperatorDraft => ({
     userFirstName: "",
     userLastName: "",
     username: "",
@@ -184,6 +207,7 @@ export const createEmptyOperatorDraft = (): OperatorDraft => ({
         shipmentLimits: {...defaultConfiguration.shipmentLimits},
         deliveryTimeConfiguration: {...defaultConfiguration.deliveryTimeConfiguration},
     },
+    geocodingConfiguration: defaultGeocodingConfiguration(geocodingProvider),
     firstDepartment: {...defaultFirstDepartment},
     status: "ACTIVE",
 });
@@ -208,6 +232,7 @@ export const operatorToDraft = (operator: Operator): OperatorDraft => ({
     contractEndDate: operator.contractEndDate || "",
     foundedDate: operator.foundedDate || "",
     configuration: operator.configuration || defaultConfiguration,
+    geocodingConfiguration: defaultGeocodingConfiguration(),
     firstDepartment: {...defaultFirstDepartment},
     status: operator.status || "ACTIVE",
 });
