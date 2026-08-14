@@ -928,6 +928,14 @@ export const de: typeof pl = {
                     label: "Zugestellte Sendungen automatisch schließen",
                     hint: "Beendet den Sendungsprozess nach bestätigter erfolgreicher Zustellung.",
                 },
+                generateTrackingNumber: {
+                    label: "Trackingnummer automatisch erzeugen",
+                    hint: "Vergibt eine Trackingnummer nach der konfigurierten Regel.",
+                },
+                trackingNumberRule: {
+                    label: "Regel für Trackingnummern",
+                    hint: "Schlüssel, Trennzeichen und Quelle des eindeutigen Nummernteils festlegen.",
+                },
                 cancellationWindowMinutes: {
                     label: "Stornierungszeitraum",
                     hint: "Zeitraum nach Erstellung, in dem die Sendung ohne zusätzliche Bearbeitung storniert werden kann.",
@@ -980,6 +988,32 @@ export const de: typeof pl = {
                 sms: "SMS",
                 email: "E-Mail",
                 both: "SMS und E-Mail",
+            },
+            trackingNumber: {
+                title: "Trackingnummer konfigurieren",
+                description: "Erstellen Sie eine Regel für Sendungsnummern. Diese Vorschaukonfiguration wird nur in diesem Browser gespeichert.",
+                configure: "Konfigurieren",
+                save: "Regel speichern",
+                keyLabel: "Schlüssel / Präfix",
+                separatorLabel: "Trennzeichen",
+                sourceLabel: "Quelle des eindeutigen Teils",
+                randomLengthLabel: "Länge des Zufallsteils",
+                includeDateLabel: "Datum hinzufügen",
+                includeDateHint: "Setzt das Datum zwischen Schlüssel und eindeutigen Nummernteil.",
+                dateFormatLabel: "Datumsformat",
+                uppercaseLabel: "Großbuchstaben",
+                uppercaseHint: "Wandelt Buchstaben in der erzeugten Nummer in Großbuchstaben um.",
+                previewLabel: "Beispielnummer",
+                sources: {
+                    sequence: "Niederlassungssequenz",
+                    shipmentId: "Sendungskennung",
+                    random: "Zufällige alphanumerische Zeichenfolge",
+                },
+                dateFormats: {
+                    yyyyMMdd: "JJJJMMTT (20260814)",
+                    yyMMdd: "JJMMTT (260814)",
+                    yyyyMM: "JJJJMM (202608)",
+                },
             },
             messages: {
                 saved: "Die Sendungseinstellungen wurden lokal in der GUI gespeichert.",

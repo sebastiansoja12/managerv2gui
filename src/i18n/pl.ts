@@ -927,6 +927,14 @@ export const pl = {
                     label: "Automatycznie zamykaj doręczone przesyłki",
                     hint: "Kończy proces przesyłki po potwierdzeniu skutecznego doręczenia.",
                 },
+                generateTrackingNumber: {
+                    label: "Generuj numer trackingowy automatycznie",
+                    hint: "Nadaje przesyłce numer trackingowy według skonfigurowanej reguły.",
+                },
+                trackingNumberRule: {
+                    label: "Reguła numeru trackingowego",
+                    hint: "Ustaw klucz, separator i źródło unikalnej części numeru.",
+                },
                 cancellationWindowMinutes: {
                     label: "Czas na anulowanie przesyłki",
                     hint: "Okres od utworzenia, w którym przesyłkę można anulować bez dodatkowej obsługi.",
@@ -979,6 +987,32 @@ export const pl = {
                 sms: "SMS",
                 email: "E-mail",
                 both: "SMS i e-mail",
+            },
+            trackingNumber: {
+                title: "Konfiguracja numeru trackingowego",
+                description: "Zbuduj regułę numeru przesyłki. Jest to konfiguracja poglądowa zapisywana wyłącznie w tej przeglądarce.",
+                configure: "Konfiguruj",
+                save: "Zapisz regułę",
+                keyLabel: "Klucz / prefiks",
+                separatorLabel: "Separator",
+                sourceLabel: "Źródło unikalnej części",
+                randomLengthLabel: "Długość części losowej",
+                includeDateLabel: "Dodaj datę",
+                includeDateHint: "Umieszcza datę pomiędzy kluczem a unikalną częścią numeru.",
+                dateFormatLabel: "Format daty",
+                uppercaseLabel: "Wielkie litery",
+                uppercaseHint: "Zamienia litery w wygenerowanym numerze na wielkie.",
+                previewLabel: "Przykładowy numer",
+                sources: {
+                    sequence: "Sekwencja oddziału",
+                    shipmentId: "Identyfikator przesyłki",
+                    random: "Losowy ciąg alfanumeryczny",
+                },
+                dateFormats: {
+                    yyyyMMdd: "RRRRMMDD (20260814)",
+                    yyMMdd: "RRMMDD (260814)",
+                    yyyyMM: "RRRRMM (202608)",
+                },
             },
             messages: {
                 saved: "Ustawienia przesyłek zostały zapisane lokalnie w GUI.",

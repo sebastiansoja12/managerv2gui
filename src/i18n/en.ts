@@ -931,6 +931,14 @@ export const en: typeof pl = {
                     label: "Close delivered shipments automatically",
                     hint: "Completes the shipment process after successful delivery is confirmed.",
                 },
+                generateTrackingNumber: {
+                    label: "Generate tracking number automatically",
+                    hint: "Assigns a tracking number according to the configured rule.",
+                },
+                trackingNumberRule: {
+                    label: "Tracking number rule",
+                    hint: "Configure the key, separator, and source of the unique number segment.",
+                },
                 cancellationWindowMinutes: {
                     label: "Shipment cancellation window",
                     hint: "Time after creation during which a shipment can be cancelled without additional handling.",
@@ -983,6 +991,32 @@ export const en: typeof pl = {
                 sms: "SMS",
                 email: "Email",
                 both: "SMS and email",
+            },
+            trackingNumber: {
+                title: "Tracking number configuration",
+                description: "Build a shipment number rule. This preview configuration is stored only in this browser.",
+                configure: "Configure",
+                save: "Save rule",
+                keyLabel: "Key / prefix",
+                separatorLabel: "Separator",
+                sourceLabel: "Unique segment source",
+                randomLengthLabel: "Random segment length",
+                includeDateLabel: "Include date",
+                includeDateHint: "Places the date between the key and the unique number segment.",
+                dateFormatLabel: "Date format",
+                uppercaseLabel: "Uppercase letters",
+                uppercaseHint: "Converts letters in the generated number to uppercase.",
+                previewLabel: "Example number",
+                sources: {
+                    sequence: "Department sequence",
+                    shipmentId: "Shipment identifier",
+                    random: "Random alphanumeric string",
+                },
+                dateFormats: {
+                    yyyyMMdd: "YYYYMMDD (20260814)",
+                    yyMMdd: "YYMMDD (260814)",
+                    yyyyMM: "YYYYMM (202608)",
+                },
             },
             messages: {
                 saved: "Shipment settings have been saved locally in the GUI.",
