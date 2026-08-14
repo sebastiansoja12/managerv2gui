@@ -521,13 +521,15 @@ const Departments: React.FC = () => {
                     </div>
 
                     <div className="departments-filter-bar">
-                        <TextField
-                            InputProps={{startAdornment: <Search className="departments-filter-icon" fontSize="small" />}}
-                            label={pl.departments.filters.code}
-                            size="small"
-                            value={filters.code}
-                            onChange={(event) => updateFilter("code", event.target.value)}
-                        />
+                        <div className="departments-code-filter">
+                            <Search aria-hidden="true" className="departments-filter-icon" fontSize="small" />
+                            <TextField
+                                label={pl.departments.filters.code}
+                                size="small"
+                                value={filters.code}
+                                onChange={(event) => updateFilter("code", event.target.value)}
+                            />
+                        </div>
                         <TextField
                             select
                             label={pl.departments.filters.country}
@@ -552,7 +554,14 @@ const Departments: React.FC = () => {
                                 <MenuItem key={type} value={type}>{translateDepartmentType(type)}</MenuItem>
                             ))}
                         </TextField>
-                        <Button variant="text" onClick={resetFilters}>{pl.departments.filters.clear}</Button>
+                        <Button
+                            disabled={!filters.code && !filters.country && !filters.type}
+                            startIcon={<Close fontSize="small" />}
+                            variant="text"
+                            onClick={resetFilters}
+                        >
+                            {pl.departments.filters.clear}
+                        </Button>
                         <span className="departments-filter-count">
                             {pl.departments.filters.results.replace("{count}", String(filteredDepartments.length))}
                         </span>
