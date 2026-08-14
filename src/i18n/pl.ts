@@ -1528,6 +1528,8 @@ export const pl = {
             currentCourier: "Aktualny kurier",
             courierCode: "Kod kuriera",
             lastOperation: "Ostatnia operacja",
+            departmentDetailsTitle: "Informacje o oddziale",
+            showDepartmentDetails: "Pokaż informacje o oddziale",
             departmentDetailsUnavailable: "Brak danych adresowych oddziału",
             lastActivity: "Ostatnia aktywność: {date} · {department}",
             noCourierInfo: "Brak informacji o aktualnym kurierze",

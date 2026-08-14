@@ -1533,6 +1533,8 @@ export const en: typeof pl = {
             currentCourier: "Current courier",
             courierCode: "Courier code",
             lastOperation: "Last operation",
+            departmentDetailsTitle: "Department information",
+            showDepartmentDetails: "Show department information",
             departmentDetailsUnavailable: "No department address details",
             lastActivity: "Last activity: {date} · {department}",
             noCourierInfo: "No courier information",
