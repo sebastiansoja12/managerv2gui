@@ -1246,3 +1246,1095 @@ button.super-admin-table-row:hover {
         padding-right: 14px !important;
     }
 }
+
+/* Operator directory — readable member list */
+.super-admin-member-toolbar {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.super-admin-member-search {
+    align-items: center;
+    background: var(--surface-secondary);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--muted-foreground);
+    display: flex;
+    flex: 1 1 240px;
+    gap: 8px;
+    max-width: 360px;
+    padding: 0 10px;
+}
+
+.super-admin-member-search:focus-within {
+    border-color: color-mix(in srgb, var(--primary) 60%, var(--border));
+}
+
+.super-admin-member-search input {
+    background: transparent;
+    border: 0;
+    color: var(--foreground);
+    flex: 1;
+    font: inherit;
+    font-size: 0.84rem;
+    min-height: 34px;
+    outline: none;
+}
+
+.super-admin-member-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.super-admin-member-filters button {
+    align-items: center;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--muted-foreground);
+    cursor: pointer;
+    display: inline-flex;
+    font: inherit;
+    font-size: 0.76rem;
+    font-weight: 650;
+    gap: 6px;
+    padding: 5px 10px;
+}
+
+.super-admin-member-filters button span {
+    background: color-mix(in srgb, var(--foreground) 8%, transparent);
+    border-radius: 999px;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    padding: 1px 6px;
+}
+
+.super-admin-member-filters button:hover {
+    color: var(--foreground);
+}
+
+.super-admin-member-filters button.is-active {
+    background: color-mix(in srgb, var(--primary) 14%, transparent);
+    border-color: color-mix(in srgb, var(--primary) 55%, var(--border));
+    color: var(--foreground);
+}
+
+.super-admin-member-table .super-admin-directory-row {
+    font-size: 0.84rem !important;
+    grid-template-columns: minmax(200px, 1.5fr) minmax(130px, 0.8fr) minmax(90px, 0.6fr) minmax(160px, 1.1fr);
+    min-height: 58px !important;
+    padding: 8px 14px !important;
+}
+
+.super-admin-member-table .super-admin-directory-row:not(.super-admin-directory-head):nth-child(even) {
+    background: color-mix(in srgb, var(--foreground) 2.5%, transparent) !important;
+}
+
+.super-admin-member-table .super-admin-directory-row:not(.super-admin-directory-head):hover {
+    background: color-mix(in srgb, var(--primary) 7%, transparent) !important;
+}
+
+.super-admin-member-table .super-admin-directory-head {
+    font-size: 0.64rem !important;
+    min-height: 36px !important;
+}
+
+.super-admin-member-person {
+    align-items: center;
+    display: flex;
+    gap: 12px;
+    min-width: 0;
+}
+
+.super-admin-member-avatar {
+    align-items: center;
+    border: 1px solid currentColor;
+    border-radius: 50%;
+    display: inline-flex;
+    flex: 0 0 36px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    height: 36px;
+    justify-content: center;
+    letter-spacing: 0.02em;
+    width: 36px;
+}
+
+.super-admin-member-name {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.super-admin-member-name strong,
+.super-admin-member-name small,
+.super-admin-member-email {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.super-admin-member-name strong {
+    color: var(--foreground);
+    font-size: 0.88rem;
+    font-weight: 700;
+}
+
+.super-admin-member-name small {
+    color: var(--muted-foreground);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+}
+
+.super-admin-member-role {
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 750;
+    justify-self: start;
+    letter-spacing: 0.02em;
+    padding: 4px 10px;
+    white-space: nowrap;
+}
+
+.super-admin-member-role-superadmin,
+.super-admin-member-avatar-superadmin {
+    background: color-mix(in srgb, #c026d3 14%, transparent);
+    color: color-mix(in srgb, #c026d3 70%, var(--foreground));
+}
+
+.super-admin-member-role-admin,
+.super-admin-member-avatar-admin {
+    background: color-mix(in srgb, var(--danger) 14%, transparent);
+    color: color-mix(in srgb, var(--danger) 75%, var(--foreground));
+}
+
+.super-admin-member-role-manager,
+.super-admin-member-avatar-manager {
+    background: color-mix(in srgb, var(--warning) 16%, transparent);
+    color: color-mix(in srgb, var(--warning) 80%, var(--foreground));
+}
+
+.super-admin-member-role-user,
+.super-admin-member-avatar-user {
+    background: color-mix(in srgb, var(--info) 14%, transparent);
+    color: color-mix(in srgb, var(--info) 75%, var(--foreground));
+}
+
+.super-admin-member-role-supplier,
+.super-admin-member-avatar-supplier {
+    background: color-mix(in srgb, var(--success) 14%, transparent);
+    color: color-mix(in srgb, var(--success) 75%, var(--foreground));
+}
+
+.super-admin-member-department {
+    align-items: center;
+    color: var(--foreground);
+    display: inline-flex;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    font-weight: 700;
+    gap: 6px;
+}
+
+.super-admin-member-department svg {
+    color: var(--muted-foreground);
+}
+
+.super-admin-member-email {
+    color: var(--muted-foreground);
+}
+
+@media (max-width: 760px) {
+    .super-admin-member-search {
+        max-width: none;
+    }
+
+    .super-admin-member-table .super-admin-directory-row {
+        min-width: 680px;
+    }
+}
+
+/* Panel accounts and audit log */
+.super-admin-module-section {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.super-admin-module-heading-actions {
+    align-items: flex-end;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: space-between;
+}
+
+.super-admin-module-heading-buttons {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.super-admin-module-heading-buttons select {
+    min-width: 220px;
+}
+
+.super-admin-member-table .super-admin-owner-row {
+    grid-template-columns: minmax(220px, 1.4fr) minmax(180px, 1.1fr) minmax(110px, 0.6fr) minmax(260px, 1.2fr);
+}
+
+.super-admin-member-table .super-admin-audit-row {
+    grid-template-columns: minmax(150px, 0.8fr) minmax(150px, 0.9fr) minmax(160px, 1fr) minmax(260px, 1.8fr) minmax(110px, 0.6fr);
+}
+
+.super-admin-owner-you {
+    background: color-mix(in srgb, var(--primary) 16%, transparent);
+    border-radius: 999px;
+    color: var(--foreground);
+    font-size: 0.68rem;
+    font-style: normal;
+    font-weight: 700;
+    margin-left: 8px;
+    padding: 2px 8px;
+}
+
+.super-admin-owner-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.super-admin-owner-password-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.super-admin-audit-time {
+    color: var(--muted-foreground);
+    font-family: var(--font-mono);
+    font-size: 0.76rem;
+}
+
+.super-admin-audit-action {
+    align-items: center;
+    display: flex;
+    gap: 8px;
+    min-width: 0;
+}
+
+.super-admin-audit-action code {
+    color: var(--foreground);
+    font-family: var(--font-mono);
+    font-size: 0.76rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.super-admin-audit-method {
+    border: 1px solid currentColor;
+    border-radius: 4px;
+    flex: 0 0 auto;
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    font-style: normal;
+    font-weight: 800;
+    padding: 2px 6px;
+}
+
+.super-admin-audit-method-post {
+    color: color-mix(in srgb, var(--success) 75%, var(--foreground));
+}
+
+.super-admin-audit-method-put,
+.super-admin-audit-method-patch {
+    color: color-mix(in srgb, var(--warning) 80%, var(--foreground));
+}
+
+.super-admin-audit-method-delete {
+    color: color-mix(in srgb, var(--danger) 75%, var(--foreground));
+}
+
+.super-admin-impersonate-button {
+    border-color: color-mix(in srgb, #c026d3 55%, var(--border)) !important;
+    color: color-mix(in srgb, #c026d3 70%, var(--foreground)) !important;
+}
+
+.super-admin-impersonation-description {
+    color: var(--foreground);
+    line-height: 1.55;
+}
+
+@media (max-width: 760px) {
+    .super-admin-member-table .super-admin-owner-row,
+    .super-admin-member-table .super-admin-audit-row {
+        min-width: 760px;
+    }
+}
+
+/* Operator administration: details, access, settings, read models */
+.super-admin-danger-button {
+    align-items: center;
+    background: color-mix(in srgb, var(--danger) 10%, transparent);
+    border: 1px solid color-mix(in srgb, var(--danger) 55%, var(--border));
+    border-radius: 4px;
+    color: color-mix(in srgb, var(--danger) 80%, var(--foreground));
+    cursor: pointer;
+    display: inline-flex;
+    font-family: var(--font-ui);
+    font-size: 0.76rem;
+    font-weight: 600;
+    gap: 7px;
+    min-height: 36px;
+    padding: 0 12px;
+}
+
+.super-admin-danger-button:not(:disabled):hover {
+    background: color-mix(in srgb, var(--danger) 18%, transparent);
+}
+
+.super-admin-danger-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.super-admin-compact-button.super-admin-danger-button {
+    min-height: 32px;
+}
+
+.super-admin-configuration-workspace {
+    display: grid;
+    gap: 14px;
+}
+
+.super-admin-data-section {
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin: 0;
+    min-width: 0;
+    padding: 14px 16px 16px;
+}
+
+.super-admin-data-section legend {
+    color: var(--muted-foreground);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    padding: 0 6px;
+    text-transform: uppercase;
+}
+
+.super-admin-form-grid.super-admin-form-grid-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.super-admin-limits-grid {
+    display: grid;
+    gap: 14px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.super-admin-form-hint {
+    color: var(--muted-foreground);
+    font-size: 0.74rem;
+    margin: -4px 0 0;
+}
+
+.super-admin-access-grid,
+.super-admin-status-grid {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.super-admin-access-card,
+.super-admin-status-card {
+    align-content: start;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    display: grid;
+    gap: 8px;
+    justify-items: start;
+    min-width: 0;
+    padding: 14px 16px;
+}
+
+.super-admin-access-card strong,
+.super-admin-status-card strong {
+    color: var(--foreground);
+    font-size: 1.15rem;
+    font-weight: 650;
+}
+
+.super-admin-access-card p {
+    color: var(--muted-foreground);
+    font-size: 0.76rem;
+    line-height: 1.45;
+    margin: 0;
+}
+
+.super-admin-access-card-label {
+    color: var(--muted-foreground);
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.super-admin-access-card.is-active {
+    border-left: 3px solid var(--success);
+}
+
+.super-admin-access-card.is-blocked {
+    background: color-mix(in srgb, var(--danger) 6%, var(--surface));
+    border-left: 3px solid var(--danger);
+}
+
+.super-admin-member-table .super-admin-access-admin-row {
+    grid-template-columns: minmax(200px, 1.3fr) minmax(140px, 0.7fr) minmax(200px, 1fr);
+}
+
+.super-admin-access-admin-row strong {
+    align-items: center;
+    display: inline-flex;
+    gap: 6px;
+}
+
+.super-admin-read-model-form {
+    align-items: end;
+    display: grid;
+    gap: 12px;
+    grid-template-columns: minmax(160px, 1fr) minmax(140px, 0.8fr) minmax(140px, 0.8fr) auto;
+}
+
+.super-admin-read-model-form label {
+    display: grid;
+    gap: 6px;
+}
+
+.super-admin-read-model-form label > span {
+    color: var(--muted-foreground);
+    font-size: 0.72rem;
+    font-weight: 600;
+}
+
+.super-admin-read-model-form input {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--foreground);
+    font: inherit;
+    min-height: 36px;
+    padding: 0 10px;
+}
+
+.super-admin-member-table .super-admin-read-model-row {
+    grid-template-columns: minmax(120px, 0.7fr) minmax(190px, 1fr) minmax(160px, 1fr) minmax(150px, 0.9fr) minmax(80px, 0.4fr);
+}
+
+.super-admin-job-status {
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    font-size: 0.68rem;
+    font-style: normal;
+    font-weight: 700;
+    padding: 2px 8px;
+}
+
+.super-admin-job-status-pending,
+.super-admin-job-status-running {
+    color: color-mix(in srgb, var(--info) 75%, var(--foreground));
+}
+
+.super-admin-job-status-completed {
+    color: color-mix(in srgb, var(--success) 75%, var(--foreground));
+}
+
+.super-admin-job-status-failed {
+    color: color-mix(in srgb, var(--danger) 75%, var(--foreground));
+}
+
+.super-admin-job-error {
+    color: var(--muted-foreground);
+    display: block;
+    font-size: 0.7rem;
+    margin-top: 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* System: feature matrix, status, maintenance */
+.super-admin-system-panel {
+    display: grid;
+    gap: 16px;
+}
+
+.super-admin-feature-matrix-scroll {
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    max-width: 100%;
+    overflow: auto;
+}
+
+.super-admin-feature-matrix {
+    border-collapse: separate;
+    border-spacing: 0;
+    min-width: 100%;
+}
+
+.super-admin-feature-matrix th,
+.super-admin-feature-matrix td {
+    border-bottom: 1px solid var(--border);
+    padding: 8px 10px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.super-admin-feature-matrix thead th {
+    background: var(--surface-secondary);
+    color: var(--muted-foreground);
+    font-size: 0.68rem;
+    font-weight: 650;
+    min-width: 92px;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.super-admin-feature-matrix thead th span,
+.super-admin-feature-matrix thead th small {
+    display: block;
+}
+
+.super-admin-feature-matrix thead th small {
+    color: var(--foreground);
+    font-family: var(--font-mono);
+    margin-top: 2px;
+}
+
+.super-admin-feature-matrix th[scope="row"],
+.super-admin-feature-matrix thead th:first-child {
+    background: var(--surface);
+    left: 0;
+    min-width: 200px;
+    position: sticky;
+    text-align: left;
+    z-index: 2;
+}
+
+.super-admin-feature-matrix th[scope="row"] strong,
+.super-admin-feature-matrix th[scope="row"] small {
+    display: block;
+}
+
+.super-admin-feature-matrix th[scope="row"] small {
+    color: var(--muted-foreground);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    font-weight: 400;
+}
+
+.super-admin-matrix-cell {
+    align-items: center;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--muted-foreground);
+    cursor: pointer;
+    display: inline-flex;
+    height: 30px;
+    justify-content: center;
+    width: 30px;
+}
+
+.super-admin-matrix-cell.is-enabled {
+    background: color-mix(in srgb, var(--success) 14%, transparent);
+    border-color: color-mix(in srgb, var(--success) 55%, var(--border));
+    color: color-mix(in srgb, var(--success) 80%, var(--foreground));
+}
+
+.super-admin-matrix-cell:not(:disabled):hover {
+    border-color: var(--border-strong);
+}
+
+.super-admin-matrix-cell:disabled {
+    cursor: progress;
+}
+
+.super-admin-matrix-cell:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 1px;
+}
+
+.super-admin-status-card dl {
+    display: grid;
+    gap: 6px;
+    margin: 4px 0 0;
+    width: 100%;
+}
+
+.super-admin-status-card dl div {
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+    min-width: 0;
+}
+
+.super-admin-status-card dt {
+    color: var(--muted-foreground);
+    font-size: 0.72rem;
+}
+
+.super-admin-status-card dd {
+    color: var(--foreground);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    margin: 0;
+    overflow: hidden;
+    text-align: right;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.super-admin-status-card.is-healthy {
+    border-left: 3px solid var(--success);
+}
+
+.super-admin-status-card.is-failing {
+    border-left: 3px solid var(--danger);
+}
+
+.super-admin-status-health {
+    align-items: center;
+    display: inline-flex;
+    gap: 6px;
+}
+
+.super-admin-status-meter {
+    background: var(--surface-secondary);
+    border-radius: 999px;
+    display: block;
+    height: 6px;
+    overflow: hidden;
+    width: 100%;
+}
+
+.super-admin-status-meter span {
+    background: var(--primary);
+    display: block;
+    height: 100%;
+}
+
+.super-admin-maintenance-card {
+    align-items: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    display: grid;
+    gap: 16px;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    padding: 16px 18px;
+}
+
+.super-admin-maintenance-card > div {
+    display: grid;
+    gap: 4px;
+}
+
+.super-admin-maintenance-card strong {
+    font-size: 1.1rem;
+}
+
+.super-admin-maintenance-card p {
+    color: var(--muted-foreground);
+    font-size: 0.78rem;
+    margin: 0;
+}
+
+.super-admin-maintenance-card small {
+    color: var(--muted-foreground);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+}
+
+.super-admin-maintenance-icon {
+    align-items: center;
+    background: var(--surface-secondary);
+    border-radius: 999px;
+    color: var(--muted-foreground);
+    display: inline-flex;
+    height: 44px;
+    justify-content: center;
+    width: 44px;
+}
+
+.super-admin-maintenance-card.is-enabled {
+    background: color-mix(in srgb, var(--warning) 8%, var(--surface));
+    border-color: color-mix(in srgb, var(--warning) 45%, var(--border));
+}
+
+.super-admin-maintenance-card.is-enabled .super-admin-maintenance-icon {
+    background: color-mix(in srgb, var(--warning) 18%, transparent);
+    color: color-mix(in srgb, var(--warning) 75%, var(--foreground));
+}
+
+@media (max-width: 900px) {
+    .super-admin-form-grid.super-admin-form-grid-3,
+    .super-admin-limits-grid,
+    .super-admin-read-model-form {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .super-admin-maintenance-card {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .super-admin-member-table .super-admin-read-model-row,
+    .super-admin-member-table .super-admin-access-admin-row {
+        min-width: 720px;
+    }
+}
+
+/* Operations and communication: announcements, onboarding, devices, GDPR */
+.super-admin-announcement-list {
+    display: grid;
+    gap: 10px;
+}
+
+.super-admin-announcement-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--info);
+    border-radius: 6px;
+    display: grid;
+    gap: 6px;
+    padding: 12px 14px;
+}
+
+.super-admin-announcement-item.super-admin-announcement-warning {
+    border-left-color: var(--warning);
+}
+
+.super-admin-announcement-item.super-admin-announcement-critical {
+    border-left-color: var(--danger);
+}
+
+.super-admin-announcement-item p {
+    color: var(--foreground);
+    font-size: 0.82rem;
+    line-height: 1.5;
+    margin: 0;
+    white-space: pre-line;
+}
+
+.super-admin-announcement-item-head,
+.super-admin-announcement-item-foot {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: space-between;
+}
+
+.super-admin-announcement-item-head {
+    justify-content: flex-start;
+}
+
+.super-admin-announcement-item-foot small {
+    color: var(--muted-foreground);
+    font-size: 0.72rem;
+}
+
+.super-admin-announcement-severity {
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: 0.64rem;
+    font-style: normal;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    padding: 2px 6px;
+    text-transform: uppercase;
+}
+
+.super-admin-announcement-severity-info {
+    background: color-mix(in srgb, var(--info) 14%, transparent);
+    color: color-mix(in srgb, var(--info) 75%, var(--foreground));
+}
+
+.super-admin-announcement-severity-warning {
+    background: color-mix(in srgb, var(--warning) 16%, transparent);
+    color: color-mix(in srgb, var(--warning) 75%, var(--foreground));
+}
+
+.super-admin-announcement-severity-critical {
+    background: color-mix(in srgb, var(--danger) 14%, transparent);
+    color: color-mix(in srgb, var(--danger) 80%, var(--foreground));
+}
+
+.super-admin-announcement-status-active {
+    color: color-mix(in srgb, var(--success) 75%, var(--foreground));
+}
+
+.super-admin-announcement-status-scheduled {
+    color: color-mix(in srgb, var(--info) 75%, var(--foreground));
+}
+
+.super-admin-announcement-status-expired {
+    color: var(--muted-foreground);
+}
+
+.super-admin-form-grid .super-admin-form-grid-wide {
+    grid-column: 1 / -1;
+}
+
+.super-admin-form-grid textarea {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--foreground);
+    font: inherit;
+    padding: 8px 10px;
+    resize: vertical;
+}
+
+.super-admin-form-hint.super-admin-form-hint-error {
+    color: color-mix(in srgb, var(--danger) 80%, var(--foreground));
+}
+
+.super-admin-check-grid {
+    display: grid;
+    gap: 6px 12px;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    max-height: 220px;
+    overflow: auto;
+}
+
+.super-admin-check {
+    align-items: center;
+    color: var(--foreground);
+    cursor: pointer;
+    display: flex;
+    font-size: 0.8rem;
+    gap: 8px;
+}
+
+.super-admin-check small {
+    color: var(--muted-foreground);
+    font-family: var(--font-mono);
+}
+
+.super-admin-onboarding {
+    background: var(--surface);
+    border: 1px solid color-mix(in srgb, var(--warning) 40%, var(--border));
+    border-radius: 6px;
+    margin: 0 0 12px;
+}
+
+.super-admin-onboarding.is-complete {
+    border-color: var(--border);
+}
+
+.super-admin-onboarding-error {
+    color: var(--muted-foreground);
+    font-size: 0.76rem;
+    padding: 10px 14px;
+}
+
+.super-admin-onboarding-head {
+    align-items: center;
+    background: transparent;
+    border: 0;
+    color: var(--foreground);
+    cursor: pointer;
+    display: grid;
+    gap: 14px;
+    grid-template-columns: minmax(0, auto) minmax(80px, 1fr) auto;
+    padding: 10px 14px;
+    text-align: left;
+    width: 100%;
+}
+
+.super-admin-onboarding-head strong,
+.super-admin-onboarding-head small {
+    display: block;
+}
+
+.super-admin-onboarding-head small {
+    color: var(--muted-foreground);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+}
+
+.super-admin-onboarding-meter {
+    background: var(--surface-secondary);
+    border-radius: 999px;
+    display: block;
+    height: 6px;
+    overflow: hidden;
+}
+
+.super-admin-onboarding-meter span {
+    background: var(--success);
+    display: block;
+    height: 100%;
+}
+
+.super-admin-onboarding-steps {
+    border-top: 1px solid var(--border);
+    display: grid;
+    gap: 0;
+    list-style: none;
+    margin: 0;
+    padding: 4px 14px 8px;
+}
+
+.super-admin-onboarding-steps li {
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    color: var(--muted-foreground);
+    display: grid;
+    gap: 10px;
+    grid-template-columns: 20px minmax(0, 1fr) auto;
+    padding: 8px 0;
+}
+
+.super-admin-onboarding-steps li:last-child {
+    border-bottom: 0;
+}
+
+.super-admin-onboarding-steps li.is-done {
+    color: color-mix(in srgb, var(--success) 75%, var(--foreground));
+}
+
+.super-admin-onboarding-steps strong {
+    color: var(--foreground);
+    display: block;
+    font-size: 0.8rem;
+}
+
+.super-admin-onboarding-steps small {
+    color: var(--muted-foreground);
+    font-size: 0.72rem;
+}
+
+.super-admin-onboarding-dot {
+    border: 2px solid var(--border-strong);
+    border-radius: 999px;
+    display: inline-block;
+    height: 14px;
+    width: 14px;
+}
+
+.super-admin-member-table .super-admin-device-row {
+    grid-template-columns: minmax(150px, 1fr) minmax(140px, 0.9fr) minmax(180px, 1fr) minmax(110px, 0.6fr) minmax(250px, 1.2fr);
+}
+
+.super-admin-device-status-active {
+    color: color-mix(in srgb, var(--success) 75%, var(--foreground));
+}
+
+.super-admin-device-status-blocked,
+.super-admin-device-status-lost {
+    color: color-mix(in srgb, var(--danger) 75%, var(--foreground));
+}
+
+.super-admin-device-status-retired {
+    color: var(--muted-foreground);
+}
+
+.super-admin-privacy-card {
+    gap: 10px;
+    justify-items: stretch;
+}
+
+.super-admin-privacy-card > button {
+    justify-self: start;
+}
+
+.super-admin-privacy-confirmation {
+    display: grid;
+    gap: 6px;
+}
+
+.super-admin-privacy-confirmation span {
+    color: var(--foreground);
+    font-size: 0.76rem;
+    font-weight: 600;
+}
+
+.super-admin-privacy-confirmation input {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--foreground);
+    font: inherit;
+    max-width: 420px;
+    min-height: 36px;
+    padding: 0 10px;
+}
+
+.super-admin-privacy-last {
+    color: var(--muted-foreground);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+}
+
+@media (max-width: 760px) {
+    .super-admin-member-table .super-admin-device-row {
+        min-width: 860px;
+    }
+
+    .super-admin-onboarding-head {
+        grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .super-admin-onboarding-meter {
+        display: none;
+    }
+}
+
+.super-admin-impersonation-consent {
+    display: grid;
+    gap: 12px;
+}
+
+.super-admin-impersonation-consent-head {
+    align-items: center;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    padding-top: 10px;
+}
+
+.super-admin-impersonation-consent-hint {
+    color: var(--muted-foreground);
+    font-size: 0.84rem;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.super-admin-impersonation-consent-reason {
+    display: grid;
+    gap: 6px;
+    font-size: 0.82rem;
+}
+
+.super-admin-impersonation-consent-reason textarea {
+    background: var(--input, var(--card));
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--foreground);
+    font: inherit;
+    padding: 8px 10px;
+    resize: vertical;
+}
