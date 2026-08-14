@@ -816,6 +816,53 @@ export const pl = {
             category: "Kategoria",
             value: "Wartość",
         },
+        shipmentConfiguration: {
+            previewNote: "Wersja poglądowa — ustawienia są zapisywane wyłącznie w tej przeglądarce, bez połączenia z backendem.",
+            categories: {
+                validation: "Walidacja",
+                labels: "Etykiety",
+                limits: "Limity",
+                workflow: "Przepływ",
+            },
+            fields: {
+                validateAddressData: {
+                    label: "Automatyczna walidacja adresu",
+                    hint: "Sprawdza kompletność adresu nadawcy i odbiorcy przed utworzeniem przesyłki.",
+                },
+                requireRecipientPhone: {
+                    label: "Wymagaj telefonu odbiorcy",
+                    hint: "Numer telefonu musi być uzupełniony przed zapisaniem przesyłki.",
+                },
+                preventDuplicateTracking: {
+                    label: "Blokuj duplikaty numerów trackingowych",
+                    hint: "Ostrzega przed utworzeniem przesyłki z istniejącym numerem trackingowym.",
+                },
+                autoGenerateLabels: {
+                    label: "Automatycznie generuj etykietę",
+                    hint: "Tworzy etykietę od razu po poprawnym utworzeniu przesyłki.",
+                },
+                maximumWeightKg: {
+                    label: "Maksymalna waga przesyłki",
+                    hint: "Górny limit wagi akceptowany w formularzu przesyłki.",
+                },
+                defaultStatus: {
+                    label: "Domyślny status nowej przesyłki",
+                    hint: "Status ustawiany automatycznie po utworzeniu przesyłki.",
+                },
+            },
+            values: {
+                enabled: "Włączone",
+                disabled: "Wyłączone",
+            },
+            statuses: {
+                created: "Utworzona",
+                prepared: "Przygotowana",
+                accepted: "Przyjęta",
+            },
+            messages: {
+                saved: "Ustawienia przesyłek zostały zapisane lokalnie w GUI.",
+            },
+        },
         courierConfiguration: {
             title: "Edycja kurierów",
             fields: {

@@ -820,6 +820,53 @@ export const en: typeof pl = {
             category: "Category",
             value: "Value",
         },
+        shipmentConfiguration: {
+            previewNote: "GUI preview — settings are stored only in this browser and are not connected to the backend.",
+            categories: {
+                validation: "Validation",
+                labels: "Labels",
+                limits: "Limits",
+                workflow: "Workflow",
+            },
+            fields: {
+                validateAddressData: {
+                    label: "Automatic address validation",
+                    hint: "Checks sender and recipient address completeness before creating a shipment.",
+                },
+                requireRecipientPhone: {
+                    label: "Require recipient phone number",
+                    hint: "A phone number must be provided before the shipment can be saved.",
+                },
+                preventDuplicateTracking: {
+                    label: "Block duplicate tracking numbers",
+                    hint: "Warns before creating a shipment with an existing tracking number.",
+                },
+                autoGenerateLabels: {
+                    label: "Generate labels automatically",
+                    hint: "Creates a label immediately after a shipment is created successfully.",
+                },
+                maximumWeightKg: {
+                    label: "Maximum shipment weight",
+                    hint: "Upper weight limit accepted by the shipment form.",
+                },
+                defaultStatus: {
+                    label: "Default new shipment status",
+                    hint: "Status assigned automatically after a shipment is created.",
+                },
+            },
+            values: {
+                enabled: "Enabled",
+                disabled: "Disabled",
+            },
+            statuses: {
+                created: "Created",
+                prepared: "Prepared",
+                accepted: "Accepted",
+            },
+            messages: {
+                saved: "Shipment settings have been saved locally in the GUI.",
+            },
+        },
         courierConfiguration: {
             title: "Courier editing",
             fields: {

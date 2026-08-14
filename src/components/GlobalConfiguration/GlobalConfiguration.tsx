@@ -17,6 +17,7 @@ import Software from "../SoftwareConfiguration/model/Software";
 import GeocodingConfigurationPanel from "./GeocodingConfigurationPanel";
 import IntegrationsConfigurationPanel from "./IntegrationsConfigurationPanel";
 import {GlobalConfigurationSection, GlobalConfigurationSectionKey} from "./model/GlobalConfigurationSection";
+import ShipmentConfigurationPanel from "./ShipmentConfigurationPanel";
 import "./styles/global-configuration.css";
 
 type PropertyDraft = {
@@ -48,7 +49,7 @@ const sections: GlobalConfigurationSection[] = [
 ];
 
 const isDedicatedConfigurationSection = (sectionKey: GlobalConfigurationSectionKey) => (
-    sectionKey === "geocoding" || sectionKey === "integrations"
+    sectionKey === "shipments" || sectionKey === "geocoding" || sectionKey === "integrations"
 );
 
 const normalizeCategory = (value?: string) => (value || "").trim().toLowerCase();
@@ -215,6 +216,8 @@ function GlobalConfiguration() {
                 <GeocodingConfigurationPanel />
             ) : activeSection.key === "integrations" ? (
                 <IntegrationsConfigurationPanel />
+            ) : activeSection.key === "shipments" ? (
+                <ShipmentConfigurationPanel />
             ) : loading ? (
                 <div className="global-configuration-loader">
                     <CircularProgress size={28} />
