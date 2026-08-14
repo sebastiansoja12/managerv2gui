@@ -17,9 +17,16 @@ describe("ShipmentConfigurationPanel", () => {
             name: pl.globalConfiguration.shipmentConfiguration.fields.validateAddressData.label,
         });
         expect(addressValidation).toBeChecked();
+        expect(screen.getByText(pl.globalConfiguration.shipmentConfiguration.categories.labels)).toBeInTheDocument();
+        expect(screen.getByText(pl.globalConfiguration.shipmentConfiguration.categories.limits)).toBeInTheDocument();
+        expect(screen.getByText(pl.globalConfiguration.shipmentConfiguration.categories.workflow)).toBeInTheDocument();
+        expect(screen.getByText(pl.globalConfiguration.shipmentConfiguration.categories.notifications)).toBeInTheDocument();
+        expect(screen.getByRole("checkbox", {
+            name: pl.globalConfiguration.shipmentConfiguration.fields.requireRecipientEmail.label,
+        })).not.toBeChecked();
 
         fireEvent.click(addressValidation);
-        fireEvent.click(screen.getAllByRole("button", {name: pl.common.saveChanges})[0]);
+        fireEvent.click(screen.getByRole("button", {name: pl.common.saveChanges}));
 
         const storedConfiguration = JSON.parse(
             window.localStorage.getItem(SHIPMENT_CONFIGURATION_STORAGE_KEY) || "{}",

@@ -142,8 +142,9 @@ function GeocodingConfigurationPanel() {
     const selectedDefinition = providers.find((provider) => provider.provider === selectedProvider);
 
     const openCreateDialog = () => {
+        const firstAvailableProvider = availableProviders[0];
         setEditingConfiguration(null);
-        setSelectedProvider("");
+        setSelectedProvider(firstAvailableProvider?.provider || "");
         setFieldValues({});
         setEnabled(true);
         setError("");
@@ -241,14 +242,16 @@ function GeocodingConfigurationPanel() {
                     <h3>{pl.globalConfiguration.geocoding.title}</h3>
                     <p>{pl.globalConfiguration.geocoding.description}</p>
                 </div>
-                <Button
-                    disabled={loading}
-                    startIcon={<Add />}
-                    variant="contained"
-                    onClick={openCreateDialog}
-                >
-                    {pl.globalConfiguration.geocoding.add}
-                </Button>
+                {!loading && configurations.length ? (
+                    <Button
+                        disabled={!availableProviders.length}
+                        startIcon={<Add />}
+                        variant="outlined"
+                        onClick={openCreateDialog}
+                    >
+                        {pl.globalConfiguration.geocoding.add}
+                    </Button>
+                ) : undefined}
             </div>
 
             {error && !dialogOpen && !configurationToDelete ? <Alert severity="error">{error}</Alert> : undefined}
@@ -335,7 +338,7 @@ function GeocodingConfigurationPanel() {
                     <LocationOn />
                     <h4>{pl.globalConfiguration.geocoding.emptyTitle}</h4>
                     <p>{pl.globalConfiguration.geocoding.emptyDescription}</p>
-                    <Button disabled={loading} startIcon={<Add />} variant="outlined" onClick={openCreateDialog}>
+                    <Button disabled={loading || !availableProviders.length} startIcon={<Add />} variant="outlined" onClick={openCreateDialog}>
                         {pl.globalConfiguration.geocoding.addFirst}
                     </Button>
                 </div>
@@ -367,6 +370,7 @@ function GeocodingConfigurationPanel() {
                             </InputLabel>
                             <Select
                                 disabled={Boolean(editingConfiguration)}
+                                fullWidth
                                 label={pl.globalConfiguration.geocoding.dialog.providerLabel}
                                 labelId="geocoding-provider-label"
                                 value={selectedProvider}
@@ -421,13 +425,14 @@ function GeocodingConfigurationPanel() {
                     ) : undefined}
                 </DialogContent>
                 <DialogActions>
-                    <Button disabled={saving} onClick={closeDialog}>
+                    <Button disabled={saving} variant="outlined" onClick={closeDialog}>
                         {pl.common.cancel}
                     </Button>
                     <Button
+                        className="geocoding-dialog-primary-action"
                         disabled={saving || !selectedDefinition
                             || selectedDefinition.activeFields.some((field) => !fieldValues[field]?.trim())}
-                        variant="contained"
+                        variant="outlined"
                         onClick={saveConfiguration}
                     >
                         {saving
@@ -459,7 +464,7 @@ function GeocodingConfigurationPanel() {
                     ) : undefined}
                 </DialogContent>
                 <DialogActions>
-                    <Button disabled={deleting} onClick={() => setConfigurationToDelete(null)}>
+                    <Button disabled={deleting} variant="outlined" onClick={() => setConfigurationToDelete(null)}>
                         {pl.common.cancel}
                     </Button>
                     <Button color="error" disabled={deleting} variant="contained" onClick={deleteConfiguration}>

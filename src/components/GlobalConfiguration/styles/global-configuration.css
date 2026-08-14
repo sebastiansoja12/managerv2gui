@@ -244,83 +244,199 @@
 .global-configuration-shipment-panel {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    padding: 14px 16px 0;
+    gap: 16px;
+    padding: 18px;
+    box-shadow: none;
+}
+
+.shipment-configuration-topbar {
+    align-items: center;
+    display: flex;
+    gap: 16px;
+    justify-content: space-between;
+}
+
+.shipment-configuration-topbar [data-ui="button"] {
+    border-color: var(--border-strong);
+    border-radius: 9px;
+    color: var(--foreground);
+    flex: 0 0 auto;
+    font-weight: 800;
+    min-height: 40px;
+    text-transform: none;
 }
 
 .global-configuration-preview-note {
     align-items: center;
-    background: #f2f6ff;
-    border: 1px solid #d7e3ff;
+    background: color-mix(in srgb, var(--surface-secondary) 58%, var(--surface));
+    border: 1px solid var(--border);
     border-radius: 8px;
-    color: #315a9f;
+    color: var(--muted-foreground);
     display: flex;
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 650;
     gap: 8px;
     padding: 10px 12px;
 }
 
 .global-configuration-preview-note svg {
+    color: var(--muted-foreground);
     flex: 0 0 auto;
 }
 
-.global-configuration-settings-table th:first-child,
-.global-configuration-settings-table td:first-child {
-    width: 36%;
+.shipment-configuration-sections {
+    display: grid;
+    gap: 16px;
 }
 
-.global-configuration-settings-table th:nth-child(2),
-.global-configuration-settings-table td:nth-child(2) {
-    width: 16%;
+.shipment-configuration-group {
+    background: color-mix(in srgb, var(--surface-elevated) 94%, var(--surface));
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
 }
 
-.global-configuration-settings-table th:nth-child(3),
-.global-configuration-settings-table td:nth-child(3) {
-    width: 28%;
+.shipment-configuration-group > header {
+    background: color-mix(in srgb, var(--surface-secondary) 42%, var(--surface-elevated));
+    border-bottom: 1px solid var(--border);
+    padding: 16px 18px;
 }
 
-.global-configuration-settings-table td:last-child {
-    width: 1%;
-    white-space: nowrap;
+.shipment-configuration-group > header h3 {
+    color: var(--foreground);
+    font-size: 1rem;
+    font-weight: 850;
+    letter-spacing: -0.01em;
+    margin: 0;
 }
 
-.global-configuration-setting-name,
-.global-configuration-setting-hint {
-    display: block;
-}
-
-.global-configuration-setting-name {
-    color: var(--brand-ink);
-    font-weight: 800;
-}
-
-.global-configuration-setting-hint {
-    color: var(--brand-muted);
-    font-size: 12px;
+.shipment-configuration-group > header p {
+    color: var(--muted-foreground);
+    font-size: 0.78rem;
     line-height: 1.45;
-    margin-top: 4px;
+    margin: 4px 0 0;
 }
 
-.global-configuration-settings-table [data-ui="form-control-label"] {
+.shipment-configuration-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.shipment-setting-row {
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    display: grid;
+    gap: 18px;
+    grid-template-columns: minmax(0, 1fr) minmax(150px, 210px);
+    min-height: 86px;
+    padding: 13px 18px;
+}
+
+.shipment-setting-row:nth-child(odd) {
+    border-right: 1px solid var(--border);
+}
+
+.shipment-setting-row:nth-last-child(-n + 2) {
+    border-bottom: 0;
+}
+
+.shipment-setting-copy {
+    display: grid;
+    gap: 4px;
+    min-width: 0;
+}
+
+.shipment-setting-copy strong {
+    color: var(--foreground);
+    font-size: 0.82rem;
+    font-weight: 800;
+    line-height: 1.35;
+}
+
+.shipment-setting-copy small {
+    color: var(--muted-foreground);
+    font-size: 0.72rem;
+    line-height: 1.4;
+}
+
+.shipment-setting-row [data-ui="form-control-label"] {
+    justify-self: end;
+    margin: 0;
+}
+
+.shipment-setting-row [data-ui="form-control-label-text"] {
+    color: var(--muted-foreground);
+    font-size: 0.75rem;
     font-weight: 700;
 }
 
-.global-configuration-compact-control {
+.shipment-setting-row [data-ui="switch"] > input:checked + span {
+    background: color-mix(in srgb, var(--primary) 52%, var(--muted)) !important;
+}
+
+.shipment-setting-input {
     align-items: center;
     display: flex;
     gap: 8px;
-    max-width: 180px;
+    min-width: 0;
 }
 
-.global-configuration-compact-control > span {
-    color: var(--brand-muted);
-    font-size: 13px;
-    font-weight: 800;
+.shipment-setting-input > span {
+    color: var(--muted-foreground);
+    flex: 0 0 auto;
+    font-size: 0.75rem;
+    font-weight: 750;
+}
+
+.shipment-setting-input [data-ui="input"],
+.shipment-setting-select [data-ui="select"] {
+    background: var(--input);
+    border-color: var(--border);
+    color: var(--foreground);
+    min-height: 40px;
+}
+
+.shipment-setting-select {
+    min-width: 0;
+}
+
+@media (max-width: 1060px) {
+    .shipment-configuration-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .shipment-setting-row:nth-child(odd) {
+        border-right: 0;
+    }
+
+    .shipment-setting-row:nth-last-child(2) {
+        border-bottom: 1px solid var(--border);
+    }
+}
+
+@media (max-width: 680px) {
+    .shipment-configuration-topbar {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .shipment-configuration-topbar [data-ui="button"] {
+        width: 100%;
+    }
+
+    .shipment-setting-row {
+        align-items: stretch;
+        grid-template-columns: 1fr;
+    }
+
+    .shipment-setting-row [data-ui="form-control-label"] {
+        justify-self: start;
+    }
 }
 
 .geocoding-configuration-panel {
-    padding: 14px 16px;
+    box-shadow: none;
+    padding: 18px;
 }
 
 .geocoding-configuration-heading {
@@ -328,19 +444,49 @@
     display: flex;
     gap: 20px;
     justify-content: space-between;
-    margin-bottom: 10px;
+    margin-bottom: 16px;
 }
 
 .geocoding-configuration-heading h3 {
-    color: #101828;
-    font-size: 20px;
-    font-weight: 800;
+    color: var(--foreground);
+    font-size: 1rem;
+    font-weight: 850;
     margin: 0;
 }
 
 .geocoding-configuration-heading p {
-    color: var(--brand-muted);
-    margin: 5px 0 0;
+    color: var(--muted-foreground);
+    font-size: 0.78rem;
+    line-height: 1.45;
+    margin: 4px 0 0;
+}
+
+.geocoding-configuration-heading [data-ui="button"],
+.geocoding-configuration-empty [data-ui="button"] {
+    background: transparent;
+    border-color: var(--border-strong);
+    border-radius: 9px;
+    color: var(--foreground);
+    font-weight: 800;
+    min-height: 40px;
+    text-transform: none;
+}
+
+.geocoding-configuration-heading [data-ui="button"]:hover,
+.geocoding-configuration-empty [data-ui="button"]:hover {
+    background: var(--surface-secondary);
+    border-color: var(--border-strong);
+}
+
+.geocoding-configuration-panel > [data-ui="alert"] {
+    background: color-mix(in srgb, var(--surface-secondary) 58%, var(--surface));
+    border-color: var(--border);
+    box-shadow: none;
+    color: var(--foreground);
+}
+
+.geocoding-configuration-panel > [data-ui="alert"].text-danger {
+    color: color-mix(in srgb, var(--danger) 62%, var(--foreground));
 }
 
 .geocoding-provider-list {
@@ -358,10 +504,10 @@
 
 .geocoding-provider-list-header {
     align-items: center;
-    background: #f7f9fc;
-    border: 1px solid #e5eaf2;
+    background: var(--surface-secondary);
+    border: 1px solid var(--border);
     border-radius: 8px 8px 0 0;
-    color: #667085;
+    color: var(--muted-foreground);
     font-size: 12px;
     font-weight: 800;
     letter-spacing: 0.025em;
@@ -375,12 +521,12 @@
 
 .geocoding-provider-card {
     align-items: center;
-    background: #fbfcfe;
-    border: 1px solid #e5eaf2;
+    background: var(--surface);
+    border: 1px solid var(--border);
     border-radius: 0;
     border-top: 0;
     padding: 9px 11px;
-    transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+    transition: background 160ms ease, border-color 160ms ease;
 }
 
 .geocoding-provider-card:last-child {
@@ -388,16 +534,17 @@
 }
 
 .geocoding-provider-card:hover {
-    border-color: #cfdcf4;
-    box-shadow: 0 10px 24px rgba(30, 64, 120, 0.09);
-    transform: translateY(-1px);
+    background: color-mix(in srgb, var(--surface-secondary) 46%, var(--surface));
+    border-color: var(--border-strong);
+    box-shadow: none;
+    transform: none;
 }
 
 .geocoding-provider-icon {
     align-items: center;
-    background: #eaf1ff;
+    background: var(--surface-secondary);
     border-radius: 8px;
-    color: #1f56c0;
+    color: var(--muted-foreground);
     display: flex;
     height: 36px;
     justify-content: center;
@@ -412,14 +559,14 @@
 }
 
 .geocoding-provider-main h4 {
-    color: #101828;
+    color: var(--foreground);
     font-size: 15px;
     font-weight: 800;
     margin: 0;
 }
 
 .geocoding-provider-code {
-    color: #667085;
+    color: var(--muted-foreground);
     display: block;
     font-size: 12px;
     font-weight: 750;
@@ -432,7 +579,7 @@
 }
 
 .geocoding-provider-endpoint a {
-    color: #315a9f;
+    color: var(--foreground);
     display: block;
     font-size: 13px;
     overflow: hidden;
@@ -442,7 +589,7 @@
 
 .geocoding-provider-credential {
     align-items: center;
-    color: #667085;
+    color: var(--muted-foreground);
     display: inline-flex;
     font-size: 12px;
     font-weight: 700;
@@ -467,7 +614,7 @@
 }
 
 .geocoding-provider-actions [data-ui="icon-button"] {
-    border: 1px solid #e1e7ef;
+    border: 1px solid var(--border);
     border-radius: 7px;
     padding: 5px;
 }
@@ -475,11 +622,11 @@
 .geocoding-configuration-loading,
 .geocoding-configuration-empty {
     align-items: center;
-    color: var(--brand-muted);
+    color: var(--muted-foreground);
     display: flex;
     flex-direction: column;
     justify-content: center;
-    min-height: 160px;
+    min-height: 210px;
     text-align: center;
 }
 
@@ -489,45 +636,109 @@
 }
 
 .geocoding-configuration-empty > svg {
-    color: #8ca8d9;
-    font-size: 42px;
+    color: var(--muted-foreground) !important;
+    font-size: 30px;
+    opacity: 0.62;
 }
 
 .geocoding-configuration-empty h4 {
-    color: #344054;
-    font-size: 18px;
-    margin: 12px 0 0;
+    color: var(--foreground);
+    font-size: 1rem;
+    margin: 10px 0 0;
 }
 
 .geocoding-configuration-empty p {
-    margin: 6px 0 16px;
+    color: var(--muted-foreground);
+    font-size: 0.78rem;
+    margin: 5px 0 18px;
 }
 
-.geocoding-configuration-dialog [data-ui="dialog"] {
-    border-radius: 14px;
+[data-ui="dialog"].geocoding-configuration-dialog {
+    border-radius: 16px;
+    max-width: 560px;
 }
 
 .geocoding-configuration-dialog [data-ui="dialog-title"] {
-    border-bottom: 1px solid #eaecf0;
-    color: #101828;
-    font-size: 22px;
-    font-weight: 800;
-    padding: 22px 24px 16px;
+    background: var(--surface-elevated);
+    border-bottom: 1px solid var(--border);
+    color: var(--foreground);
+    font-size: 1.15rem;
+    font-weight: 850;
+    letter-spacing: -0.015em;
+    padding: 20px 22px;
 }
 
 .geocoding-configuration-dialog [data-ui="dialog-content"] {
-    padding: 14px 24px 8px;
+    background: var(--surface);
+    padding: 20px 22px 24px;
 }
 
 .geocoding-configuration-dialog [data-ui="dialog-actions"] {
-    border-top: 1px solid #eaecf0;
-    gap: 8px;
-    padding: 16px 24px 20px;
+    background: var(--surface-elevated);
+    border-top: 1px solid var(--border);
+    gap: 10px;
+    padding: 16px 22px 18px;
 }
 
 .geocoding-dialog-description {
-    color: #667085;
-    margin: 0 0 6px;
+    color: var(--muted-foreground);
+    font-size: 0.88rem;
+    line-height: 1.55;
+    margin: 0 0 18px;
+}
+
+.geocoding-configuration-dialog [data-ui="form-control"] {
+    display: grid;
+    gap: 7px;
+}
+
+.geocoding-configuration-dialog [data-ui="form-control"] [data-ui="input-label"] {
+    color: var(--muted-foreground);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.geocoding-configuration-dialog [data-ui="form-control"] [data-ui="select"] {
+    background: var(--input);
+    border-color: var(--border);
+    color: var(--foreground);
+    min-height: 46px;
+    width: 100%;
+}
+
+.geocoding-configuration-dialog [data-ui="dialog-actions"] [data-ui="button"] {
+    background: transparent;
+    border-color: var(--border-strong);
+    border-radius: 9px;
+    color: var(--foreground);
+    font-weight: 800;
+    min-height: 40px;
+    text-transform: none;
+}
+
+.geocoding-configuration-dialog [data-ui="dialog-actions"] .geocoding-dialog-primary-action {
+    background: color-mix(in srgb, var(--primary) 11%, var(--surface-elevated));
+    border-color: color-mix(in srgb, var(--primary) 34%, var(--border));
+    color: var(--foreground);
+}
+
+.geocoding-configuration-dialog [data-ui="dialog-actions"] .geocoding-dialog-primary-action:hover {
+    background: color-mix(in srgb, var(--primary) 17%, var(--surface-elevated));
+    border-color: color-mix(in srgb, var(--primary) 48%, var(--border));
+}
+
+.geocoding-configuration-dialog [data-ui="dialog-actions"] [data-ui="button"]:disabled {
+    background: var(--muted);
+    border-color: var(--border);
+    color: var(--muted-foreground);
+}
+
+.geocoding-configuration-dialog [data-ui="dialog-actions"] [data-ui="button"][data-color="error"] {
+    background: color-mix(in srgb, var(--danger) 11%, var(--surface-elevated));
+    border-color: color-mix(in srgb, var(--danger) 34%, var(--border));
+    color: var(--danger);
 }
 
 .geocoding-dialog-fields {

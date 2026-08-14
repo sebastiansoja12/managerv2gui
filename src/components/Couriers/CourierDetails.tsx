@@ -619,16 +619,20 @@ const CourierDetails: React.FC = () => {
         <main className="couriers-page courier-details-page">
             <section className="couriers-header">
                 <div className="couriers-detail-heading">
-                    <Button startIcon={<ArrowBack />} variant="outlined" onClick={() => navigate("/couriers")}>
-                        {pl.couriers.actions.backToList}
-                    </Button>
-                    <div>
-                        <span className="couriers-kicker">{pl.couriers.page.kicker}</span>
-                        <Typography variant="h4">{pl.couriers.page.detailsTitle}</Typography>
-                        <p>{decodedSupplierCode}</p>
+                    <div className="courier-details-title">
+                        <span aria-hidden="true" className="courier-details-title-icon">
+                            <LocalShipping />
+                        </span>
+                        <div>
+                            <Typography variant="h4">{pl.couriers.page.detailsTitle}</Typography>
+                            <p>{decodedSupplierCode}</p>
+                        </div>
                     </div>
                 </div>
                 <div className="couriers-table-actions">
+                    <Button startIcon={<ArrowBack />} variant="outlined" onClick={() => navigate("/couriers")}>
+                        {pl.couriers.actions.backToList}
+                    </Button>
                     <Button disabled={loading} startIcon={<Settings />} variant="outlined" onClick={() => setConfigurationDialogOpen(true)}>
                         {pl.globalConfiguration.courierConfiguration.title}
                     </Button>
@@ -815,8 +819,8 @@ const CourierDetails: React.FC = () => {
                     ) : undefined}
 
                     {editingSection === "driverLicense" ? (
-                        <div className="courier-edit-dialog-grid courier-edit-dialog-grid-three">
-                            <TextField disabled={saving} label={pl.couriers.fields.driverLicenseNumber} value={driverLicenseForm.number} onChange={(event) => setDriverLicenseForm({...driverLicenseForm, number: event.target.value})} />
+                        <div className="courier-edit-dialog-grid courier-edit-dialog-grid-license">
+                            <TextField className="courier-edit-dialog-field-wide" disabled={saving} label={pl.couriers.fields.driverLicenseNumber} value={driverLicenseForm.number} onChange={(event) => setDriverLicenseForm({...driverLicenseForm, number: event.target.value})} />
                             <TextField InputLabelProps={{shrink: true}} disabled={saving} label={pl.couriers.fields.acquiredDate} type="date" value={driverLicenseForm.acquiredDate} onChange={(event) => setDriverLicenseForm({...driverLicenseForm, acquiredDate: event.target.value})} />
                             <TextField InputLabelProps={{shrink: true}} disabled={saving} label={pl.couriers.fields.drivingLicenseExpiryDate} type="date" value={driverLicenseForm.drivingLicenseExpiryDate} onChange={(event) => setDriverLicenseForm({...driverLicenseForm, drivingLicenseExpiryDate: event.target.value})} />
                         </div>

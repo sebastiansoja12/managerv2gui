@@ -836,12 +836,20 @@ export const de: typeof pl = {
             value: "Wert",
         },
         shipmentConfiguration: {
-            previewNote: "GUI-Vorschau — die Einstellungen werden nur in diesem Browser gespeichert und sind nicht mit dem Backend verbunden.",
+            previewNote: "GUI-Vorschau — die Einstellungen werden nur in diesem Browser gespeichert.",
             categories: {
                 validation: "Validierung",
                 labels: "Etiketten",
                 limits: "Grenzwerte",
                 workflow: "Ablauf",
+                notifications: "Benachrichtigungen",
+            },
+            categoryDescriptions: {
+                validation: "Pflichtangaben und Qualitätsprüfungen vor dem Erstellen einer Sendung.",
+                labels: "Erstellung von Etiketten und Beförderungsdokumenten.",
+                limits: "Standardgrenzen für Gewicht und Abmessungen von Sendungen.",
+                workflow: "Automatisierte Schritte während der Sendungsbearbeitung.",
+                notifications: "Ereignisse, bei denen Empfänger oder Absender informiert werden.",
             },
             fields: {
                 validateAddressData: {
@@ -852,21 +860,101 @@ export const de: typeof pl = {
                     label: "Telefonnummer des Empfängers verlangen",
                     hint: "Vor dem Speichern der Sendung muss eine Telefonnummer angegeben werden.",
                 },
+                requireRecipientEmail: {
+                    label: "E-Mail des Empfängers verlangen",
+                    hint: "Vor dem Speichern der Sendung muss die E-Mail-Adresse des Empfängers angegeben werden.",
+                },
                 preventDuplicateTracking: {
                     label: "Doppelte Trackingnummern blockieren",
                     hint: "Warnt vor dem Erstellen einer Sendung mit einer bereits vorhandenen Trackingnummer.",
+                },
+                requireSenderReference: {
+                    label: "Absenderreferenz verlangen",
+                    hint: "Macht die interne Referenznummer des Absenders zur Pflichtangabe.",
+                },
+                validatePostalCode: {
+                    label: "Postleitzahlenformat prüfen",
+                    hint: "Prüft das Format der Postleitzahl anhand des Landes der Lieferadresse.",
                 },
                 autoGenerateLabels: {
                     label: "Etiketten automatisch erzeugen",
                     hint: "Erstellt direkt nach erfolgreichem Anlegen einer Sendung ein Etikett.",
                 },
+                includeReturnLabel: {
+                    label: "Rücksendeetikett beilegen",
+                    hint: "Erzeugt ein zusätzliches Etikett für die Rücksendung.",
+                },
+                attachPackingSlip: {
+                    label: "Packliste beilegen",
+                    hint: "Fügt den erzeugten Dokumenten eine Inhaltsübersicht hinzu.",
+                },
+                labelFormat: {
+                    label: "Standardformat des Etiketts",
+                    hint: "Dokumentformat für automatisch erzeugte Etiketten.",
+                },
                 maximumWeightKg: {
                     label: "Maximales Sendungsgewicht",
                     hint: "Obere Gewichtsgrenze, die im Sendungsformular akzeptiert wird.",
                 },
+                maximumLengthCm: {
+                    label: "Maximale Länge",
+                    hint: "Maximal zulässige Länge eines einzelnen Pakets.",
+                },
+                maximumWidthCm: {
+                    label: "Maximale Breite",
+                    hint: "Maximal zulässige Breite eines einzelnen Pakets.",
+                },
+                maximumHeightCm: {
+                    label: "Maximale Höhe",
+                    hint: "Maximal zulässige Höhe eines einzelnen Pakets.",
+                },
+                allowOversized: {
+                    label: "Übermaßsendungen zulassen",
+                    hint: "Erlaubt das Speichern von Sendungen oberhalb der Standardabmessungen.",
+                },
                 defaultStatus: {
                     label: "Standardstatus neuer Sendungen",
                     hint: "Status, der nach dem Erstellen einer Sendung automatisch vergeben wird.",
+                },
+                defaultServiceLevel: {
+                    label: "Standard-Servicelevel",
+                    hint: "Dienstleistung, die im Formular für neue Sendungen automatisch ausgewählt wird.",
+                },
+                autoAssignCourier: {
+                    label: "Kurier automatisch zuweisen",
+                    hint: "Versucht nach Annahme der Sendung einen verfügbaren Kurier zuzuweisen.",
+                },
+                autoCloseDelivered: {
+                    label: "Zugestellte Sendungen automatisch schließen",
+                    hint: "Beendet den Sendungsprozess nach bestätigter erfolgreicher Zustellung.",
+                },
+                cancellationWindowMinutes: {
+                    label: "Stornierungszeitraum",
+                    hint: "Zeitraum nach Erstellung, in dem die Sendung ohne zusätzliche Bearbeitung storniert werden kann.",
+                },
+                pickupCutoffTime: {
+                    label: "Annahmeschluss für Abholungen",
+                    hint: "Später erstellte Aufträge werden für den nächsten Arbeitstag geplant.",
+                },
+                notifyRecipientOnCreated: {
+                    label: "Empfänger bei Erstellung informieren",
+                    hint: "Sendet nach dem erfolgreichen Speichern einer neuen Sendung eine Nachricht.",
+                },
+                notifyRecipientOnDispatched: {
+                    label: "Empfänger beim Versand informieren",
+                    hint: "Sendet eine Nachricht, wenn die Sendung die Abgangsniederlassung verlässt.",
+                },
+                notifyRecipientOnDelivered: {
+                    label: "Empfänger bei Zustellung informieren",
+                    hint: "Sendet nach abgeschlossener Zustellung eine Bestätigung.",
+                },
+                notifySenderOnException: {
+                    label: "Absender bei Problemen informieren",
+                    hint: "Informiert den Absender über Unterbrechungen oder Fehler im Sendungsprozess.",
+                },
+                notificationChannel: {
+                    label: "Standardkanal für Benachrichtigungen",
+                    hint: "Kanal, wenn der Empfänger keine eigene Präferenz angegeben hat.",
                 },
             },
             values: {
@@ -877,6 +965,21 @@ export const de: typeof pl = {
                 created: "Erstellt",
                 prepared: "Vorbereitet",
                 accepted: "Angenommen",
+            },
+            labelFormats: {
+                pdfA6: "PDF A6",
+                pdfA4: "PDF A4",
+                zpl: "ZPL",
+            },
+            serviceLevels: {
+                economy: "Economy",
+                standard: "Standard",
+                express: "Express",
+            },
+            notificationChannels: {
+                sms: "SMS",
+                email: "E-Mail",
+                both: "SMS und E-Mail",
             },
             messages: {
                 saved: "Die Sendungseinstellungen wurden lokal in der GUI gespeichert.",

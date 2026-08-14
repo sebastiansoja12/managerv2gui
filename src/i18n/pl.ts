@@ -835,12 +835,20 @@ export const pl = {
             value: "Wartość",
         },
         shipmentConfiguration: {
-            previewNote: "Wersja poglądowa — ustawienia są zapisywane wyłącznie w tej przeglądarce, bez połączenia z backendem.",
+            previewNote: "Wersja poglądowa — ustawienia są zapisywane wyłącznie w tej przeglądarce.",
             categories: {
                 validation: "Walidacja",
                 labels: "Etykiety",
                 limits: "Limity",
                 workflow: "Przepływ",
+                notifications: "Powiadomienia",
+            },
+            categoryDescriptions: {
+                validation: "Wymagane dane i kontrola jakości przed utworzeniem przesyłki.",
+                labels: "Sposób generowania etykiet oraz dokumentów przewozowych.",
+                limits: "Domyślne ograniczenia wagi i wymiarów przesyłek.",
+                workflow: "Automatyczne kroki wykonywane podczas obsługi przesyłki.",
+                notifications: "Zdarzenia, po których system informuje odbiorcę lub nadawcę.",
             },
             fields: {
                 validateAddressData: {
@@ -851,21 +859,101 @@ export const pl = {
                     label: "Wymagaj telefonu odbiorcy",
                     hint: "Numer telefonu musi być uzupełniony przed zapisaniem przesyłki.",
                 },
+                requireRecipientEmail: {
+                    label: "Wymagaj e-maila odbiorcy",
+                    hint: "Adres e-mail odbiorcy musi być uzupełniony przed zapisaniem przesyłki.",
+                },
                 preventDuplicateTracking: {
                     label: "Blokuj duplikaty numerów trackingowych",
                     hint: "Ostrzega przed utworzeniem przesyłki z istniejącym numerem trackingowym.",
+                },
+                requireSenderReference: {
+                    label: "Wymagaj referencji nadawcy",
+                    hint: "Wewnętrzny numer referencyjny nadawcy staje się polem obowiązkowym.",
+                },
+                validatePostalCode: {
+                    label: "Sprawdzaj format kodu pocztowego",
+                    hint: "Weryfikuje kod pocztowy zgodnie z krajem adresu dostawy.",
                 },
                 autoGenerateLabels: {
                     label: "Automatycznie generuj etykietę",
                     hint: "Tworzy etykietę od razu po poprawnym utworzeniu przesyłki.",
                 },
+                includeReturnLabel: {
+                    label: "Dołączaj etykietę zwrotną",
+                    hint: "Generuje dodatkową etykietę umożliwiającą zwrot przesyłki.",
+                },
+                attachPackingSlip: {
+                    label: "Dołączaj dokument pakowania",
+                    hint: "Dodaje dokument z podsumowaniem zawartości do kompletu wydruków.",
+                },
+                labelFormat: {
+                    label: "Domyślny format etykiety",
+                    hint: "Format dokumentu używany przy automatycznym generowaniu etykiety.",
+                },
                 maximumWeightKg: {
                     label: "Maksymalna waga przesyłki",
                     hint: "Górny limit wagi akceptowany w formularzu przesyłki.",
                 },
+                maximumLengthCm: {
+                    label: "Maksymalna długość",
+                    hint: "Największa dozwolona długość pojedynczej paczki.",
+                },
+                maximumWidthCm: {
+                    label: "Maksymalna szerokość",
+                    hint: "Największa dozwolona szerokość pojedynczej paczki.",
+                },
+                maximumHeightCm: {
+                    label: "Maksymalna wysokość",
+                    hint: "Największa dozwolona wysokość pojedynczej paczki.",
+                },
+                allowOversized: {
+                    label: "Zezwalaj na przesyłki ponadgabarytowe",
+                    hint: "Pozwala zapisać przesyłkę przekraczającą standardowe limity wymiarów.",
+                },
                 defaultStatus: {
                     label: "Domyślny status nowej przesyłki",
                     hint: "Status ustawiany automatycznie po utworzeniu przesyłki.",
+                },
+                defaultServiceLevel: {
+                    label: "Domyślny poziom usługi",
+                    hint: "Usługa wybierana automatycznie w formularzu nowej przesyłki.",
+                },
+                autoAssignCourier: {
+                    label: "Automatycznie przypisuj kuriera",
+                    hint: "Próbuje przypisać dostępnego kuriera po przyjęciu przesyłki.",
+                },
+                autoCloseDelivered: {
+                    label: "Automatycznie zamykaj doręczone przesyłki",
+                    hint: "Kończy proces przesyłki po potwierdzeniu skutecznego doręczenia.",
+                },
+                cancellationWindowMinutes: {
+                    label: "Czas na anulowanie przesyłki",
+                    hint: "Okres od utworzenia, w którym przesyłkę można anulować bez dodatkowej obsługi.",
+                },
+                pickupCutoffTime: {
+                    label: "Godzina graniczna odbioru",
+                    hint: "Zlecenia utworzone później są planowane na kolejny dzień roboczy.",
+                },
+                notifyRecipientOnCreated: {
+                    label: "Powiadom odbiorcę o utworzeniu",
+                    hint: "Wysyła informację po poprawnym zapisaniu nowej przesyłki.",
+                },
+                notifyRecipientOnDispatched: {
+                    label: "Powiadom odbiorcę o wysłaniu",
+                    hint: "Wysyła informację, gdy przesyłka opuszcza oddział nadawczy.",
+                },
+                notifyRecipientOnDelivered: {
+                    label: "Powiadom odbiorcę o doręczeniu",
+                    hint: "Wysyła potwierdzenie po zakończeniu doręczenia.",
+                },
+                notifySenderOnException: {
+                    label: "Powiadom nadawcę o problemie",
+                    hint: "Informuje nadawcę o wyjątku lub zatrzymaniu procesu przesyłki.",
+                },
+                notificationChannel: {
+                    label: "Domyślny kanał powiadomień",
+                    hint: "Kanał używany, gdy odbiorca nie określił własnych preferencji.",
                 },
             },
             values: {
@@ -876,6 +964,21 @@ export const pl = {
                 created: "Utworzona",
                 prepared: "Przygotowana",
                 accepted: "Przyjęta",
+            },
+            labelFormats: {
+                pdfA6: "PDF A6",
+                pdfA4: "PDF A4",
+                zpl: "ZPL",
+            },
+            serviceLevels: {
+                economy: "Ekonomiczna",
+                standard: "Standardowa",
+                express: "Ekspresowa",
+            },
+            notificationChannels: {
+                sms: "SMS",
+                email: "E-mail",
+                both: "SMS i e-mail",
             },
             messages: {
                 saved: "Ustawienia przesyłek zostały zapisane lokalnie w GUI.",
