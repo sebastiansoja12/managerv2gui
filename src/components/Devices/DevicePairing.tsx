@@ -1,13 +1,15 @@
 import React, {ChangeEvent, useEffect, useMemo, useState} from "react";
 import QRCode from "qrcode";
 import {Alert, Button, Chip, Snackbar, TextField, Typography} from "components/ui";
-import {DevicesOther, QrCode2, Refresh} from "components/ui/icons";
+import {Add, DevicesOther, QrCode2, Refresh} from "components/ui/icons";
 import AuthService from "../../hooks/AuthService";
 import DeviceService from "../../hooks/DeviceService";
 import {CurrentUserDto} from "../../auth/UserProfileDto";
 import {ApiErrorResponse} from "../../api/ApiResult";
 import pl from "../../i18n/translate";
 import {DeviceDto, DevicePairResponseDto} from "./dto/DeviceDto";
+import DeviceCreateDialog from "./DeviceCreateDialog";
+import {saveDevicePairKey} from "./devicePairKeyStore";
 import "./styles/device-pairing.css";
 
 type Notice = {
@@ -27,6 +29,7 @@ function DevicePairing() {
     const [qrCodeUrl, setQrCodeUrl] = useState("");
     const [loading, setLoading] = useState(false);
     const [notice, setNotice] = useState<Notice | null>(null);
+    const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
     const departmentCode = useMemo(() => user?.departmentCode || "", [user]);
 
@@ -86,6 +89,9 @@ function DevicePairing() {
                 departmentCode: departmentCode ? {value: departmentCode} : null,
             });
             setPairResponse(response.data);
+            if (user && response.data.deviceId?.value && response.data.pairKey) {
+                saveDevicePairKey(user.userId.value, response.data.deviceId.value, response.data.pairKey);
+            }
             await generateQr(response.data);
             setNotice({severity: "success", message: pl.devices.messages.paired});
             await loadData();
@@ -94,6 +100,13 @@ function DevicePairing() {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleDeviceCreated = async (createdExternalSystemId: string) => {
+        setCreateDialogOpen(false);
+        setExternalSystemId(createdExternalSystemId);
+        setNotice({severity: "success", message: pl.devices.create.messages.created});
+        await loadData();
     };
 
     return (
@@ -107,9 +120,14 @@ function DevicePairing() {
                             <p>{pl.devices.page.subtitle}</p>
                         </div>
                     </div>
-                    <Button disabled={loading} startIcon={<Refresh />} variant="outlined" onClick={loadData}>
-                        {pl.devices.actions.refresh}
-                    </Button>
+                    <div className="device-pairing-header-actions">
+                        <Button disabled={loading} startIcon={<Refresh />} variant="outlined" onClick={loadData}>
+                            {pl.devices.actions.refresh}
+                        </Button>
+                        <Button disabled={loading} startIcon={<Add />} variant="contained" onClick={() => setCreateDialogOpen(true)}>
+                            {pl.devices.create.open}
+                        </Button>
+                    </div>
                 </section>
 
                 <section className="device-pairing-grid">
@@ -200,6 +218,13 @@ function DevicePairing() {
                     </div>
                 </section>
             </div>
+
+            <DeviceCreateDialog
+                currentUser={user}
+                open={createDialogOpen}
+                onClose={() => setCreateDialogOpen(false)}
+                onCreated={handleDeviceCreated}
+            />
 
             <Snackbar open={Boolean(notice)} autoHideDuration={4500} onClose={() => setNotice(null)}>
                 {notice ? <Alert severity={notice.severity} onClose={() => setNotice(null)}>{notice.message}</Alert> : undefined}

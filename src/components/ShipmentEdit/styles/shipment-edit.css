@@ -1,0 +1,118 @@
+.shipment-edit-card {
+    display: grid;
+    gap: 18px;
+    max-width: 520px;
+    width: 100%;
+}
+
+.shipment-edit-card-wide {
+    max-width: 920px;
+}
+
+.shipment-edit-header {
+    align-items: center;
+    display: flex;
+    gap: 14px;
+}
+
+.shipment-edit-header h1 {
+    margin: 0;
+}
+
+.shipment-edit-header p {
+    color: var(--muted-foreground);
+    margin: 4px 0 0;
+}
+
+.shipment-edit-brand {
+    align-items: center;
+    background: var(--primary);
+    border-radius: var(--radius-control);
+    color: var(--primary-foreground);
+    display: inline-flex;
+    flex-shrink: 0;
+    height: 44px;
+    justify-content: center;
+    width: 44px;
+}
+
+.shipment-edit-meta {
+    align-items: center;
+    background: var(--surface-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-control);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+    padding: 10px 12px;
+}
+
+.shipment-edit-meta span {
+    color: var(--muted-foreground);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.shipment-edit-meta code {
+    flex: 1;
+    font-size: 0.9rem;
+    overflow-wrap: anywhere;
+}
+
+.shipment-edit-step,
+.shipment-edit-form {
+    display: grid;
+    gap: 14px;
+}
+
+.shipment-edit-step p {
+    margin: 0;
+}
+
+.shipment-edit-hint {
+    color: var(--muted-foreground);
+    font-size: 0.875rem;
+    margin: 0;
+}
+
+.shipment-edit-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.shipment-edit-party {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-control);
+    margin: 0;
+    padding: 14px 16px 16px;
+}
+
+.shipment-edit-party legend {
+    font-weight: 600;
+    padding: 0 6px;
+}
+
+.shipment-edit-grid {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.shipment-edit-done {
+    justify-items: center;
+    text-align: center;
+}
+
+.shipment-edit-done > svg {
+    color: var(--success);
+    font-size: 44px;
+}
+
+@media (max-width: 640px) {
+    .shipment-edit-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

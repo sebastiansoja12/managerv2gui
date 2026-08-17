@@ -36,3 +36,43 @@ export type DevicePairResponseDto = {
     deviceUpToDate: boolean | null;
     operatorId?: OperatorIdDto | null;
 };
+
+export type DeviceTypeDto = "SCANNER" | "MOBILE" | "TERMINAL";
+
+export type DeviceUserTypeDto = "SUPPLIER" | "OPERATOR";
+
+export type ScanTypeDto = "BARCODE" | "QRCODE";
+
+export type ScannerTypeDto = "HANDHELD" | "WRIST_WORN" | "RING" | "GLOVE" | "FIXED" | "VEHICLE";
+
+export const deviceTypes: DeviceTypeDto[] = ["SCANNER", "MOBILE", "TERMINAL"];
+
+export const deviceUserTypes: DeviceUserTypeDto[] = ["SUPPLIER", "OPERATOR"];
+
+export const scanTypes: ScanTypeDto[] = ["BARCODE", "QRCODE"];
+
+export const scannerTypes: ScannerTypeDto[] = ["HANDHELD", "WRIST_WORN", "RING", "GLOVE", "FIXED", "VEHICLE"];
+
+export type DeviceCreateRequest = {
+    userId: WrappedNumberDto;
+    departmentCode: WrappedStringDto;
+    version: WrappedStringDto | null;
+    deviceUserType: DeviceUserTypeDto;
+    deviceType: DeviceTypeDto;
+    scanType: ScanTypeDto | null;
+    scannerType: ScannerTypeDto | null;
+    identity: {
+        externalSystemId: string;
+        serialNumber: string | null;
+    };
+    hardware: {
+        manufacturer: string | null;
+        model: string | null;
+    };
+    software: {
+        appVersion: string | null;
+    };
+    network: Record<string, never>;
+    security: Record<string, never>;
+    location: Record<string, never>;
+};

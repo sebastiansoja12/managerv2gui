@@ -1,5 +1,6 @@
 import AuthService from "../hooks/AuthService";
 import {setAuthenticated, setUnauthenticated} from "./AuthState";
+import {clearDevicePairKeys} from "../components/Devices/devicePairKeyStore";
 
 let initializationPromise: Promise<void> | null = null;
 
@@ -41,6 +42,7 @@ export const logoutAuthSession = async () => {
     try {
         await AuthService.logout();
     } finally {
+        clearDevicePairKeys();
         setUnauthenticated();
         await refreshCsrfToken();
     }
