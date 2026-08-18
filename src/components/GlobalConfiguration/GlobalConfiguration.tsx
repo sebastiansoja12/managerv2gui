@@ -1,179 +1,30 @@
-import React, {useCallback, useEffect, useMemo, useState} from "react";
-import {
-    Alert,
-    Button,
-    CircularProgress,
-    TextField,
-    Typography,
-} from "components/ui";
-import {
-    Cable,
-    Inventory2Outlined,
-    LocalShipping,
-    Map,
-    Refresh,
-    Save,
-    SettingsOutlined,
-    SettingsSuggest,
-} from "components/ui/icons";
-import {getBackendErrorMessage} from "../../api/errorMessage";
-import SoftwareConfigurationService from "../../hooks/SoftwareConfigurationService";
+import React, {useState} from "react";
+import {Typography} from "components/ui";
+import {Cable, Inventory2Outlined, Map, SettingsSuggest} from "components/ui/icons";
 import pl from "../../i18n/translate";
-import Software from "../SoftwareConfiguration/model/Software";
 import GeocodingConfigurationPanel from "./GeocodingConfigurationPanel";
 import IntegrationsConfigurationPanel from "./IntegrationsConfigurationPanel";
-import {GlobalConfigurationSection, GlobalConfigurationSectionKey} from "./model/GlobalConfigurationSection";
+import {GlobalConfigurationSectionKey} from "./model/GlobalConfigurationSection";
 import ShipmentConfigurationPanel from "./ShipmentConfigurationPanel";
 import "./styles/global-configuration.css";
 
-type PropertyDraft = {
-    name: string;
-    value: string;
-};
-
-const sections: GlobalConfigurationSection[] = [
-    {
-        key: "suppliers",
-        categoryAliases: ["supplier", "suppliers", "courier", "couriers"],
-    },
-    {
-        key: "shipments",
-        categoryAliases: ["shipment", "shipments", "parcel", "parcels"],
-    },
-    {
-        key: "configuration",
-        categoryAliases: ["configuration", "config", "system", "software", "global"],
-    },
-    {
-        key: "geocoding",
-        categoryAliases: [],
-    },
-    {
-        key: "integrations",
-        categoryAliases: [],
-    },
-];
+const sections: GlobalConfigurationSectionKey[] = ["shipments", "geocoding", "integrations"];
 
 const sectionIcons: Record<GlobalConfigurationSectionKey, React.ReactNode> = {
-    suppliers: <LocalShipping fontSize="small" />,
     shipments: <Inventory2Outlined fontSize="small" />,
-    configuration: <SettingsOutlined fontSize="small" />,
     geocoding: <Map fontSize="small" />,
     integrations: <Cable fontSize="small" />,
 };
 
-const isDedicatedConfigurationSection = (sectionKey: GlobalConfigurationSectionKey) => (
-    sectionKey === "shipments" || sectionKey === "geocoding" || sectionKey === "integrations"
-);
-
-const normalizeCategory = (value?: string) => (value || "").trim().toLowerCase();
-
-const propertyBelongsToSection = (property: Software, section: GlobalConfigurationSection) => {
-    const category = normalizeCategory(property.category);
-    if (!category) {
-        return section.key === "configuration";
-    }
-
-    return section.categoryAliases.some((alias) => category.includes(alias));
+const sectionPanels: Record<GlobalConfigurationSectionKey, React.ReactNode> = {
+    shipments: <ShipmentConfigurationPanel />,
+    geocoding: <GeocodingConfigurationPanel />,
+    integrations: <IntegrationsConfigurationPanel />,
 };
 
-const getSectionForProperty = (property: Software) => (
-    sections.find((section) => propertyBelongsToSection(property, section)) || sections[2]
-);
-
 function GlobalConfiguration() {
-    const [properties, setProperties] = useState<Software[]>([]);
-    const [drafts, setDrafts] = useState<Record<string, PropertyDraft>>({});
-    const [loading, setLoading] = useState<boolean>(false);
-    const [savingId, setSavingId] = useState<string>("");
-    const [error, setError] = useState<string>("");
-    const [success, setSuccess] = useState<string>("");
-    const [activeSectionKey, setActiveSectionKey] = useState<GlobalConfigurationSectionKey>("suppliers");
-
-    const retrieveProperties = useCallback(() => {
-        setLoading(true);
-        setError("");
-        setSuccess("");
-        SoftwareConfigurationService.getAll()
-            .then((response) => {
-                setProperties(response.data);
-                setDrafts({});
-            })
-            .catch((exception: unknown) => {
-                setError(getBackendErrorMessage(exception, pl.globalConfiguration.messages.loadError));
-            })
-            .finally(() => {
-                setLoading(false);
-            });
-    }, []);
-
-    useEffect(() => {
-        retrieveProperties();
-    }, [retrieveProperties]);
-
-    const propertiesBySection = useMemo(() => {
-        const grouped = sections.reduce((accumulator, section) => ({
-            ...accumulator,
-            [section.key]: [] as Software[],
-        }), {} as Record<GlobalConfigurationSectionKey, Software[]>);
-
-        properties.forEach((property) => {
-            const section = getSectionForProperty(property);
-            grouped[section.key].push(property);
-        });
-
-        return grouped;
-    }, [properties]);
-
-    const activeSection = sections.find((section) => section.key === activeSectionKey) || sections[0];
-    const activeSectionProperties = propertiesBySection[activeSection.key];
-    const activeSectionTranslation = pl.globalConfiguration.sections[activeSection.key];
-
-    const updateDraft = (id: string, field: keyof PropertyDraft, value: string) => {
-        const property = properties.find((item) => item.id === id);
-        setDrafts((currentDrafts) => ({
-            ...currentDrafts,
-            [id]: {
-                name: currentDrafts[id]?.name ?? property?.name ?? "",
-                value: currentDrafts[id]?.value ?? property?.value ?? "",
-                [field]: value,
-            },
-        }));
-    };
-
-    const saveProperty = (property: Software, section: GlobalConfigurationSection) => {
-        const draft = drafts[property.id] || {
-            name: property.name,
-            value: property.value,
-        };
-
-        setSavingId(property.id);
-        setError("");
-        setSuccess("");
-        SoftwareConfigurationService.update(property.id, {
-            category: property.category || section.key,
-            name: draft.name,
-            value: draft.value,
-        })
-            .then((response) => {
-                const updatedProperty = response.data;
-                setProperties((currentProperties) => currentProperties.map((item) => (
-                    item.id === property.id ? updatedProperty : item
-                )));
-                setDrafts((currentDrafts) => {
-                    const nextDrafts = {...currentDrafts};
-                    delete nextDrafts[property.id];
-                    return nextDrafts;
-                });
-                setSuccess(pl.globalConfiguration.messages.updateSuccess);
-            })
-            .catch((exception: unknown) => {
-                setError(getBackendErrorMessage(exception, pl.globalConfiguration.messages.updateError));
-            })
-            .finally(() => {
-                setSavingId("");
-            });
-    };
+    const [activeSection, setActiveSection] = useState<GlobalConfigurationSectionKey>("shipments");
+    const activeSectionTranslation = pl.globalConfiguration.sections[activeSection];
 
     return (
         <main className="global-configuration-page">
@@ -192,21 +43,19 @@ function GlobalConfiguration() {
                 <nav className="global-configuration-tabs" aria-label={pl.globalConfiguration.page.sectionsTitle}>
                     <div className="global-configuration-tab-list">
                         {sections.map((section) => {
-                            const sectionTranslation = pl.globalConfiguration.sections[section.key];
-                            const isActive = activeSectionKey === section.key;
-
+                            const isActive = activeSection === section;
                             return (
                                 <button
                                     className={`global-configuration-tab${isActive ? " global-configuration-tab-active" : ""}`}
-                                    key={section.key}
+                                    key={section}
                                     aria-pressed={isActive}
-                                    onClick={() => setActiveSectionKey(section.key)}
+                                    onClick={() => setActiveSection(section)}
                                     type="button"
                                 >
                                     <span className="global-configuration-tab-icon" aria-hidden="true">
-                                        {sectionIcons[section.key]}
+                                        {sectionIcons[section]}
                                     </span>
-                                    {sectionTranslation.title}
+                                    {pl.globalConfiguration.sections[section].title}
                                 </button>
                             );
                         })}
@@ -214,106 +63,19 @@ function GlobalConfiguration() {
                 </nav>
 
                 <div className="global-configuration-content">
-                    {!isDedicatedConfigurationSection(activeSection.key) && error
-                        ? <Alert severity="error">{error}</Alert>
-                        : undefined}
-                    {!isDedicatedConfigurationSection(activeSection.key) && success
-                        ? <Alert severity="success">{success}</Alert>
-                        : undefined}
-
                     <section className="global-configuration-toolbar">
                         <div className="global-configuration-toolbar-heading">
                             <span className="global-configuration-section-icon" aria-hidden="true">
-                                {sectionIcons[activeSection.key]}
+                                {sectionIcons[activeSection]}
                             </span>
                             <div>
                                 <h2>{activeSectionTranslation.title}</h2>
                                 <p>{activeSectionTranslation.description}</p>
                             </div>
                         </div>
-                        {!isDedicatedConfigurationSection(activeSection.key) ? (
-                            <Button disabled={loading} startIcon={<Refresh />} variant="outlined" onClick={retrieveProperties}>
-                                {pl.common.refresh}
-                            </Button>
-                        ) : undefined}
                     </section>
 
-                    {activeSection.key === "geocoding" ? (
-                        <GeocodingConfigurationPanel />
-                    ) : activeSection.key === "integrations" ? (
-                        <IntegrationsConfigurationPanel />
-                    ) : activeSection.key === "shipments" ? (
-                        <ShipmentConfigurationPanel />
-                    ) : loading ? (
-                        <div className="global-configuration-loader">
-                            <CircularProgress size={28} />
-                            <span>{pl.globalConfiguration.page.loading}</span>
-                        </div>
-                    ) : (
-                        <section className="global-configuration-section">
-                            <div className="global-configuration-table-wrap">
-                                <table className="global-configuration-table">
-                                <thead>
-                                <tr>
-                                    <th>{pl.globalConfiguration.columns.name}</th>
-                                    <th>{pl.globalConfiguration.columns.category}</th>
-                                    <th>{pl.globalConfiguration.columns.value}</th>
-                                    <th>{pl.common.actions}</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {activeSectionProperties.map((property) => {
-                                    const draft = drafts[property.id];
-                                    const saving = savingId === property.id;
-
-                                    return (
-                                        <tr key={property.id}>
-                                            <td>
-                                                <TextField
-                                                    disabled={saving}
-                                                    fullWidth
-                                                    size="small"
-                                                    value={draft?.name ?? property.name}
-                                                    onChange={(event) => updateDraft(property.id, "name", event.target.value)}
-                                                />
-                                            </td>
-                                            <td>
-                                                <span className="global-configuration-category">{property.category || activeSection.key}</span>
-                                            </td>
-                                            <td>
-                                                <TextField
-                                                    disabled={saving}
-                                                    fullWidth
-                                                    size="small"
-                                                    value={draft?.value ?? property.value}
-                                                    onChange={(event) => updateDraft(property.id, "value", event.target.value)}
-                                                />
-                                            </td>
-                                            <td>
-                                                <Button
-                                                    disabled={saving}
-                                                    startIcon={<Save />}
-                                                    variant="contained"
-                                                    onClick={() => saveProperty(property, activeSection)}
-                                                >
-                                                    {pl.common.saveChanges}
-                                                </Button>
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
-                                {!activeSectionProperties.length ? (
-                                    <tr>
-                                        <td className="global-configuration-empty" colSpan={4}>
-                                            {pl.globalConfiguration.page.emptySection}
-                                        </td>
-                                    </tr>
-                                ) : undefined}
-                                </tbody>
-                                </table>
-                            </div>
-                        </section>
-                    )}
+                    {sectionPanels[activeSection]}
                 </div>
             </div>
         </main>

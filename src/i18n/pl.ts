@@ -155,8 +155,6 @@ export const pl = {
         billing: "Płatności",
         admins: "Użytkownicy",
         globalConfiguration: "Konfiguracja globalna",
-        microservices: "Status serwisów",
-        systemSettings: "Ustawienia systemu",
         support: "Support",
         profile: "Mój profil",
         logout: "Wyloguj",
@@ -441,10 +439,6 @@ export const pl = {
             deliveries: {
                 title: "Dostawy",
                 description: "Podgląd dostaw, statusów i historii kroków.",
-            },
-            systemSettings: {
-                title: "Ustawienia systemu",
-                description: "Konfiguracja parametrów technicznych i zachowania aplikacji.",
             },
             profile: {
                 title: "Mój profil",
@@ -1609,46 +1603,19 @@ export const pl = {
             },
         },
     },
-    softwareConfiguration: {
-        title: "Lista właściwości systemu",
-        columns: {
-            id: "ID",
-            name: "Nazwa",
-            category: "Kategoria",
-            value: "Wartość",
-            action: "Akcja",
-        },
-        actions: {
-            update: "Aktualizuj",
-        },
-        messages: {
-            loadError: "Nie udało się pobrać właściwości systemu",
-            updateError: "Nie udało się zaktualizować właściwości",
-        },
-    },
     globalConfiguration: {
         page: {
             kicker: "Ustawienia",
             moduleTitle: "Konfiguracja",
             title: "Konfiguracja globalna",
-            subtitle: "Centralne parametry dla dostawców, przesyłek i konfiguracji systemu.",
+            subtitle: "Centralne parametry dla przesyłek, geolokalizacji i integracji.",
             sectionsTitle: "Sekcje konfiguracji",
             propertiesCount: "Właściwości",
-            loading: "Ładowanie konfiguracji...",
-            emptySection: "Brak właściwości w tej sekcji",
         },
         sections: {
-            suppliers: {
-                title: "Dostawcy",
-                description: "Parametry dotyczące dostawców, kurierów i ich operacyjnych uprawnień.",
-            },
             shipments: {
                 title: "Przesyłki",
                 description: "Reguły obsługi, walidacji i przepływu przesyłek.",
-            },
-            configuration: {
-                title: "Konfiguracja",
-                description: "Globalne ustawienia techniczne oraz zachowanie aplikacji.",
             },
             geocoding: {
                 title: "Geolokalizacja",
@@ -1658,11 +1625,6 @@ export const pl = {
                 title: "Integracje",
                 description: "Połączenia z zewnętrznymi usługami niezwiązanymi z geolokalizacją.",
             },
-        },
-        columns: {
-            name: "Właściwość",
-            category: "Kategoria",
-            value: "Wartość",
         },
         shipmentConfiguration: {
             previewNote: "Zmiana konfiguracji ma wpływ na wszystkich użytkowników wewnątrz organizacji",
@@ -1948,38 +1910,6 @@ export const pl = {
                 defaultProviderRequired: "Wybierz aktywnego providera domyślnego przed zapisem",
                 defaultProviderRequiredBeforeDelete: "Najpierw ustaw innego aktywnego providera jako domyślnego",
             },
-        },
-        messages: {
-            loadError: "Nie udało się pobrać konfiguracji globalnej",
-            updateError: "Nie udało się zapisać właściwości",
-            updateSuccess: "Właściwość została zapisana",
-        },
-    },
-    microservices: {
-        page: {
-            kicker: "Zarządzanie",
-            title: "Status serwisów",
-            subtitle: "Podgląd dostępności usług uruchomionych w środowisku aplikacji.",
-            listTitle: "Serwisy",
-            servicesCount: "Usługi",
-            loading: "Sprawdzanie serwisów...",
-            empty: "Brak serwisów do sprawdzenia",
-        },
-        columns: {
-            name: "Nazwa",
-            url: "URL",
-            status: "Status",
-            latency: "Czas odpowiedzi",
-            lastCheck: "Ostatnie sprawdzenie",
-            message: "Komunikat",
-        },
-        status: {
-            online: "Działa",
-            offline: "Nie działa",
-            unknown: "Nie skonfigurowano",
-        },
-        messages: {
-            loadError: "Nie udało się sprawdzić mikroserwisów",
         },
     },
     routeLogs: {

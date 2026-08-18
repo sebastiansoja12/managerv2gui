@@ -11,7 +11,6 @@ import GlobalConfiguration from "../GlobalConfiguration/GlobalConfiguration";
 import OperationalDashboard from "../Home/OperationalDashboard";
 import ModulePlaceholder from "../Home/ModulePlaceholder";
 import LoginPage from "../LoginPage/LoginPage";
-import MicroserviceStatus from "../MicroserviceStatus/MicroserviceStatus";
 import ProcessDetails from "../Process/ProcessDetails";
 import Processes from "../Process/Processes";
 import PalletCreate from "../Pallets/PalletCreate";
@@ -30,7 +29,6 @@ import ShipmentDetails from "../Shipment/ShipmentDetails";
 import ShipmentHistoryDetails from "../Shipment/ShipmentHistoryDetails";
 import ShipmentList from "../Shipment/ShipmentList";
 import ShipmentScanner from "../ShipmentScanner/ShipmentScanner";
-import SoftwareConfigurationList from "../SoftwareConfiguration/SoftwareConfigurationList";
 import UserProfile from "../UserProfile/UserProfile";
 import UsersPage from "../Users/UsersPage";
 import {isPathAllowedForProfile, OperationalProfile} from "../../config/operationalProfile";
@@ -100,13 +98,11 @@ function AppRoutes({onOpenTab, operationalProfile = "warehouse"}: AppRoutesProps
             <Route path="chat" element={guarded("/chat", <OrganizationChat/>)}/>
             <Route path="deals" element={guarded("/deals", <ModulePlaceholder title={pl.navigation.deals}/>)}/>
             <Route path="billing" element={guarded("/billing", <ModulePlaceholder title={pl.navigation.billing}/>)}/>
-            <Route path="microservices" element={guarded("/microservices", <MicroserviceStatus/>)}/>
             <Route path="support" element={guarded("/support", <ModulePlaceholder title={pl.navigation.support}/>)}/>
             <Route path="login" element={<LoginPage/>}/>
             <Route path="profile" element={<UserProfile/>}/>
             <Route path="device-pairing" element={guarded("/device-pairing", <DevicePairing/>)}/>
             <Route path="global-configuration" element={guarded("/global-configuration", <GlobalConfiguration/>)}/>
-            <Route path="software-configurations" element={guarded("/software-configurations", <SoftwareConfigurationList/>)}/>
         </Routes>
     );
 }

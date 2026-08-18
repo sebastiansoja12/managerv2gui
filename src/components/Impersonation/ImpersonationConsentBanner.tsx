@@ -6,8 +6,8 @@ import pl from "../../i18n/translate";
 import {isSuperadministrator} from "../Users/model/UserRoleAccess";
 import {ImpersonationConsentActiveItem, ImpersonationConsentRequestItem} from "./ImpersonationConsentItems";
 import {
-    startImpersonationConsentPolling,
-    stopImpersonationConsentPolling,
+    startImpersonationConsentUpdates,
+    stopImpersonationConsentUpdates,
     useImpersonationConsents,
 } from "./impersonationConsentStore";
 import "./styles/impersonation.css";
@@ -26,12 +26,12 @@ function ImpersonationConsentBanner() {
             .catch(() => null)
             .then((impersonation) => {
                 if (!cancelled && !impersonation) {
-                    startImpersonationConsentPolling();
+                    startImpersonationConsentUpdates();
                 }
             });
         return () => {
             cancelled = true;
-            stopImpersonationConsentPolling();
+            stopImpersonationConsentUpdates();
         };
     }, [superadministrator]);
 

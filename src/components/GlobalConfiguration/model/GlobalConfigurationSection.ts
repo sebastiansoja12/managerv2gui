@@ -1,6 +1,1 @@
-export type GlobalConfigurationSectionKey = "suppliers" | "shipments" | "configuration" | "geocoding" | "integrations";
-
-export type GlobalConfigurationSection = {
-    key: GlobalConfigurationSectionKey;
-    categoryAliases: string[];
-};
+export type GlobalConfigurationSectionKey = "shipments" | "geocoding" | "integrations";

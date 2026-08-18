@@ -31,13 +31,11 @@ export const tabTitles = (): Record<string, string> => ({
     "/chat": pl.navigation.chat,
     "/deals": pl.navigation.deals,
     "/billing": pl.navigation.billing,
-    "/microservices": pl.navigation.microservices,
     "/support": pl.navigation.support,
     "/login": pl.navigation.login,
     "/profile": pl.navigation.profile,
     "/device-pairing": pl.navigation.devicePairing,
     "/global-configuration": pl.navigation.globalConfiguration,
-    "/software-configurations": pl.navigation.systemSettings,
 });
 
 export const normalizePath = (path: string) => path === "/shipments" ? "/shipments/list" : path;

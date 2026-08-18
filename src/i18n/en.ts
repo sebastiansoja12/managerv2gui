@@ -158,8 +158,6 @@ export const en: typeof pl = {
         billing: "Billing",
         admins: "Users",
         globalConfiguration: "Global configuration",
-        microservices: "Microservice status",
-        systemSettings: "System settings",
         support: "Support",
         profile: "My profile",
         logout: "Logout",
@@ -438,10 +436,6 @@ export const en: typeof pl = {
             deliveries: {
                 title: "Deliveries",
                 description: "View deliveries, statuses, and step history.",
-            },
-            systemSettings: {
-                title: "System settings",
-                description: "Configure technical parameters and application behavior.",
             },
             profile: {
                 title: "My profile",
@@ -1607,46 +1601,19 @@ export const en: typeof pl = {
             },
         },
     },
-    softwareConfiguration: {
-        title: "System properties list",
-        columns: {
-            id: "ID",
-            name: "Name",
-            category: "Category",
-            value: "Value",
-            action: "Action",
-        },
-        actions: {
-            update: "Update",
-        },
-        messages: {
-            loadError: "Could not load system properties",
-            updateError: "Could not update property",
-        },
-    },
     globalConfiguration: {
         page: {
             kicker: "Settings",
             moduleTitle: "Configuration",
             title: "Global configuration",
-            subtitle: "Central parameters for suppliers, shipments, and system configuration.",
+            subtitle: "Central settings for shipments, geocoding and integrations.",
             sectionsTitle: "Configuration sections",
             propertiesCount: "Properties",
-            loading: "Loading configuration...",
-            emptySection: "No properties in this section",
         },
         sections: {
-            suppliers: {
-                title: "Suppliers",
-                description: "Parameters for suppliers, couriers, and their operational permissions.",
-            },
             shipments: {
                 title: "Shipments",
                 description: "Rules for shipment handling, validation, and workflow.",
-            },
-            configuration: {
-                title: "Configuration",
-                description: "Global technical settings and application behavior.",
             },
             geocoding: {
                 title: "Geolocation",
@@ -1656,11 +1623,6 @@ export const en: typeof pl = {
                 title: "Integrations",
                 description: "Connections to external services unrelated to geolocation.",
             },
-        },
-        columns: {
-            name: "Property",
-            category: "Category",
-            value: "Value",
         },
         shipmentConfiguration: {
             previewNote: "Configuration is loaded and saved for the current operator.",
@@ -1946,38 +1908,6 @@ export const en: typeof pl = {
                 defaultProviderRequired: "Select an enabled default provider before saving",
                 defaultProviderRequiredBeforeDelete: "Set another enabled provider as default first",
             },
-        },
-        messages: {
-            loadError: "Could not load global configuration",
-            updateError: "Could not save property",
-            updateSuccess: "Property has been saved",
-        },
-    },
-    microservices: {
-        page: {
-            kicker: "Management",
-            title: "Microservice status",
-            subtitle: "Availability overview for services running in the application environment.",
-            listTitle: "Microservices",
-            servicesCount: "Services",
-            loading: "Checking microservices...",
-            empty: "No microservices to check",
-        },
-        columns: {
-            name: "Name",
-            url: "URL",
-            status: "Status",
-            latency: "Response time",
-            lastCheck: "Last check",
-            message: "Message",
-        },
-        status: {
-            online: "Running",
-            offline: "Down",
-            unknown: "Not configured",
-        },
-        messages: {
-            loadError: "Could not check microservices",
         },
     },
     routeLogs: {

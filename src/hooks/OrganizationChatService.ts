@@ -10,6 +10,7 @@ import {User} from "../components/Users/model/User";
 import {getAuthState} from "../auth/AuthState";
 import http from "../http-common";
 import {createChatClientId} from "../components/Chat/model/chatClientId";
+import {realtimeWebSocketUrl} from "./RealtimeService";
 import UserManagementService from "./UserManagementService";
 
 type ApiIdentifier = number | string | {value: number | string};
@@ -57,17 +58,6 @@ const mapUser = (user: User): OrganizationChatUser => ({
     availability: "OFFLINE",
     unreadCount: 0,
 });
-
-
-const chatWebSocketUrl = () => {
-    const serverUrl = process.env.REACT_APP_SERVER_URL || window.location.origin;
-    const url = new URL(serverUrl, window.location.origin);
-    url.protocol = url.protocol === "https:" ? "wss:" : "ws:";
-    url.pathname = `${url.pathname.replace(/\/$/, "")}/chat/ws`;
-    url.search = "";
-    url.hash = "";
-    return url.toString();
-};
 
 class OrganizationChatServiceAdapter implements OrganizationChatGateway {
     private readonly conversationIds = new Map<string, string>();
@@ -147,7 +137,7 @@ class OrganizationChatServiceAdapter implements OrganizationChatGateway {
         }
 
         const client = new Client({
-            brokerURL: chatWebSocketUrl(),
+            brokerURL: realtimeWebSocketUrl(),
             reconnectDelay: 3000,
             heartbeatIncoming: 10000,
             heartbeatOutgoing: 10000,
