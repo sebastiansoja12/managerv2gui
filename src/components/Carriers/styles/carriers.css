@@ -1,0 +1,41 @@
+.carrier-field-list {
+    display: grid;
+    gap: 0;
+    margin: 12px 0 0;
+}
+
+.carrier-field-list > div {
+    align-items: center;
+    border-top: 1px solid var(--border);
+    display: grid;
+    gap: 12px;
+    grid-template-columns: minmax(140px, 220px) minmax(0, 1fr);
+    padding: 6px 0;
+}
+
+.carrier-field-list dt {
+    color: var(--muted-foreground);
+    font-size: 0.85rem;
+}
+
+.carrier-field-list dd,
+.carrier-editable-cell {
+    align-items: center;
+    display: flex;
+    gap: 6px;
+    justify-content: space-between;
+    margin: 0;
+    min-width: 0;
+}
+
+.carrier-field-list dd > span,
+.carrier-editable-cell > span {
+    overflow: hidden;
+    overflow-wrap: anywhere;
+}
+
+.carrier-status-cell {
+    align-items: center;
+    display: inline-flex;
+    gap: 8px;
+}
