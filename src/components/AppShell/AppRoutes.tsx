@@ -14,6 +14,15 @@ import LoginPage from "../LoginPage/LoginPage";
 import MicroserviceStatus from "../MicroserviceStatus/MicroserviceStatus";
 import ProcessDetails from "../Process/ProcessDetails";
 import Processes from "../Process/Processes";
+import PalletCreate from "../Pallets/PalletCreate";
+import PalletCreateFromShipments from "../Pallets/PalletCreateFromShipments";
+import PalletDetailsView from "../Pallets/PalletDetailsView";
+import PalletList from "../Pallets/PalletList";
+import PalletScanner from "../Pallets/PalletScanner";
+import CarrierList from "../Carriers/CarrierList";
+import DriverList from "../Carriers/DriverList";
+import CarrierDetailsView from "../Carriers/CarrierDetailsView";
+import DriverDetailsView from "../Carriers/DriverDetailsView";
 import PickupPointCatalog from "../PickupPoints/PickupPointCatalog";
 import Returns from "../Returns/Returns";
 import ShipmentCreate from "../Shipment/ShipmentCreate";
@@ -73,7 +82,17 @@ function AppRoutes({onOpenTab, operationalProfile = "warehouse"}: AppRoutesProps
             <Route path="couriers" element={guarded("/couriers", <Couriers/>)}/>
             <Route path="couriers/:supplierCode" element={guarded("/couriers", <CourierDetails/>)}/>
             <Route path="vehicles" element={guarded("/vehicles", <ModulePlaceholder title={pl.home.tiles.vehicles.title}/>)}/>
-            <Route path="pallets" element={guarded("/pallets", <ModulePlaceholder title={pl.home.tiles.pallets.title}/>)}/>
+            <Route path="pallets" element={guarded("/pallets", <PalletList onOpenTab={onOpenTab} variant="all"/>)}/>
+            <Route path="pallets/scan" element={guarded("/pallets/scan", <PalletScanner onOpenTab={onOpenTab}/>)}/>
+            <Route path="pallets/create" element={guarded("/pallets/create", <PalletCreate onOpenTab={onOpenTab}/>)}/>
+            <Route path="pallets/create-from-shipments" element={guarded("/pallets/create-from-shipments", <PalletCreateFromShipments onOpenTab={onOpenTab}/>)}/>
+            <Route path="pallets/cancelled" element={guarded("/pallets/cancelled", <PalletList key="cancelled" onOpenTab={onOpenTab} variant="cancelled"/>)}/>
+            <Route path="pallets/empty" element={guarded("/pallets/empty", <PalletList key="empty" onOpenTab={onOpenTab} variant="empty"/>)}/>
+            <Route path="carriers" element={guarded("/carriers", <CarrierList onOpenTab={onOpenTab}/>)}/>
+            <Route path="carriers/:carrierId" element={guarded("/carriers/1", <CarrierDetailsView onOpenTab={onOpenTab}/>)}/>
+            <Route path="drivers" element={guarded("/drivers", <DriverList onOpenTab={onOpenTab}/>)}/>
+            <Route path="drivers/:driverId" element={guarded("/drivers/1", <DriverDetailsView onOpenTab={onOpenTab}/>)}/>
+            <Route path="pallets/tracking/:trackingNumber" element={guarded("/pallets/tracking/1", <PalletDetailsView onOpenTab={onOpenTab}/>)}/>
             <Route path="shipment-scanner" element={guarded("/shipment-scanner", <ShipmentScanner/>)}/>
             <Route path="courier-deliveries" element={guarded("/courier-deliveries", <ModulePlaceholder title={pl.home.tiles.courierDeliveries.title}/>)}/>
             <Route path="suppliers" element={guarded("/suppliers", <ModulePlaceholder title={pl.navigation.suppliers}/>)}/>
