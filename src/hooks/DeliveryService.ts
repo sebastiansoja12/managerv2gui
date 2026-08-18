@@ -12,12 +12,15 @@ const get = (deliveryId: string) => client.get<Delivery>(`/deliveries/${encodeUR
 const getByShipmentId = (shipmentId: string) =>
     client.get<Delivery>(`/deliveries/by-shipment/${encodeURIComponent(shipmentId)}`);
 
+const getByPalletId = (palletId: string) =>
+    client.get<Delivery>(`/deliveries/by-pallet/${encodeURIComponent(palletId)}`);
+
 const changeMethod = (deliveryId: string, method: string) =>
     client.put<{method: string}, Delivery>(`/deliveries/${encodeURIComponent(deliveryId)}/method`, {method});
 
 const cancel = (deliveryId: string) =>
     client.post<Record<string, never>, void>(`/deliveries/${encodeURIComponent(deliveryId)}/cancel`, {});
 
-const DeliveryService = {getRecent, get, getByShipmentId, changeMethod, cancel};
+const DeliveryService = {getRecent, get, getByShipmentId, getByPalletId, changeMethod, cancel};
 
 export default DeliveryService;
