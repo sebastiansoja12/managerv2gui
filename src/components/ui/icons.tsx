@@ -7,7 +7,7 @@ import {
     FiDelete, FiDollarSign, FiDownload, FiEdit, FiEye, FiFilter, FiGrid,
     FiHardDrive, FiInfo, FiKey, FiLayers, FiLayout, FiLink2, FiList,
     FiLogOut, FiMap, FiMapPin, FiMaximize2, FiMonitor, FiMoreHorizontal, FiMoreVertical, FiPackage,
-    FiMessageCircle, FiPhone, FiPlus, FiPrinter, FiRadio, FiRefreshCw, FiRepeat, FiRotateCw, FiSave, FiSend,
+    FiMessageCircle, FiPhone, FiPlus, FiPrinter, FiRadio, FiRefreshCw, FiRepeat, FiRotateCcw, FiRotateCw, FiSave, FiSend,
     FiSearch, FiSettings, FiShield, FiShoppingBag, FiShoppingCart, FiSliders,
     FiStar, FiTable, FiTag, FiToggleLeft, FiToggleRight, FiTool, FiTrendingUp, FiTruck,
     FiUnlock, FiUpload, FiUser, FiUserPlus, FiUsers, FiX, FiXCircle, FiZap,
@@ -146,6 +146,7 @@ export const TrendingUp = makeIcon(FiTrendingUp);
 export const Tune = makeIcon(FiSliders);
 export const TuneOutlined = makeIcon(FiSliders);
 export const UnarchiveOutlined = makeIcon(FiUpload);
+export const Undo = makeIcon(FiRotateCcw);
 export const Upload = makeIcon(FiUpload);
 export const ViewList = makeIcon(FiList);
 export const Visibility = makeIcon(FiEye);
