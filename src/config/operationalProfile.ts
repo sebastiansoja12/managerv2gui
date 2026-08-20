@@ -33,6 +33,7 @@ export const isPathAllowedForProfile = (path: string, profile: OperationalProfil
     }
 
     if (/^\/pallets\/tracking\/[^/]+$/.test(path)
+        || /^\/departments\/[^/]+$/.test(path)
         || /^\/carriers\/[^/]+$/.test(path)
         || /^\/drivers\/[^/]+$/.test(path)) {
         return profile === "warehouse";

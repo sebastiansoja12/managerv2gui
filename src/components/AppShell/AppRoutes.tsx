@@ -6,6 +6,7 @@ import CourierDetails from "../Couriers/CourierDetails";
 import Deliveries from "../Deliveries/Deliveries";
 import DeliveryEdit from "../Deliveries/DeliveryEdit";
 import Departments from "../Departments";
+import DepartmentDetailsView from "../Departments/DepartmentDetailsView";
 import DevicePairing from "../Devices/DevicePairing";
 import GlobalConfiguration from "../GlobalConfiguration/GlobalConfiguration";
 import OperationalDashboard from "../Home/OperationalDashboard";
@@ -58,7 +59,8 @@ function AppRoutes({onOpenTab, operationalProfile = "warehouse"}: AppRoutesProps
     return (
         <Routes>
             <Route path="/" element={<OperationalDashboard onOpenTab={onOpenTab}/>}/>
-            <Route path="depots" element={guarded("/depots", <Departments/>)}/>
+            <Route path="depots" element={guarded("/depots", <Departments onOpenTab={onOpenTab}/>)}/>
+            <Route path="departments/:departmentId" element={guarded("/departments/1", <DepartmentDetailsView/>)}/>
             <Route path="pickup-points" element={guarded("/pickup-points", <PickupPointCatalog/>)}/>
             <Route path="parcels" element={guarded("/shipments/list", <ShipmentList onOpenTab={onOpenTab}/>)}/>
             <Route path="shipment-details" element={guarded("/shipment-details", <ShipmentList onOpenTab={onOpenTab} variant="details"/>)}/>

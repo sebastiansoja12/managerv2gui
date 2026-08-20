@@ -43,6 +43,8 @@ import UserManagementService from "../hooks/UserManagementService";
 import pl from "../i18n/translate";
 import DepartmentRelationsMap, {getDepartmentsMissingSortingRelation} from "./Departments/DepartmentRelationsMap";
 import {DepartmentRelation, departmentRelationPairKey} from "./Departments/model/DepartmentRelation";
+import {AppTabDefinition} from "./AppShell/types";
+import {departmentDetailsTab} from "./Departments/departmentNavigation";
 import {User} from "./Users/model/User";
 import {canManageUsers, isAdministrator} from "./Users/model/UserRoleAccess";
 import "./Departments/styles/departments.css";
@@ -58,8 +60,6 @@ const DEPARTMENT_TYPES = [
     "REMOTE_OFFICE",
 ];
 
-const DEPARTMENT_STATUSES: DepartmentStatus[] = ["ACTIVE", "INACTIVE", "ARCHIVED", "DELETED", "SUSPENDED"];
-
 const emptyDepartmentForm = {
     departmentCode: "",
     city: "",
@@ -71,17 +71,6 @@ const emptyDepartmentForm = {
     email: "",
     countryCode: "PL",
     departmentType: "BRANCH",
-};
-
-const emptyEditForm = {
-    city: "",
-    street: "",
-    postalCode: "",
-    countryCode: "PL",
-    taxId: "",
-    email: "",
-    departmentType: "BRANCH",
-    status: "ACTIVE" as DepartmentStatus,
 };
 
 const emptyFilters = {
@@ -134,7 +123,11 @@ const departmentRelationsKey = (relations: DepartmentRelation[]) => relations
     .sort()
     .join("|");
 
-const Departments: React.FC = () => {
+type DepartmentsProps = {
+    onOpenTab?: (tab: AppTabDefinition) => void;
+};
+
+const Departments: React.FC<DepartmentsProps> = ({onOpenTab}) => {
     const {user: currentUser} = useAuthState();
     const [departments, setDepartments] = useState<Department[]>([]);
     const [users, setUsers] = useState<User[]>([]);
@@ -145,7 +138,6 @@ const Departments: React.FC = () => {
     const [success, setSuccess] = useState<string>("");
     const [filters, setFilters] = useState({...emptyFilters});
     const [createForm, setCreateForm] = useState({...emptyDepartmentForm});
-    const [editForm, setEditForm] = useState({...emptyEditForm});
     const [createDialogOpen, setCreateDialogOpen] = useState<boolean>(false);
     const [relationsDialogOpen, setRelationsDialogOpen] = useState<boolean>(false);
     const [departmentRelations, setDepartmentRelations] = useState<DepartmentRelation[]>([]);
@@ -158,7 +150,6 @@ const Departments: React.FC = () => {
     const [relationsError, setRelationsError] = useState<string>("");
     const [relationsSuccess, setRelationsSuccess] = useState<string>("");
     const relationsImportInputRef = useRef<HTMLInputElement | null>(null);
-    const [editedDepartment, setEditedDepartment] = useState<Department | null>(null);
     const [usersDepartment, setUsersDepartment] = useState<Department | null>(null);
     const [selectedDepartmentId, setSelectedDepartmentId] = useState<number | null>(null);
     const [pendingStatusChange, setPendingStatusChange] = useState<{
@@ -166,7 +157,6 @@ const Departments: React.FC = () => {
         status: "ARCHIVED" | "DELETED";
     } | null>(null);
     const createTranslations = pl.departments.create;
-    const editTranslations = pl.departments.edit;
     const canViewArchivedDepartments = isAdministrator(currentUser?.role);
     const canArchiveDepartments = canManageUsers(currentUser?.role);
 
@@ -287,13 +277,6 @@ const Departments: React.FC = () => {
         }));
     };
 
-    const updateEditField = (field: keyof typeof editForm, value: string) => {
-        setEditForm((currentForm) => ({
-            ...currentForm,
-            [field]: value,
-        }));
-    };
-
     const updateFilter = (field: keyof typeof filters, value: string) => {
         setFilters((currentFilters) => ({
             ...currentFilters,
@@ -342,85 +325,9 @@ const Departments: React.FC = () => {
             });
     };
 
-    const openEditDialog = (department: Department) => {
-        setError("");
-        setSuccess("");
-        setEditedDepartment(department);
-        setEditForm({
-            city: department.address?.city || "",
-            street: department.address?.street || "",
-            postalCode: department.address?.postalCode || "",
-            countryCode: department.address?.countryCode || "PL",
-            taxId: department.taxId || "",
-            email: department.email || "",
-            departmentType: department.departmentType || "BRANCH",
-            status: (department.status || "ACTIVE") as DepartmentStatus,
-        });
-    };
-
-    const updateDepartment = () => {
-        if (!editedDepartment) {
-            return;
-        }
-
-        if (!editForm.city.trim() || !editForm.street.trim() || !editForm.countryCode.trim()) {
-            setError(editTranslations.required);
-            return;
-        }
-
-        const departmentCode = getDepartmentCode(editedDepartment);
-        const requests: Array<Promise<unknown>> = [
-            departmentService.updateAddress({
-                departmentCode: {value: departmentCode},
-                address: {
-                    city: editForm.city.trim(),
-                    street: editForm.street.trim(),
-                    postalCode: editForm.postalCode.trim(),
-                    countryCode: editForm.countryCode.trim().toUpperCase(),
-                },
-            }),
-        ];
-
-        if (editForm.email.trim() !== (editedDepartment.email || "")) {
-            requests.push(departmentService.changeEmail({
-                departmentCode: {value: departmentCode},
-                email: editForm.email.trim(),
-            }));
-        }
-
-        if (editForm.taxId.trim() !== (editedDepartment.taxId || "")) {
-            requests.push(departmentService.changeIdentificationNumber({
-                departmentCode: {value: departmentCode},
-                identificationNumber: editForm.taxId.trim(),
-            }));
-        }
-
-        if (editForm.departmentType !== editedDepartment.departmentType) {
-            requests.push(departmentService.changeType(departmentCode, editForm.departmentType));
-        }
-
-        if (editForm.status !== editedDepartment.status) {
-            requests.push(departmentService.changeStatus({
-                departmentCode: {value: departmentCode},
-                status: editForm.status,
-            }));
-        }
-
-        setSaving(true);
-        setError("");
-        setSuccess("");
-        Promise.all(requests)
-            .then(() => {
-                setEditedDepartment(null);
-                setSuccess(editTranslations.success);
-                retrieveDepartments(false);
-            })
-            .catch((exception: unknown) => {
-                setError(getBackendErrorMessage(exception, editTranslations.error));
-            })
-            .finally(() => {
-                setSaving(false);
-            });
+    const openDepartment = (department: Department) => {
+        setSelectedDepartmentId(department.departmentId);
+        onOpenTab?.(departmentDetailsTab(department));
     };
 
     const changeDepartmentStatus = (department: Department, status: DepartmentStatus) => {
@@ -463,12 +370,6 @@ const Departments: React.FC = () => {
     const closeCreateDialog = () => {
         if (!saving) {
             setCreateDialogOpen(false);
-        }
-    };
-
-    const closeEditDialog = () => {
-        if (!saving) {
-            setEditedDepartment(null);
         }
     };
 
@@ -733,7 +634,13 @@ const Departments: React.FC = () => {
                                         <tr
                                             className={selected ? "departments-row-selected" : undefined}
                                             key={department.departmentId}
-                                            onClick={() => setSelectedDepartmentId(department.departmentId)}
+                                            tabIndex={0}
+                                            onClick={() => openDepartment(department)}
+                                            onKeyDown={(event) => {
+                                                if (event.key === "Enter") {
+                                                    openDepartment(department);
+                                                }
+                                            }}
                                         >
                                             <td><strong>{departmentCode}</strong></td>
                                             <td>{valueOrDash(department.address?.city)}</td>
@@ -809,7 +716,7 @@ const Departments: React.FC = () => {
                                     <button
                                         disabled={!selectedDepartment || saving || selectedDepartment.status === "DELETED"}
                                         type="button"
-                                        onClick={() => selectedDepartment && openEditDialog(selectedDepartment)}
+                                        onClick={() => selectedDepartment && openDepartment(selectedDepartment)}
                                     >
                                         <EditOutlined fontSize="small" />
                                         <span>{pl.common.edit}</span>
@@ -1054,103 +961,6 @@ const Departments: React.FC = () => {
                     <Button disabled={saving} variant="outlined" onClick={closeCreateDialog}>{createTranslations.cancel}</Button>
                     <Button disabled={saving} startIcon={<Save />} variant="contained" onClick={createDepartment}>
                         {saving ? createTranslations.saving : createTranslations.submit}
-                    </Button>
-                </DialogActions>
-            </Dialog>
-
-            <Dialog
-                className="departments-edit-dialog"
-                fullWidth
-                maxWidth="lg"
-                PaperProps={{className: "departments-edit-dialog-paper"}}
-                open={Boolean(editedDepartment)}
-                onClose={closeEditDialog}
-            >
-                <DialogTitle className="departments-dialog-title">
-                    <span className="departments-dialog-heading">
-                        <span className="departments-dialog-icon">
-                            <EditOutlined />
-                        </span>
-                        <span>{editTranslations.title}</span>
-                        <strong>{editedDepartment ? getDepartmentCode(editedDepartment) : ""}</strong>
-                    </span>
-                    <IconButton aria-label={pl.common.close} disabled={saving} onClick={closeEditDialog}>
-                        <Close />
-                    </IconButton>
-                </DialogTitle>
-                <DialogContent className="departments-dialog-content">
-                    <DialogContentText className="departments-edit-dialog-description">
-                        {editTranslations.description}
-                    </DialogContentText>
-                    <div className="departments-create-grid departments-dialog-grid">
-                        <TextField
-                            autoFocus
-                            label={createTranslations.fields.city}
-                            size="small"
-                            value={editForm.city}
-                            onChange={(event) => updateEditField("city", event.target.value)}
-                        />
-                        <TextField
-                            label={createTranslations.fields.street}
-                            size="small"
-                            value={editForm.street}
-                            onChange={(event) => updateEditField("street", event.target.value)}
-                        />
-                        <TextField
-                            label={createTranslations.fields.postalCode}
-                            size="small"
-                            value={editForm.postalCode}
-                            onChange={(event) => updateEditField("postalCode", event.target.value)}
-                        />
-                        <TextField
-                            label={createTranslations.fields.countryCode}
-                            size="small"
-                            value={editForm.countryCode}
-                            onChange={(event) => updateEditField("countryCode", event.target.value)}
-                        />
-                        <TextField
-                            label={createTranslations.fields.taxId}
-                            size="small"
-                            value={editForm.taxId}
-                            onChange={(event) => updateEditField("taxId", event.target.value)}
-                        />
-                        <TextField
-                            label={createTranslations.fields.email}
-                            size="small"
-                            type="email"
-                            value={editForm.email}
-                            onChange={(event) => updateEditField("email", event.target.value)}
-                        />
-                        <TextField
-                            select
-                            label={createTranslations.fields.departmentType}
-                            size="small"
-                            value={editForm.departmentType}
-                            onChange={(event) => updateEditField("departmentType", event.target.value)}
-                        >
-                            {DEPARTMENT_TYPES.map((type) => (
-                                <MenuItem key={type} value={type}>{translateDepartmentType(type)}</MenuItem>
-                            ))}
-                        </TextField>
-                        {canViewArchivedDepartments ? (
-                            <TextField
-                                select
-                                label={pl.departments.columns.status}
-                                size="small"
-                                value={editForm.status}
-                                onChange={(event) => updateEditField("status", event.target.value)}
-                            >
-                                {DEPARTMENT_STATUSES.map((status) => (
-                                    <MenuItem key={status} value={status}>{translateDepartmentStatus(status)}</MenuItem>
-                                ))}
-                            </TextField>
-                        ) : null}
-                    </div>
-                </DialogContent>
-                <DialogActions className="departments-dialog-actions">
-                    <Button disabled={saving} variant="outlined" onClick={closeEditDialog}>{pl.common.cancel}</Button>
-                    <Button disabled={saving} startIcon={<Save />} variant="contained" onClick={updateDepartment}>
-                        {saving ? editTranslations.saving : pl.common.saveChanges}
                     </Button>
                 </DialogActions>
             </Dialog>
