@@ -67,7 +67,7 @@
     background: transparent;
     border: 0;
     box-shadow: none;
-    color: #ffffff;
+    color: var(--primary-foreground);
     font-size: 0.78rem;
     font-weight: 900;
     line-height: 1;
@@ -77,6 +77,32 @@
 
 .shipment-history-map-marker-number.leaflet-tooltip::before {
     display: none;
+}
+
+.shipment-history-map-marker {
+    fill: var(--primary);
+    filter: drop-shadow(0 2px 4px color-mix(in srgb, var(--foreground) 42%, transparent));
+    stroke: var(--surface-elevated);
+}
+
+.shipment-history-leaflet-map .leaflet-popup-content-wrapper {
+    background: var(--card);
+    border: 1px solid var(--border-strong);
+    box-shadow: var(--shadow-floating);
+    color: var(--card-foreground);
+}
+
+.shipment-history-leaflet-map .leaflet-popup-tip {
+    background: var(--card);
+}
+
+.shipment-history-leaflet-map .leaflet-popup-close-button {
+    color: var(--muted-foreground);
+}
+
+.shipment-history-leaflet-map .leaflet-popup-close-button:hover,
+.shipment-history-leaflet-map .leaflet-popup-close-button:focus-visible {
+    color: var(--card-foreground);
 }
 
 .shipment-history-map-popup {

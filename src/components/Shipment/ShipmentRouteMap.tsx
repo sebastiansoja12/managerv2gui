@@ -149,6 +149,7 @@ const ShipmentRouteMap: React.FC<ShipmentRouteMapProps> = ({departments, details
 
         stops.forEach((stop, index) => {
             L.circleMarker(stop.position, {
+                className: "shipment-history-map-marker",
                 color: "#ffffff",
                 fillColor: "#2563a9",
                 fillOpacity: 1,

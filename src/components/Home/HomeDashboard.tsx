@@ -41,6 +41,7 @@ type ShipmentLookupCriterion = "TRACKING_NUMBER" | "SHIPMENT_ID";
 const homeTiles: HomeTile[] = [
     {key: "shipmentDetails", path: "/shipment-details", icon: Warehouse, accent: "blue"},
     {key: "shipmentList", path: "/shipments/list", icon: TableRows, accent: "cyan"},
+    {key: "returns", path: "/returns", icon: History, accent: "rose"},
     {key: "shipmentScanner", path: "/shipment-scanner", icon: Warehouse, accent: "teal"},
     {key: "courierDeliveries", path: "/courier-deliveries", icon: LocalShipping, accent: "emerald"},
     {key: "systemSettings", path: "/software-configurations", icon: SettingsSuggest, accent: "violet"},

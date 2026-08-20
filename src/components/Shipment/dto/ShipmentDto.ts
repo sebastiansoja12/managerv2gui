@@ -125,7 +125,6 @@ export interface ShipmentCreateRequestApi {
     shipmentPriority: ShipmentPriorityDto;
     issuerCountryCode: string;
     receiverCountryCode: string;
-    carrierOperator: string;
 }
 
 export interface ShipmentCreateResponseDto {

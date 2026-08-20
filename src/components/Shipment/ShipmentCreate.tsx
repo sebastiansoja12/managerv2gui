@@ -64,7 +64,6 @@ const ShipmentCreate: React.FC = () => {
     const [currency, setCurrency] = useState<string>(initialCurrency);
     const [issuerCountryCode, setIssuerCountryCode] = useState<string>(initialIssuerCountryCode);
     const [receiverCountryCode, setReceiverCountryCode] = useState<string>(initialReceiverCountryCode);
-    const [carrierOperator, setCarrierOperator] = useState<string>("");
     const [dangerousEnabled, setDangerousEnabled] = useState<boolean>(false);
     const [dangerousGood, setDangerousGood] = useState<DangerousGoodApi>(createEmptyDangerousGood());
 
@@ -148,8 +147,7 @@ const ShipmentCreate: React.FC = () => {
         ...(dangerousEnabled ? {dangerousGood} : {}),
         shipmentPriority,
         issuerCountryCode,
-        receiverCountryCode,
-        carrierOperator,
+        receiverCountryCode
     });
 
     const resetForm = () => {
@@ -161,7 +159,6 @@ const ShipmentCreate: React.FC = () => {
         setCurrency(initialCurrency);
         setIssuerCountryCode(initialIssuerCountryCode);
         setReceiverCountryCode(initialReceiverCountryCode);
-        setCarrierOperator("");
         setDangerousEnabled(false);
         setDangerousGood(createEmptyDangerousGood());
     };
@@ -222,7 +219,6 @@ const ShipmentCreate: React.FC = () => {
                     <div className="shipments-form-grid-three shipments-create-data-grid">
                         {selectField(shipmentTranslations.form.fields.size, shipmentSize, shipmentSizes, setShipmentSize, (option) => shipmentTranslations.size[option])}
                         {selectField(shipmentTranslations.form.fields.priority, shipmentPriority, shipmentPriorities, setShipmentPriority, (option) => shipmentTranslations.priority[option])}
-                        {textField(shipmentTranslations.form.fields.operator, carrierOperator, setCarrierOperator)}
                         {textField(shipmentTranslations.form.fields.amount, priceAmount, setPriceAmount, "number")}
                         {textField(shipmentTranslations.form.fields.currency, currency, setCurrency)}
                         {selectField(shipmentTranslations.form.fields.issuerCountry, issuerCountryCode, countryCodes, setIssuerCountryCode)}

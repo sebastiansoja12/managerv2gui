@@ -26,6 +26,7 @@ configuration screens, plus a separate super-admin area.
 - Shipment history map with department routes and translated event labels.
 - Dangerous goods form and shipment dangerous-good handling.
 - Shipment document download, QR label preview and print support.
+- Return registration, return lookup by ID, status actions, reason updates and token validation.
 - Department list and department creation.
 - Courier list, details and courier creation.
 - Process list and process details.
