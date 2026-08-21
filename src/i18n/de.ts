@@ -3450,7 +3450,7 @@ export const de: typeof pl = {
         },
         createOptions: {
             title: "Palette anlegen",
-            subtitle: "Art der Anlage wählen. Die Sendungsnummer vergibt der Palettendienst.",
+            subtitle: "Art der Anlage wählen",
             creating: "Wird angelegt…",
             error: "Palette konnte nicht angelegt werden.",
             close: "Schließen",
