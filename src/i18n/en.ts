@@ -2161,6 +2161,7 @@ export const en: typeof pl = {
                 integration: "Integration",
                 provider: "Provider",
                 apiAddress: "API address",
+                status: "Status",
             },
             providers: {
                 geoapify: "Geoapify",

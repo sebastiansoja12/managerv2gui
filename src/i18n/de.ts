@@ -2158,6 +2158,7 @@ export const de: typeof pl = {
                 integration: "Integration",
                 provider: "Anbieter",
                 apiAddress: "API-Adresse",
+                status: "Status",
             },
             providers: {
                 geoapify: "Geoapify",

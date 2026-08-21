@@ -2163,6 +2163,7 @@ export const pl = {
                 integration: "Integracja",
                 provider: "Provider",
                 apiAddress: "Adres API",
+                status: "Status",
             },
             providers: {
                 geoapify: "Geoapify",

@@ -409,69 +409,6 @@
     min-height: 34px !important;
 }
 
-.geocoding-provider-list {
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    overflow: hidden;
-}
-
-.geocoding-provider-list-header {
-    border: 0 !important;
-    border-bottom: 1px solid var(--border) !important;
-    border-radius: 0 !important;
-    font-family: var(--font-mono);
-    font-size: 0.64rem !important;
-    letter-spacing: 0.055em;
-    padding: 9px 11px;
-}
-
-.app-main-content .geocoding-provider-card {
-    background: transparent !important;
-    border: 0 !important;
-    border-bottom: 1px solid var(--border) !important;
-    border-radius: 0 !important;
-    min-height: 66px;
-    padding: 9px 11px;
-}
-
-.app-main-content .geocoding-provider-card:last-child {
-    border-bottom: 0 !important;
-}
-
-.app-main-content .geocoding-provider-card:hover {
-    background: var(--technical-row-hover) !important;
-}
-
-.geocoding-provider-icon {
-    background: transparent !important;
-    border: 1px solid var(--technical-accent-line);
-    border-radius: 4px !important;
-    color: var(--primary) !important;
-    height: 32px;
-    width: 32px;
-}
-
-.geocoding-provider-main h4 {
-    font-size: 0.8rem !important;
-    font-weight: 650 !important;
-}
-
-.geocoding-provider-code,
-.geocoding-provider-api,
-.geocoding-provider-credential,
-.geocoding-provider-endpoint a {
-    font-size: 0.68rem !important;
-}
-
-.geocoding-provider-code,
-.geocoding-provider-api {
-    font-family: var(--font-mono);
-}
-
-.geocoding-provider-actions [data-ui="icon-button"] {
-    border-radius: 4px !important;
-}
-
 /* Integrations */
 .app-main-content .integrations-configuration-panel {
     padding: 14px !important;
@@ -752,19 +689,6 @@
 
     .app-main-content .shipment-setting-row:nth-child(odd) {
         border-right: 0 !important;
-    }
-
-    .geocoding-provider-list-header {
-        display: none;
-    }
-
-    .geocoding-provider-card {
-        grid-template-columns: minmax(0, 1fr) auto;
-    }
-
-    .geocoding-provider-main,
-    .geocoding-provider-endpoint {
-        grid-column: 1 / -1;
     }
 
     .shipment-tracking-number-fields,

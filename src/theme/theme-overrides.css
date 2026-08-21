@@ -1707,17 +1707,12 @@
     background: var(--card);
 }
 
-:root[data-theme] .geocoding-provider-list-header,
-:root[data-theme] .geocoding-provider-card,
 :root[data-theme] .geocoding-enabled-control {
     background: var(--surface);
     border-color: var(--border);
     color: var(--foreground);
 }
 
-:root[data-theme] .geocoding-provider-list-header,
-:root[data-theme] .geocoding-provider-code,
-:root[data-theme] .geocoding-provider-credential,
 :root[data-theme] .geocoding-dialog-description,
 :root[data-theme] .geocoding-enabled-control small,
 :root[data-theme] .geocoding-configuration-empty p {
@@ -1725,30 +1720,9 @@
 }
 
 :root[data-theme] .geocoding-configuration-heading h3,
-:root[data-theme] .geocoding-provider-main h4,
 :root[data-theme] .geocoding-configuration-empty h4,
 :root[data-theme] .geocoding-enabled-control strong,
 :root[data-theme] .geocoding-configuration-dialog [data-ui="dialog-title"] {
-    color: var(--foreground);
-}
-
-:root[data-theme] .geocoding-provider-card:hover {
-    background: color-mix(in srgb, var(--surface-secondary) 46%, var(--surface));
-    border-color: var(--border-strong);
-    box-shadow: none;
-}
-
-:root[data-theme] .geocoding-provider-icon {
-    background: var(--surface-secondary);
-    color: var(--muted-foreground);
-}
-
-:root[data-theme] .geocoding-provider-endpoint a {
-    color: var(--foreground);
-}
-
-:root[data-theme] .geocoding-provider-actions [data-ui="icon-button"] {
-    border-color: var(--border);
     color: var(--foreground);
 }
 
