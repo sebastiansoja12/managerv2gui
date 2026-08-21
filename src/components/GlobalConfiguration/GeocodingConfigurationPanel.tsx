@@ -35,6 +35,7 @@ type FieldValues = Partial<Record<GeocodingConfigurationField, string>>;
 const providerLabels: Record<string, string> = {
     GEOAPIFY: pl.globalConfiguration.geocoding.providers.geoapify,
     POSITION_STACK: pl.globalConfiguration.geocoding.providers.positionStack,
+    OPEN_CAGE: pl.globalConfiguration.geocoding.providers.openCage,
 };
 
 const getProviderLabel = (provider: GeocodingProvider) => providerLabels[provider]
