@@ -172,10 +172,21 @@ function TechnicalSelect({
         }
 
         const minimumWidth = Math.max(rect.width, 196);
-        const left = Math.min(rect.left, window.innerWidth - minimumWidth - 8);
+        const left = Math.max(8, Math.min(rect.left, window.innerWidth - minimumWidth - 8));
+        const spaceBelow = window.innerHeight - rect.bottom - 18;
+        const spaceAbove = rect.top - 18;
+        if (spaceBelow < 160 && spaceAbove > spaceBelow) {
+            setMenuPosition({
+                bottom: window.innerHeight - rect.top + 6,
+                left,
+                maxHeight: Math.min(360, spaceAbove),
+                width: minimumWidth,
+            });
+            return;
+        }
         setMenuPosition({
-            left: Math.max(8, left),
-            maxHeight: Math.max(160, Math.min(360, window.innerHeight - rect.bottom - 18)),
+            left,
+            maxHeight: Math.max(160, Math.min(360, spaceBelow)),
             top: rect.bottom + 6,
             width: minimumWidth,
         });
