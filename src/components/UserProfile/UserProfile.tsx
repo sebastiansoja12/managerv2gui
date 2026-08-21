@@ -17,6 +17,7 @@ import AuthService from "../../hooks/AuthService";
 import {ApiErrorResponse} from "../../api/ApiResult";
 import {CurrentUserDto} from "../../auth/UserProfileDto";
 import pl from "../../i18n/translate";
+import OperatorPlanSection from "../Subscription/OperatorPlanSection";
 import "./styles/user-profile.css";
 
 type Notice = {
@@ -332,6 +333,8 @@ export default function UserProfile() {
                         )) : <span>{pl.userProfile.noPermissions}</span>}
                     </div>
                 </section>
+
+                <OperatorPlanSection />
             </div>
 
             <Dialog

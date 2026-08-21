@@ -43,6 +43,8 @@ configuration screens, plus a separate super-admin area.
 - Microservice status page.
 - User profile page.
 - Super-admin application with its own login and operator management UI.
+- Operator subscription plans (`MINI`, `BASIC`, `ENTERPRISE`) managed in the super-admin operator workspace; operators
+  without a plan or with an expired or not yet started plan see a screen asking them to contact support.
 - Polish, English and German translations.
 
 Some routes are placeholders for planned modules, for example analytics,
