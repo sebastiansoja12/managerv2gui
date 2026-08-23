@@ -2,6 +2,7 @@ import React from "react";
 import {fireEvent, render, screen, waitFor, within} from "@testing-library/react";
 import {MemoryRouter, Route, Routes} from "react-router-dom";
 import DeliveryService from "../../hooks/DeliveryService";
+import DepartmentService from "../../hooks/DepartmentService";
 import pl from "../../i18n/translate";
 import Deliveries from "./Deliveries";
 import DeliveryEdit from "./DeliveryEdit";
@@ -13,6 +14,11 @@ jest.mock("../../hooks/DeliveryService", () => ({
     default: {getRecent: jest.fn(), get: jest.fn(), changeMethod: jest.fn(), cancel: jest.fn()},
 }));
 
+jest.mock("../../hooks/DepartmentService", () => ({
+    __esModule: true,
+    default: {getAll: jest.fn()},
+}));
+
 jest.mock("../../api/errorMessage", () => ({
     getBackendErrorMessage: (_error: unknown, fallback: string) => fallback,
 }));
@@ -20,6 +26,11 @@ jest.mock("../../api/errorMessage", () => ({
 jest.mock("./deliveryExport", () => ({exportDeliveryExcel: jest.fn(), exportDeliveryPdf: jest.fn()}));
 
 const mockedService = DeliveryService as jest.Mocked<typeof DeliveryService>;
+const departments = [
+    {departmentId: 3, departmentCode: {value: "KT1"}},
+    {departmentId: 5, departmentCode: {value: "WAW1"}},
+    {departmentId: 7, departmentCode: {value: "KR1"}},
+];
 
 const delivery: Delivery = {
     id: "6ce57331-8ef7-4a81-bf0f-14baa23231ad",
@@ -29,7 +40,12 @@ const delivery: Delivery = {
     type: "OUTBOUND",
     deliveryStatus: "DEPOT",
     lifecycleStatus: "CREATED",
+    originDepartmentId: "3",
+    destinationDepartmentId: "5",
+    pickupMethod: "PICKUP_POINT",
     method: "COURIER",
+    pickupPointId: null,
+    deliveryPickupPointId: null,
     createdAt: "2026-09-30T09:00:00",
     plannedAt: null,
     deliveredAt: null,
@@ -42,14 +58,16 @@ const delivery: Delivery = {
         departmentId: "7",
         supplierId: "12",
         vehicleId: "21",
-        method: "COURIER",
         comment: "Shipment created",
         failureReason: null,
     }],
 };
 
 describe("Deliveries", () => {
-    beforeEach(() => jest.clearAllMocks());
+    beforeEach(() => {
+        jest.clearAllMocks();
+        (DepartmentService.getAll as jest.Mock).mockResolvedValue({data: departments});
+    });
 
     const renderDeliveries = () => render(
         <MemoryRouter initialEntries={["/deliveries"]}>
@@ -81,11 +99,15 @@ describe("Deliveries", () => {
         expect(screen.getByText(pl.deliveries.userLabel)).toBeInTheDocument();
         expect(screen.getByText("42")).toBeInTheDocument();
         expect(screen.getByText(pl.deliveries.departmentLabel)).toBeInTheDocument();
-        expect(screen.getByText("7")).toBeInTheDocument();
+        expect(await screen.findByText("KR1")).toBeInTheDocument();
         expect(within(screen.getByRole("region", {name: pl.deliveries.historyTitle}))
             .getByText(pl.deliveries.courierLabel)).toBeInTheDocument();
         expect(screen.getByText("12")).toBeInTheDocument();
         expect(screen.getByText(pl.deliveries.attemptDateLabel)).toBeInTheDocument();
+        expect(screen.getByText(pl.shipments.summary.originDepartment).nextSibling).toHaveTextContent("KT1");
+        expect(screen.getByText(pl.shipments.summary.destination).nextSibling).toHaveTextContent("WAW1");
+        expect(screen.getByText(pl.shipments.form.fields.pickupMethod).nextSibling)
+            .toHaveTextContent(pl.shipments.pickupMethod.PICKUP_POINT);
         expect(screen.getByRole("link", {name: /9223372036854775001/})).toHaveAttribute("href", "/shipments/9223372036854775001/edit");
         expect(mockedService.get).toHaveBeenCalledWith(delivery.id);
     });
@@ -132,9 +154,9 @@ describe("Deliveries", () => {
         await screen.findByText(delivery.shipmentId as string);
         fireEvent.click(screen.getByRole("radio", {name: `${pl.deliveries.selectDelivery} ${delivery.id}`}));
         fireEvent.click(screen.getByRole("button", {name: pl.deliveries.exportExcel}));
-        await waitFor(() => expect(exportDeliveryExcel).toHaveBeenCalledWith(delivery));
+        await waitFor(() => expect(exportDeliveryExcel).toHaveBeenCalledWith(delivery, departments));
         fireEvent.click(screen.getByRole("button", {name: pl.deliveries.exportPdf}));
-        await waitFor(() => expect(exportDeliveryPdf).toHaveBeenCalledWith(delivery));
+        await waitFor(() => expect(exportDeliveryPdf).toHaveBeenCalledWith(delivery, departments));
         expect(mockedService.get).toHaveBeenCalledTimes(2);
     });
 

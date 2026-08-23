@@ -3,7 +3,9 @@ import {Alert, Button, Chip, CircularProgress, Dialog, DialogActions, DialogCont
 import {Close, Download, Edit, LocalShipping, Refresh} from "components/ui/icons";
 import {useNavigate} from "react-router-dom";
 import {getBackendErrorMessage} from "../../api/errorMessage";
+import Department from "../../class/depots/Department";
 import DeliveryService from "../../hooks/DeliveryService";
+import DepartmentService from "../../hooks/DepartmentService";
 import pl from "../../i18n/translate";
 import {Delivery} from "./model/Delivery";
 import {exportDeliveryExcel, exportDeliveryPdf} from "./deliveryExport";
@@ -50,11 +52,16 @@ function Deliveries() {
         setExporting(true);
         setExportError(null);
         try {
-            const response = await DeliveryService.get(selectedDelivery.id);
+            const [response, departments] = await Promise.all([
+                DeliveryService.get(selectedDelivery.id),
+                DepartmentService.getAll()
+                    .then((departmentResponse) => Array.isArray(departmentResponse.data) ? departmentResponse.data : [])
+                    .catch(() => [] as Department[]),
+            ]);
             if (format === "excel") {
-                await exportDeliveryExcel(response.data);
+                await exportDeliveryExcel(response.data, departments);
             } else {
-                await exportDeliveryPdf(response.data);
+                await exportDeliveryPdf(response.data, departments);
             }
         } catch (failure) {
             setExportError(getBackendErrorMessage(failure, pl.deliveries.exportError));
