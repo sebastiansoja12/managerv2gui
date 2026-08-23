@@ -1,6 +1,5 @@
 /* Tabs and segmented navigation */
 :is(
-    .global-configuration-tab,
     .tm-tabs button,
     .shipment-detail-tabs a,
     .shipment-detail-tabs button,
@@ -17,7 +16,6 @@
 }
 
 :is(
-    .global-configuration-tab,
     .tm-tabs button,
     .shipment-detail-tabs a,
     .shipment-detail-tabs button,
@@ -25,7 +23,6 @@
     .super-admin-workspace-tabs button
 ):hover,
 :is(
-    .global-configuration-tab.global-configuration-tab-active,
     .tm-tabs .tm-tab-active,
     .shipment-detail-tabs .shipment-detail-tab-active,
     .super-admin-nav-item.super-admin-nav-item-active,

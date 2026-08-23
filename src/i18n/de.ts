@@ -46,6 +46,16 @@ export const de: typeof pl = {
             courierBlue: "Kurier",
         },
     },
+    footer: {
+        rights: "Alle Rechte vorbehalten.",
+        environment: "Umgebung",
+        environments: {
+            development: "Entwicklung",
+            test: "Test",
+            uat: "UAT",
+            production: "Produktion",
+        },
+    },
     app: {
         tabs: {
             closeAll: "Alle schließen",

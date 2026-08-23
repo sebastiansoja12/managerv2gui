@@ -901,38 +901,6 @@
     color: var(--warning);
 }
 
-:root[data-theme="operations-dark"] .global-configuration-header,
-:root[data-theme="warehouse"] .global-configuration-header,
-:root[data-theme="night-shift"] .global-configuration-header,
-:root[data-theme="neon-dark"] .global-configuration-header,
-:root[data-theme="cyberpunk"] .global-configuration-header,
-:root[data-theme="terminal-green"] .global-configuration-header,
-:root[data-theme="arctic-dark"] .global-configuration-header,
-:root[data-theme="graphite-red"] .global-configuration-header,
-:root[data-theme="electric-blue"] .global-configuration-header,
-:root[data-theme="ultraviolet"] .global-configuration-header,
-:root[data-theme="graphite-deep"] .global-configuration-header,
-:root[data-theme="acid-lime"] .global-configuration-header,
-:root[data-theme="deep-ocean"] .global-configuration-header,
-:root[data-theme="aubergine"] .global-configuration-header,
-:root[data-theme="midnight-blue"] .global-configuration-header,
-:root[data-theme="carbon"] .global-configuration-header,
-:root[data-theme="operations-dark"] .global-configuration-tabs,
-:root[data-theme="warehouse"] .global-configuration-tabs,
-:root[data-theme="night-shift"] .global-configuration-tabs,
-:root[data-theme="neon-dark"] .global-configuration-tabs,
-:root[data-theme="cyberpunk"] .global-configuration-tabs,
-:root[data-theme="terminal-green"] .global-configuration-tabs,
-:root[data-theme="arctic-dark"] .global-configuration-tabs,
-:root[data-theme="graphite-red"] .global-configuration-tabs,
-:root[data-theme="electric-blue"] .global-configuration-tabs,
-:root[data-theme="ultraviolet"] .global-configuration-tabs,
-:root[data-theme="graphite-deep"] .global-configuration-tabs,
-:root[data-theme="acid-lime"] .global-configuration-tabs,
-:root[data-theme="deep-ocean"] .global-configuration-tabs,
-:root[data-theme="aubergine"] .global-configuration-tabs,
-:root[data-theme="midnight-blue"] .global-configuration-tabs,
-:root[data-theme="carbon"] .global-configuration-tabs,
 :root[data-theme="operations-dark"] .global-configuration-toolbar,
 :root[data-theme="warehouse"] .global-configuration-toolbar,
 :root[data-theme="night-shift"] .global-configuration-toolbar,
@@ -1000,22 +968,6 @@
     border-color: var(--border);
 }
 
-:root[data-theme="operations-dark"] .global-configuration-header h4,
-:root[data-theme="warehouse"] .global-configuration-header h4,
-:root[data-theme="night-shift"] .global-configuration-header h4,
-:root[data-theme="neon-dark"] .global-configuration-header h4,
-:root[data-theme="cyberpunk"] .global-configuration-header h4,
-:root[data-theme="terminal-green"] .global-configuration-header h4,
-:root[data-theme="arctic-dark"] .global-configuration-header h4,
-:root[data-theme="graphite-red"] .global-configuration-header h4,
-:root[data-theme="electric-blue"] .global-configuration-header h4,
-:root[data-theme="ultraviolet"] .global-configuration-header h4,
-:root[data-theme="graphite-deep"] .global-configuration-header h4,
-:root[data-theme="acid-lime"] .global-configuration-header h4,
-:root[data-theme="deep-ocean"] .global-configuration-header h4,
-:root[data-theme="aubergine"] .global-configuration-header h4,
-:root[data-theme="midnight-blue"] .global-configuration-header h4,
-:root[data-theme="carbon"] .global-configuration-header h4,
 :root[data-theme="operations-dark"] .global-configuration-toolbar h2,
 :root[data-theme="warehouse"] .global-configuration-toolbar h2,
 :root[data-theme="night-shift"] .global-configuration-toolbar h2,
@@ -1099,22 +1051,6 @@
     color: var(--foreground);
 }
 
-:root[data-theme="operations-dark"] .global-configuration-tab,
-:root[data-theme="warehouse"] .global-configuration-tab,
-:root[data-theme="night-shift"] .global-configuration-tab,
-:root[data-theme="neon-dark"] .global-configuration-tab,
-:root[data-theme="cyberpunk"] .global-configuration-tab,
-:root[data-theme="terminal-green"] .global-configuration-tab,
-:root[data-theme="arctic-dark"] .global-configuration-tab,
-:root[data-theme="graphite-red"] .global-configuration-tab,
-:root[data-theme="electric-blue"] .global-configuration-tab,
-:root[data-theme="ultraviolet"] .global-configuration-tab,
-:root[data-theme="graphite-deep"] .global-configuration-tab,
-:root[data-theme="acid-lime"] .global-configuration-tab,
-:root[data-theme="deep-ocean"] .global-configuration-tab,
-:root[data-theme="aubergine"] .global-configuration-tab,
-:root[data-theme="midnight-blue"] .global-configuration-tab,
-:root[data-theme="carbon"] .global-configuration-tab,
 :root[data-theme="operations-dark"] .global-configuration-category,
 :root[data-theme="warehouse"] .global-configuration-category,
 :root[data-theme="night-shift"] .global-configuration-category,
@@ -1134,27 +1070,6 @@
     background: var(--surface-secondary);
     border-color: var(--border);
     color: var(--foreground);
-}
-
-:root[data-theme="operations-dark"] .global-configuration-tab-active,
-:root[data-theme="warehouse"] .global-configuration-tab-active,
-:root[data-theme="night-shift"] .global-configuration-tab-active,
-:root[data-theme="neon-dark"] .global-configuration-tab-active,
-:root[data-theme="cyberpunk"] .global-configuration-tab-active,
-:root[data-theme="terminal-green"] .global-configuration-tab-active,
-:root[data-theme="arctic-dark"] .global-configuration-tab-active,
-:root[data-theme="graphite-red"] .global-configuration-tab-active,
-:root[data-theme="electric-blue"] .global-configuration-tab-active,
-:root[data-theme="ultraviolet"] .global-configuration-tab-active,
-:root[data-theme="graphite-deep"] .global-configuration-tab-active,
-:root[data-theme="acid-lime"] .global-configuration-tab-active,
-:root[data-theme="deep-ocean"] .global-configuration-tab-active,
-:root[data-theme="aubergine"] .global-configuration-tab-active,
-:root[data-theme="midnight-blue"] .global-configuration-tab-active,
-:root[data-theme="carbon"] .global-configuration-tab-active {
-    background: color-mix(in srgb, var(--primary) 18%, var(--card));
-    border-color: var(--primary);
-    color: var(--primary);
 }
 
 :root[data-theme="operations-dark"] .tm-page-heading p,

@@ -692,8 +692,6 @@
 }
 
 .top-nav-dropdown-item:hover { background: rgba(var(--nav-accent-rgb), 0.13); color: var(--nav-accent); transform: translateX(2px); }
-.top-nav-version { align-items: center; border-top: 1px solid var(--nav-line); color: var(--nav-muted); display: flex; font-size: 0.7rem; font-weight: 700; justify-content: space-between; min-height: 32px; padding: 5px 10px 2px; }
-.top-nav-version strong { color: var(--nav-text-soft); }
 .top-nav-logout-item { color: #fda4af; }
 .top-nav-logout-item:hover { background: rgba(251, 113, 133, 0.13); color: #fecdd3; }
 
