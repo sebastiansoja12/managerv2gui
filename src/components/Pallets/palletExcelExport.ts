@@ -1,6 +1,6 @@
 import ShipmentService from "../../hooks/ShipmentService";
 import pl from "../../i18n/translate";
-import {departmentCodeValue, ShipmentDto} from "../Shipment/dto/ShipmentDto";
+import {ShipmentDto} from "../Shipment/dto/ShipmentDto";
 import {PalletDto} from "./model/Pallet";
 import {formatPalletDate, formatPalletWeight, palletStatusLabel, transportTypeLabel} from "./palletLabels";
 
@@ -60,7 +60,6 @@ export const exportPalletExcel = async (pallet: PalletDto, departmentLabel: (id?
         {header: translations.columns.status, width: 18},
         {header: translations.columns.recipient, width: 28},
         {header: translations.columns.city, width: 20},
-        {header: translations.columns.destination, width: 14},
         {header: translations.columns.weight, width: 14},
     ];
     shipments.forEach((shipment, index) => items.addRow([
@@ -69,7 +68,6 @@ export const exportPalletExcel = async (pallet: PalletDto, departmentLabel: (id?
         shipment ? pl.shipments.status[shipment.shipmentStatus] : pl.common.dash,
         shipment ? [shipment.recipient?.firstName, shipment.recipient?.lastName].filter(Boolean).join(" ") : pl.common.dash,
         shipment?.recipient?.city || pl.common.dash,
-        shipment?.destination ? departmentCodeValue(shipment.destination) || pl.common.dash : pl.common.dash,
         shipment?.weight ? `${shipment.weight.value} ${shipment.weight.unit}` : pl.common.dash,
     ]));
     items.getRow(1).font = {bold: true};

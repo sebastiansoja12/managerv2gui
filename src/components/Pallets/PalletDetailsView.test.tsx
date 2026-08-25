@@ -76,7 +76,6 @@ describe("PalletDetailsView", () => {
                 trackingNumber: {value: "FTM-1"},
                 shipmentStatus: "CREATED",
                 recipient: {firstName: "Jan", lastName: "Nowak", city: "Kraków"},
-                destination: {value: "KR1"},
                 weight: {value: 5, unit: "KG"},
             },
             routeLog: {routeLogRecordDetails: {routeLogRecordDetailSet: [{
@@ -162,8 +161,8 @@ describe("PalletDetailsView", () => {
 
     it("adds shipments selected from the list", async () => {
         shipmentService.search.mockResolvedValue({status: 200, data: [
-            {shipmentId: {value: "9007199254740993"}, trackingNumber: {value: "FTM-1"}, shipmentStatus: "CREATED", recipient: {}, destination: {value: "KR1"}},
-            {shipmentId: {value: "88"}, trackingNumber: {value: "FTM-88"}, shipmentStatus: "PREPARED", recipient: {}, destination: {value: "KR1"}},
+            {shipmentId: {value: "9007199254740993"}, trackingNumber: {value: "FTM-1"}, shipmentStatus: "CREATED", recipient: {}},
+            {shipmentId: {value: "88"}, trackingNumber: {value: "FTM-88"}, shipmentStatus: "PREPARED", recipient: {}},
         ]} as never);
         palletService.addShipments.mockResolvedValue({status: 200, data: {...pallet, shipmentIds: ["9007199254740993", "88"]}} as never);
         renderView();

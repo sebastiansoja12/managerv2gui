@@ -4,7 +4,7 @@ import {Refresh, Search} from "components/ui/icons";
 import ShipmentService from "../../hooks/ShipmentService";
 import {getBackendErrorMessage} from "../../api/errorMessage";
 import pl from "../../i18n/translate";
-import {departmentCodeValue, ShipmentDto, ShipmentStatusDto} from "../Shipment/dto/ShipmentDto";
+import {ShipmentDto, ShipmentStatusDto} from "../Shipment/dto/ShipmentDto";
 import "./styles/pallets.css";
 
 export const PALLET_SHIPMENT_STATUSES: ShipmentStatusDto[] = ["CREATED", "PREPARED", "ACCEPTED"];
@@ -121,13 +121,12 @@ function PalletShipmentPicker({selected, onChange, excludedShipmentIds = [], rel
                             </th>
                             <th>{translations.columns.trackingNumber}</th>
                             <th>{translations.columns.recipient}</th>
-                            <th>{translations.columns.destination}</th>
                             <th>{translations.columns.status}</th>
                         </tr>
                     </thead>
                     <tbody>
                         {loading ? (
-                            <tr><td className="pallet-empty" colSpan={5}>{translations.loading}</td></tr>
+                            <tr><td className="pallet-empty" colSpan={4}>{translations.loading}</td></tr>
                         ) : shipments.length ? shipments.map((shipment) => {
                             const shipmentId = String(shipment.shipmentId.value);
                             const isSelected = selectedIds.has(shipmentId);
@@ -144,12 +143,11 @@ function PalletShipmentPicker({selected, onChange, excludedShipmentIds = [], rel
                                     </td>
                                     <td className="pallet-code">{shipment.trackingNumber?.value || pl.common.dash}</td>
                                     <td>{[shipment.recipient?.firstName, shipment.recipient?.lastName].filter(Boolean).join(" ") || pl.common.dash}</td>
-                                    <td>{shipment.destination ? departmentCodeValue(shipment.destination) : pl.common.dash}</td>
                                     <td>{isExcluded ? translations.alreadyOnPallet : pl.shipments.status[shipment.shipmentStatus]}</td>
                                 </tr>
                             );
                         }) : (
-                            <tr><td className="pallet-empty" colSpan={5}>{translations.empty}</td></tr>
+                            <tr><td className="pallet-empty" colSpan={4}>{translations.empty}</td></tr>
                         )}
                     </tbody>
                 </table>

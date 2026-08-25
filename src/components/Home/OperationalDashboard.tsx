@@ -18,12 +18,14 @@ import {getBackendErrorMessage} from "../../api/errorMessage";
 import {useAuthState} from "../../auth/AuthState";
 import Department from "../../class/depots/Department";
 import DeliveryNetworkService from "../../hooks/DeliveryNetworkService";
+import DeliveryService from "../../hooks/DeliveryService";
 import DepartmentService from "../../hooks/DepartmentService";
 import ReturnService from "../../hooks/ReturnService";
 import ShipmentService from "../../hooks/ShipmentService";
 import pl from "../../i18n/translate";
 import {AppTabDefinition} from "../AppShell/types";
 import {useOperatorCapabilities} from "../AppShell/OperatorCapabilitiesContext";
+import {Delivery} from "../Deliveries/model/Delivery";
 import {DepartmentRelation} from "../Departments/model/DepartmentRelation";
 import {ReturnPackageDto} from "../Returns/model/ReturnPackage";
 import {ShipmentDto, ShipmentStatusDto} from "../Shipment/dto/ShipmentDto";
@@ -47,6 +49,8 @@ type ShipmentLookupCriterion = "TRACKING_NUMBER" | "SHIPMENT_ID";
 
 const SHIPMENT_PAGE_SIZE = 100;
 const MAX_SHIPMENT_PAGES = 20;
+const DELIVERY_PAGE_SIZE = 100;
+const MAX_DELIVERY_PAGES = 20;
 const ACTIVE_SHIPMENT_STATUSES: ShipmentStatusDto[] = ["PREPARED", "ACCEPTED", "REROUTE", "SENT", "REDIRECT"];
 
 const formatDateTime = (value?: string | null) => {
@@ -90,6 +94,22 @@ const loadShipments = async () => {
     } while (currentPage.length === SHIPMENT_PAGE_SIZE && page < MAX_SHIPMENT_PAGES);
 
     return shipments;
+};
+
+const loadDepartmentDeliveries = async (departmentId: number) => {
+    const deliveries: Delivery[] = [];
+    let page = 0;
+    let currentPage: Delivery[] = [];
+
+    do {
+        const response = await DeliveryService.getByDepartment(departmentId, page * DELIVERY_PAGE_SIZE,
+            DELIVERY_PAGE_SIZE);
+        currentPage = response.data;
+        deliveries.push(...currentPage);
+        page += 1;
+    } while (currentPage.length === DELIVERY_PAGE_SIZE && page < MAX_DELIVERY_PAGES);
+
+    return deliveries;
 };
 
 const sortByNewest = <T extends {createdAt?: string | null}>(items: T[]) => [...items].sort((left, right) => (
@@ -239,27 +259,28 @@ function OperationalDashboard({onOpenTab}: OperationalDashboardProps) {
             }) : Promise.resolve([] as ReturnPackageDto[]),
             departmentsRequest,
             DeliveryNetworkService.getCurrentNetwork().then((response) => response.data),
-        ]).then(([shipmentResult, returnResult, departmentResult, relationResult]) => {
+            departmentsRequest.then((loadedDepartments) => {
+                const currentDepartment = loadedDepartments.find(
+                    (department) => department.departmentCode?.value === departmentCode,
+                );
+                return currentDepartment
+                    ? loadDepartmentDeliveries(currentDepartment.departmentId)
+                    : [] as Delivery[];
+            }),
+        ]).then(([shipmentResult, returnResult, departmentResult, relationResult, deliveryResult]) => {
             if (ignore) {
                 return;
             }
 
             const loadedDepartments = departmentResult.status === "fulfilled" ? departmentResult.value : [];
-            const currentDepartment = loadedDepartments.find(
-                (department) => department.departmentCode?.value === departmentCode,
-            );
-            setShipments(shipmentResult.status === "fulfilled"
-                ? filterShipmentsForDepartment(
-                    shipmentResult.value,
-                    departmentCode,
-                    currentDepartment?.departmentId,
-                )
+            setShipments(shipmentResult.status === "fulfilled" && deliveryResult.status === "fulfilled"
+                ? filterShipmentsForDepartment(shipmentResult.value, deliveryResult.value)
                 : []);
             setReturnPackages(returnResult.status === "fulfilled" ? returnResult.value : []);
             setDepartments(loadedDepartments);
             setRelations(relationResult.status === "fulfilled" ? relationResult.value : []);
 
-            const failure = [shipmentResult, returnResult, departmentResult, relationResult]
+            const failure = [shipmentResult, returnResult, departmentResult, relationResult, deliveryResult]
                 .find((result) => result.status === "rejected");
             if (failure?.status === "rejected") {
                 setDashboardError(getBackendErrorMessage(failure.reason, pl.home.dashboard.messages.loadError));

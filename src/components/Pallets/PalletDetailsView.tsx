@@ -34,7 +34,7 @@ import Department from "../../class/depots/Department";
 import {AppTabDefinition} from "../AppShell/types";
 import {Delivery} from "../Deliveries/model/Delivery";
 import {deliveryLifecycleLabel, deliveryMethodLabel, deliveryStatusLabel, formatDeliveryDateTime} from "../Deliveries/deliveryLabels";
-import {departmentCodeValue, ShipmentDetailsDto, ShipmentDto} from "../Shipment/dto/ShipmentDto";
+import {ShipmentDetailsDto, ShipmentDto} from "../Shipment/dto/ShipmentDto";
 import {PalletDto, PalletHistoryEntryDto, PalletManualStatusDto} from "./model/Pallet";
 import PalletAddShipmentsDialog from "./PalletAddShipmentsDialog";
 import PalletCarrierDialog from "./PalletCarrierDialog";
@@ -439,14 +439,13 @@ function PalletDetailsView({onOpenTab}: PalletDetailsViewProps) {
                                             <th>{translations.items.columns.trackingNumber}</th>
                                             <th>{translations.items.columns.status}</th>
                                             <th>{translations.items.columns.recipient}</th>
-                                            <th>{translations.items.columns.destination}</th>
                                             <th>{translations.items.columns.weight}</th>
                                             {editable ? <th aria-label={translations.items.columns.actions} /> : null}
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {itemsLoading ? (
-                                            <tr><td className="pallet-empty" colSpan={6}>{translations.items.loading}</td></tr>
+                                            <tr><td className="pallet-empty" colSpan={5}>{translations.items.loading}</td></tr>
                                         ) : items.length ? items.map((item) => {
                                             const itemTrackingNumber = item.shipment?.trackingNumber?.value;
                                             return (
@@ -469,7 +468,6 @@ function PalletDetailsView({onOpenTab}: PalletDetailsViewProps) {
                                                     <td>{item.shipment
                                                         ? [item.shipment.recipient?.city, [item.shipment.recipient?.firstName, item.shipment.recipient?.lastName].filter(Boolean).join(" ")].filter(Boolean).join(" · ")
                                                         : pl.common.dash}</td>
-                                                    <td>{item.shipment?.destination ? departmentCodeValue(item.shipment.destination) || pl.common.dash : pl.common.dash}</td>
                                                     <td>{item.shipment?.weight ? `${item.shipment.weight.value} ${item.shipment.weight.unit}` : pl.common.dash}</td>
                                                     {editable ? (
                                                         <td className="pallet-actions-cell">
@@ -487,7 +485,7 @@ function PalletDetailsView({onOpenTab}: PalletDetailsViewProps) {
                                                 </tr>
                                             );
                                         }) : (
-                                            <tr><td className="pallet-empty" colSpan={6}>{translations.items.empty}</td></tr>
+                                            <tr><td className="pallet-empty" colSpan={5}>{translations.items.empty}</td></tr>
                                         )}
                                     </tbody>
                                 </table>

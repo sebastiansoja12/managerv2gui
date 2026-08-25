@@ -37,7 +37,7 @@ const person = {firstName: "Jan", lastName: "Test", email: "", telephoneNumber: 
 const shipment = {
     shipmentId: {value: "6805406359141427429"}, trackingNumber: {value: "MGR-10"},
     sender: person, recipient: person, shipmentPriority: "MEDIUM",
-    destination: {value: "KT1"}, shipmentStatus: "DELIVERY", shipmentType: "PARENT",
+    shipmentStatus: "DELIVERY", shipmentType: "PARENT",
     price: {amount: 15, currency: "PLN"}, locked: false,
 };
 const returnPackage = {
@@ -52,7 +52,12 @@ const delivery = {
     type: "OUTBOUND",
     deliveryStatus: "DELIVERY",
     lifecycleStatus: "CREATED",
+    originDepartmentId: "3",
+    destinationDepartmentId: "5",
+    pickupMethod: "DEPARTMENT",
     method: "COURIER",
+    pickupPointId: null,
+    deliveryPickupPointId: null,
     createdAt: "2026-10-07T17:00:00",
     plannedAt: null,
     deliveredAt: null,
@@ -65,7 +70,6 @@ const delivery = {
         departmentId: "12",
         supplierId: "7",
         vehicleId: null,
-        method: "COURIER",
         comment: "Przekazano kurierowi",
         failureReason: null,
     }],
@@ -146,11 +150,11 @@ describe("ShipmentDetails return data from Manager", () => {
     it("displays the delivery pickup point code instead of its id", async () => {
         const deliveryPickupPointId = "c5afe577-8f66-464a-abaf-1d4369f0000";
         (ShipmentService.getControlCenter as jest.Mock).mockResolvedValue({
-            data: {
-                shipment: {...shipment, deliveryPickupPointId: {value: deliveryPickupPointId}},
-                routeLog: null,
-                returnPackage: null,
-            },
+            data: {shipment, routeLog: null, returnPackage: null},
+            status: 200,
+        });
+        (DeliveryService.getByShipmentId as jest.Mock).mockResolvedValue({
+            data: {...delivery, method: "PICKUP_POINT", deliveryPickupPointId},
             status: 200,
         });
 
