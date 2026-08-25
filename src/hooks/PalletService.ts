@@ -39,6 +39,8 @@ const search = (params: PalletSearchParams) =>
 const getByTrackingNumber = (trackingNumber: string) =>
     client.get<PalletDto>(`/pallets/tracking/${encodeURIComponent(trackingNumber)}`);
 
+const getById = (palletId: string) => client.get<PalletDto>(`/pallets/${encodeURIComponent(palletId)}`);
+
 const cancel = (palletId: string) =>
     client.put<undefined, PalletDto>(`/pallets/${encodeURIComponent(palletId)}/cancel`);
 
@@ -141,6 +143,7 @@ const PalletService = {
     createFromShipments,
     search,
     getByTrackingNumber,
+    getById,
     cancel,
     scan,
     addShipments,
