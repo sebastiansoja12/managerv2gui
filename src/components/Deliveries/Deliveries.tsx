@@ -1,34 +1,97 @@
-import React, {useEffect, useState} from "react";
-import {Alert, Button, Chip, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Typography} from "components/ui";
-import {Close, Download, Edit, LocalShipping, Refresh} from "components/ui/icons";
+import React, {useCallback, useEffect, useState} from "react";
+import {Alert, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, MenuItem, TextField,
+    Typography} from "components/ui";
+import {LocalShipping, Refresh} from "components/ui/icons";
 import {useNavigate} from "react-router-dom";
 import {getBackendErrorMessage} from "../../api/errorMessage";
 import Department from "../../class/depots/Department";
 import DeliveryService from "../../hooks/DeliveryService";
 import DepartmentService from "../../hooks/DepartmentService";
 import pl from "../../i18n/translate";
-import {Delivery} from "./model/Delivery";
+import DeliveryFilters from "./list/DeliveryFilters";
+import DeliveryTable from "./list/DeliveryTable";
+import {
+    defaultDeliveryListFilters,
+    defaultDeliveryListSort,
+    DeliveryListFilters,
+    DeliveryListSort,
+    deliveryPageSizes,
+    toggleSort,
+} from "./list/deliveryListModel";
+import {DeliveryListItem, DeliverySortField} from "./model/Delivery";
 import {exportDeliveryExcel, exportDeliveryPdf} from "./deliveryExport";
-import {deliveryStatusLabel, deliveryTargetLabel, deliveryTypeLabel, formatDeliveryDateTime} from "./deliveryLabels";
 import "./styles/deliveries.css";
-
-const PAGE_SIZE = 25;
 
 function Deliveries() {
     const navigate = useNavigate();
     const [page, setPage] = useState(0);
+    const [pageSize, setPageSize] = useState<number>(25);
+    const [filters, setFilters] = useState<DeliveryListFilters>(defaultDeliveryListFilters);
+    const [sort, setSort] = useState<DeliveryListSort>(defaultDeliveryListSort);
     const [reloadKey, setReloadKey] = useState(0);
-    const [deliveries, setDeliveries] = useState<Delivery[]>([]);
-    const [deliveryToCancel, setDeliveryToCancel] = useState<Delivery | null>(null);
+    const [deliveries, setDeliveries] = useState<DeliveryListItem[]>([]);
+    const [departments, setDepartments] = useState<Department[]>([]);
+    const [deliveryToCancel, setDeliveryToCancel] = useState<DeliveryListItem | null>(null);
     const [canceling, setCanceling] = useState(false);
     const [cancelError, setCancelError] = useState<string | null>(null);
-    const [selectedId, setSelectedId] = useState<string | null>(null);
     const [exporting, setExporting] = useState(false);
     const [exportError, setExportError] = useState<string | null>(null);
     const [hasNextPage, setHasNextPage] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const selectedDelivery = deliveries.find((delivery) => delivery.id === selectedId) || null;
+
+    const changeFilters = useCallback((next: DeliveryListFilters) => {
+        setFilters(next);
+        setPage(0);
+    }, []);
+
+    const changeSort = (field: DeliverySortField) => {
+        setSort((current) => toggleSort(current, field));
+        setPage(0);
+    };
+
+    useEffect(() => {
+        let active = true;
+        DepartmentService.getAll()
+            .then((response) => {
+                if (active) {
+                    setDepartments(Array.isArray(response.data) ? response.data : []);
+                }
+            })
+            .catch(() => {
+                if (active) {
+                    setDepartments([]);
+                }
+            });
+        return () => {active = false;};
+    }, []);
+
+    useEffect(() => {
+        let active = true;
+        setLoading(true);
+        setError(null);
+        DeliveryService.query(page, pageSize, {...filters, sort: sort.field, direction: sort.direction})
+            .then((response) => {
+                if (!active) {
+                    return;
+                }
+                setDeliveries(response.data.items);
+                setHasNextPage(response.data.hasNext);
+            })
+            .catch((loadError) => {
+                if (active) {
+                    setError(getBackendErrorMessage(loadError, pl.deliveries.loadError));
+                    setDeliveries([]);
+                    setHasNextPage(false);
+                }
+            })
+            .finally(() => {
+                if (active) {
+                    setLoading(false);
+                }
+            });
+        return () => {active = false;};
+    }, [filters, page, pageSize, reloadKey, sort]);
 
     const cancelDelivery = async () => {
         if (!deliveryToCancel) {
@@ -47,17 +110,11 @@ function Deliveries() {
         }
     };
 
-    const exportSelected = async (format: "excel" | "pdf") => {
-        if (!selectedDelivery) return;
+    const exportDelivery = async (delivery: DeliveryListItem, format: "excel" | "pdf") => {
         setExporting(true);
         setExportError(null);
         try {
-            const [response, departments] = await Promise.all([
-                DeliveryService.get(selectedDelivery.id),
-                DepartmentService.getAll()
-                    .then((departmentResponse) => Array.isArray(departmentResponse.data) ? departmentResponse.data : [])
-                    .catch(() => [] as Department[]),
-            ]);
+            const response = await DeliveryService.get(delivery.id);
             if (format === "excel") {
                 await exportDeliveryExcel(response.data, departments);
             } else {
@@ -70,62 +127,39 @@ function Deliveries() {
         }
     };
 
-    useEffect(() => {
-        let active = true;
-        setLoading(true);
-        setError(null);
-
-        DeliveryService.getRecent(page * PAGE_SIZE, PAGE_SIZE + 1)
-            .then((response) => {
-                if (!active) {
-                    return;
-                }
-                const visibleDeliveries = response.data.slice(0, PAGE_SIZE);
-                setDeliveries(visibleDeliveries);
-                setSelectedId((current) => visibleDeliveries.some((delivery) => delivery.id === current) ? current : null);
-                setHasNextPage(response.data.length > PAGE_SIZE);
-            })
-            .catch((loadError) => {
-                if (active) {
-                    setError(getBackendErrorMessage(loadError, pl.deliveries.loadError));
-                    setDeliveries([]);
-                    setHasNextPage(false);
-                }
-            })
-            .finally(() => {
-                if (active) {
-                    setLoading(false);
-                }
-            });
-
-        return () => {
-            active = false;
-        };
-    }, [page, reloadKey]);
-
     return (
         <div className="deliveries-page">
             <div className="deliveries-shell">
                 <header className="deliveries-header">
                     <div className="deliveries-title">
-                        <span className="deliveries-title-icon"><LocalShipping /></span>
+                        <span className="deliveries-title-icon"><LocalShipping/></span>
                         <div>
                             <Typography variant="h4">{pl.deliveries.title}</Typography>
                             <Typography variant="body2">{pl.deliveries.subtitle}</Typography>
                         </div>
                     </div>
-                    <Button variant="outlined" startIcon={<Refresh />} disabled={loading}
+                    <Button variant="outlined" startIcon={<Refresh/>} disabled={loading}
                             onClick={() => setReloadKey((current) => current + 1)}>
                         {pl.common.refresh}
                     </Button>
                 </header>
 
-                <div className="deliveries-overview">
                 <section className="deliveries-card" aria-label={pl.deliveries.listTitle}>
                     <div className="deliveries-card-heading">
                         <Typography variant="h6">{pl.deliveries.listTitle}</Typography>
-                        <span>{pl.deliveries.page.replace("{page}", String(page + 1))}</span>
+                        <div className="deliveries-list-meta">
+                            <span>{pl.deliveries.page.replace("{page}", String(page + 1))}</span>
+                            <TextField select size="small" label={pl.deliveries.filters.pageSize} value={String(pageSize)}
+                                       onChange={(event: React.ChangeEvent<HTMLSelectElement>) => {
+                                           setPageSize(Number(event.target.value));
+                                           setPage(0);
+                                       }}>
+                                {deliveryPageSizes.map((size) => <MenuItem key={size} value={String(size)}>{size}</MenuItem>)}
+                            </TextField>
+                        </div>
                     </div>
+                    <DeliveryFilters filters={filters} departments={departments} onChange={changeFilters}/>
+                    {exportError && <Alert severity="error">{exportError}</Alert>}
                     {error && <Alert severity="error" action={
                         <Button variant="text" onClick={() => setReloadKey((current) => current + 1)}>
                             {pl.deliveries.retry}
@@ -136,40 +170,14 @@ function Deliveries() {
                     ) : !error && deliveries.length === 0 ? (
                         <div className="deliveries-state">{pl.deliveries.empty}</div>
                     ) : !error ? (
-                        <div className="deliveries-table-wrap">
-                            <table className="deliveries-table">
-                                <thead>
-                                <tr>
-                                    <th className="deliveries-selection-column"><span className="visually-hidden">{pl.deliveries.selectDelivery}</span></th>
-                                    <th>{pl.deliveries.columns.id}</th>
-                                    <th>{pl.deliveries.columns.shipment}</th>
-                                    <th>{pl.deliveries.columns.target}</th>
-                                    <th>{pl.deliveries.columns.type}</th>
-                                    <th>{pl.deliveries.columns.status}</th>
-                                    <th>{pl.deliveries.columns.created}</th>
-                                    <th>{pl.deliveries.columns.steps}</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {deliveries.map((delivery) => (
-                                    <tr key={delivery.id} className={selectedId === delivery.id ? "is-selected" : ""}
-                                        onClick={() => setSelectedId(delivery.id)}>
-                                        <td><input type="radio" name="selected-delivery" checked={selectedId === delivery.id}
-                                                   aria-label={`${pl.deliveries.selectDelivery} ${delivery.id}`}
-                                                   onChange={() => setSelectedId(delivery.id)}/></td>
-                                        <td className="deliveries-id" title={delivery.id}>{delivery.id}</td>
-                                        <td>{delivery.shipmentId || pl.common.dash}</td>
-                                        <td>{deliveryTargetLabel(delivery.targetType)} · {delivery.targetId}</td>
-                                        <td>{deliveryTypeLabel(delivery.type)}</td>
-                                        <td><Chip size="small" label={delivery.lifecycleStatus === "CANCELED"
-                                            ? pl.deliveries.lifecycle.CANCELED : deliveryStatusLabel(delivery.deliveryStatus)}/></td>
-                                        <td>{formatDeliveryDateTime(delivery.createdAt)}</td>
-                                        <td>{delivery.steps.length}</td>
-                                    </tr>
-                                ))}
-                                </tbody>
-                            </table>
-                        </div>
+                        <DeliveryTable deliveries={deliveries} departments={departments} sort={sort} busy={exporting}
+                                       onSort={changeSort}
+                                       onOpen={(delivery) => navigate(`/deliveries/${encodeURIComponent(delivery.id)}/edit`)}
+                                       onExport={exportDelivery}
+                                       onCancel={(delivery) => {
+                                           setCancelError(null);
+                                           setDeliveryToCancel(delivery);
+                                       }}/>
                     ) : null}
                     <div className="deliveries-pagination">
                         <Button variant="outlined" disabled={loading || page === 0}
@@ -178,24 +186,6 @@ function Deliveries() {
                                 onClick={() => setPage((current) => current + 1)}>{pl.deliveries.next}</Button>
                     </div>
                 </section>
-                <aside className="deliveries-action-panel" aria-label={pl.deliveries.actionsTitle}>
-                    <Typography variant="h6">{pl.deliveries.actionsTitle}</Typography>
-                    <p>{selectedDelivery ? `${pl.deliveries.selectedDelivery}: ${selectedDelivery.id}` : pl.deliveries.selectHint}</p>
-                    {exportError && <Alert severity="error">{exportError}</Alert>}
-                    <Button variant="outlined" startIcon={<Edit/>} disabled={!selectedDelivery || exporting}
-                            onClick={() => selectedDelivery && navigate(`/deliveries/${encodeURIComponent(selectedDelivery.id)}/edit`)}>
-                        {pl.deliveries.edit}</Button>
-                    <Button variant="outlined" color="error" startIcon={<Close/>}
-                            disabled={!selectedDelivery || exporting || selectedDelivery.lifecycleStatus === "CANCELED" || selectedDelivery.lifecycleStatus === "COMPLETED"}
-                            onClick={() => {setCancelError(null); setDeliveryToCancel(selectedDelivery);}}>
-                        {pl.deliveries.cancel}</Button>
-                    <div className="deliveries-action-divider"/>
-                    <Button variant="outlined" startIcon={<Download/>} disabled={!selectedDelivery || exporting}
-                            onClick={() => exportSelected("excel")}>{pl.deliveries.exportExcel}</Button>
-                    <Button variant="outlined" startIcon={<Download/>} disabled={!selectedDelivery || exporting}
-                            onClick={() => exportSelected("pdf")}>{pl.deliveries.exportPdf}</Button>
-                </aside>
-                </div>
 
                 <Dialog open={Boolean(deliveryToCancel)} onClose={() => !canceling && setDeliveryToCancel(null)}>
                     <DialogTitle>{pl.deliveries.cancelTitle}</DialogTitle>

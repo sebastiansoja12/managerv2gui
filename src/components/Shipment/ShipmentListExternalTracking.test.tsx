@@ -1,6 +1,8 @@
 import React from "react";
 import {act, fireEvent, render, screen, waitFor} from "@testing-library/react";
 import {MemoryRouter} from "react-router-dom";
+import DeliveryService from "../../hooks/DeliveryService";
+import DepartmentService from "../../hooks/DepartmentService";
 import ShipmentService from "../../hooks/ShipmentService";
 import TrackingService from "../../hooks/TrackingService";
 import pl from "../../i18n/translate";
@@ -9,6 +11,16 @@ import ShipmentList from "./ShipmentList";
 jest.mock("../../hooks/ShipmentService", () => ({
     __esModule: true,
     default: {search: jest.fn()},
+}));
+
+jest.mock("../../hooks/DeliveryService", () => ({
+    __esModule: true,
+    default: {query: jest.fn()},
+}));
+
+jest.mock("../../hooks/DepartmentService", () => ({
+    __esModule: true,
+    default: {getAll: jest.fn()},
 }));
 
 jest.mock("../../hooks/TrackingService", () => ({
@@ -30,6 +42,8 @@ describe("external tracking search", () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
+        (DeliveryService.query as jest.Mock).mockResolvedValue({data: {items: [], page: 0, size: 0, hasNext: false}});
+        (DepartmentService.getAll as jest.Mock).mockResolvedValue({data: []});
         (ShipmentService.search as jest.Mock).mockResolvedValue({data: [], status: 200});
         (TrackingService.getAvailableProviders as jest.Mock).mockResolvedValue({
             data: [{id: "INPOST", displayName: "InPost"}],

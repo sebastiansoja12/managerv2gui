@@ -1,6 +1,8 @@
 import React from "react";
 import {fireEvent, render, screen, waitFor, within} from "@testing-library/react";
 import {MemoryRouter} from "react-router-dom";
+import DeliveryService from "../../hooks/DeliveryService";
+import DepartmentService from "../../hooks/DepartmentService";
 import DocumentService from "../../hooks/DocumentService";
 import ShipmentService from "../../hooks/ShipmentService";
 import pl from "../../i18n/translate";
@@ -16,6 +18,16 @@ jest.mock("../../hooks/ShipmentService", () => ({
 jest.mock("../../hooks/DocumentService", () => ({
     __esModule: true,
     default: {getQrLabel: jest.fn()},
+}));
+
+jest.mock("../../hooks/DeliveryService", () => ({
+    __esModule: true,
+    default: {query: jest.fn()},
+}));
+
+jest.mock("../../hooks/DepartmentService", () => ({
+    __esModule: true,
+    default: {getAll: jest.fn()},
 }));
 
 jest.mock("./shipmentExcelExport", () => ({exportShipmentExcel: jest.fn()}));
@@ -34,10 +46,23 @@ describe("shipment list selection", () => {
     beforeEach(() => {
         jest.clearAllMocks();
         (ShipmentService.search as jest.Mock).mockResolvedValue({data: [shipment], status: 200});
+        (DepartmentService.getAll as jest.Mock).mockResolvedValue({data: [{departmentId: 5, departmentCode: {value: "POZ1"}}]});
+        (DeliveryService.query as jest.Mock).mockResolvedValue({
+            data: {items: [{shipmentId: "101", destinationDepartmentId: "5"}], page: 0, size: 1, hasNext: false},
+            status: 200,
+        });
         (exportShipmentExcel as jest.Mock).mockResolvedValue(undefined);
         (DocumentService.getQrLabel as jest.Mock).mockResolvedValue({blob: new Blob(["label"], {type: "application/pdf"})});
         URL.createObjectURL = jest.fn(() => "blob:shipment-label");
         URL.revokeObjectURL = jest.fn();
+    });
+
+    it("shows the destination department code from the shipment delivery", async () => {
+        render(<MemoryRouter><ShipmentList variant="details" onOpenTab={jest.fn()}/></MemoryRouter>);
+
+        const row = await screen.findByRole("row", {name: /#101/});
+        expect(await within(row).findByText("POZ1")).toBeInTheDocument();
+        expect(DeliveryService.query).toHaveBeenCalledWith(0, 1, {shipmentIds: ["101"]});
     });
 
     it("enables actions for the selected shipment and opens its related shipment", async () => {
