@@ -2323,10 +2323,15 @@
 }
 
 .shipment-dangerous-good-flags [data-ui="chip"] {
-    background: var(--brand-surface);
-    border: 1px solid var(--brand-accent-border);
-    color: #7c2d12;
+    background: color-mix(in srgb, var(--danger) 12%, var(--brand-surface));
+    border: 1px solid color-mix(in srgb, var(--danger) 48%, var(--brand-border));
+    color: var(--danger);
     font-weight: 850;
+}
+
+.shipment-dangerous-good-flags [data-ui="chip-label"] {
+    color: inherit;
+    font-weight: 900;
 }
 
 .shipment-dangerous-good-notes {
@@ -3061,6 +3066,14 @@
     border-right: 1px solid var(--brand-border);
 }
 
+.shipment-cc-page .shipment-details-summary-with-origin > div:nth-child(n + 5) {
+    border-bottom: 1px solid var(--brand-border);
+}
+
+.shipment-cc-page .shipment-details-summary-with-origin > div:nth-child(n + 9) {
+    border-bottom: 0;
+}
+
 .shipment-cc-page .shipment-details-summary > div > span,
 .shipment-cc-page .shipment-detail-value span,
 .shipment-cc-page .shipment-type-control > span,
@@ -3468,6 +3481,18 @@
         border-bottom: 0;
     }
 
+    .shipment-cc-page .shipment-details-summary-with-origin > div:nth-last-child(-n + 2) {
+        border-bottom: 1px solid var(--brand-border);
+    }
+
+    .shipment-cc-page .shipment-details-summary-with-origin > div:last-child {
+        border-bottom: 0;
+    }
+
+    .shipment-cc-page .shipment-details-summary-with-cancellation > div:nth-last-child(-n + 2) {
+        border-bottom: 0;
+    }
+
     .shipment-cc-page .shipment-status-control {
         align-items: flex-start;
         flex-direction: column;
@@ -3562,6 +3587,10 @@
 .shipment-cc-page .shipment-details-summary > div > span[title] {
     cursor: help;
     display: block;
+}
+
+.shipment-cc-page .shipment-cancellation-window-value {
+    white-space: normal;
 }
 
 .shipment-cc-page .shipment-destination-value {

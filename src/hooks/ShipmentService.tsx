@@ -75,6 +75,10 @@ const update = (data: ShipmentUpdateRequestApi) => {
     return client.put<ShipmentUpdateRequestApi, void>("/shipments", data);
 };
 
+const cancel = (shipmentId: string) => {
+    return client.put<undefined, ShipmentResponseInformation>(`/shipments/cancel/${shipmentId}`, undefined);
+};
+
 const returnShipment = (data: ShipmentReturnRequestApi) => {
     return client.put<ShipmentReturnRequestApi, ShipmentResponseInformation>("/shipments/returns", data);
 };
@@ -152,6 +156,7 @@ const ShipmentService = {
     getControlCenter,
     getControlCenterByTrackingNumber,
     update,
+    cancel,
     returnShipment,
     deliverShipment,
     updateStatus,

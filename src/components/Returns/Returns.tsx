@@ -341,7 +341,21 @@ function Returns() {
                 ? pl.returns.messages.completeSuccess
                 : pl.returns.messages.cancelSuccess;
             setConfirmation(null);
-            await loadReturn(returnPackage.returnPackageId.value);
+            if (confirmation === "complete") {
+                await loadReturn(returnPackage.returnPackageId.value);
+            } else {
+                const canceledReturnPackage: ReturnPackageDto = {
+                    ...returnPackage,
+                    returnStatus: "CANCELLED",
+                    updatedAt: new Date().toISOString(),
+                };
+                setReturnPackages((currentReturnPackages) => currentReturnPackages.map((item) => (
+                    item.returnPackageId.value === canceledReturnPackage.returnPackageId.value
+                        ? canceledReturnPackage
+                        : item
+                )));
+                selectReturnPackage(canceledReturnPackage);
+            }
             setNotice({severity: "success", message: successMessage});
         } catch (error) {
             setNotice({

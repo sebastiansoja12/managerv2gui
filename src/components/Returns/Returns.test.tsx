@@ -180,4 +180,24 @@ describe("Returns", () => {
         expect(await screen.findByText(pl.returns.messages.createSuccess)).toBeInTheDocument();
         await waitFor(() => expect(screen.queryByRole("progressbar")).not.toBeInTheDocument());
     });
+
+    it("cancels a return without reloading the cancelled return by id", async () => {
+        mockedReturnService.cancel.mockResolvedValue({data: {status: "OK"}, status: 200});
+
+        render(<Returns />);
+
+        await screen.findByRole("rowheader", {name: returnPackage.returnPackageId.value});
+        fireEvent.click(screen.getByRole("button", {name: pl.returns.actions.open}));
+        fireEvent.click(screen.getByRole("button", {name: pl.returns.actions.cancelReturn}));
+        fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", {
+            name: pl.returns.actions.cancelReturn,
+        }));
+
+        await waitFor(() => expect(mockedReturnService.cancel).toHaveBeenCalledWith(
+            returnPackage.returnPackageId.value,
+        ));
+        expect(mockedReturnService.get).not.toHaveBeenCalled();
+        expect(await screen.findByText(pl.returns.messages.cancelSuccess)).toBeInTheDocument();
+        expect(screen.getAllByText(pl.returns.status.CANCELLED).length).toBeGreaterThan(0);
+    });
 });

@@ -36,6 +36,10 @@ export interface DepartmentCodeDto {
     value: string;
 }
 
+export interface DepartmentIdDto {
+    value: number;
+}
+
 export type DepartmentCodeValue = ValueObject<string>;
 
 export const departmentCodeValue = (departmentCode: DepartmentCodeValue): string => {
@@ -96,6 +100,9 @@ export interface ShipmentDto {
     recipient: PersonApi;
     shipmentSize: ShipmentSizeDto;
     destination: DepartmentCodeValue;
+    originDepartmentId?: DepartmentIdDto | null;
+    originCountry?: CountryCodeDto | null;
+    destinationCountry?: CountryCodeDto | null;
     shipmentStatus: ShipmentStatusDto;
     shipmentType: ShipmentTypeDto;
     shipmentRelatedId?: ShipmentIdDto | null;
@@ -105,6 +112,8 @@ export interface ShipmentDto {
     locked: boolean;
     signature?: SignatureDto | null;
     dangerousGood?: DangerousGoodApi | null;
+    createdAt?: string | null;
+    updatedAt?: string | null;
 }
 
 export interface ShipmentDetailsDto {
@@ -130,6 +139,18 @@ export interface ShipmentCreateRequestApi {
 export interface ShipmentCreateResponseDto {
     shipmentId: string;
     trackingNumber: string;
+}
+
+export interface ShipmentCreateInitialState {
+    sender: PersonApi;
+    recipient: PersonApi;
+    shipmentSize: ShipmentSizeDto;
+    shipmentPriority: ShipmentPriorityDto;
+    priceAmount: string;
+    currency: string;
+    issuerCountryCode: CountryCodeDto;
+    receiverCountryCode: CountryCodeDto;
+    dangerousGood?: DangerousGoodApi | null;
 }
 
 export interface ShipmentUpdateRequestApi {
@@ -213,7 +234,9 @@ export type ShipmentPriorityDto = "LOW" | "MEDIUM" | "HIGH" | "EXPRESS";
 
 export type ShipmentSizeDto = "TINY" | "SMALL" | "MEDIUM" | "AVERAGE" | "BIG" | "CUSTOM" | "TEST";
 
-export type ShipmentStatusDto = "CREATED" | "REROUTE" | "SENT" | "DELIVERY" | "RETURN" | "REDIRECT";
+export type CountryCodeDto = typeof countryCodes[number];
+
+export type ShipmentStatusDto = "CREATED" | "PREPARED" | "ACCEPTED" | "REROUTE" | "SENT" | "DELIVERY" | "RETURN" | "REDIRECT" | "CANCELED";
 
 export type ShipmentTypeDto = "PARENT" | "CHILD";
 
@@ -223,7 +246,9 @@ export const shipmentSizes: ShipmentSizeDto[] = ["TINY", "SMALL", "MEDIUM", "AVE
 
 export const shipmentPriorities: ShipmentPriorityDto[] = ["LOW", "MEDIUM", "HIGH", "EXPRESS"];
 
-export const shipmentStatuses: ShipmentStatusDto[] = ["CREATED", "REROUTE", "SENT", "DELIVERY", "RETURN", "REDIRECT"];
+export const shipmentStatuses: ShipmentStatusDto[] = ["CREATED", "PREPARED", "ACCEPTED", "REROUTE", "SENT", "DELIVERY", "RETURN", "REDIRECT", "CANCELED"];
+
+export const shipmentChangeStatuses: ShipmentStatusDto[] = shipmentStatuses.filter((status) => status !== "CANCELED");
 
 export const shipmentTypes: ShipmentTypeDto[] = ["PARENT", "CHILD"];
 
