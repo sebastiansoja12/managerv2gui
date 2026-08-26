@@ -284,6 +284,107 @@
     flex: 0 0 auto;
 }
 
+.shipment-configuration-loading {
+    align-items: center;
+    display: inline-flex;
+    gap: 8px;
+}
+
+.shipment-configuration-toast {
+    animation: shipment-configuration-toast-in 260ms cubic-bezier(0.2, 0.9, 0.2, 1) both;
+    max-width: min(420px, calc(100vw - 32px));
+}
+
+.shipment-configuration-toast-alert[data-ui="alert"] {
+    align-items: center;
+    background:
+        linear-gradient(135deg, color-mix(in srgb, var(--success) 18%, var(--surface-elevated)), var(--surface-elevated) 68%),
+        var(--surface-elevated);
+    border: 1px solid color-mix(in srgb, var(--success) 42%, var(--border));
+    border-radius: 14px;
+    box-shadow: 0 18px 48px color-mix(in srgb, var(--success) 16%, transparent),
+        0 14px 34px color-mix(in srgb, var(--foreground) 24%, transparent);
+    color: var(--foreground);
+    display: flex;
+    gap: 12px;
+    min-width: min(380px, calc(100vw - 32px));
+    padding: 14px 16px;
+}
+
+.shipment-configuration-toast-alert[data-ui="alert"] > div {
+    align-items: center;
+    display: flex;
+    gap: 12px;
+}
+
+.shipment-configuration-toast-icon {
+    align-items: center;
+    background: color-mix(in srgb, var(--success) 18%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--success) 42%, transparent);
+    border-radius: 999px;
+    color: var(--success);
+    display: inline-flex;
+    flex: 0 0 auto;
+    height: 34px;
+    justify-content: center;
+    width: 34px;
+}
+
+.shipment-configuration-toast-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.shipment-configuration-toast-copy strong {
+    color: var(--foreground);
+    font-size: 14px;
+    font-weight: 850;
+    letter-spacing: 0;
+    line-height: 1.3;
+}
+
+.shipment-configuration-toast-alert[data-ui="alert"] button {
+    align-items: center;
+    border-radius: 999px;
+    color: var(--muted-foreground);
+    display: inline-flex;
+    font-size: 18px;
+    height: 28px;
+    justify-content: center;
+    line-height: 1;
+    opacity: 1;
+    transition: background 160ms ease, color 160ms ease, transform 160ms ease;
+    width: 28px;
+}
+
+.shipment-configuration-toast-alert[data-ui="alert"] button:hover,
+.shipment-configuration-toast-alert[data-ui="alert"] button:focus-visible {
+    background: color-mix(in srgb, var(--success) 12%, transparent);
+    color: var(--foreground);
+    outline: none;
+    transform: scale(1.04);
+}
+
+@keyframes shipment-configuration-toast-in {
+    from {
+        opacity: 0;
+        transform: translate3d(0, 14px, 0) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .shipment-configuration-toast {
+        animation: none;
+    }
+}
+
 .shipment-configuration-sections {
     display: grid;
     gap: 16px;

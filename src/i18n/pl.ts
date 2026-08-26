@@ -841,7 +841,7 @@ export const pl = {
             value: "Wartość",
         },
         shipmentConfiguration: {
-            previewNote: "Wersja poglądowa — ustawienia są zapisywane wyłącznie w tej przeglądarce.",
+            previewNote: "Zmiana konfiguracji ma wpływ na wszystkich użytkowników wewnątrz organizacji",
             categories: {
                 validation: "Walidacja",
                 labels: "Etykiety",
@@ -1021,7 +1021,11 @@ export const pl = {
                 },
             },
             messages: {
-                saved: "Ustawienia przesyłek zostały zapisane lokalnie w GUI.",
+                loading: "Ładowanie konfiguracji przesyłek...",
+                saving: "Zapisywanie...",
+                saved: "Ustawienia przesyłek zostały zapisane.",
+                loadError: "Nie udało się pobrać konfiguracji przesyłek",
+                saveError: "Nie udało się zapisać konfiguracji przesyłek",
             },
         },
         courierConfiguration: {

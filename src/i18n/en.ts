@@ -845,7 +845,7 @@ export const en: typeof pl = {
             value: "Value",
         },
         shipmentConfiguration: {
-            previewNote: "GUI preview — settings are stored only in this browser.",
+            previewNote: "Configuration is loaded and saved for the current operator.",
             categories: {
                 validation: "Validation",
                 labels: "Labels",
@@ -1025,7 +1025,11 @@ export const en: typeof pl = {
                 },
             },
             messages: {
-                saved: "Shipment settings have been saved locally in the GUI.",
+                loading: "Loading shipment configuration...",
+                saving: "Saving...",
+                saved: "Shipment settings have been saved.",
+                loadError: "Could not load shipment configuration",
+                saveError: "Could not save shipment configuration",
             },
         },
         courierConfiguration: {

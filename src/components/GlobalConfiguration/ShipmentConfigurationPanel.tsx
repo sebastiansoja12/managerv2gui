@@ -1,18 +1,31 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {
     Alert,
     Button,
+    CircularProgress,
     Dialog,
     DialogActions,
     DialogContent,
     DialogTitle,
     FormControlLabel,
     MenuItem,
+    Snackbar,
     Switch,
     TextField,
 } from "components/ui";
-import {InfoOutlined, Save, Settings} from "components/ui/icons";
+import {CheckCircle, InfoOutlined, Save, Settings} from "components/ui/icons";
+import {getBackendErrorMessage} from "../../api/errorMessage";
+import OperatorConfigurationService from "../../hooks/OperatorConfigurationService";
 import pl from "../../i18n/translate";
+import {
+    DefaultShipmentStatusApi,
+    ShipmentConfigurationApi,
+    ShipmentLabelFormatApi,
+    ShipmentNotificationChannelApi,
+    ShipmentServiceLevelApi,
+    TrackingNumberDateFormatApi,
+    TrackingNumberSourceApi,
+} from "./model/ShipmentConfiguration";
 
 type ShipmentConfigurationDraft = {
     validateAddressData: boolean;
@@ -26,9 +39,11 @@ type ShipmentConfigurationDraft = {
     attachPackingSlip: boolean;
     labelFormat: string;
     maximumWeightKg: string;
+    minimumWeightKg: string;
     maximumLengthCm: string;
     maximumWidthCm: string;
     maximumHeightCm: string;
+    maximumShipmentValue: string;
     allowOversized: boolean;
     defaultStatus: string;
     defaultServiceLevel: string;
@@ -86,9 +101,11 @@ const defaultShipmentConfiguration: ShipmentConfigurationDraft = {
     attachPackingSlip: false,
     labelFormat: "pdfA6",
     maximumWeightKg: "31.5",
+    minimumWeightKg: "0.2",
     maximumLengthCm: "120",
     maximumWidthCm: "80",
     maximumHeightCm: "80",
+    maximumShipmentValue: "5000",
     allowOversized: false,
     defaultStatus: "created",
     defaultServiceLevel: "standard",
@@ -109,6 +126,78 @@ const defaultShipmentConfiguration: ShipmentConfigurationDraft = {
     notifyRecipientOnDelivered: true,
     notifySenderOnException: true,
     notificationChannel: "sms",
+};
+
+const labelFormatFromApi: Record<ShipmentLabelFormatApi, string> = {
+    PDF_A6: "pdfA6",
+    PDF_A4: "pdfA4",
+    ZPL: "zpl",
+};
+
+const labelFormatToApi: Record<string, ShipmentLabelFormatApi> = {
+    pdfA6: "PDF_A6",
+    pdfA4: "PDF_A4",
+    zpl: "ZPL",
+};
+
+const shipmentStatusFromApi: Record<DefaultShipmentStatusApi, string> = {
+    CREATED: "created",
+    PREPARED: "prepared",
+    ACCEPTED: "accepted",
+};
+
+const shipmentStatusToApi: Record<string, DefaultShipmentStatusApi> = {
+    created: "CREATED",
+    prepared: "PREPARED",
+    accepted: "ACCEPTED",
+};
+
+const serviceLevelFromApi: Record<ShipmentServiceLevelApi, string> = {
+    ECONOMY: "economy",
+    STANDARD: "standard",
+    EXPRESS: "express",
+};
+
+const serviceLevelToApi: Record<string, ShipmentServiceLevelApi> = {
+    economy: "ECONOMY",
+    standard: "STANDARD",
+    express: "EXPRESS",
+};
+
+const trackingSourceFromApi: Record<TrackingNumberSourceApi, string> = {
+    SEQUENCE: "sequence",
+    SHIPMENT_ID: "shipmentId",
+    RANDOM: "random",
+};
+
+const trackingSourceToApi: Record<string, TrackingNumberSourceApi> = {
+    sequence: "SEQUENCE",
+    shipmentId: "SHIPMENT_ID",
+    random: "RANDOM",
+};
+
+const trackingDateFormatFromApi: Record<TrackingNumberDateFormatApi, string> = {
+    YYYYMMDD: "yyyyMMdd",
+    YYMMDD: "yyMMdd",
+    YYYYMM: "yyyyMM",
+};
+
+const trackingDateFormatToApi: Record<string, TrackingNumberDateFormatApi> = {
+    yyyyMMdd: "YYYYMMDD",
+    yyMMdd: "YYMMDD",
+    yyyyMM: "YYYYMM",
+};
+
+const notificationChannelFromApi: Record<ShipmentNotificationChannelApi, string> = {
+    SMS: "sms",
+    EMAIL: "email",
+    BOTH: "both",
+};
+
+const notificationChannelToApi: Record<string, ShipmentNotificationChannelApi> = {
+    sms: "SMS",
+    email: "EMAIL",
+    both: "BOTH",
 };
 
 const getTrackingNumberRule = (configuration: ShipmentConfigurationDraft): TrackingNumberRuleDraft => ({
@@ -166,9 +255,140 @@ const readShipmentConfiguration = (): ShipmentConfigurationDraft => {
     }
 };
 
+const toTextNumber = (value: number | null | undefined, fallback: string) => (
+    Number.isFinite(value) ? String(value) : fallback
+);
+
+const toApiNumber = (value: string, fallback: string) => {
+    const parsedValue = Number(value);
+    if (Number.isFinite(parsedValue)) {
+        return parsedValue;
+    }
+
+    return Number(fallback);
+};
+
+const mapApiToDraft = (configuration: ShipmentConfigurationApi): ShipmentConfigurationDraft => ({
+    validateAddressData: Boolean(configuration.validationConfiguration?.validateAddressData),
+    requireRecipientPhone: Boolean(configuration.validationConfiguration?.requireRecipientPhone),
+    requireRecipientEmail: Boolean(configuration.validationConfiguration?.requireRecipientEmail),
+    preventDuplicateTracking: Boolean(configuration.validationConfiguration?.preventDuplicateTracking),
+    requireSenderReference: Boolean(configuration.validationConfiguration?.requireSenderReference),
+    validatePostalCode: Boolean(configuration.validationConfiguration?.validatePostalCode),
+    autoGenerateLabels: Boolean(configuration.labelConfiguration?.autoGenerateLabels),
+    includeReturnLabel: Boolean(configuration.labelConfiguration?.includeReturnLabel),
+    attachPackingSlip: Boolean(configuration.labelConfiguration?.attachPackingSlip),
+    labelFormat: labelFormatFromApi[configuration.labelConfiguration?.labelFormat] || defaultShipmentConfiguration.labelFormat,
+    maximumWeightKg: toTextNumber(configuration.shipmentLimits?.maxWeight, defaultShipmentConfiguration.maximumWeightKg),
+    minimumWeightKg: toTextNumber(configuration.shipmentLimits?.minWeight, defaultShipmentConfiguration.minimumWeightKg),
+    maximumLengthCm: toTextNumber(configuration.shipmentLimits?.maxLength, defaultShipmentConfiguration.maximumLengthCm),
+    maximumWidthCm: toTextNumber(configuration.shipmentLimits?.maxWidth, defaultShipmentConfiguration.maximumWidthCm),
+    maximumHeightCm: toTextNumber(configuration.shipmentLimits?.maxHeight, defaultShipmentConfiguration.maximumHeightCm),
+    maximumShipmentValue: toTextNumber(
+        configuration.shipmentLimits?.maxShipmentValue,
+        defaultShipmentConfiguration.maximumShipmentValue,
+    ),
+    allowOversized: Boolean(configuration.shipmentLimits?.allowOversized),
+    defaultStatus: shipmentStatusFromApi[configuration.workflowConfiguration?.defaultStatus]
+        || defaultShipmentConfiguration.defaultStatus,
+    defaultServiceLevel: serviceLevelFromApi[configuration.workflowConfiguration?.defaultServiceLevel]
+        || defaultShipmentConfiguration.defaultServiceLevel,
+    autoAssignCourier: Boolean(configuration.workflowConfiguration?.autoAssignCourier),
+    autoCloseDelivered: Boolean(configuration.workflowConfiguration?.autoCloseDelivered),
+    generateTrackingNumber: Boolean(configuration.workflowConfiguration?.generateTrackingNumber),
+    trackingNumberKey: configuration.trackingNumberRule?.key || defaultShipmentConfiguration.trackingNumberKey,
+    trackingNumberSeparator: configuration.trackingNumberRule?.separator
+        || defaultShipmentConfiguration.trackingNumberSeparator,
+    trackingNumberSource: trackingSourceFromApi[configuration.trackingNumberRule?.source]
+        || defaultShipmentConfiguration.trackingNumberSource,
+    trackingNumberRandomLength: toTextNumber(
+        configuration.trackingNumberRule?.randomLength,
+        defaultShipmentConfiguration.trackingNumberRandomLength,
+    ),
+    trackingNumberIncludeDate: Boolean(configuration.trackingNumberRule?.includeDate),
+    trackingNumberDateFormat: trackingDateFormatFromApi[configuration.trackingNumberRule?.dateFormat]
+        || defaultShipmentConfiguration.trackingNumberDateFormat,
+    trackingNumberUppercase: Boolean(configuration.trackingNumberRule?.uppercase),
+    cancellationWindowMinutes: toTextNumber(
+        configuration.workflowConfiguration?.cancellationWindowMinutes,
+        defaultShipmentConfiguration.cancellationWindowMinutes,
+    ),
+    pickupCutoffTime: configuration.workflowConfiguration?.pickupCutoffTime
+        || defaultShipmentConfiguration.pickupCutoffTime,
+    notifyRecipientOnCreated: Boolean(configuration.notificationConfiguration?.notifyRecipientOnCreated),
+    notifyRecipientOnDispatched: Boolean(configuration.notificationConfiguration?.notifyRecipientOnDispatched),
+    notifyRecipientOnDelivered: Boolean(configuration.notificationConfiguration?.notifyRecipientOnDelivered),
+    notifySenderOnException: Boolean(configuration.notificationConfiguration?.notifySenderOnException),
+    notificationChannel: notificationChannelFromApi[configuration.notificationConfiguration?.notificationChannel]
+        || defaultShipmentConfiguration.notificationChannel,
+});
+
+const mapDraftToApi = (configuration: ShipmentConfigurationDraft): ShipmentConfigurationApi => ({
+    validationConfiguration: {
+        validateAddressData: configuration.validateAddressData,
+        requireRecipientPhone: configuration.requireRecipientPhone,
+        requireRecipientEmail: configuration.requireRecipientEmail,
+        preventDuplicateTracking: configuration.preventDuplicateTracking,
+        requireSenderReference: configuration.requireSenderReference,
+        validatePostalCode: configuration.validatePostalCode,
+    },
+    labelConfiguration: {
+        autoGenerateLabels: configuration.autoGenerateLabels,
+        includeReturnLabel: configuration.includeReturnLabel,
+        attachPackingSlip: configuration.attachPackingSlip,
+        labelFormat: labelFormatToApi[configuration.labelFormat] || "PDF_A6",
+    },
+    shipmentLimits: {
+        maxWeight: toApiNumber(configuration.maximumWeightKg, defaultShipmentConfiguration.maximumWeightKg),
+        minWeight: toApiNumber(configuration.minimumWeightKg, defaultShipmentConfiguration.minimumWeightKg),
+        maxLength: toApiNumber(configuration.maximumLengthCm, defaultShipmentConfiguration.maximumLengthCm),
+        maxWidth: toApiNumber(configuration.maximumWidthCm, defaultShipmentConfiguration.maximumWidthCm),
+        maxHeight: toApiNumber(configuration.maximumHeightCm, defaultShipmentConfiguration.maximumHeightCm),
+        maxShipmentValue: toApiNumber(
+            configuration.maximumShipmentValue,
+            defaultShipmentConfiguration.maximumShipmentValue,
+        ),
+        allowOversized: configuration.allowOversized,
+    },
+    workflowConfiguration: {
+        defaultStatus: shipmentStatusToApi[configuration.defaultStatus] || "CREATED",
+        defaultServiceLevel: serviceLevelToApi[configuration.defaultServiceLevel] || "STANDARD",
+        autoAssignCourier: configuration.autoAssignCourier,
+        autoCloseDelivered: configuration.autoCloseDelivered,
+        generateTrackingNumber: configuration.generateTrackingNumber,
+        cancellationWindowMinutes: toApiNumber(
+            configuration.cancellationWindowMinutes,
+            defaultShipmentConfiguration.cancellationWindowMinutes,
+        ),
+        pickupCutoffTime: configuration.pickupCutoffTime,
+    },
+    trackingNumberRule: {
+        key: configuration.trackingNumberKey.trim(),
+        separator: configuration.trackingNumberSeparator,
+        source: trackingSourceToApi[configuration.trackingNumberSource] || "SEQUENCE",
+        randomLength: toApiNumber(
+            configuration.trackingNumberRandomLength,
+            defaultShipmentConfiguration.trackingNumberRandomLength,
+        ),
+        includeDate: configuration.trackingNumberIncludeDate,
+        dateFormat: trackingDateFormatToApi[configuration.trackingNumberDateFormat] || "YYYYMMDD",
+        uppercase: configuration.trackingNumberUppercase,
+    },
+    notificationConfiguration: {
+        notifyRecipientOnCreated: configuration.notifyRecipientOnCreated,
+        notifyRecipientOnDispatched: configuration.notifyRecipientOnDispatched,
+        notifyRecipientOnDelivered: configuration.notifyRecipientOnDelivered,
+        notifySenderOnException: configuration.notifySenderOnException,
+        notificationChannel: notificationChannelToApi[configuration.notificationChannel] || "SMS",
+    },
+});
+
 export function ShipmentConfigurationPanel() {
     const [configuration, setConfiguration] = useState<ShipmentConfigurationDraft>(readShipmentConfiguration);
     const [saved, setSaved] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const [trackingNumberDialogOpen, setTrackingNumberDialogOpen] = useState(false);
     const [trackingNumberRuleDraft, setTrackingNumberRuleDraft] = useState<TrackingNumberRuleDraft>(
         getTrackingNumberRule(defaultShipmentConfiguration),
@@ -176,6 +396,42 @@ export function ShipmentConfigurationPanel() {
     const shipmentConfiguration = pl.globalConfiguration.shipmentConfiguration;
     const trackingNumberPreview = buildTrackingNumberPreview(getTrackingNumberRule(configuration));
     const trackingNumberDraftPreview = buildTrackingNumberPreview(trackingNumberRuleDraft);
+
+    useEffect(() => {
+        let active = true;
+
+        const loadConfiguration = async () => {
+            try {
+                setLoading(true);
+                setError(null);
+                const response = await OperatorConfigurationService.getCurrentShipmentConfiguration();
+                if (!active) {
+                    return;
+                }
+
+                const nextConfiguration = mapApiToDraft(response.data);
+                setConfiguration(nextConfiguration);
+                window.localStorage.setItem(SHIPMENT_CONFIGURATION_STORAGE_KEY, JSON.stringify(nextConfiguration));
+            } catch (exception) {
+                if (active) {
+                    setError(getBackendErrorMessage(
+                        exception,
+                        shipmentConfiguration.messages.loadError,
+                    ));
+                }
+            } finally {
+                if (active) {
+                    setLoading(false);
+                }
+            }
+        };
+
+        loadConfiguration();
+
+        return () => {
+            active = false;
+        };
+    }, [shipmentConfiguration.messages.loadError]);
 
     const updateConfiguration = <Key extends keyof ShipmentConfigurationDraft>(
         field: Key,
@@ -188,9 +444,23 @@ export function ShipmentConfigurationPanel() {
         setSaved(false);
     };
 
-    const saveConfiguration = () => {
-        window.localStorage.setItem(SHIPMENT_CONFIGURATION_STORAGE_KEY, JSON.stringify(configuration));
-        setSaved(true);
+    const saveConfiguration = async () => {
+        try {
+            setSaving(true);
+            setError(null);
+            const response = await OperatorConfigurationService.updateCurrentShipmentConfiguration(
+                mapDraftToApi(configuration),
+            );
+            const nextConfiguration = mapApiToDraft(response.data);
+            setConfiguration(nextConfiguration);
+            window.localStorage.setItem(SHIPMENT_CONFIGURATION_STORAGE_KEY, JSON.stringify(nextConfiguration));
+            setSaved(true);
+        } catch (exception) {
+            setError(getBackendErrorMessage(exception, shipmentConfiguration.messages.saveError));
+            setSaved(false);
+        } finally {
+            setSaving(false);
+        }
     };
 
     const openTrackingNumberDialog = () => {
@@ -214,8 +484,7 @@ export function ShipmentConfigurationPanel() {
             ...trackingNumberRuleDraft,
         };
         setConfiguration(nextConfiguration);
-        window.localStorage.setItem(SHIPMENT_CONFIGURATION_STORAGE_KEY, JSON.stringify(nextConfiguration));
-        setSaved(true);
+        setSaved(false);
         setTrackingNumberDialogOpen(false);
     };
 
@@ -307,12 +576,25 @@ export function ShipmentConfigurationPanel() {
                     <InfoOutlined fontSize="small" />
                     <span>{shipmentConfiguration.previewNote}</span>
                 </div>
-                <Button startIcon={<Save />} variant="outlined" onClick={saveConfiguration}>
-                    {pl.common.saveChanges}
+                <Button
+                    disabled={loading || saving}
+                    startIcon={<Save />}
+                    variant="outlined"
+                    onClick={saveConfiguration}
+                >
+                    {saving ? shipmentConfiguration.messages.saving : pl.common.saveChanges}
                 </Button>
             </div>
 
-            {saved ? <Alert severity="success">{shipmentConfiguration.messages.saved}</Alert> : undefined}
+            {loading ? (
+                <Alert severity="info">
+                    <span className="shipment-configuration-loading">
+                        <CircularProgress size={18} />
+                        {shipmentConfiguration.messages.loading}
+                    </span>
+                </Alert>
+            ) : undefined}
+            {error ? <Alert severity="error">{error}</Alert> : undefined}
 
             <div className="shipment-configuration-sections">
                 <section className="shipment-configuration-group">
@@ -515,6 +797,27 @@ export function ShipmentConfigurationPanel() {
                     </Button>
                 </DialogActions>
             </Dialog>
+
+            <Snackbar
+                anchorOrigin={{vertical: "bottom", horizontal: "right"}}
+                className="shipment-configuration-toast"
+                open={saved}
+                autoHideDuration={4500}
+                onClose={() => setSaved(false)}
+            >
+                <Alert
+                    className="shipment-configuration-toast-alert"
+                    severity="success"
+                    onClose={() => setSaved(false)}
+                >
+                    <span className="shipment-configuration-toast-icon">
+                        <CheckCircle fontSize="small" />
+                    </span>
+                    <span className="shipment-configuration-toast-copy">
+                        <strong>{shipmentConfiguration.messages.saved}</strong>
+                    </span>
+                </Alert>
+            </Snackbar>
         </section>
     );
 }
