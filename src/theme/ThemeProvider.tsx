@@ -5,6 +5,17 @@ export type AppTheme =
     | "logistics-light"
     | "operations-dark"
     | "warehouse"
+    | "night-shift"
+    | "neon-dark"
+    | "cyberpunk"
+    | "terminal-green"
+    | "arctic-dark"
+    | "graphite-red"
+    | "deep-ocean"
+    | "aubergine"
+    | "midnight-blue"
+    | "carbon"
+    | "volcanic"
     | "courier-blue"
     | "dispatch-teal";
 
@@ -24,6 +35,17 @@ const isTheme = (value: string | null): value is AppTheme => Boolean(value && [
     "logistics-light",
     "operations-dark",
     "warehouse",
+    "night-shift",
+    "neon-dark",
+    "cyberpunk",
+    "terminal-green",
+    "arctic-dark",
+    "graphite-red",
+    "deep-ocean",
+    "aubergine",
+    "midnight-blue",
+    "carbon",
+    "volcanic",
     "courier-blue",
     "dispatch-teal",
 ].includes(value));
@@ -48,7 +70,21 @@ const readInitialTheme = (): AppTheme => {
 
 const applyTheme = (theme: Exclude<AppTheme, "system">) => {
     document.documentElement.dataset.theme = theme;
-    document.documentElement.style.colorScheme = theme === "warehouse" ? "dark" : "light";
+    document.documentElement.style.colorScheme =
+        [
+            "warehouse",
+            "night-shift",
+            "neon-dark",
+            "cyberpunk",
+            "terminal-green",
+            "arctic-dark",
+            "graphite-red",
+            "deep-ocean",
+            "aubergine",
+            "midnight-blue",
+            "carbon",
+            "volcanic",
+        ].includes(theme) ? "dark" : "light";
 };
 
 export function AppThemeProvider({children}: {children: React.ReactNode}) {
