@@ -343,6 +343,7 @@ export const de: typeof pl = {
                 REFRESH_TOKEN: "Aktualisierungstoken",
             },
             geocodingProviders: {
+                GEOAPIFY: "Geoapify",
                 POSITION_STACK: "PositionStack",
             },
             featuresTitle: "Operatorfunktionen",
@@ -1045,6 +1046,8 @@ export const de: typeof pl = {
             addFirst: "Ersten Anbieter hinzufügen",
             edit: "Bearbeiten",
             delete: "Löschen",
+            setDefault: "Als Standard festlegen",
+            defaultAlreadySelected: "Anbieter ist bereits Standard",
             loading: "Geolokalisierungskonfiguration wird geladen...",
             emptyTitle: "Keine Anbieter konfiguriert",
             emptyDescription: "Fügen Sie einen Anbieter hinzu, um Adressen zu geokodieren.",
@@ -1056,7 +1059,11 @@ export const de: typeof pl = {
                 apiAddress: "API-Adresse",
             },
             providers: {
+                geoapify: "Geoapify",
                 positionStack: "Positionstack",
+            },
+            providerApis: {
+                geocodingApi: "Geocoding API",
             },
             fields: {
                 apiUserName: "API-Benutzername",
@@ -1067,6 +1074,7 @@ export const de: typeof pl = {
                 refreshToken: "Aktualisierungstoken",
             },
             status: {
+                defaultProvider: "Standard",
                 enabled: "Aktiv",
                 disabled: "Inaktiv",
             },
@@ -1080,6 +1088,8 @@ export const de: typeof pl = {
                 urlLabel: "API-Adresse",
                 enabledLabel: "Konfiguration aktiv",
                 enabledHint: "Der Anbieter steht Geocoding-Prozessen zur Verfügung.",
+                defaultLabel: "Standardanbieter",
+                defaultHint: "Dieser Anbieter wird zur Ermittlung von Koordinaten verwendet.",
                 save: "Konfiguration hinzufügen",
                 saving: "Wird gespeichert...",
                 update: "Änderungen speichern",
@@ -1099,6 +1109,10 @@ export const de: typeof pl = {
                 updateSuccess: "Geolokalisierungskonfiguration wurde aktualisiert",
                 deleteError: "Geolokalisierungskonfiguration konnte nicht gelöscht werden",
                 deleteSuccess: "Geolokalisierungskonfiguration wurde gelöscht",
+                defaultProviderError: "Standardanbieter konnte nicht festgelegt werden",
+                defaultProviderSuccess: "Standardanbieter wurde festgelegt",
+                defaultProviderRequired: "Wählen Sie vor dem Speichern einen aktiven Standardanbieter",
+                defaultProviderRequiredBeforeDelete: "Legen Sie zuerst einen anderen aktiven Anbieter als Standard fest",
             },
         },
         messages: {

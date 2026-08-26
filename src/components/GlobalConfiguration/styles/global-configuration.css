@@ -727,6 +727,14 @@
     margin-top: 2px;
 }
 
+.geocoding-provider-api {
+    color: var(--muted-foreground);
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    margin-top: 2px;
+}
+
 .geocoding-provider-endpoint {
     min-width: 0;
 }
@@ -753,6 +761,8 @@
 .geocoding-provider-status {
     align-items: center;
     display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
 }
 
 .geocoding-provider-credential svg {

@@ -345,6 +345,7 @@ export const en: typeof pl = {
                 REFRESH_TOKEN: "Refresh token",
             },
             geocodingProviders: {
+                GEOAPIFY: "Geoapify",
                 POSITION_STACK: "PositionStack",
             },
             featuresTitle: "Operator features",
@@ -1048,6 +1049,8 @@ export const en: typeof pl = {
             addFirst: "Add first provider",
             edit: "Edit",
             delete: "Delete",
+            setDefault: "Set as default",
+            defaultAlreadySelected: "Provider is already default",
             loading: "Loading geolocation configuration...",
             emptyTitle: "No providers configured",
             emptyDescription: "Add a provider to enable address geocoding.",
@@ -1059,7 +1062,11 @@ export const en: typeof pl = {
                 apiAddress: "API address",
             },
             providers: {
+                geoapify: "Geoapify",
                 positionStack: "Positionstack",
+            },
+            providerApis: {
+                geocodingApi: "Geocoding API",
             },
             fields: {
                 apiUserName: "API username",
@@ -1070,6 +1077,7 @@ export const en: typeof pl = {
                 refreshToken: "Refresh token",
             },
             status: {
+                defaultProvider: "Default",
                 enabled: "Enabled",
                 disabled: "Disabled",
             },
@@ -1083,6 +1091,8 @@ export const en: typeof pl = {
                 urlLabel: "API URL",
                 enabledLabel: "Configuration enabled",
                 enabledHint: "The provider will be available to geocoding processes.",
+                defaultLabel: "Default provider",
+                defaultHint: "This provider will be used to resolve coordinates.",
                 save: "Add configuration",
                 saving: "Saving...",
                 update: "Save changes",
@@ -1102,6 +1112,10 @@ export const en: typeof pl = {
                 updateSuccess: "Geolocation configuration has been updated",
                 deleteError: "Could not delete geolocation configuration",
                 deleteSuccess: "Geolocation configuration has been deleted",
+                defaultProviderError: "Could not set the default provider",
+                defaultProviderSuccess: "Default provider has been set",
+                defaultProviderRequired: "Select an enabled default provider before saving",
+                defaultProviderRequiredBeforeDelete: "Set another enabled provider as default first",
             },
         },
         messages: {
