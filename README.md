@@ -73,7 +73,7 @@ in `.env`.
 
 Important variables:
 
-- `REACT_APP_SERVER_URL` - main Manager API, default `http://localhost:8080/v2/api`
+- `REACT_APP_SERVER_URL` - main Manager API, default `http://localhost:8080/v1/api`
 - `REACT_APP_MANAGER_API_URL` - manager API alias
 - `REACT_APP_GATEWAY_URL` - gateway URL, default `http://localhost:8088/gateway`
 - `REACT_APP_SOFTWARE_CONFIGURATION_URL` - software configuration service
@@ -140,7 +140,7 @@ Relevant build arguments:
 ## Backend Expectations
 
 For local development the frontend expects the Manager backend on
-`http://localhost:8080/v2/api` and the Gateway on `http://localhost:8088/gateway`.
+`http://localhost:8080/v1/api` and the Gateway on `http://localhost:8088/gateway`.
 Authentication is cookie/JWT based and the backend CORS configuration must allow
 the GUI origin, usually `http://localhost:3000`.
 
