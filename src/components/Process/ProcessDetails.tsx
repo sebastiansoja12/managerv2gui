@@ -70,9 +70,6 @@ const serviceLabel = (communication: CommunicationLogDto) => {
     return `${source} → ${target}`;
 };
 
-const departmentLabel = (departmentCode: CommunicationLogDto["departmentCode"]) =>
-    valueObjectValue(departmentCode) || pl.common.dash;
-
 const processDepartmentLabel = (processLog: ProcessLogDto, communications: CommunicationLogDto[]) =>
     valueObjectValue(processLog.deviceInformation?.departmentCode) || valueObjectValue(communications[0]?.departmentCode) || pl.common.dash;
 
@@ -112,14 +109,14 @@ const ProcessDetails: React.FC = () => {
     const communications = useMemo(() => processLog?.communicationLogs || [], [processLog]);
 
     return (
-        <div className="processes-page">
+        <div className="processes-page process-details-page">
             <div className="processes-shell">
                 <div className="processes-header">
                     <div className="processes-title">
                         <span className="processes-title-icon"><AccountTree /></span>
                         <div>
                             <Typography variant="h4">{pl.processes.details.title}</Typography>
-                            <Typography variant="body2" color="text.secondary">{processId}</Typography>
+                            <p className="process-details-subtitle">{processId}</p>
                         </div>
                     </div>
                     <div className="processes-actions">
@@ -140,109 +137,109 @@ const ProcessDetails: React.FC = () => {
                 ) : error ? (
                     <Alert severity="error">{error}</Alert>
                 ) : processLog ? (
-                    <div className="process-details-layout">
-                        <main className="processes-panel">
-                            <div className="process-summary-grid">
-                                <div>
-                                    <span>{pl.processes.details.fields.processId}</span>
-                                    <strong>{processLog.processId}</strong>
-                                </div>
-                                <div>
-                                    <span>{pl.processes.details.fields.user}</span>
-                                    <strong>{userLabel(processLog)}</strong>
-                                </div>
-                                <div>
-                                    <span>{pl.processes.details.fields.department}</span>
-                                    <strong>{processDepartmentLabel(processLog, communications)}</strong>
-                                </div>
-                                <div>
-                                    <span>{pl.processes.details.fields.status}</span>
-                                    <Chip className={`process-status process-status-${String(processLog.status || "IN_PROGRESS").toLowerCase()}`} label={statusLabel(processLog.status)} size="small" />
-                                </div>
-                                <div>
-                                    <span>{pl.processes.details.fields.createdAt}</span>
-                                    <strong>{formatDateTime(processLog.createdAt)}</strong>
-                                </div>
-                                <div>
-                                    <span>{pl.processes.details.fields.modifiedAt}</span>
-                                    <strong>{formatDateTime(processLog.modifiedAt)}</strong>
-                                </div>
+                    <section className="process-details-layout">
+                        <div className="process-details-main">
+                            <div className="process-details-panel">
+                                <dl className="process-details-summary">
+                                    <div><dt>{pl.processes.details.fields.processId}</dt><dd className="process-details-mono">{processLog.processId}</dd></div>
+                                    <div><dt>{pl.processes.details.fields.user}</dt><dd>{userLabel(processLog)}</dd></div>
+                                    <div><dt>{pl.processes.details.fields.department}</dt><dd>{processDepartmentLabel(processLog, communications)}</dd></div>
+                                    <div>
+                                        <dt>{pl.processes.details.fields.status}</dt>
+                                        <dd><Chip className={`process-status process-status-${String(processLog.status || "IN_PROGRESS").toLowerCase()}`} label={statusLabel(processLog.status)} size="small" /></dd>
+                                    </div>
+                                    <div><dt>{pl.processes.details.fields.createdAt}</dt><dd>{formatDateTime(processLog.createdAt)}</dd></div>
+                                    <div><dt>{pl.processes.details.fields.modifiedAt}</dt><dd>{formatDateTime(processLog.modifiedAt)}</dd></div>
+                                </dl>
                             </div>
 
-                            <div className="process-total-request">
+                            <div className="process-details-panel">
+                                <div className="process-details-panel-header">
+                                    <Typography variant="h6">{pl.processes.details.communicationTitle}</Typography>
+                                    <span className="process-details-count">{communications.length} {pl.processes.details.communicationCount}</span>
+                                </div>
+
+                                {communications.length ? (
+                                    <ol className="process-communication-list">
+                                        {communications.map((communication, index) => {
+                                            const department = valueObjectValue(communication.departmentCode);
+                                            const device = communication.deviceId || processLog.deviceInformation?.deviceId;
+                                            const subtitle = [communication.processType, communication.serviceType, communication.createdAt ? formatDateTime(communication.createdAt) : null]
+                                                .filter(Boolean)
+                                                .join(" · ");
+
+                                            return (
+                                                <li className="process-communication-row" key={`${communication.id || index}-${communication.serviceType || ""}`}>
+                                                    <span aria-hidden="true" className="process-communication-icon"><SyncAlt fontSize="small" /></span>
+                                                    <div className="process-communication-body">
+                                                        <strong>{serviceLabel(communication)}</strong>
+                                                        {subtitle ? <p>{subtitle}</p> : null}
+                                                        <dl className="process-communication-meta">
+                                                            {communication.createdBy ? (
+                                                                <div><dt>{pl.processes.details.fields.user}</dt><dd>#{communication.createdBy}</dd></div>
+                                                            ) : null}
+                                                            {department ? (
+                                                                <div><dt>{pl.processes.details.fields.department}</dt><dd>{department}</dd></div>
+                                                            ) : null}
+                                                            {device ? (
+                                                                <div><dt>{pl.processes.details.fields.device}</dt><dd>{device}</dd></div>
+                                                            ) : null}
+                                                        </dl>
+                                                        {communication.faultDescription ? (
+                                                            <Alert severity="warning">{communication.faultDescription}</Alert>
+                                                        ) : null}
+                                                    </div>
+                                                    <div className="process-communication-actions">
+                                                        <Button startIcon={<Code fontSize="small" />} variant="outlined" onClick={() => setPayloadDialog({
+                                                            title: `${serviceLabel(communication)} · ${pl.processes.actions.showRequest}`,
+                                                            payload: communication.request,
+                                                        })}>
+                                                            {pl.processes.actions.showRequest}
+                                                        </Button>
+                                                        <Button startIcon={<Code fontSize="small" />} variant="outlined" onClick={() => setPayloadDialog({
+                                                            title: `${serviceLabel(communication)} · ${pl.processes.actions.showResponse}`,
+                                                            payload: communication.response,
+                                                        })}>
+                                                            {pl.processes.actions.showResponse}
+                                                        </Button>
+                                                    </div>
+                                                </li>
+                                            );
+                                        })}
+                                    </ol>
+                                ) : (
+                                    <div className="processes-empty">{pl.processes.details.noCommunicationLogs}</div>
+                                )}
+                            </div>
+                        </div>
+
+                        <aside className="process-details-panel process-details-side">
+                            <div className="process-payload-item">
                                 <div>
-                                    <Typography variant="h6">{pl.processes.details.totalRequestTitle}</Typography>
+                                    <strong>{pl.processes.details.totalRequestTitle}</strong>
                                     <span>{pl.processes.details.totalRequestDescription}</span>
                                 </div>
-                                <Button startIcon={<DataObject />} variant="contained" onClick={() => setPayloadDialog({
+                                <Button startIcon={<DataObject fontSize="small" />} variant="outlined" onClick={() => setPayloadDialog({
                                     title: pl.processes.details.totalRequestTitle,
                                     payload: processLog.request,
                                 })}>
                                     {pl.processes.actions.showTotalRequest}
                                 </Button>
-
+                            </div>
+                            <div className="process-payload-item">
                                 <div>
-                                    <Typography variant="h6">{pl.processes.details.totalResponseTitle}</Typography>
+                                    <strong>{pl.processes.details.totalResponseTitle}</strong>
                                     <span>{pl.processes.details.totalResponseDescription}</span>
                                 </div>
-                                <Button startIcon={<DataObject />} variant="contained" onClick={() => setPayloadDialog({
+                                <Button startIcon={<DataObject fontSize="small" />} variant="outlined" onClick={() => setPayloadDialog({
                                     title: pl.processes.details.totalResponseTitle,
-                                    payload: processLog?.response,
+                                    payload: processLog.response,
                                 })}>
                                     {pl.processes.actions.showTotalResponse}
                                 </Button>
                             </div>
-
-                            <section className="process-communications">
-                                <div className="process-section-heading">
-                                    <Typography variant="h6">{pl.processes.details.communicationTitle}</Typography>
-                                    <span>{communications.length} {pl.processes.details.communicationCount}</span>
-                                </div>
-
-                                {communications.length ? communications.map((communication, index) => (
-                                    <article className="process-communication-card" key={`${communication.id || index}-${communication.serviceType || ""}`}>
-                                        <div className="process-communication-main">
-                                            <span className="process-communication-icon"><SyncAlt fontSize="small" /></span>
-                                            <div>
-                                                <strong>{serviceLabel(communication)}</strong>
-                                                <p>
-                                                    {communication.processType || pl.common.dash}
-                                                    {" · "}
-                                                    {communication.serviceType || pl.common.dash}
-                                                    {" · "}
-                                                    {formatDateTime(communication.createdAt)}
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <dl className="process-communication-meta">
-                                            <div><dt>{pl.processes.details.fields.user}</dt><dd>{communication.createdBy ? `#${communication.createdBy}` : pl.common.dash}</dd></div>
-                                            <div><dt>{pl.processes.details.fields.department}</dt><dd>{departmentLabel(communication.departmentCode)}</dd></div>
-                                            <div><dt>{pl.processes.details.fields.device}</dt><dd>{communication.deviceId || processLog.deviceInformation?.deviceId || pl.common.dash}</dd></div>
-                                        </dl>
-                                        <div className="process-communication-actions">
-                                            <Button startIcon={<Code />} variant="outlined" onClick={() => setPayloadDialog({
-                                                title: pl.processes.actions.showRequest,
-                                                payload: communication.request,
-                                            })}>
-                                                {pl.processes.actions.showRequest}
-                                            </Button>
-                                            <Button startIcon={<Code />} variant="outlined" onClick={() => setPayloadDialog({
-                                                title: pl.processes.actions.showResponse,
-                                                payload: communication.response,
-                                            })}>
-                                                {pl.processes.actions.showResponse}
-                                            </Button>
-                                        </div>
-                                        {communication.faultDescription ? (
-                                            <Alert severity="warning">{communication.faultDescription}</Alert>
-                                        ) : null}
-                                    </article>
-                                )) : (
-                                    <div className="processes-empty">{pl.processes.details.noCommunicationLogs}</div>
-                                )}
-                            </section>
-                        </main>
-                    </div>
+                        </aside>
+                    </section>
                 ) : null}
             </div>
 
