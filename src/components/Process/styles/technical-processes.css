@@ -4,6 +4,226 @@
     gap: 10px;
 }
 
+.app-main-content .processes-page .processes-shell {
+    max-width: 1920px;
+}
+
+.app-main-content .processes-page .processes-title-icon {
+    background: var(--technical-accent-soft) !important;
+    border: 1px solid var(--technical-accent-line) !important;
+    border-radius: 4px !important;
+    color: var(--primary) !important;
+    flex-shrink: 0;
+    height: 42px;
+    width: 42px;
+}
+
+.app-main-content .processes-subtitle {
+    color: var(--muted-foreground);
+    font-size: 0.86rem;
+    font-weight: 450;
+    margin: 6px 0 0;
+}
+
+.app-main-content .processes-page > .processes-shell > .processes-panel {
+    background: var(--technical-panel) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 4px !important;
+    box-shadow: none !important;
+    margin-top: 16px;
+}
+
+.app-main-content .processes-panel-header {
+    background: var(--card) !important;
+    border-bottom: 1px solid var(--border) !important;
+    min-height: 58px;
+    padding: 10px 12px 10px 16px !important;
+}
+
+.app-main-content .processes-panel-header h6 {
+    font-size: 0.95rem !important;
+    font-weight: 650 !important;
+}
+
+.app-main-content .processes-panel-header > div:first-child span {
+    color: var(--muted-foreground);
+    display: block;
+    font-size: 0.82rem;
+    margin-top: 2px;
+}
+
+.processes-panel-actions {
+    align-items: center;
+    display: flex;
+    gap: 8px;
+}
+
+.app-main-content .processes-count {
+    background: var(--surface-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-control);
+    color: var(--muted-foreground);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 600;
+    line-height: 22px;
+    padding: 6px 10px;
+}
+
+.app-main-content .processes-panel-actions [data-ui="button"] {
+    background: transparent !important;
+    border: 1px solid var(--border-strong) !important;
+    border-radius: 4px !important;
+    color: var(--foreground) !important;
+    font-size: 0.82rem !important;
+    min-height: 38px !important;
+    padding: 0 12px;
+    transform: none !important;
+    white-space: nowrap;
+}
+
+.app-main-content .processes-panel-actions [data-ui="button"]:hover:not(:disabled) {
+    background: var(--surface-secondary) !important;
+}
+
+.app-main-content .processes-panel-actions [data-ui="button"] svg {
+    height: 18px;
+    width: 18px;
+}
+
+.processes-col-id {
+    width: 315px;
+}
+
+.processes-col-user {
+    width: 130px;
+}
+
+.processes-col-department {
+    width: 100px;
+}
+
+.processes-col-date {
+    width: 165px;
+}
+
+.processes-col-status {
+    width: 130px;
+}
+
+.processes-col-actions {
+    width: 100px;
+}
+
+.app-main-content .processes-table th,
+.app-main-content .processes-table td {
+    overflow: hidden;
+    padding: 12px 14px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.app-main-content .processes-table th {
+    font-size: 0.72rem !important;
+    height: 48px;
+}
+
+.app-main-content .processes-table td {
+    font-size: 0.875rem;
+    font-weight: 500;
+    height: 58px;
+}
+
+.app-main-content .processes-table td:first-child strong {
+    color: var(--foreground);
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.app-main-content .processes-service {
+    color: var(--foreground);
+    display: flex;
+    font-weight: 600;
+    gap: 8px;
+    min-width: 0;
+}
+
+.app-main-content .processes-service svg {
+    color: var(--muted-foreground);
+    flex-shrink: 0;
+    height: 16px;
+    width: 16px;
+}
+
+.app-main-content .processes-service > span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.app-main-content .processes-table .process-status {
+    border-radius: 4px !important;
+    font-size: 0.68rem !important;
+    min-height: 0;
+    padding: 4px 8px;
+}
+
+.app-main-content .processes-actions-cell {
+    text-align: right;
+}
+
+.app-main-content .processes-actions-cell > * + * {
+    margin-left: 4px;
+}
+
+.app-main-content .processes-actions-cell [data-ui="icon-button"] {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--muted-foreground);
+    height: 34px;
+    width: 34px;
+}
+
+.app-main-content .processes-actions-cell [data-ui="icon-button"]:hover {
+    background: var(--technical-accent-soft);
+    border-color: var(--technical-accent-line);
+    color: var(--foreground);
+}
+
+.app-main-content .processes-actions-cell svg {
+    height: 17px;
+    width: 17px;
+}
+
+.app-main-content .processes-pagination {
+    background: var(--card);
+    font-family: var(--font-mono);
+    font-size: 0.76rem;
+    gap: 6px;
+    padding: 10px 14px;
+}
+
+.app-main-content .processes-pagination select,
+.app-main-content .processes-pagination button {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--foreground);
+    font-size: 0.8rem;
+    height: 34px;
+    min-width: 34px;
+}
+
+.app-main-content .processes-pagination button:hover:not(:disabled) {
+    background: var(--technical-accent-soft);
+    border-color: var(--technical-accent-line);
+}
+
 .app-main-content .process-payload {
     background: var(--surface) !important;
     color: var(--foreground) !important;
@@ -72,14 +292,14 @@
 .process-details-summary > div {
     background: var(--card);
     min-width: 0;
-    padding: 14px 16px;
+    padding: 16px 18px;
 }
 
 .process-details-summary dt,
 .process-communication-meta dt {
     color: var(--muted-foreground);
     font-family: var(--font-mono);
-    font-size: 0.7rem;
+    font-size: 0.74rem;
     font-weight: 600;
     letter-spacing: 0.04em;
     text-transform: uppercase;
@@ -91,7 +311,7 @@
 
 .process-details-summary dd {
     color: var(--foreground);
-    font-size: 0.9375rem;
+    font-size: 1rem;
     font-weight: 600;
     margin: 0;
     overflow-wrap: anywhere;
@@ -99,7 +319,7 @@
 
 .process-details-summary dd.process-details-mono {
     font-family: var(--font-mono);
-    font-size: 0.8125rem;
+    font-size: 0.875rem;
 }
 
 .app-main-content .process-details-panel-header {
@@ -114,7 +334,7 @@
 }
 
 .app-main-content .process-details-panel-header h6 {
-    font-size: 0.95rem !important;
+    font-size: 1rem !important;
 }
 
 .app-main-content .process-details-count {
@@ -123,7 +343,7 @@
     border-radius: 4px;
     color: var(--primary);
     font-family: var(--font-mono);
-    font-size: 0.66rem;
+    font-size: 0.7rem;
     font-weight: 600;
     letter-spacing: 0.04em;
     padding: 4px 7px;
@@ -143,7 +363,7 @@
     display: grid;
     gap: 12px;
     grid-template-columns: auto minmax(0, 1fr) auto;
-    padding: 14px 16px;
+    padding: 16px 18px;
     transition: background 160ms ease;
 }
 
@@ -162,9 +382,9 @@
     border-radius: 4px;
     color: var(--muted-foreground);
     display: inline-flex;
-    height: 32px;
+    height: 36px;
     justify-content: center;
-    width: 32px;
+    width: 36px;
 }
 
 .process-communication-body {
@@ -175,14 +395,14 @@
 
 .process-communication-body strong {
     color: var(--foreground);
-    font-size: 0.9375rem;
+    font-size: 1rem;
     font-weight: 650;
     overflow-wrap: anywhere;
 }
 
 .process-communication-body p {
     color: var(--muted-foreground);
-    font-size: 0.8125rem;
+    font-size: 0.86rem;
     margin: 0;
 }
 
@@ -207,7 +427,7 @@
 .process-communication-meta dd {
     color: var(--foreground);
     font-family: var(--font-mono);
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     margin: 0;
     overflow-wrap: anywhere;
 }
@@ -224,9 +444,9 @@
     border: 1px solid var(--border-strong) !important;
     border-radius: 4px !important;
     color: var(--foreground) !important;
-    font-size: 0.8125rem;
-    min-height: 32px;
-    padding: 4px 10px;
+    font-size: 0.86rem;
+    min-height: 36px;
+    padding: 4px 12px;
     transform: none !important;
     white-space: nowrap;
 }
@@ -237,8 +457,8 @@
 }
 
 .app-main-content .process-details-page .process-details-panel [data-ui="button"] svg {
-    height: 15px;
-    width: 15px;
+    height: 17px;
+    width: 17px;
 }
 
 .process-details-side {
@@ -249,7 +469,7 @@
 .process-payload-item {
     display: grid;
     gap: 10px;
-    padding: 14px 16px;
+    padding: 16px 18px;
 }
 
 .process-payload-item + .process-payload-item {
@@ -263,13 +483,13 @@
 
 .process-payload-item strong {
     color: var(--foreground);
-    font-size: 0.875rem;
+    font-size: 0.94rem;
     font-weight: 650;
 }
 
 .process-payload-item span {
     color: var(--muted-foreground);
-    font-size: 0.8125rem;
+    font-size: 0.86rem;
 }
 
 .process-payload-item [data-ui="button"] {
