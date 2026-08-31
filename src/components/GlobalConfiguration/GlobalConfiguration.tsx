@@ -1,22 +1,25 @@
 import React, {useState} from "react";
-import {Cable, ChevronRight, Inventory2Outlined, Map, Tune} from "components/ui/icons";
+import {Cable, ChevronRight, Inventory2Outlined, LocalShipping, Map, Tune} from "components/ui/icons";
 import pl from "../../i18n/translate";
+import CourierConfigurationPolicyPanel from "./CourierConfigurationPolicyPanel";
 import GeocodingConfigurationPanel from "./GeocodingConfigurationPanel";
 import IntegrationsConfigurationPanel from "./IntegrationsConfigurationPanel";
 import {GlobalConfigurationSectionKey} from "./model/GlobalConfigurationSection";
 import ShipmentConfigurationPanel from "./ShipmentConfigurationPanel";
 import "./styles/global-configuration.css";
 
-const sections: GlobalConfigurationSectionKey[] = ["shipments", "geocoding", "integrations"];
+const sections: GlobalConfigurationSectionKey[] = ["shipments", "couriers", "geocoding", "integrations"];
 
 const sectionIcons: Record<GlobalConfigurationSectionKey, React.ReactNode> = {
     shipments: <Inventory2Outlined fontSize="small" />,
+    couriers: <LocalShipping fontSize="small" />,
     geocoding: <Map fontSize="small" />,
     integrations: <Cable fontSize="small" />,
 };
 
 const sectionPanels: Record<GlobalConfigurationSectionKey, React.ReactNode> = {
     shipments: <ShipmentConfigurationPanel />,
+    couriers: <CourierConfigurationPolicyPanel />,
     geocoding: <GeocodingConfigurationPanel />,
     integrations: <IntegrationsConfigurationPanel />,
 };

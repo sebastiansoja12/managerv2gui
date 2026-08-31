@@ -180,6 +180,7 @@ export const de: typeof pl = {
         shipmentScanner: "Sendungen scannen",
         courierDeliveries: "Sendungen transportieren",
         devicePairing: "Mein Gerät",
+        mySettings: "Meine Einstellungen",
         integrations: "Integrationen",
         mainAriaLabel: "Hauptnavigation",
         defaultUserName: "Admin",
@@ -551,6 +552,10 @@ export const de: typeof pl = {
             devicePairing: {
                 title: "Mein Gerät",
                 description: "Gerät per QR-Code koppeln und dem Konto zugewiesene Geräte anzeigen.",
+            },
+            mySettings: {
+                title: "Meine Einstellungen",
+                description: "Ihre Konfiguration für Sendungen, Zustellungen, Touren und Retouren.",
             },
             processes: {
                 title: "Prozesse",
@@ -1944,6 +1949,7 @@ export const de: typeof pl = {
             firstName: "Vorname",
             lastName: "Nachname",
             telephoneNumber: "Telefon",
+            email: "E-Mail",
             department: "Niederlassung",
             certificateNumber: "Zertifikatsnummer",
             issueDate: "Ausstellungsdatum",
@@ -2004,7 +2010,9 @@ export const de: typeof pl = {
             submit: "Kurier hinzufügen",
             saving: "Wird gespeichert...",
             cancel: "Abbrechen",
-            required: "Kuriercode, Vorname, Nachname und Niederlassung sind erforderlich.",
+            required: "Kuriercode, Vorname, Nachname, E-Mail und Niederlassung sind erforderlich.",
+            invalidEmail: "Geben Sie eine gültige E-Mail-Adresse des Kuriers ein.",
+            emailHint: "An diese Adresse senden wir eine Einladung zum Festlegen des Passworts.",
             success: "Kurier wurde hinzugefügt.",
             error: "Kurier konnte nicht hinzugefügt werden.",
             departmentLoading: "Niederlassungen werden geladen...",
@@ -2035,6 +2043,10 @@ export const de: typeof pl = {
             integrations: {
                 title: "Integrationen",
                 description: "Verbindungen zu externen Diensten außerhalb der Geolokalisierung.",
+            },
+            couriers: {
+                title: "Kuriere",
+                description: "Einstellungen, die Kuriere nicht selbst ändern können.",
             },
         },
         shipmentConfiguration: {
@@ -2234,16 +2246,220 @@ export const de: typeof pl = {
         },
         courierConfiguration: {
             title: "Kurierbearbeitung",
-            fields: {
-                copyDepartmentCodeFromDevice: "Niederlassungscode vom Gerät übernehmen",
-                skipInvalidShipments: "Ungültige Sendungen überspringen",
-                generateNewReturnCodes: "Neue Rückgabecodes generieren",
-                editDeliveryArea: "Liefergebiet bearbeiten",
-                substituteCourier: "Ersatzkurier",
-                autoGenerateLabels: "Etiketten automatisch generieren",
+            editingFor: "Kurierkonfiguration",
+            mySettings: {
+                title: "Meine Einstellungen",
+                description: "Ihre Konfiguration für Sendungen, Zustellungen, Touren und Retouren.",
+            },
+            tabs: {
+                SHIPMENTS: "Sendungen",
+                DELIVERIES: "Zustellungen",
+                ROUTES: "Gebiete und Touren",
+                RETURNS: "Retouren",
+                PREFERENCES: "Einstellungen",
+                SUBSTITUTE: "Vertretung",
+                HISTORY: "Änderungsverlauf",
+            },
+            categories: {
+                PREFERENCE: "Präferenz",
+                OPERATIONAL_PERMISSION: "Betriebliche Berechtigung",
+                MANDATORY_REQUIREMENT: "Pflichtanforderung",
+            },
+            settings: {
+                COPY_DEPARTMENT_CODE_FROM_DEVICE: {
+                    label: "Niederlassungscode vom Gerät übernehmen",
+                    description: "Der Niederlassungscode der Sendung wird vom gekoppelten Gerät übernommen.",
+                },
+                SKIP_INVALID_SHIPMENTS: {
+                    label: "Ungültige Sendungen überspringen",
+                    description: "Ungültige Positionen werden übersprungen, die übrigen weiter verarbeitet. Fehler werden protokolliert.",
+                },
+                AUTO_GENERATE_LABELS: {
+                    label: "Etiketten automatisch generieren",
+                    description: "Etiketten werden bei unterstützten Vorgängen zur Sendungserstellung erzeugt.",
+                },
+                REQUIRE_PICKUP_SCAN: {
+                    label: "Scan bei Abholung erforderlich",
+                    description: "Die Sendung muss vor der Abholbestätigung gescannt werden.",
+                },
+                REQUIRE_DELIVERY_SCAN: {
+                    label: "Scan bei Zustellung erforderlich",
+                    description: "Die Sendung muss vor der Zustellbestätigung gescannt werden.",
+                },
+                ALLOW_MANUAL_SHIPMENT_ADDITION: {
+                    label: "Manuelles Hinzufügen von Sendungen erlauben",
+                    description: "Der Kurier kann seiner Liste manuell eine Sendung zuweisen.",
+                },
+                ALLOW_SHIPMENT_TRANSFER: {
+                    label: "Übergabe von Sendungen erlauben",
+                    description: "Eine Übergabe aktualisiert Zuweisung und Verlauf der Sendung.",
+                },
+                ALLOW_SHIPMENT_UNASSIGNMENT: {
+                    label: "Entfernen von Sendungen aus der Liste erlauben",
+                    description: "Löst die Sendung vom Kurier — sie wird nicht aus dem System gelöscht.",
+                },
+                REQUIRE_PROOF_OF_DELIVERY: {
+                    label: "Zustellnachweis (POD) erforderlich",
+                    description: "Der Nachweis muss vor Abschluss der Zustellung erfasst werden. Wird automatisch aktiviert, wenn Unterschrift oder Foto erforderlich sind.",
+                },
+                REQUIRE_RECIPIENT_SIGNATURE: {
+                    label: "Unterschrift des Empfängers erforderlich",
+                    description: "Die Zustellung kann ohne Unterschrift nicht abgeschlossen werden.",
+                },
+                REQUIRE_DELIVERY_PHOTO: {
+                    label: "Zustellfoto erforderlich",
+                    description: "Die Zustellung kann ohne Foto nicht abgeschlossen werden.",
+                },
+                REQUIRE_NON_DELIVERY_REASON: {
+                    label: "Grund für Nichtzustellung erforderlich",
+                    description: "Bei einer fehlgeschlagenen Zustellung muss ein Grund gewählt werden.",
+                },
+                ALLOW_DELIVERY_ADDRESS_CHANGE: {
+                    label: "Änderung der Zustelladresse erlauben",
+                    description: "Adressänderungen werden im Sendungsverlauf gespeichert.",
+                },
+                ALLOW_DELIVERY_AREA_EDITING: {
+                    label: "Liefergebiet bearbeiten",
+                    description: "Der Kurier kann sein Liefergebiet selbst ändern.",
+                },
+                ALLOW_OUT_OF_AREA_DELIVERY: {
+                    label: "Zustellungen außerhalb des Gebiets erlauben",
+                    description: "",
+                },
+                ALLOW_DELIVERY_REORDERING: {
+                    label: "Änderung der Zustellreihenfolge erlauben",
+                    description: "Der Kurier kann die Reihenfolge der Stopps manuell ändern.",
+                },
+                AUTO_ASSIGN_SHIPMENTS_BY_AREA: {
+                    label: "Sendungen automatisch nach Gebiet zuweisen",
+                    description: "Die Zuweisung berücksichtigt das aktuelle Gebiet des Kuriers.",
+                },
+                GENERATE_NEW_RETURN_CODES: {
+                    label: "Neue Rückgabecodes generieren",
+                    description: "Jeder neue Rückgabecode ist eindeutig.",
+                },
+                AUTO_MARK_FOR_RETURN: {
+                    label: "Sendungen automatisch zur Retoure markieren",
+                    description: "Nur wenn die Bedingungen des Retourenprozesses erfüllt sind.",
+                },
+                REQUIRE_RETURN_SCAN: {
+                    label: "Scan von Retouren erforderlich",
+                    description: "Eine Retoure kann ohne Scan nicht angenommen werden.",
+                },
+                AUTO_GENERATE_RETURN_LABELS: {
+                    label: "Retourenetiketten automatisch generieren",
+                    description: "Nur für Sendungen, deren Prozess ein Retourenetikett unterstützt.",
+                },
+                NOTIFY_ABOUT_NEW_SHIPMENTS: {
+                    label: "Benachrichtigungen über neue Sendungen",
+                    description: "",
+                },
+                NOTIFY_ABOUT_ROUTE_CHANGES: {
+                    label: "Benachrichtigungen über Tourenänderungen",
+                    description: "",
+                },
+                CONFIRM_SHIPMENT_TRANSFER: {
+                    label: "Sendungsübergaben bestätigen",
+                    description: "Vor der Übergabe einer Sendung fragt die App nach einer Bestätigung.",
+                },
+            },
+            parameters: {
+                MAX_DELIVERY_ATTEMPTS: {
+                    label: "Maximale Anzahl an Zustellversuchen",
+                    description: "Die Anzahl der Versuche darf dieses Limit nicht überschreiten.",
+                },
+                MAX_SHIPMENTS_PER_ROUTE: {
+                    label: "Maximale Anzahl an Sendungen pro Tour",
+                    description: "Leer lassen für kein Limit.",
+                },
+                SUBSTITUTE_SUPPLIER_ID: {
+                    label: "Code des Ersatzkuriers",
+                    description: "Geben Sie den Kuriercode ein (derselbe wie bei der Anmeldung) oder wählen Sie ihn aus der Liste. Die Auswahl eines Ersatzkuriers übergibt keine Sendungen automatisch.",
+                },
+                PREFERRED_LABEL_FORMAT: {
+                    label: "Bevorzugtes Etikettenformat",
+                    description: "",
+                },
+                DEFAULT_SHIPMENT_SORT_ORDER: {
+                    label: "Standardsortierung der Sendungen",
+                    description: "",
+                },
+            },
+            labelFormats: {
+                PDF_A6: "PDF A6",
+                PDF_A4: "PDF A4",
+                ZPL: "ZPL (Thermodrucker)",
+            },
+            sortOrders: {
+                DELIVERY_ORDER: "Zustellreihenfolge",
+                POSTAL_CODE: "Postleitzahl",
+                RECIPIENT_NAME: "Name des Empfängers",
+                ASSIGNED_AT: "Zuweisungsdatum",
+            },
+            stateOn: "An",
+            stateOff: "Aus",
+            substitute: {
+                placeholder: "z. B. KUR-02",
+                candidatesTitle: "Aktive Kuriere in der Organisation",
+                noCandidates: "Es gibt keine anderen aktiven Kuriere. Nur ein aktiver Kurier kann Vertretung sein.",
+                clear: "Vertretung entfernen",
+            },
+            noLimit: "Kein Limit",
+            noSubstitute: "Kein Ersatzkurier",
+            lockedByPolicy: "Durch die Organisationsrichtlinie vorgegeben — nicht änderbar",
+            forcedByProofRule: "Erforderlich, da Unterschrift oder Zustellfoto verlangt werden",
+            validation: {
+                REQUIRED: "Dieses Feld ist erforderlich",
+                MUST_BE_POSITIVE: "Der Wert muss eine Zahl größer als 0 sein",
+                SUBSTITUTE_SELF: "Ein Kurier kann sich nicht selbst vertreten",
+                SUBSTITUTE_UNAVAILABLE: "Der gewählte Kurier ist inaktiv oder nicht verfügbar",
+                ENFORCED_BY_POLICY: "Der Wert widerspricht der Organisationsrichtlinie",
+            },
+            history: {
+                empty: "Keine Konfigurationsänderungen erfasst.",
+                changedBy: "Benutzer",
+                unknownUser: "unbekannt",
+                emptyValue: "keiner",
+                enabledValue: "an",
+                disabledValue: "aus",
+                changeTypes: {
+                    UPDATED: "Einstellungen geändert",
+                    RESET_TO_DEFAULTS: "Standardwerte wiederhergestellt",
+                },
+            },
+            actions: {
+                resetDefaults: "Standardwerte wiederherstellen",
+                reload: "Neu laden",
+                cancel: "Abbrechen",
+                confirmReset: "Wiederherstellen",
+                savePolicy: "Richtlinie speichern",
+            },
+            confirmReset: {
+                title: "Standardwerte wiederherstellen?",
+                description: "Die Einstellungen des Kuriers werden durch die von der Organisationsrichtlinie erlaubten Standardwerte ersetzt. Die Änderung wird im Verlauf gespeichert.",
+            },
+            policy: {
+                title: "Richtlinie für die Kurierkonfiguration",
+                description: "Von der Organisation vorgegebene Einstellungen werden Kurieren schreibgeschützt angezeigt und können von ihnen nicht deaktiviert werden.",
+                modes: {
+                    SUPPLIER: "Kurier entscheidet",
+                    ENFORCED_ON: "Vorgegeben: an",
+                    ENFORCED_OFF: "Vorgegeben: aus",
+                },
             },
             messages: {
-                saved: "Konfiguration der Kurierbearbeitung wurde in der GUI gespeichert",
+                loading: "Kurierkonfiguration wird geladen...",
+                saved: "Die Kurierkonfiguration wurde gespeichert.",
+                reset: "Standardwerte wurden wiederhergestellt.",
+                loadError: "Kurierkonfiguration konnte nicht geladen werden",
+                saveError: "Kurierkonfiguration konnte nicht gespeichert werden",
+                conflict: "Die Konfiguration wurde inzwischen von einem anderen Benutzer geändert. Laden Sie die Daten neu, um fortzufahren.",
+                validationError: "Korrigieren Sie die markierten Felder.",
+                unsavedChanges: "Ungespeicherte Änderungen",
+                historyLoadError: "Änderungsverlauf konnte nicht geladen werden",
+                policySaved: "Die Richtlinie für die Kurierkonfiguration wurde gespeichert.",
+                policyLoadError: "Richtlinie für die Kurierkonfiguration konnte nicht geladen werden",
+                policySaveError: "Richtlinie für die Kurierkonfiguration konnte nicht gespeichert werden",
             },
         },
         geocoding: {
@@ -2533,6 +2749,27 @@ export const de: typeof pl = {
             deviceRequired: "Gerät auswählen",
             pairKeyRequired: "Kopplungsschlüssel eingeben",
             emptyList: "Die Sendungsliste ist leer",
+        },
+    },
+    setPassword: {
+        title: "Passwort festlegen",
+        subtitle: "Aktivieren Sie Ihr Kurierkonto, indem Sie ein eigenes Passwort festlegen.",
+        loading: "Einladung wird geprüft...",
+        username: "Benutzername",
+        password: "Neues Passwort",
+        passwordConfirmation: "Passwort wiederholen",
+        passwordHint: "Mindestens {min} Zeichen.",
+        submit: "Passwort festlegen",
+        saving: "Wird gespeichert...",
+        success: "Ihr Passwort wurde festgelegt. Sie können sich jetzt im System und in der mobilen App anmelden.",
+        goToLogin: "Zur Anmeldung",
+        errors: {
+            notFound: "Der Einladungslink ist ungültig.",
+            expired: "Der Einladungslink ist abgelaufen. Bitten Sie Ihren Administrator um eine neue Einladung.",
+            alreadyAccepted: "Diese Einladung wurde bereits verwendet. Melden Sie sich mit Ihrem Passwort an.",
+            weakPassword: "Das Passwort ist zu kurz.",
+            mismatch: "Die Passwörter stimmen nicht überein.",
+            generic: "Das Passwort konnte nicht festgelegt werden. Bitte versuchen Sie es erneut.",
         },
     },
     shipmentEdit: {

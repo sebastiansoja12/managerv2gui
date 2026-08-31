@@ -179,6 +179,7 @@ export const pl = {
         shipmentScanner: "Skanowanie przesyłek",
         courierDeliveries: "Przewożenie przesyłek",
         devicePairing: "Moje urządzenie",
+        mySettings: "Moje ustawienia",
         integrations: "Integracje",
         mainAriaLabel: "Główna nawigacja",
         defaultUserName: "Admin",
@@ -556,6 +557,10 @@ export const pl = {
             devicePairing: {
                 title: "Moje urządzenie",
                 description: "Parowanie urządzenia kodem QR i podgląd urządzeń przypisanych do konta.",
+            },
+            mySettings: {
+                title: "Moje ustawienia",
+                description: "Twoja konfiguracja obsługi przesyłek, doręczeń, tras i zwrotów.",
             },
             processes: {
                 title: "Procesy",
@@ -1949,6 +1954,7 @@ export const pl = {
             firstName: "Imię",
             lastName: "Nazwisko",
             telephoneNumber: "Telefon",
+            email: "E-mail",
             department: "Oddział",
             certificateNumber: "Numer certyfikatu",
             issueDate: "Data wydania",
@@ -2009,7 +2015,9 @@ export const pl = {
             submit: "Dodaj kuriera",
             saving: "Zapisywanie...",
             cancel: "Anuluj",
-            required: "Kod, imię, nazwisko i oddział kuriera są wymagane.",
+            required: "Kod, imię, nazwisko, e-mail i oddział kuriera są wymagane.",
+            invalidEmail: "Podaj poprawny adres e-mail kuriera.",
+            emailHint: "Na ten adres wyślemy zaproszenie do ustawienia hasła w systemie.",
             success: "Kurier został dodany.",
             error: "Nie udało się dodać kuriera.",
             departmentLoading: "Ładowanie oddziałów...",
@@ -2040,6 +2048,10 @@ export const pl = {
             integrations: {
                 title: "Integracje",
                 description: "Połączenia z zewnętrznymi usługami niezwiązanymi z geolokalizacją.",
+            },
+            couriers: {
+                title: "Kurierzy",
+                description: "Ustawienia, których kurierzy nie mogą zmieniać samodzielnie.",
             },
         },
         shipmentConfiguration: {
@@ -2239,16 +2251,220 @@ export const pl = {
         },
         courierConfiguration: {
             title: "Edycja kurierów",
-            fields: {
-                copyDepartmentCodeFromDevice: "Przepisuj kod oddziału z urządzenia",
-                skipInvalidShipments: "Pomijaj nieprawidłowe przesyłki",
-                generateNewReturnCodes: "Generuj nowe kody zwrotu",
-                editDeliveryArea: "Edytuj rejon dowożenia",
-                substituteCourier: "Kurier zastępczy",
-                autoGenerateLabels: "Automatycznie generuj etykiety",
+            editingFor: "Konfiguracja kuriera",
+            mySettings: {
+                title: "Moje ustawienia",
+                description: "Twoja konfiguracja obsługi przesyłek, doręczeń, tras i zwrotów.",
+            },
+            tabs: {
+                SHIPMENTS: "Przesyłki",
+                DELIVERIES: "Doręczenia",
+                ROUTES: "Rejony i trasy",
+                RETURNS: "Zwroty",
+                PREFERENCES: "Preferencje",
+                SUBSTITUTE: "Zastępstwo",
+                HISTORY: "Historia zmian",
+            },
+            categories: {
+                PREFERENCE: "Preferencja",
+                OPERATIONAL_PERMISSION: "Uprawnienie operacyjne",
+                MANDATORY_REQUIREMENT: "Wymaganie obowiązkowe",
+            },
+            settings: {
+                COPY_DEPARTMENT_CODE_FROM_DEVICE: {
+                    label: "Przepisuj kod oddziału z urządzenia",
+                    description: "Kod oddziału przesyłki jest uzupełniany na podstawie sparowanego urządzenia.",
+                },
+                SKIP_INVALID_SHIPMENTS: {
+                    label: "Pomijaj nieprawidłowe przesyłki",
+                    description: "Nieprawidłowe pozycje są pomijane, a pozostałe przetwarzane dalej. Błędy zostają zapisane.",
+                },
+                AUTO_GENERATE_LABELS: {
+                    label: "Automatycznie generuj etykiety",
+                    description: "Etykiety są tworzone podczas obsługiwanych operacji tworzenia przesyłek.",
+                },
+                REQUIRE_PICKUP_SCAN: {
+                    label: "Wymagaj skanowania przy odbiorze",
+                    description: "Przesyłkę trzeba zeskanować przed potwierdzeniem odbioru.",
+                },
+                REQUIRE_DELIVERY_SCAN: {
+                    label: "Wymagaj skanowania przy doręczeniu",
+                    description: "Przesyłkę trzeba zeskanować przed potwierdzeniem doręczenia.",
+                },
+                ALLOW_MANUAL_SHIPMENT_ADDITION: {
+                    label: "Zezwalaj na ręczne dodawanie przesyłek",
+                    description: "Kurier może ręcznie przypisać przesyłkę do swojej listy.",
+                },
+                ALLOW_SHIPMENT_TRANSFER: {
+                    label: "Zezwalaj na przekazywanie przesyłek",
+                    description: "Przekazanie aktualizuje przypisanie i historię przesyłki.",
+                },
+                ALLOW_SHIPMENT_UNASSIGNMENT: {
+                    label: "Zezwalaj na usuwanie przesyłek z listy",
+                    description: "Odpina przesyłkę od kuriera — nie usuwa jej z systemu.",
+                },
+                REQUIRE_PROOF_OF_DELIVERY: {
+                    label: "Wymagaj potwierdzenia doręczenia (POD)",
+                    description: "Potwierdzenie musi zostać zarejestrowane przed zakończeniem doręczenia. Włączane automatycznie, gdy wymagany jest podpis lub zdjęcie.",
+                },
+                REQUIRE_RECIPIENT_SIGNATURE: {
+                    label: "Wymagaj podpisu odbiorcy",
+                    description: "Doręczenia nie można zakończyć bez podpisu odbiorcy.",
+                },
+                REQUIRE_DELIVERY_PHOTO: {
+                    label: "Wymagaj zdjęcia doręczenia",
+                    description: "Doręczenia nie można zakończyć bez zdjęcia.",
+                },
+                REQUIRE_NON_DELIVERY_REASON: {
+                    label: "Wymagaj powodu niedoręczenia",
+                    description: "Przy nieudanym doręczeniu trzeba wybrać powód.",
+                },
+                ALLOW_DELIVERY_ADDRESS_CHANGE: {
+                    label: "Zezwalaj na zmianę adresu doręczenia",
+                    description: "Zmiana adresu jest zapisywana w historii przesyłki.",
+                },
+                ALLOW_DELIVERY_AREA_EDITING: {
+                    label: "Edytuj rejon dowożenia",
+                    description: "Kurier może samodzielnie zmienić swój rejon.",
+                },
+                ALLOW_OUT_OF_AREA_DELIVERY: {
+                    label: "Zezwalaj na doręczenia poza rejonem",
+                    description: "",
+                },
+                ALLOW_DELIVERY_REORDERING: {
+                    label: "Zezwalaj na zmianę kolejności doręczeń",
+                    description: "Kurier może ręcznie zmieniać kolejność punktów na trasie.",
+                },
+                AUTO_ASSIGN_SHIPMENTS_BY_AREA: {
+                    label: "Automatycznie przypisuj przesyłki według rejonu",
+                    description: "Przypisanie uwzględnia aktualny rejon kuriera.",
+                },
+                GENERATE_NEW_RETURN_CODES: {
+                    label: "Generuj nowe kody zwrotu",
+                    description: "Każdy nowy kod zwrotu jest unikalny.",
+                },
+                AUTO_MARK_FOR_RETURN: {
+                    label: "Automatycznie oznaczaj przesyłki do zwrotu",
+                    description: "Tylko gdy spełnione są warunki procesu zwrotów.",
+                },
+                REQUIRE_RETURN_SCAN: {
+                    label: "Wymagaj skanowania przesyłek zwrotnych",
+                    description: "Przyjęcia zwrotu nie można zakończyć bez skanu.",
+                },
+                AUTO_GENERATE_RETURN_LABELS: {
+                    label: "Automatycznie generuj etykiety zwrotne",
+                    description: "Tylko dla przesyłek, których proces obsługuje etykietę zwrotną.",
+                },
+                NOTIFY_ABOUT_NEW_SHIPMENTS: {
+                    label: "Powiadomienia o nowych przesyłkach",
+                    description: "",
+                },
+                NOTIFY_ABOUT_ROUTE_CHANGES: {
+                    label: "Powiadomienia o zmianach na trasie",
+                    description: "",
+                },
+                CONFIRM_SHIPMENT_TRANSFER: {
+                    label: "Potwierdzaj operacje przekazania przesyłki",
+                    description: "Przed przekazaniem przesyłki aplikacja poprosi o potwierdzenie.",
+                },
+            },
+            parameters: {
+                MAX_DELIVERY_ATTEMPTS: {
+                    label: "Maksymalna liczba prób doręczenia",
+                    description: "Liczba prób nie może przekroczyć tego limitu.",
+                },
+                MAX_SHIPMENTS_PER_ROUTE: {
+                    label: "Maksymalna liczba przesyłek na trasie",
+                    description: "Puste pole oznacza brak limitu.",
+                },
+                SUBSTITUTE_SUPPLIER_ID: {
+                    label: "Kod kuriera zastępczego",
+                    description: "Wpisz kod kuriera (ten sam, którym loguje się do systemu) albo wybierz go z listy. Wskazanie zastępcy nie przekazuje automatycznie przesyłek.",
+                },
+                PREFERRED_LABEL_FORMAT: {
+                    label: "Preferowany format etykiety",
+                    description: "",
+                },
+                DEFAULT_SHIPMENT_SORT_ORDER: {
+                    label: "Domyślne sortowanie przesyłek",
+                    description: "",
+                },
+            },
+            labelFormats: {
+                PDF_A6: "PDF A6",
+                PDF_A4: "PDF A4",
+                ZPL: "ZPL (drukarka termiczna)",
+            },
+            sortOrders: {
+                DELIVERY_ORDER: "Kolejność doręczeń",
+                POSTAL_CODE: "Kod pocztowy",
+                RECIPIENT_NAME: "Nazwa odbiorcy",
+                ASSIGNED_AT: "Data przypisania",
+            },
+            stateOn: "Włączone",
+            stateOff: "Wyłączone",
+            substitute: {
+                placeholder: "np. KUR-02",
+                candidatesTitle: "Aktywni kurierzy w organizacji",
+                noCandidates: "Brak innych aktywnych kurierów. Zastępcą może zostać tylko aktywny kurier.",
+                clear: "Usuń zastępstwo",
+            },
+            noLimit: "Brak limitu",
+            noSubstitute: "Brak kuriera zastępczego",
+            lockedByPolicy: "Wymuszone przez politykę organizacji — nie można zmienić",
+            forcedByProofRule: "Wymagane, ponieważ włączono podpis lub zdjęcie doręczenia",
+            validation: {
+                REQUIRED: "Pole jest wymagane",
+                MUST_BE_POSITIVE: "Wartość musi być liczbą większą od 0",
+                SUBSTITUTE_SELF: "Kurier nie może zastępować samego siebie",
+                SUBSTITUTE_UNAVAILABLE: "Wybrany kurier jest nieaktywny lub niedostępny",
+                ENFORCED_BY_POLICY: "Wartość jest sprzeczna z polityką organizacji",
+            },
+            history: {
+                empty: "Brak zarejestrowanych zmian konfiguracji.",
+                changedBy: "Użytkownik",
+                unknownUser: "nieznany",
+                emptyValue: "brak",
+                enabledValue: "włączone",
+                disabledValue: "wyłączone",
+                changeTypes: {
+                    UPDATED: "Zmiana ustawień",
+                    RESET_TO_DEFAULTS: "Przywrócenie wartości domyślnych",
+                },
+            },
+            actions: {
+                resetDefaults: "Przywróć domyślne",
+                reload: "Wczytaj ponownie",
+                cancel: "Anuluj",
+                confirmReset: "Przywróć",
+                savePolicy: "Zapisz politykę",
+            },
+            confirmReset: {
+                title: "Przywrócić wartości domyślne?",
+                description: "Ustawienia kuriera zostaną zastąpione wartościami domyślnymi dozwolonymi przez politykę organizacji. Zmiana zostanie zapisana w historii.",
+            },
+            policy: {
+                title: "Polityka konfiguracji kurierów",
+                description: "Ustawienia wymuszone przez organizację są widoczne dla kurierów jako nieedytowalne i nie mogą zostać przez nich wyłączone.",
+                modes: {
+                    SUPPLIER: "Decyduje kurier",
+                    ENFORCED_ON: "Wymuszone: włączone",
+                    ENFORCED_OFF: "Wymuszone: wyłączone",
+                },
             },
             messages: {
-                saved: "Konfiguracja edycji kurierów została zapisana w GUI",
+                loading: "Ładowanie konfiguracji kuriera...",
+                saved: "Konfiguracja kuriera została zapisana.",
+                reset: "Przywrócono wartości domyślne.",
+                loadError: "Nie udało się pobrać konfiguracji kuriera",
+                saveError: "Nie udało się zapisać konfiguracji kuriera",
+                conflict: "Konfiguracja została w międzyczasie zmieniona przez innego użytkownika. Wczytaj dane ponownie, aby kontynuować.",
+                validationError: "Popraw zaznaczone pola.",
+                unsavedChanges: "Niezapisane zmiany",
+                historyLoadError: "Nie udało się pobrać historii zmian",
+                policySaved: "Polityka konfiguracji kurierów została zapisana.",
+                policyLoadError: "Nie udało się pobrać polityki konfiguracji kurierów",
+                policySaveError: "Nie udało się zapisać polityki konfiguracji kurierów",
             },
         },
         geocoding: {
@@ -2538,6 +2754,27 @@ export const pl = {
             deviceRequired: "Wybierz urządzenie",
             pairKeyRequired: "Podaj klucz parowania",
             emptyList: "Lista przesyłek jest pusta",
+        },
+    },
+    setPassword: {
+        title: "Ustaw hasło",
+        subtitle: "Aktywuj konto kuriera, ustawiając własne hasło.",
+        loading: "Sprawdzanie zaproszenia...",
+        username: "Login",
+        password: "Nowe hasło",
+        passwordConfirmation: "Powtórz hasło",
+        passwordHint: "Co najmniej {min} znaków.",
+        submit: "Ustaw hasło",
+        saving: "Zapisywanie...",
+        success: "Hasło zostało ustawione. Możesz zalogować się do systemu i aplikacji mobilnej.",
+        goToLogin: "Przejdź do logowania",
+        errors: {
+            notFound: "Link zaproszenia jest nieprawidłowy.",
+            expired: "Link zaproszenia wygasł. Poproś administratora o nowe zaproszenie.",
+            alreadyAccepted: "To zaproszenie zostało już wykorzystane. Zaloguj się swoim hasłem.",
+            weakPassword: "Hasło jest za krótkie.",
+            mismatch: "Hasła nie są takie same.",
+            generic: "Nie udało się ustawić hasła. Spróbuj ponownie.",
         },
     },
     shipmentEdit: {
