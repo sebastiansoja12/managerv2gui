@@ -17,6 +17,20 @@ export const setOperationalProfile = (profile: OperationalProfile) => {
     localStorage.setItem(STORAGE_KEY, profile);
 };
 
+const COURIER_ONLY_ROLES = ["SUPPLIER"];
+
+export const availableOperationalProfiles = (role?: string | null): OperationalProfile[] => (
+    role && COURIER_ONLY_ROLES.includes(role.toUpperCase()) ? ["courier"] : operationalProfiles
+);
+
+export const resolveOperationalProfile = (
+    role: string | null | undefined,
+    selectedProfile: OperationalProfile,
+): OperationalProfile => {
+    const allowedProfiles = availableOperationalProfiles(role);
+    return allowedProfiles.includes(selectedProfile) ? selectedProfile : allowedProfiles[0];
+};
+
 export const isReturnPath = (path: string) => path === "/returns" || path.startsWith("/returns/");
 
 export const isPathAllowedForProfile = (path: string, profile: OperationalProfile) => {
@@ -48,6 +62,7 @@ export const isPathAllowedForProfile = (path: string, profile: OperationalProfil
         "/shipment-details",
         "/shipments/list",
         "/courier-deliveries",
+        "/my-settings",
         "/vehicles",
         "/device-pairing",
         "/chat",

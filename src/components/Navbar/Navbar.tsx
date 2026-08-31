@@ -31,7 +31,7 @@ import {
     Warehouse,
     WarehouseRounded,
 } from "components/ui/icons";
-import {isPathAllowedForProfile, isReturnPath, operationalProfiles, OperationalProfile} from "../../config/operationalProfile";
+import {isPathAllowedForProfile, isReturnPath, operationalProfiles as allOperationalProfiles, OperationalProfile} from "../../config/operationalProfile";
 import {getAppEnvironment} from "../../config/appEnvironment";
 import {AppTabDefinition} from "../AppShell/types";
 import AppTabs from "../AppShell/AppTabs";
@@ -88,6 +88,7 @@ type NavbarProps = {
     onSelectTab: (path: string) => void;
     language: Language;
     operationalProfile: OperationalProfile;
+    operationalProfiles?: OperationalProfile[];
 };
 
 const languages = Object.keys(translations) as Language[];
@@ -201,6 +202,7 @@ function Navbar({
     onSelectTab,
     language,
     operationalProfile,
+    operationalProfiles = allOperationalProfiles,
 }: NavbarProps) {
     const [expandedPanel, setExpandedPanel] = React.useState<string | null>(null);
     const [activeGroupKey, setActiveGroupKey] = React.useState<string | null>(null);
@@ -291,6 +293,7 @@ function Navbar({
                 {label: pl.navigation.pickupPoints, path: '/pickup-points', icon: LocationOn},
                 {label: pl.navigation.couriers, path: '/couriers', icon: Person},
                 {label: pl.navigation.devicePairing, path: '/device-pairing', icon: DevicesOther},
+                {label: pl.navigation.mySettings, path: '/my-settings', icon: Settings},
                 {label: pl.navigation.analytics, path: '/analytics', icon: Analytics},
             ],
         },
@@ -442,21 +445,23 @@ function Navbar({
         <nav aria-label={pl.navigation.mainAriaLabel} className="top-nav-options-panel" id="main-navigation-options">
             <div className="top-nav-options-context">
                 <span className="top-nav-env">{environment}</span>
-                <div className="top-nav-profile-switch" aria-label={pl.operationalProfiles.label}>
-                    {operationalProfiles.map((profile) => (
-                        <button
-                            className={profile === operationalProfile ? "top-nav-profile-switch-active" : ""}
-                            key={profile}
-                            onClick={() => {
-                                onOperationalProfileChange(profile);
-                                setExpandedPanel(null);
-                            }}
-                            type="button"
-                        >
-                            {profile === "courier" ? pl.operationalProfiles.courierShort : pl.operationalProfiles.warehouseShort}
-                        </button>
-                    ))}
-                </div>
+                {operationalProfiles.length > 1 ? (
+                    <div className="top-nav-profile-switch" aria-label={pl.operationalProfiles.label}>
+                        {operationalProfiles.map((profile) => (
+                            <button
+                                className={profile === operationalProfile ? "top-nav-profile-switch-active" : ""}
+                                key={profile}
+                                onClick={() => {
+                                    onOperationalProfileChange(profile);
+                                    setExpandedPanel(null);
+                                }}
+                                type="button"
+                            >
+                                {profile === "courier" ? pl.operationalProfiles.courierShort : pl.operationalProfiles.warehouseShort}
+                            </button>
+                        ))}
+                    </div>
+                ) : undefined}
             </div>
 
             <section className="top-nav-options-section">

@@ -12,6 +12,7 @@ import {
     Inventory2,
     LocalShipping,
     Person,
+    Settings,
     TableRows,
     Warehouse,
 } from "components/ui/icons";
@@ -46,6 +47,7 @@ const homeTiles: HomeTile[] = [
     {key: "profile", path: "/profile", icon: Person, accent: "slate"},
     {key: "chat", path: "/chat", icon: ChatBubbleOutline, accent: "violet"},
     {key: "devicePairing", path: "/device-pairing", icon: DevicesOther, accent: "indigo"},
+    {key: "mySettings", path: "/my-settings", icon: Settings, accent: "amber"},
     {key: "processes", path: "/processes", icon: AccountTree, accent: "amber"},
     {key: "couriers", path: "/couriers", icon: LocalShipping, accent: "emerald"},
     {key: "vehicles", path: "/vehicles", icon: DirectionsCar, accent: "indigo"},

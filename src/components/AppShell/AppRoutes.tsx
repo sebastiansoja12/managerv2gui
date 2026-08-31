@@ -2,6 +2,7 @@ import React from "react";
 import {Route, Routes} from "react-router-dom";
 import OrganizationChat from "../Chat/OrganizationChat";
 import Couriers from "../Couriers/Couriers";
+import MyCourierSettings from "../Couriers/MyCourierSettings";
 import CourierDetails from "../Couriers/CourierDetails";
 import Deliveries from "../Deliveries/Deliveries";
 import DeliveryEdit from "../Deliveries/DeliveryEdit";
@@ -106,6 +107,7 @@ function AppRoutes({onOpenTab, operationalProfile = "warehouse"}: AppRoutesProps
             <Route path="login" element={<LoginPage/>}/>
             <Route path="profile" element={<UserProfile/>}/>
             <Route path="device-pairing" element={guarded("/device-pairing", <DevicePairing/>)}/>
+            <Route path="my-settings" element={guarded("/my-settings", <MyCourierSettings/>)}/>
             <Route path="global-configuration" element={guarded("/global-configuration", <GlobalConfiguration/>)}/>
         </Routes>
     );

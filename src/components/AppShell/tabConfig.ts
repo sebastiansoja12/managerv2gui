@@ -35,6 +35,7 @@ export const tabTitles = (): Record<string, string> => ({
     "/login": pl.navigation.login,
     "/profile": pl.navigation.profile,
     "/device-pairing": pl.navigation.devicePairing,
+    "/my-settings": pl.navigation.mySettings,
     "/global-configuration": pl.navigation.globalConfiguration,
 });
 
