@@ -1,15 +1,13 @@
 import React, {FormEvent, useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {Link} from "react-router-dom";
-import {Alert, Button, Chip, IconButton, MenuItem, TextField, Typography} from "components/ui";
+import {Alert, Button, Chip, IconButton, TextField, Typography} from "components/ui";
 import {Add, DeleteOutline, QrCodeScanner, Save} from "components/ui/icons";
 import AuthService from "../../hooks/AuthService";
-import DeviceService from "../../hooks/DeviceService";
 import ShipmentCollectService, {CollectFaultError} from "../../hooks/ShipmentCollectService";
 import {getBackendErrorMessage} from "../../api/errorMessage";
 import {CurrentUserDto} from "../../auth/UserProfileDto";
 import pl from "../../i18n/translate";
-import {DeviceDto} from "../Devices/dto/DeviceDto";
-import {readDevicePairKey, removeDevicePairKey, saveDevicePairKey} from "../Devices/devicePairKeyStore";
+import {useBrowserDevice} from "../Devices/useBrowserDevice";
 import {CollectResponse, PendingShipment} from "./model/ShipmentCollect";
 import {readShipmentCollectSession, saveShipmentCollectSession} from "./shipmentCollectSession";
 import "./styles/shipment-scanner.css";
@@ -40,10 +38,6 @@ const formatScanTime = () => new Date().toLocaleTimeString(pl.common.locale, {
 
 export const normalizeTrackingNumber = (value: string) => value.trim();
 
-const deviceKey = (device: DeviceDto, index: number) => device.deviceId?.value || String(index);
-
-const isPairKeyFault = (message: string) => /pair key/i.test(message);
-
 const resolveSavedState = (collectResponse: CollectResponse): FeedbackState => {
     if (collectResponse.success) {
         return "saved";
@@ -56,27 +50,20 @@ function ShipmentScanner() {
     const [inputValue, setInputValue] = useState("");
     const [feedback, setFeedback] = useState<Feedback | null>(null);
     const [pendingShipments, setPendingShipments] = useState<PendingShipment[]>([]);
-    const [devices, setDevices] = useState<DeviceDto[]>([]);
-    const [devicesLoading, setDevicesLoading] = useState(true);
-    const [devicesError, setDevicesError] = useState<string | null>(null);
     const [currentUser, setCurrentUser] = useState<CurrentUserDto | null>(null);
-    const [selectedDeviceKey, setSelectedDeviceKey] = useState("");
-    const [pairKey, setPairKey] = useState("");
+    const [activationCode, setActivationCode] = useState("");
+    const [adminCodeVisible, setAdminCodeVisible] = useState(false);
     const [validationMessage, setValidationMessage] = useState<string | null>(null);
     const [collectResponse, setCollectResponse] = useState<CollectResponse | null>(null);
     const [sessionRestored, setSessionRestored] = useState(false);
 
     const translations = pl.shipmentScanner;
     const saving = feedback?.state === "saving";
-
-    const selectedDevice = useMemo(
-        () => devices.find((device, index) => deviceKey(device, index) === selectedDeviceKey),
-        [devices, selectedDeviceKey],
-    );
+    const browserDevice = useBrowserDevice();
+    const device = browserDevice.device;
+    const deviceReady = browserDevice.status === "ready";
 
     const userId = currentUser ? String(currentUser.userId.value) : null;
-    const selectedDeviceId = selectedDevice?.deviceId?.value || null;
-    const pairKeySaved = Boolean(userId && selectedDeviceId && pairKey && readDevicePairKey(userId, selectedDeviceId) === pairKey.trim());
 
     const collectedCount = useMemo(
         () => collectResponse?.details.filter((detail) => detail.success).length || 0,
@@ -87,58 +74,36 @@ function ShipmentScanner() {
         window.setTimeout(() => inputRef.current?.focus(), 0);
     };
 
-    const loadDevices = useCallback(async () => {
-        setDevicesLoading(true);
-        setDevicesError(null);
+    const loadCurrentUser = useCallback(async () => {
         try {
-            const [profileResponse, devicesResponse] = await Promise.all([
-                AuthService.me(),
-                DeviceService.currentUserDevices(),
-            ]);
-            const loadedDevices = devicesResponse.data;
+            const profileResponse = await AuthService.me();
             const session = readShipmentCollectSession(profileResponse.data.userId.value);
-            const restoredDeviceKey = loadedDevices.some((device, index) => deviceKey(device, index) === session.selectedDeviceKey)
-                ? session.selectedDeviceKey
-                : loadedDevices.length === 1 ? deviceKey(loadedDevices[0], 0) : "";
             setCurrentUser(profileResponse.data);
-            setDevices(loadedDevices);
-            setSelectedDeviceKey(restoredDeviceKey);
             setPendingShipments(session.pendingShipments);
             setSessionRestored(true);
         } catch (error) {
-            setDevicesError(getBackendErrorMessage(error, translations.device.loadError));
-        } finally {
-            setDevicesLoading(false);
+            setFeedback({state: "error", description: getBackendErrorMessage(error, translations.feedback.error)});
         }
-    }, [translations.device.loadError]);
+    }, [translations.feedback.error]);
 
     useEffect(() => {
-        loadDevices();
+        loadCurrentUser();
         focusInput();
-    }, [loadDevices]);
+    }, [loadCurrentUser]);
 
     useEffect(() => {
         if (userId && sessionRestored) {
-            saveShipmentCollectSession(userId, {pendingShipments, selectedDeviceKey});
+            saveShipmentCollectSession(userId, {pendingShipments});
         }
-    }, [userId, sessionRestored, pendingShipments, selectedDeviceKey]);
+    }, [userId, sessionRestored, pendingShipments]);
 
-    useEffect(() => {
-        setPairKey(userId && selectedDeviceId ? readDevicePairKey(userId, selectedDeviceId) : "");
-    }, [userId, selectedDeviceId]);
-
-    const changePairKey = (value: string) => {
-        setPairKey(value);
-        if (userId && selectedDeviceId) {
-            saveDevicePairKey(userId, selectedDeviceId, value);
+    const activateBrowser = async (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        if (!activationCode.trim() || browserDevice.activating) {
+            return;
         }
-    };
-
-    const forgetPairKey = () => {
-        if (userId && selectedDeviceId) {
-            removeDevicePairKey(userId, selectedDeviceId);
-        }
-        setPairKey("");
+        await browserDevice.activate(activationCode);
+        setActivationCode("");
     };
 
     const addShipment = (event: FormEvent<HTMLFormElement>) => {
@@ -185,11 +150,11 @@ function ShipmentScanner() {
         if (!pendingShipments.length) {
             return translations.validation.emptyList;
         }
-        if (!selectedDevice) {
+        if (!device) {
             return translations.validation.deviceRequired;
         }
-        if (!pairKey.trim()) {
-            return translations.validation.pairKeyRequired;
+        if (!deviceReady) {
+            return translations.validation.sessionRequired;
         }
         return null;
     };
@@ -201,7 +166,7 @@ function ShipmentScanner() {
 
         const validationError = validateBeforeSave();
         setValidationMessage(validationError);
-        if (validationError || !selectedDevice) {
+        if (validationError || !device) {
             return;
         }
 
@@ -209,13 +174,13 @@ function ShipmentScanner() {
         try {
             const response = await ShipmentCollectService.collect({
                 deviceInformation: {
-                    version: selectedDevice.version?.value || "",
-                    deviceId: selectedDevice.deviceId?.value || "",
-                    responsibleUser: selectedDevice.username?.value || currentUser?.username || "",
-                    departmentCode: selectedDevice.depotCode?.value || currentUser?.departmentCode || "",
-                    pairKey: pairKey.trim(),
+                    version: device.version || "",
+                    deviceId: device.deviceId,
+                    responsibleUser: currentUser?.username || "",
+                    departmentCode: device.departmentCode || currentUser?.departmentCode || "",
+                    pairKey: device.pairKey,
                     deviceUserType: "SUPPLIER",
-                    deviceType: selectedDevice.deviceType || "SCANNER",
+                    deviceType: device.deviceType || "SCANNER",
                 },
                 trackingNumbers: [...pendingShipments].reverse().map((shipment) => shipment.trackingNumber),
             });
@@ -226,9 +191,7 @@ function ShipmentScanner() {
             const message = error instanceof CollectFaultError
                 ? error.message
                 : getBackendErrorMessage(error, translations.feedback.error);
-            if (isPairKeyFault(message)) {
-                forgetPairKey();
-            }
+            browserDevice.handleFault(message);
             setFeedback({state: "error", description: message});
         } finally {
             focusInput();
@@ -259,8 +222,8 @@ function ShipmentScanner() {
                         </div>
                     </div>
                     <Chip
-                        color={selectedDevice ? "success" : "warning"}
-                        label={selectedDevice ? translations.page.readyStatus : translations.page.deviceMissingStatus}
+                        color={deviceReady ? "success" : "warning"}
+                        label={deviceReady ? translations.page.readyStatus : translations.page.deviceMissingStatus}
                     />
                 </section>
 
@@ -358,52 +321,71 @@ function ShipmentScanner() {
                                 </div>
                             </div>
 
-                            {devicesLoading ? <p className="shipment-collect-hint">{translations.device.loading}</p> : null}
-                            {devicesError ? <Alert severity="error">{devicesError}</Alert> : null}
-                            {!devicesLoading && !devicesError && !devices.length ? (
-                                <p className="shipment-collect-hint">
-                                    {translations.device.empty}{" "}
-                                    <Link to="/device-pairing">{translations.device.pairingLink}</Link>
-                                </p>
-                            ) : null}
+                            {browserDevice.error ? <Alert severity="error">{browserDevice.error}</Alert> : null}
 
-                            {devices.length ? (
+                            {device ? (
                                 <div className="shipment-collect-form">
-                                    <TextField
-                                        select
-                                        disabled={saving}
-                                        label={translations.device.deviceLabel}
-                                        size="small"
-                                        value={selectedDeviceKey}
-                                        onChange={(event: React.ChangeEvent<HTMLSelectElement>) => setSelectedDeviceKey(event.target.value)}
-                                    >
-                                        <MenuItem value="">{translations.device.devicePlaceholder}</MenuItem>
-                                        {devices.map((device, index) => (
-                                            <MenuItem key={deviceKey(device, index)} value={deviceKey(device, index)}>
-                                                {[device.deviceType, device.deviceId?.value].filter(Boolean).join(" · ")}
-                                            </MenuItem>
-                                        ))}
-                                    </TextField>
-                                    <TextField
-                                        autoComplete="off"
-                                        disabled={saving || !selectedDevice}
-                                        helperText={pairKeySaved ? translations.device.pairKeySaved : translations.device.pairKeyHint}
-                                        label={translations.device.pairKeyLabel}
-                                        size="small"
-                                        type="password"
-                                        value={pairKey}
-                                        onChange={(event: React.ChangeEvent<HTMLInputElement>) => changePairKey(event.target.value)}
-                                    />
+                                    <div className="shipment-collect-process">
+                                        <span>{translations.device.deviceIdLabel}</span>
+                                        <code>{device.deviceId}</code>
+                                    </div>
+                                    <div className="shipment-collect-process">
+                                        <span>{translations.device.departmentLabel}</span>
+                                        <code>{device.departmentCode || pl.common.dash}</code>
+                                    </div>
+                                    {browserDevice.status === "starting" ? (
+                                        <p className="shipment-collect-hint">{translations.device.sessionStarting}</p>
+                                    ) : null}
+                                    {deviceReady && browserDevice.sessionExpiresAt ? (
+                                        <p className="shipment-collect-hint">
+                                            {translations.device.sessionReady.replace("{time}",
+                                                new Date(browserDevice.sessionExpiresAt).toLocaleString(pl.common.locale))}
+                                        </p>
+                                    ) : null}
                                     <div className="shipment-collect-device-links">
-                                        <Link className="shipment-collect-link" to="/device-pairing">{translations.device.pairingLink}</Link>
-                                        {pairKeySaved ? (
-                                            <Button disabled={saving} variant="text" onClick={forgetPairKey}>
-                                                {translations.device.forgetPairKey}
+                                        {browserDevice.status === "error" ? (
+                                            <Button disabled={saving} variant="outlined" onClick={browserDevice.retrySession}>
+                                                {translations.device.retrySession}
                                             </Button>
                                         ) : null}
+                                        <Button disabled={saving} variant="text" onClick={browserDevice.deregister}>
+                                            {translations.device.deregister}
+                                        </Button>
                                     </div>
                                 </div>
-                            ) : null}
+                            ) : (
+                                <form className="shipment-collect-form" onSubmit={activateBrowser}>
+                                    <p className="shipment-collect-hint">{translations.device.activationDescription}</p>
+                                    <Button
+                                        disabled={browserDevice.activating}
+                                        variant="contained"
+                                        onClick={() => browserDevice.activate()}
+                                    >
+                                        {translations.device.activateBrowser}
+                                    </Button>
+                                    {adminCodeVisible ? (
+                                        <>
+                                        <TextField
+                                            autoComplete="off"
+                                            disabled={browserDevice.activating}
+                                            label={translations.device.activationCodeLabel}
+                                            placeholder="ABCD-EFGH"
+                                            size="small"
+                                            value={activationCode}
+                                            onChange={(event: React.ChangeEvent<HTMLInputElement>) => setActivationCode(event.target.value)}
+                                        />
+                                        <Button disabled={browserDevice.activating || !activationCode.trim()} type="submit" variant="outlined">
+                                            {translations.device.activate}
+                                        </Button>
+                                        </>
+                                    ) : (
+                                        <Button disabled={browserDevice.activating} variant="text" onClick={() => setAdminCodeVisible(true)}>
+                                            {translations.device.adminCode}
+                                        </Button>
+                                    )}
+                                    <Link className="shipment-collect-link" to="/device-pairing">{translations.device.devicesLink}</Link>
+                                </form>
+                            )}
                         </div>
 
                         <div className="shipment-collect-panel">

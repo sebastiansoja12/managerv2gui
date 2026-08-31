@@ -6,10 +6,6 @@ export type WrappedNumberDto = {
     value: number;
 };
 
-export type OperatorIdDto = {
-    value: number;
-};
-
 export type DeviceDto = {
     deviceId: WrappedStringDto | null;
     version: WrappedStringDto | null;
@@ -18,23 +14,52 @@ export type DeviceDto = {
     depotCode: WrappedStringDto | null;
     lastUpdate: string | null;
     active: boolean | null;
+    assignmentMode?: DeviceAssignmentModeDto | null;
 };
 
-export type CurrentUserDevicePairRequest = {
-    externalSystemId: string;
-    departmentCode: WrappedStringDto | null;
+export type DeviceAssignmentModeDto = "PERSONAL" | "SHARED";
+
+export const deviceAssignmentModes: DeviceAssignmentModeDto[] = ["PERSONAL", "SHARED"];
+
+export type DeviceActivationCodeResponseDto = {
+    activationCode: string;
+    expiresAt: string;
 };
 
-export type DevicePairResponseDto = {
-    userId: (WrappedNumberDto & { operatorId?: number | null }) | null;
-    deviceId: WrappedStringDto | null;
-    devicePairId: WrappedNumberDto | null;
-    pairStatus: string | null;
-    pairKey: string | null;
-    userValid: boolean | null;
-    deviceValid: boolean | null;
-    deviceUpToDate: boolean | null;
-    operatorId?: OperatorIdDto | null;
+export type DeviceOwnershipUpdateRequest = {
+    assignmentMode: DeviceAssignmentModeDto;
+};
+
+export const DEVICE_ACTIVATION_QR_TYPE = "MANAGER_DEVICE_ACTIVATION";
+
+export type DeviceActivationRequest = {
+    activationCode: string;
+    installationId?: string | null;
+    deviceType?: DeviceTypeDto | null;
+    appVersion?: string | null;
+};
+
+export type DeviceActivationResponseDto = {
+    device: DeviceDto;
+    pairKey: string;
+    pairKeyExpiresAt: string;
+};
+
+export type DeviceOperatorSessionResponseDto = {
+    device: DeviceDto;
+    sessionExpiresAt: string;
+};
+
+export type DeviceHeartbeatRequest = {
+    version: string;
+    manufacturer: string | null;
+    model: string | null;
+    osName: string | null;
+    osVersion: string | null;
+};
+
+export type DeviceHeartbeatResponseDto = {
+    updateRequired: boolean | null;
 };
 
 export type DeviceTypeDto = "SCANNER" | "MOBILE" | "TERMINAL";

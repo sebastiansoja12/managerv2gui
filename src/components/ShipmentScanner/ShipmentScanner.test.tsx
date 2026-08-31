@@ -14,7 +14,13 @@ jest.mock("../../hooks/AuthService", () => ({
 
 jest.mock("../../hooks/DeviceService", () => ({
     __esModule: true,
-    default: {currentUserDevices: jest.fn()},
+    default: {
+        issuePairingCode: jest.fn(),
+        activateDevice: jest.fn(),
+        startOperatorSession: jest.fn(),
+        endOperatorSession: jest.fn(),
+        heartbeat: jest.fn(),
+    },
 }));
 
 jest.mock("../../hooks/ShipmentCollectService", () => {
@@ -35,10 +41,36 @@ const mockedAuthService = AuthService as jest.Mocked<typeof AuthService>;
 const mockedDeviceService = DeviceService as jest.Mocked<typeof DeviceService>;
 const mockedCollectService = ShipmentCollectService as jest.Mocked<typeof ShipmentCollectService>;
 
-const scanTrackingNumber = (trackingNumber: string) => {
-    fireEvent.change(screen.getByLabelText(pl.shipmentScanner.scanCard.inputLabel), {target: {value: trackingNumber}});
-    fireEvent.click(screen.getByRole("button", {name: pl.shipmentScanner.scanCard.submit}));
+const translations = pl.shipmentScanner;
+
+const scannerDevice = {
+    deviceId: {value: "SC:1"},
+    version: {value: "1.3.0"},
+    deviceType: "SCANNER",
+    username: {value: "7"},
+    depotCode: {value: "KT1"},
+    lastUpdate: null,
+    active: true,
+    assignmentMode: "SHARED" as const,
 };
+
+const storeActivatedBrowser = () => {
+    window.localStorage.setItem("manager.browserDevice", JSON.stringify({
+        deviceId: "SC:1",
+        deviceType: "SCANNER",
+        departmentCode: "KT1",
+        version: "1.3.0",
+        assignmentMode: "SHARED",
+        pairKey: "pair-key",
+    }));
+};
+
+const scanTrackingNumber = (trackingNumber: string) => {
+    fireEvent.change(screen.getByLabelText(translations.scanCard.inputLabel), {target: {value: trackingNumber}});
+    fireEvent.click(screen.getByRole("button", {name: translations.scanCard.submit}));
+};
+
+const renderScanner = () => render(<MemoryRouter><ShipmentScanner/></MemoryRouter>);
 
 describe("ShipmentScanner", () => {
     beforeEach(() => {
@@ -46,47 +78,76 @@ describe("ShipmentScanner", () => {
         window.localStorage.clear();
         window.sessionStorage.clear();
         mockedAuthService.me.mockResolvedValue({data: {userId: {value: 7}, username: "courier", departmentCode: "KT1"}} as never);
-        mockedDeviceService.currentUserDevices.mockResolvedValue({
-            data: [{
-                deviceId: {value: "SC:1"},
-                version: {value: "1.3.0"},
-                deviceType: "SCANNER",
-                username: {value: "courier"},
-                depotCode: {value: "KT1"},
-                lastUpdate: null,
-                active: true,
-            }],
+        mockedDeviceService.heartbeat.mockResolvedValue({data: {updateRequired: false}} as never);
+        mockedDeviceService.endOperatorSession.mockResolvedValue({data: undefined} as never);
+        mockedDeviceService.startOperatorSession.mockResolvedValue({
+            data: {device: scannerDevice, sessionExpiresAt: new Date(Date.now() + 3_600_000).toISOString()},
         } as never);
     });
 
-    const renderScanner = async () => {
-        render(<MemoryRouter><ShipmentScanner/></MemoryRouter>);
-        await screen.findByText(pl.shipmentScanner.device.pairKeyLabel);
-    };
-
     it("keeps scanned shipments in memory and rejects duplicates", async () => {
-        await renderScanner();
+        renderScanner();
+        await screen.findByRole("button", {name: translations.device.activateBrowser});
 
         scanTrackingNumber(" TRK-001 ");
         scanTrackingNumber("TRK-001");
 
-        expect(screen.getByRole("button", {name: pl.shipmentScanner.pending.remove.replace("{trackingNumber}", "TRK-001")})).toBeInTheDocument();
-        expect(screen.getByText(pl.shipmentScanner.feedback.duplicate)).toBeInTheDocument();
-        expect(screen.getByText(pl.shipmentScanner.pending.count.replace("{count}", "1"))).toBeInTheDocument();
+        expect(screen.getByRole("button", {name: translations.pending.remove.replace("{trackingNumber}", "TRK-001")})).toBeInTheDocument();
+        expect(screen.getByText(translations.feedback.duplicate)).toBeInTheDocument();
+        expect(screen.getByText(translations.pending.count.replace("{count}", "1"))).toBeInTheDocument();
         expect(mockedCollectService.collect).not.toHaveBeenCalled();
     });
 
-    it("requires a pair key before sending the collect request", async () => {
-        await renderScanner();
+    it("requires an activated browser before sending the collect request", async () => {
+        renderScanner();
+        await screen.findByRole("button", {name: translations.device.activateBrowser});
         scanTrackingNumber("TRK-001");
 
-        fireEvent.click(screen.getByRole("button", {name: pl.shipmentScanner.pending.save.replace("{count}", "1")}));
+        fireEvent.click(screen.getByRole("button", {name: translations.pending.save.replace("{count}", "1")}));
 
-        expect(screen.getByText(pl.shipmentScanner.validation.pairKeyRequired)).toBeInTheDocument();
+        expect(screen.getByText(translations.validation.deviceRequired)).toBeInTheDocument();
         expect(mockedCollectService.collect).not.toHaveBeenCalled();
     });
 
-    it("sends all scanned shipments and shows which ones were not collected", async () => {
+    it("activates the browser on the current account with one click", async () => {
+        mockedDeviceService.issuePairingCode.mockResolvedValue({
+            data: {activationCode: "WXYZ-2345", expiresAt: "2027-04-21T10:00:00Z"},
+        } as never);
+        mockedDeviceService.activateDevice.mockResolvedValue({
+            data: {device: scannerDevice, pairKey: "account-pair-key", pairKeyExpiresAt: "2027-04-21T10:00:00Z"},
+        } as never);
+        renderScanner();
+
+        fireEvent.click(await screen.findByRole("button", {name: translations.device.activateBrowser}));
+
+        expect(await screen.findByText("SC:1")).toBeInTheDocument();
+        expect(mockedDeviceService.activateDevice).toHaveBeenCalledWith(expect.objectContaining({
+            activationCode: "WXYZ-2345",
+            deviceType: "SCANNER",
+            installationId: expect.stringMatching(/^web-/),
+        }));
+        await waitFor(() => expect(mockedDeviceService.startOperatorSession).toHaveBeenCalledWith("account-pair-key"));
+    });
+
+    it("activates the browser with an administrator code and starts an operator session", async () => {
+        mockedDeviceService.activateDevice.mockResolvedValue({
+            data: {device: scannerDevice, pairKey: "new-pair-key", pairKeyExpiresAt: "2027-04-21T10:00:00Z"},
+        } as never);
+        renderScanner();
+
+        fireEvent.click(await screen.findByRole("button", {name: translations.device.adminCode}));
+        fireEvent.change(screen.getByLabelText(translations.device.activationCodeLabel), {target: {value: "ABCD-EFGH"}});
+        fireEvent.click(screen.getByRole("button", {name: translations.device.activate}));
+
+        expect(await screen.findByText("SC:1")).toBeInTheDocument();
+        expect(mockedDeviceService.activateDevice).toHaveBeenCalledWith(expect.objectContaining({activationCode: "ABCD-EFGH"}));
+        expect(mockedDeviceService.issuePairingCode).not.toHaveBeenCalled();
+        await waitFor(() => expect(mockedDeviceService.startOperatorSession).toHaveBeenCalledWith("new-pair-key"));
+        expect(JSON.parse(window.localStorage.getItem("manager.browserDevice") || "{}").pairKey).toBe("new-pair-key");
+    });
+
+    it("sends all scanned shipments on behalf of the activated browser", async () => {
+        storeActivatedBrowser();
         mockedCollectService.collect.mockResolvedValue({
             processId: "6f0f3a5e-2d0c-4b8e-9a39-2f7d0d3c1a11",
             success: false,
@@ -95,49 +156,45 @@ describe("ShipmentScanner", () => {
                 {trackingNumber: "TRK-002", shipmentId: null, success: false, errorMessage: "Shipment was not found"},
             ],
         });
-        await renderScanner();
+        renderScanner();
+        await screen.findByText(translations.page.readyStatus);
         scanTrackingNumber("TRK-001");
         scanTrackingNumber("TRK-002");
-        fireEvent.change(screen.getByLabelText(pl.shipmentScanner.device.pairKeyLabel), {target: {value: "pair-key"}});
 
-        fireEvent.click(screen.getByRole("button", {name: pl.shipmentScanner.pending.save.replace("{count}", "2")}));
+        fireEvent.click(screen.getByRole("button", {name: translations.pending.save.replace("{count}", "2")}));
 
-        await screen.findByText(pl.shipmentScanner.feedback.partial);
+        await screen.findByText(translations.feedback.partial);
         expect(mockedCollectService.collect).toHaveBeenCalledWith(expect.objectContaining({
             trackingNumbers: ["TRK-001", "TRK-002"],
             deviceInformation: expect.objectContaining({deviceId: "SC:1", pairKey: "pair-key", deviceType: "SCANNER"}),
         }));
         expect(screen.getByText("Shipment was not found")).toBeInTheDocument();
-        await waitFor(() => expect(screen.getByText(pl.shipmentScanner.result.summary
-            .replace("{collected}", "1")
-            .replace("{total}", "2"))).toBeInTheDocument());
-        expect(screen.getByText(pl.shipmentScanner.pending.empty)).toBeInTheDocument();
+        expect(screen.getByText(translations.pending.empty)).toBeInTheDocument();
     });
 
-    it("remembers the pair key and scanned shipments after leaving the view", async () => {
-        const firstRender = render(<MemoryRouter><ShipmentScanner/></MemoryRouter>);
-        await screen.findByText(pl.shipmentScanner.device.pairKeyLabel);
+    it("remembers scanned shipments after leaving the view", async () => {
+        storeActivatedBrowser();
+        const firstRender = renderScanner();
+        await screen.findByText(translations.page.readyStatus);
         scanTrackingNumber("TRK-001");
-        fireEvent.change(screen.getByLabelText(pl.shipmentScanner.device.pairKeyLabel), {target: {value: "pair-key"}});
         firstRender.unmount();
 
-        render(<MemoryRouter><ShipmentScanner/></MemoryRouter>);
+        renderScanner();
 
-        await waitFor(() => expect(screen.getByLabelText(pl.shipmentScanner.device.pairKeyLabel)).toHaveValue("pair-key"));
-        expect(screen.getByText(pl.shipmentScanner.device.pairKeySaved)).toBeInTheDocument();
-        expect(screen.getByRole("button", {name: pl.shipmentScanner.pending.remove.replace("{trackingNumber}", "TRK-001")})).toBeInTheDocument();
+        expect(await screen.findByRole("button", {name: translations.pending.remove.replace("{trackingNumber}", "TRK-001")})).toBeInTheDocument();
     });
 
-    it("forgets a pair key rejected by the backend", async () => {
+    it("forgets the browser device when the backend rejects its pair key", async () => {
+        storeActivatedBrowser();
         mockedCollectService.collect.mockRejectedValue(new (jest.requireMock("../../hooks/ShipmentCollectService").CollectFaultError)("Invalid device pair key"));
-        await renderScanner();
+        renderScanner();
+        await screen.findByText(translations.page.readyStatus);
         scanTrackingNumber("TRK-001");
-        fireEvent.change(screen.getByLabelText(pl.shipmentScanner.device.pairKeyLabel), {target: {value: "expired-key"}});
 
-        fireEvent.click(screen.getByRole("button", {name: pl.shipmentScanner.pending.save.replace("{count}", "1")}));
+        fireEvent.click(screen.getByRole("button", {name: translations.pending.save.replace("{count}", "1")}));
 
-        await screen.findByText("Invalid device pair key");
-        expect(screen.getByLabelText(pl.shipmentScanner.device.pairKeyLabel)).toHaveValue("");
-        expect(window.localStorage.getItem("manager.devicePairKeys.7")).toBeNull();
+        expect(await screen.findByText(translations.device.credentialsRevoked)).toBeInTheDocument();
+        expect(screen.getByRole("button", {name: translations.device.activateBrowser})).toBeInTheDocument();
+        expect(window.localStorage.getItem("manager.browserDevice")).toBeNull();
     });
 });

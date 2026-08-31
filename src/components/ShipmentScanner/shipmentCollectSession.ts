@@ -4,10 +4,9 @@ const STORAGE_PREFIX = "manager.shipmentCollect.";
 
 export type ShipmentCollectSession = {
     pendingShipments: PendingShipment[];
-    selectedDeviceKey: string;
 };
 
-const emptySession: ShipmentCollectSession = {pendingShipments: [], selectedDeviceKey: ""};
+const emptySession: ShipmentCollectSession = {pendingShipments: []};
 
 export const readShipmentCollectSession = (userId: string | number): ShipmentCollectSession => {
     try {
@@ -18,7 +17,6 @@ export const readShipmentCollectSession = (userId: string | number): ShipmentCol
         const parsed = JSON.parse(storedValue) as Partial<ShipmentCollectSession>;
         return {
             pendingShipments: Array.isArray(parsed.pendingShipments) ? parsed.pendingShipments : [],
-            selectedDeviceKey: parsed.selectedDeviceKey || "",
         };
     } catch (error) {
         return emptySession;
