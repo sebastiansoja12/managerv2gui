@@ -4,6 +4,7 @@ import './App.css';
 import AppShell from "./components/AppShell/AppShell";
 import MaintenanceGate from "./components/Maintenance/MaintenanceGate";
 import {OperatorCapabilitiesProvider} from "./components/AppShell/OperatorCapabilitiesContext";
+import SetPasswordApplication from "./components/SetPassword/SetPasswordApplication";
 import ShipmentEditApplication from "./components/ShipmentEdit/ShipmentEditApplication";
 import SubscriptionGate from "./components/Subscription/SubscriptionGate";
 import SuperAdminApplication from "./components/SuperAdmin/SuperAdminApplication";
@@ -20,6 +21,7 @@ function App() {
                                 <Route path="/super-admin/*" element={<SuperAdminApplication/>}/>
                                 <Route path="/shipment-edit" element={<MaintenanceGate><SubscriptionGate><ShipmentEditApplication/></SubscriptionGate></MaintenanceGate>}/>
                                 <Route path="/shipment-edit/:trackingNumber" element={<MaintenanceGate><SubscriptionGate><ShipmentEditApplication/></SubscriptionGate></MaintenanceGate>}/>
+                                <Route path="/set-password" element={<MaintenanceGate><SetPasswordApplication/></MaintenanceGate>}/>
                                 <Route path="/*" element={<MaintenanceGate><OperatorCapabilitiesProvider><SubscriptionGate><AppShell/></SubscriptionGate></OperatorCapabilitiesProvider></MaintenanceGate>}/>
                             </Routes>
                         </BrowserRouter>

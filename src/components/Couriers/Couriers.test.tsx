@@ -73,6 +73,9 @@ describe("Couriers", () => {
         fireEvent.change(within(dialog).getByRole("textbox", {name: pl.couriers.fields.telephoneNumber}), {
             target: {value: "+48123456789"},
         });
+        fireEvent.change(within(dialog).getByRole("textbox", {name: pl.couriers.fields.email}), {
+            target: {value: "jan.kowalski@example.com"},
+        });
         fireEvent.click(within(dialog).getByRole("button", {name: pl.couriers.create.submit}));
 
         await waitFor(() => expect(mockedCourierService.create).toHaveBeenCalledWith({
@@ -80,6 +83,7 @@ describe("Couriers", () => {
             firstName: "Jan",
             lastName: "Kowalski",
             telephoneNumber: "+48123456789",
+            email: "jan.kowalski@example.com",
             departmentCode: {value: "WAW01"},
         }));
         expect(await screen.findByText(pl.couriers.create.success)).toBeInTheDocument();

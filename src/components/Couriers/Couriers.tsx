@@ -62,8 +62,11 @@ const emptyCreateForm = {
     firstName: "",
     lastName: "",
     telephoneNumber: "",
+    email: "",
     departmentCode: "",
 };
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const emptyFilters = {
     code: "",
@@ -243,6 +246,7 @@ function Couriers() {
         firstName: createForm.firstName.trim(),
         lastName: createForm.lastName.trim(),
         telephoneNumber: createForm.telephoneNumber.trim(),
+        email: createForm.email.trim(),
         departmentCode: {
             value: createForm.departmentCode.trim(),
         },
@@ -276,8 +280,14 @@ function Couriers() {
             || !createForm.firstName.trim()
             || !createForm.lastName.trim()
             || !createForm.departmentCode.trim()
+            || !createForm.email.trim()
         ) {
             setError(createTranslations.required);
+            return;
+        }
+
+        if (!EMAIL_PATTERN.test(createForm.email.trim())) {
+            setError(createTranslations.invalidEmail);
             return;
         }
 
@@ -582,6 +592,16 @@ function Couriers() {
                             size="small"
                             value={createForm.telephoneNumber}
                             onChange={(event) => updateCreateField("telephoneNumber", event.target.value)}
+                        />
+                        <TextField
+                            disabled={saving}
+                            helperText={createTranslations.emailHint}
+                            label={pl.couriers.fields.email}
+                            required
+                            size="small"
+                            type="email"
+                            value={createForm.email}
+                            onChange={(event) => updateCreateField("email", event.target.value)}
                         />
                         <TextField
                             disabled={saving || departmentsLoading || !availableDepartments.length}

@@ -53,6 +53,7 @@ export interface CourierDto {
     firstName: string;
     lastName: string;
     telephoneNumber: string;
+    email?: string | null;
     departmentCode?: DepartmentCodeDto | null;
     status?: string | null;
     userStatus?: string | null;
@@ -80,6 +81,7 @@ export interface CourierCreateRequest {
     firstName: string;
     lastName: string;
     telephoneNumber: string;
+    email: string;
     departmentCode: DepartmentCodeDto;
 }
 
