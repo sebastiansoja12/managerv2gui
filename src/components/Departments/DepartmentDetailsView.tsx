@@ -8,7 +8,9 @@ import Department from "../../class/depots/Department";
 import departmentService, {DepartmentStatus} from "../../hooks/DepartmentService";
 import UserManagementService from "../../hooks/UserManagementService";
 import pl from "../../i18n/translate";
+import {useDepartmentConfiguration} from "../GlobalConfiguration/model/DepartmentConfiguration";
 import DepartmentMapWorkspace from "../DepartmentMap/DepartmentMapWorkspace";
+import DeliveryAreaEditor from "./DeliveryAreaEditor";
 import {User} from "../Users/model/User";
 import {canManageUsers, isAdministrator} from "../Users/model/UserRoleAccess";
 import "./styles/departments.css";
@@ -27,7 +29,7 @@ export const DEPARTMENT_TYPES = [
 
 const DEPARTMENT_STATUSES: DepartmentStatus[] = ["ACTIVE", "INACTIVE", "ARCHIVED", "DELETED", "SUSPENDED"];
 
-type DepartmentTab = "details" | "map";
+type DepartmentTab = "details" | "map" | "deliveryArea";
 
 type EditForm = {
     city: string;
@@ -86,6 +88,7 @@ function DepartmentDetailsView() {
     const {departmentId = ""} = useParams();
     const decodedDepartmentId = decodeURIComponent(departmentId);
     const {user: currentUser} = useAuthState();
+    const departmentConfiguration = useDepartmentConfiguration(currentUser?.operatorId?.value);
     const canEdit = canManageUsers(currentUser?.role);
     const canChangeStatus = isAdministrator(currentUser?.role);
     const [department, setDepartment] = useState<Department | null>(null);
@@ -94,6 +97,7 @@ function DepartmentDetailsView() {
     const [notice, setNotice] = useState<string | null>(null);
     const [tab, setTab] = useState<DepartmentTab>("details");
     const [mapOpened, setMapOpened] = useState(false);
+    const [deliveryAreaOpened, setDeliveryAreaOpened] = useState(false);
     const [editing, setEditing] = useState(false);
     const [form, setForm] = useState<EditForm | null>(null);
     const [saving, setSaving] = useState(false);
@@ -142,6 +146,11 @@ function DepartmentDetailsView() {
         }
         if (!form.city.trim() || !form.street.trim() || !form.countryCode.trim()) {
             setError(translations.edit.required);
+            return;
+        }
+        if (form.status !== department.status && ((form.status === "ARCHIVED" && departmentConfiguration.preventDepartmentArchiving)
+            || (form.status === "DELETED" && departmentConfiguration.preventDepartmentDeletion))) {
+            setError(pl.globalConfiguration.departmentConfiguration.restrictedStatus);
             return;
         }
         const requests: Array<Promise<unknown>> = [
@@ -203,7 +212,7 @@ function DepartmentDetailsView() {
     }
 
     return (
-        <main className="department-details-page">
+        <main className={`department-details-page${tab === "deliveryArea" ? " delivery-area-tab-active" : ""}`}>
             <section className="department-details-header">
                 <div className="departments-heading">
                     <span className="departments-kicker">{translations.view.kicker}</span>
@@ -235,6 +244,13 @@ function DepartmentDetailsView() {
                             setMapOpened(true);
                         }}>
                     <MapIcon fontSize="small" /> {translations.view.mapTab}
+                </button>
+                <button aria-selected={tab === "deliveryArea"} className={tab === "deliveryArea" ? "active" : ""}
+                        role="tab" type="button" onClick={() => {
+                            setTab("deliveryArea");
+                            setDeliveryAreaOpened(true);
+                        }}>
+                    <MapIcon fontSize="small" /> {translations.view.deliveryAreaTab}
                 </button>
             </nav>
 
@@ -287,7 +303,10 @@ function DepartmentDetailsView() {
                                         {canChangeStatus ? (
                                             <TextField select label={translations.columns.status} size="small" value={form.status}
                                                        onChange={(event) => updateField("status", event.target.value)}>
-                                                {DEPARTMENT_STATUSES.map((status) => (
+                                                {DEPARTMENT_STATUSES.filter((status) => status === department.status
+                                                    || !((status === "ARCHIVED" && departmentConfiguration.preventDepartmentArchiving)
+                                                        || (status === "DELETED" && departmentConfiguration.preventDepartmentDeletion)))
+                                                    .map((status) => (
                                                     <MenuItem key={status} value={status}>{translateDepartmentStatus(status)}</MenuItem>
                                                 ))}
                                             </TextField>
@@ -366,6 +385,14 @@ function DepartmentDetailsView() {
                 <div aria-label={translations.view.mapTab} className="department-details-content" hidden={tab !== "map"}
                      role="tabpanel">
                     <DepartmentMapWorkspace departmentCode={departmentCode} departmentId={String(department.departmentId)} />
+                </div>
+            ) : null}
+            {deliveryAreaOpened ? (
+                <div aria-label={translations.view.deliveryAreaTab} className="department-details-content"
+                     hidden={tab !== "deliveryArea"} role="tabpanel">
+                    <DeliveryAreaEditor departmentId={String(department.departmentId)} departmentCode={departmentCode}
+                                        coordinates={department.coordinates} operatorId={currentUser?.operatorId?.value}
+                                        canEdit={canEdit} active={tab === "deliveryArea"} />
                 </div>
             ) : null}
         </main>

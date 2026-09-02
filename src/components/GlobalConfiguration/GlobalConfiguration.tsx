@@ -1,18 +1,20 @@
 import React, {useState} from "react";
-import {Cable, ChevronRight, Inventory2Outlined, LocalShipping, Map, Tune} from "components/ui/icons";
+import {Business, Cable, ChevronRight, Inventory2Outlined, LocalShipping, Map, Tune} from "components/ui/icons";
 import pl from "../../i18n/translate";
 import CourierConfigurationPolicyPanel from "./CourierConfigurationPolicyPanel";
+import DepartmentConfigurationPanel from "./DepartmentConfigurationPanel";
 import GeocodingConfigurationPanel from "./GeocodingConfigurationPanel";
 import IntegrationsConfigurationPanel from "./IntegrationsConfigurationPanel";
 import {GlobalConfigurationSectionKey} from "./model/GlobalConfigurationSection";
 import ShipmentConfigurationPanel from "./ShipmentConfigurationPanel";
 import "./styles/global-configuration.css";
 
-const sections: GlobalConfigurationSectionKey[] = ["shipments", "couriers", "geocoding", "integrations"];
+const sections: GlobalConfigurationSectionKey[] = ["shipments", "couriers", "departments", "geocoding", "integrations"];
 
 const sectionIcons: Record<GlobalConfigurationSectionKey, React.ReactNode> = {
     shipments: <Inventory2Outlined fontSize="small" />,
     couriers: <LocalShipping fontSize="small" />,
+    departments: <Business fontSize="small" />,
     geocoding: <Map fontSize="small" />,
     integrations: <Cable fontSize="small" />,
 };
@@ -20,6 +22,7 @@ const sectionIcons: Record<GlobalConfigurationSectionKey, React.ReactNode> = {
 const sectionPanels: Record<GlobalConfigurationSectionKey, React.ReactNode> = {
     shipments: <ShipmentConfigurationPanel />,
     couriers: <CourierConfigurationPolicyPanel />,
+    departments: <DepartmentConfigurationPanel />,
     geocoding: <GeocodingConfigurationPanel />,
     integrations: <IntegrationsConfigurationPanel />,
 };

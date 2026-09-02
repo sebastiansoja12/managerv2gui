@@ -41,6 +41,9 @@ import DeliveryNetworkService from "../hooks/DeliveryNetworkService";
 import departmentService, {DepartmentCreateRequest, DepartmentStatus} from "../hooks/DepartmentService";
 import UserManagementService from "../hooks/UserManagementService";
 import pl from "../i18n/translate";
+import {applyDepartmentAutomations} from "./GlobalConfiguration/departmentAutomation";
+import {useDepartmentConfiguration} from "./GlobalConfiguration/model/DepartmentConfiguration";
+import DeliveryAreasMap from "./Departments/DeliveryAreasMap";
 import DepartmentRelationsMap, {getDepartmentsMissingSortingRelation} from "./Departments/DepartmentRelationsMap";
 import {DepartmentRelation, departmentRelationPairKey} from "./Departments/model/DepartmentRelation";
 import {AppTabDefinition} from "./AppShell/types";
@@ -159,6 +162,7 @@ const Departments: React.FC<DepartmentsProps> = ({onOpenTab}) => {
     const createTranslations = pl.departments.create;
     const canViewArchivedDepartments = isAdministrator(currentUser?.role);
     const canArchiveDepartments = canManageUsers(currentUser?.role);
+    const departmentConfiguration = useDepartmentConfiguration(currentUser?.operatorId?.value);
 
     const cityCount = useMemo(
         () => new Set(departments.map((department) => department.address?.city).filter(Boolean)).size,
@@ -301,28 +305,40 @@ const Departments: React.FC<DepartmentsProps> = ({onOpenTab}) => {
         }],
     });
 
-    const createDepartment = () => {
+    const createDepartment = async () => {
         if (!createForm.departmentCode.trim() || !createForm.city.trim() || !createForm.street.trim()) {
             setError(createTranslations.required);
             return;
         }
 
+        const newDepartmentCode = createForm.departmentCode.trim();
         setSaving(true);
         setError("");
         setSuccess("");
-        departmentService.create(createDepartmentRequest())
-            .then(() => {
-                setSuccess(createTranslations.success);
-                setCreateForm({...emptyDepartmentForm});
-                setCreateDialogOpen(false);
-                retrieveDepartments(false);
-            })
-            .catch((exception: unknown) => {
-                setError(getBackendErrorMessage(exception, createTranslations.error));
-            })
-            .finally(() => {
-                setSaving(false);
-            });
+        try {
+            await departmentService.create(createDepartmentRequest());
+            setSuccess(createTranslations.success);
+            setCreateForm({...emptyDepartmentForm});
+            setCreateDialogOpen(false);
+            if (departmentConfiguration.autoAssignDeliveryAreas || departmentConfiguration.autoConnectDepartments) {
+                try {
+                    const allDepartments = (await departmentService.getAll()).data || [];
+                    const result = await applyDepartmentAutomations(departmentConfiguration, allDepartments,
+                        currentUser?.operatorId?.value, newDepartmentCode);
+                    if (result.connectionSkipped) {
+                        setError(pl.globalConfiguration.departmentConfiguration.connectionSkipped);
+                    }
+                } catch (automationError) {
+                    setError(getBackendErrorMessage(automationError,
+                        pl.globalConfiguration.departmentConfiguration.automationError));
+                }
+            }
+            retrieveDepartments(false);
+        } catch (exception) {
+            setError(getBackendErrorMessage(exception, createTranslations.error));
+        } finally {
+            setSaving(false);
+        }
     };
 
     const openDepartment = (department: Department) => {
@@ -331,6 +347,10 @@ const Departments: React.FC<DepartmentsProps> = ({onOpenTab}) => {
     };
 
     const changeDepartmentStatus = (department: Department, status: DepartmentStatus) => {
+        if ((status === "ARCHIVED" && departmentConfiguration.preventDepartmentArchiving)
+            || (status === "DELETED" && departmentConfiguration.preventDepartmentDeletion)) {
+            return;
+        }
         const departmentCode = getDepartmentCode(department);
         setSaving(true);
         setError("");
@@ -364,6 +384,8 @@ const Departments: React.FC<DepartmentsProps> = ({onOpenTab}) => {
     };
 
     const requestDepartmentStatusChange = (department: Department, status: "ARCHIVED" | "DELETED") => {
+        if ((status === "ARCHIVED" && departmentConfiguration.preventDepartmentArchiving)
+            || (status === "DELETED" && departmentConfiguration.preventDepartmentDeletion)) return;
         setPendingStatusChange({department, status});
     };
 
@@ -530,6 +552,8 @@ const Departments: React.FC<DepartmentsProps> = ({onOpenTab}) => {
             </section>
 
             {success ? <Alert severity="success">{success}</Alert> : undefined}
+
+            <DeliveryAreasMap departments={filteredDepartments} operatorId={currentUser?.operatorId?.value} />
 
             <div className="departments-workspace">
                 <section className="departments-table-panel">
@@ -751,7 +775,7 @@ const Departments: React.FC<DepartmentsProps> = ({onOpenTab}) => {
                                 </button>
                             </td>
                         </tr>
-                        {canArchiveDepartments ? (
+                        {canArchiveDepartments && !departmentConfiguration.preventDepartmentArchiving ? (
                             <tr>
                                 <td>
                                     <button
@@ -765,7 +789,7 @@ const Departments: React.FC<DepartmentsProps> = ({onOpenTab}) => {
                                 </td>
                             </tr>
                         ) : null}
-                        {canViewArchivedDepartments ? (
+                        {canViewArchivedDepartments && !departmentConfiguration.preventDepartmentDeletion ? (
                             <tr>
                                 <td>
                                     <button
