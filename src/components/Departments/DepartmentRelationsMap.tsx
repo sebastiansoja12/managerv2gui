@@ -5,7 +5,7 @@ import {Alert, Button, MenuItem, TextField} from "components/ui";
 import {AccountTree, Add, Close, Map as MapIcon, WarningAmberOutlined} from "components/ui/icons";
 import Department from "../../class/depots/Department";
 import pl from "../../i18n/translate";
-import {DepartmentRelation, departmentRelationKey} from "./model/DepartmentRelation";
+import {DepartmentRelation, departmentRelationPairKey} from "./model/DepartmentRelation";
 import "./styles/department-relations-map.css";
 
 type DepartmentRelationsMapProps = {
@@ -25,6 +25,7 @@ const DEFAULT_ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyr
 const SORTING_FACILITY = "SORTING_FACILITY";
 
 const departmentCode = (department: Department) => department.departmentCode?.value || String(department.departmentId);
+const departmentId = (department: Department) => String(department.departmentId);
 
 const isRelationCandidate = (department: Department) => (
     department.status !== "ARCHIVED" && department.status !== "DELETED"
@@ -45,10 +46,10 @@ export const getDepartmentsMissingSortingRelation = (
     relations: DepartmentRelation[],
 ) => {
     const activeDepartments = departments.filter(isRelationCandidate);
-    const activeDepartmentIds = new Set(activeDepartments.map((department) => department.departmentId));
+    const activeDepartmentIds = new Set(activeDepartments.map(departmentId));
     const sortingFacilityIds = new Set(activeDepartments
         .filter((department) => department.departmentType === SORTING_FACILITY)
-        .map((department) => department.departmentId));
+        .map(departmentId));
 
     return activeDepartments.filter((department) => {
         if (department.departmentType === SORTING_FACILITY) {
@@ -61,9 +62,10 @@ export const getDepartmentsMissingSortingRelation = (
                 return false;
             }
 
-            return (relation.sourceDepartmentId === department.departmentId
+            const currentDepartmentId = departmentId(department);
+            return (relation.sourceDepartmentId === currentDepartmentId
                     && sortingFacilityIds.has(relation.targetDepartmentId))
-                || (relation.targetDepartmentId === department.departmentId
+                || (relation.targetDepartmentId === currentDepartmentId
                     && sortingFacilityIds.has(relation.sourceDepartmentId));
         });
     });
@@ -77,9 +79,23 @@ const relationArrowAngle = (source: [number, number], target: [number, number]) 
 };
 
 const relationArrowPosition = (source: [number, number], target: [number, number]): [number, number] => ([
-    source[0] + (target[0] - source[0]) * 0.62,
-    source[1] + (target[1] - source[1]) * 0.62,
+    source[0] + (target[0] - source[0]) * 0.5,
+    source[1] + (target[1] - source[1]) * 0.5,
 ]);
+
+export const getUniqueDepartmentRelations = (relations: DepartmentRelation[]) => {
+    const relationKeys = new Set<string>();
+
+    return relations.filter((relation) => {
+        const relationKey = departmentRelationPairKey(relation);
+        if (relationKeys.has(relationKey)) {
+            return false;
+        }
+
+        relationKeys.add(relationKey);
+        return true;
+    });
+};
 
 const popupContent = (department: Department) => {
     const popup = document.createElement("div");
@@ -110,7 +126,7 @@ const DepartmentRelationsMap: React.FC<DepartmentRelationsMapProps> = ({
     const mapElementRef = useRef<HTMLDivElement | null>(null);
     const mapRef = useRef<L.Map | null>(null);
     const contentLayerRef = useRef<L.LayerGroup | null>(null);
-    const [sourceDepartmentId, setSourceDepartmentId] = useState<number | null>(null);
+    const [sourceDepartmentId, setSourceDepartmentId] = useState<string | null>(null);
     const [formSourceId, setFormSourceId] = useState<string>("");
     const [formTargetId, setFormTargetId] = useState<string>("");
     const tileUrl = process.env.REACT_APP_MAP_TILE_URL || DEFAULT_TILE_URL;
@@ -121,7 +137,7 @@ const DepartmentRelationsMap: React.FC<DepartmentRelationsMapProps> = ({
         [departments],
     );
     const departmentsById = useMemo(
-        () => new Map(departments.map((department) => [department.departmentId, department])),
+        () => new Map(departments.map((department) => [departmentId(department), department])),
         [departments],
     );
     const mappedDepartments = useMemo(() => relationCandidates.reduce<MappedDepartment[]>((result, department) => {
@@ -132,15 +148,19 @@ const DepartmentRelationsMap: React.FC<DepartmentRelationsMapProps> = ({
         return result;
     }, []), [relationCandidates]);
     const mappedDepartmentsById = useMemo(
-        () => new Map(mappedDepartments.map((item) => [item.department.departmentId, item])),
+        () => new Map(mappedDepartments.map((item) => [departmentId(item.department), item])),
         [mappedDepartments],
     );
     const missingDepartments = useMemo(
         () => getDepartmentsMissingSortingRelation(departments, relations),
         [departments, relations],
     );
+    const uniqueRelations = useMemo(
+        () => getUniqueDepartmentRelations(relations),
+        [relations],
+    );
     const missingDepartmentIds = useMemo(
-        () => new Set(missingDepartments.map((department) => department.departmentId)),
+        () => new Set(missingDepartments.map(departmentId)),
         [missingDepartments],
     );
     const sortingFacilities = useMemo(
@@ -150,36 +170,30 @@ const DepartmentRelationsMap: React.FC<DepartmentRelationsMapProps> = ({
     const hasMappedDepartments = mappedDepartments.length > 0;
     const unmappedCount = relationCandidates.length - mappedDepartments.length;
 
-    const addRelation = useCallback((sourceId: number, targetId: number) => {
+    const addRelation = useCallback((sourceId: string, targetId: string) => {
         if (sourceId === targetId
             || !departmentsById.has(sourceId)
             || !departmentsById.has(targetId)) {
             return;
         }
 
-        const connectionDirections: DepartmentRelation[] = [
-            {sourceDepartmentId: sourceId, targetDepartmentId: targetId},
-            {sourceDepartmentId: targetId, targetDepartmentId: sourceId},
-        ];
-        const currentRelationKeys = new Set(relations.map(departmentRelationKey));
-        const missingDirections = connectionDirections.filter(
-            (relation) => !currentRelationKeys.has(departmentRelationKey(relation)),
-        );
-        if (!missingDirections.length) {
+        const relation = {sourceDepartmentId: sourceId, targetDepartmentId: targetId};
+        const currentRelationKeys = new Set(relations.map(departmentRelationPairKey));
+        if (currentRelationKeys.has(departmentRelationPairKey(relation))) {
             return;
         }
 
-        onRelationsChange([...relations, ...missingDirections]);
+        onRelationsChange([...relations, relation]);
     }, [departmentsById, onRelationsChange, relations]);
 
-    const selectMapDepartment = useCallback((departmentId: number) => {
+    const selectMapDepartment = useCallback((selectedDepartmentId: string) => {
         if (sourceDepartmentId === null) {
-            setSourceDepartmentId(departmentId);
+            setSourceDepartmentId(selectedDepartmentId);
             return;
         }
 
-        if (sourceDepartmentId !== departmentId) {
-            addRelation(sourceDepartmentId, departmentId);
+        if (sourceDepartmentId !== selectedDepartmentId) {
+            addRelation(sourceDepartmentId, selectedDepartmentId);
         }
         setSourceDepartmentId(null);
     }, [addRelation, sourceDepartmentId]);
@@ -198,7 +212,7 @@ const DepartmentRelationsMap: React.FC<DepartmentRelationsMapProps> = ({
             return;
         }
 
-        addRelation(Number(formSourceId), Number(formTargetId));
+        addRelation(formSourceId, formTargetId);
         setFormSourceId("");
         setFormTargetId("");
     };
@@ -238,7 +252,7 @@ const DepartmentRelationsMap: React.FC<DepartmentRelationsMapProps> = ({
 
         contentLayer.clearLayers();
 
-        relations.forEach((relation) => {
+        uniqueRelations.forEach((relation) => {
             const source = mappedDepartmentsById.get(relation.sourceDepartmentId);
             const target = mappedDepartmentsById.get(relation.targetDepartmentId);
             if (!source || !target) {
@@ -246,7 +260,7 @@ const DepartmentRelationsMap: React.FC<DepartmentRelationsMapProps> = ({
             }
 
             const lineColor = "#2563a9";
-            const relationLabel = `${departmentCode(source.department)} → ${departmentCode(target.department)}`;
+            const relationLabel = `${departmentCode(source.department)} ↔ ${departmentCode(target.department)}`;
             L.polyline([source.position, target.position], {
                 className: "department-relations-line",
                 color: lineColor,
@@ -263,16 +277,17 @@ const DepartmentRelationsMap: React.FC<DepartmentRelationsMapProps> = ({
                 icon: L.divIcon({
                     className: "department-relations-arrow-icon",
                     html: `<span class="department-relations-arrow" style="transform: rotate(${angle}deg)"></span>`,
-                    iconAnchor: [9, 9],
-                    iconSize: [18, 18],
+                    iconAnchor: [14, 8],
+                    iconSize: [28, 16],
                 }),
             }).addTo(contentLayer);
         });
 
         mappedDepartments.forEach(({department, position}) => {
             const sortingFacility = department.departmentType === SORTING_FACILITY;
-            const selectedSource = sourceDepartmentId === department.departmentId;
-            const missingSortingRelation = missingDepartmentIds.has(department.departmentId);
+            const currentDepartmentId = departmentId(department);
+            const selectedSource = sourceDepartmentId === currentDepartmentId;
+            const missingSortingRelation = missingDepartmentIds.has(currentDepartmentId);
             const marker = L.circleMarker(position, {
                 className: "department-relations-marker",
                 color: selectedSource ? "#f59e0b" : missingSortingRelation ? "#dc2626" : "#ffffff",
@@ -291,7 +306,7 @@ const DepartmentRelationsMap: React.FC<DepartmentRelationsMapProps> = ({
                     permanent: true,
                 })
                 .bindPopup(popupContent(department))
-                .on("click", () => selectMapDepartment(department.departmentId))
+                .on("click", () => selectMapDepartment(currentDepartmentId))
                 .addTo(contentLayer);
         });
 
@@ -306,7 +321,7 @@ const DepartmentRelationsMap: React.FC<DepartmentRelationsMapProps> = ({
                 padding: [44, 44],
             });
         }
-    }, [mappedDepartments, mappedDepartmentsById, missingDepartmentIds, relations, selectMapDepartment, sourceDepartmentId]);
+    }, [mappedDepartments, mappedDepartmentsById, missingDepartmentIds, selectMapDepartment, sourceDepartmentId, uniqueRelations]);
 
     const selectedSource = sourceDepartmentId === null ? null : departmentsById.get(sourceDepartmentId);
     const formRelationCanBeAdded = Boolean(formSourceId && formTargetId && formSourceId !== formTargetId);
@@ -321,7 +336,7 @@ const DepartmentRelationsMap: React.FC<DepartmentRelationsMapProps> = ({
                 </div>
                 <div className="department-relations-summary">
                     <div><span>{pl.departments.relations.points}</span><strong>{mappedDepartments.length}</strong></div>
-                    <div><span>{pl.departments.relations.relationCount}</span><strong>{relations.length}</strong></div>
+                    <div><span>{pl.departments.relations.relationCount}</span><strong>{uniqueRelations.length}</strong></div>
                     <div className={missingDepartments.length ? "is-invalid" : "is-valid"}>
                         <span>{pl.departments.relations.missingCount}</span><strong>{missingDepartments.length}</strong>
                     </div>
@@ -390,7 +405,7 @@ const DepartmentRelationsMap: React.FC<DepartmentRelationsMapProps> = ({
                     >
                         <MenuItem value="">{pl.departments.relations.chooseDepartment}</MenuItem>
                         {relationCandidates.map((department) => (
-                            <MenuItem key={department.departmentId} value={String(department.departmentId)}>
+                            <MenuItem key={departmentId(department)} value={departmentId(department)}>
                                 {departmentCode(department)} · {department.address?.city || pl.common.dash}
                             </MenuItem>
                         ))}
@@ -404,9 +419,9 @@ const DepartmentRelationsMap: React.FC<DepartmentRelationsMapProps> = ({
                         <MenuItem value="">{pl.departments.relations.chooseDepartment}</MenuItem>
                         {relationCandidates.map((department) => (
                             <MenuItem
-                                disabled={String(department.departmentId) === formSourceId}
-                                key={department.departmentId}
-                                value={String(department.departmentId)}
+                                disabled={departmentId(department) === formSourceId}
+                                key={departmentId(department)}
+                                value={departmentId(department)}
                             >
                                 {departmentCode(department)} · {department.address?.city || pl.common.dash}
                             </MenuItem>
@@ -424,22 +439,22 @@ const DepartmentRelationsMap: React.FC<DepartmentRelationsMapProps> = ({
                     <div className="department-relations-list">
                         <div className="department-relations-list-heading">
                             <strong>{pl.departments.relations.currentRelations}</strong>
-                            <span>{relations.length}</span>
+                            <span>{uniqueRelations.length}</span>
                         </div>
-                        {relations.length ? relations.map((relation) => {
+                        {uniqueRelations.length ? uniqueRelations.map((relation) => {
                             const source = departmentsById.get(relation.sourceDepartmentId);
                             const target = departmentsById.get(relation.targetDepartmentId);
                             return (
-                                <div className="department-relations-list-item" key={departmentRelationKey(relation)}>
+                                <div className="department-relations-list-item" key={departmentRelationPairKey(relation)}>
                                     <span>
                                         <strong>{source ? departmentCode(source) : relation.sourceDepartmentId}</strong>
-                                        <i aria-hidden="true">→</i>
+                                        <i aria-hidden="true">↔</i>
                                         <strong>{target ? departmentCode(target) : relation.targetDepartmentId}</strong>
                                     </span>
                                     <button
                                         aria-label={pl.departments.relations.removeRelation.replace(
                                             "{relation}",
-                                            `${source ? departmentCode(source) : relation.sourceDepartmentId} → ${target ? departmentCode(target) : relation.targetDepartmentId}`,
+                                            `${source ? departmentCode(source) : relation.sourceDepartmentId} ↔ ${target ? departmentCode(target) : relation.targetDepartmentId}`,
                                         )}
                                         type="button"
                                         onClick={() => removeRelation(relation)}

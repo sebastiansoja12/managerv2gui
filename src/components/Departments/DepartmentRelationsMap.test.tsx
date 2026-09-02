@@ -2,7 +2,10 @@ import React, {useState} from "react";
 import {fireEvent, render, screen} from "@testing-library/react";
 import Department from "../../class/depots/Department";
 import pl from "../../i18n/translate";
-import DepartmentRelationsMap, {getDepartmentsMissingSortingRelation} from "./DepartmentRelationsMap";
+import DepartmentRelationsMap, {
+    getDepartmentsMissingSortingRelation,
+    getUniqueDepartmentRelations,
+} from "./DepartmentRelationsMap";
 import {DepartmentRelation} from "./model/DepartmentRelation";
 
 const department = (departmentId: number, code: string, departmentType = "BRANCH"): Department => ({
@@ -34,8 +37,8 @@ const departments = [
 describe("DepartmentRelationsMap", () => {
     it("finds active non-sorting departments without a relation to a sorting facility", () => {
         const relations: DepartmentRelation[] = [{
-            sourceDepartmentId: 2,
-            targetDepartmentId: 1,
+            sourceDepartmentId: "2",
+            targetDepartmentId: "1",
         }];
 
         expect(getDepartmentsMissingSortingRelation(departments, relations).map((item) => item.departmentId))
@@ -47,11 +50,18 @@ describe("DepartmentRelationsMap", () => {
 
         expect(getDepartmentsMissingSortingRelation(
             [departments[0], archivedSortingFacility],
-            [{sourceDepartmentId: 1, targetDepartmentId: 2}],
+            [{sourceDepartmentId: "1", targetDepartmentId: "2"}],
         ).map((item) => item.departmentId)).toEqual([1]);
     });
 
-    it("creates and removes both directions of a relation with the accessible form", () => {
+    it("collapses opposite directions into one bidirectional relation", () => {
+        expect(getUniqueDepartmentRelations([
+            {sourceDepartmentId: "1", targetDepartmentId: "2"},
+            {sourceDepartmentId: "2", targetDepartmentId: "1"},
+        ])).toEqual([{sourceDepartmentId: "1", targetDepartmentId: "2"}]);
+    });
+
+    it("creates and removes one bidirectional relation with the accessible form", () => {
         const Harness = () => {
             const [relations, setRelations] = useState<DepartmentRelation[]>([]);
             return (
@@ -67,11 +77,7 @@ describe("DepartmentRelationsMap", () => {
 
         const removeRelationLabel = pl.departments.relations.removeRelation.replace(
             "{relation}",
-            "WAW01 → SORT01",
-        );
-        const removeReverseRelationLabel = pl.departments.relations.removeRelation.replace(
-            "{relation}",
-            "SORT01 → WAW01",
+            "WAW01 ↔ SORT01",
         );
 
         fireEvent.change(screen.getByLabelText(pl.departments.relations.source), {target: {value: "1"}});
@@ -79,7 +85,7 @@ describe("DepartmentRelationsMap", () => {
         fireEvent.click(screen.getByRole("button", {name: pl.departments.relations.addRelation}));
 
         expect(screen.getByRole("button", {name: removeRelationLabel})).toBeInTheDocument();
-        expect(screen.getByRole("button", {name: removeReverseRelationLabel})).toBeInTheDocument();
+        expect(screen.getByText("↔")).toBeInTheDocument();
 
         fireEvent.click(screen.getByRole("button", {name: removeRelationLabel}));
 
