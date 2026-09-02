@@ -144,6 +144,7 @@ export const TrendingUp = makeIcon(FiTrendingUp);
 export const Tune = makeIcon(FiSliders);
 export const TuneOutlined = makeIcon(FiSliders);
 export const UnarchiveOutlined = makeIcon(FiUpload);
+export const Upload = makeIcon(FiUpload);
 export const ViewList = makeIcon(FiList);
 export const Visibility = makeIcon(FiEye);
 export const VpnKey = makeIcon(FiKey);

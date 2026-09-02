@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useMemo, useState} from "react";
+import React, {ChangeEvent, useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {
     Alert,
     Button,
@@ -21,6 +21,7 @@ import {
     Close,
     DeleteOutline,
     EditOutlined,
+    FileDownload,
     GroupOutlined,
     LocationCity,
     Phone,
@@ -30,16 +31,18 @@ import {
     Search,
     Tag,
     UnarchiveOutlined,
+    Upload,
     WarningAmberOutlined,
 } from "components/ui/icons";
 import {getBackendErrorMessage} from "../api/errorMessage";
 import {useAuthState} from "../auth/AuthState";
 import Department from "../class/depots/Department";
+import DeliveryNetworkService from "../hooks/DeliveryNetworkService";
 import departmentService, {DepartmentCreateRequest, DepartmentStatus} from "../hooks/DepartmentService";
 import UserManagementService from "../hooks/UserManagementService";
 import pl from "../i18n/translate";
-import DepartmentRelationsMap from "./Departments/DepartmentRelationsMap";
-import {DepartmentRelation} from "./Departments/model/DepartmentRelation";
+import DepartmentRelationsMap, {getDepartmentsMissingSortingRelation} from "./Departments/DepartmentRelationsMap";
+import {DepartmentRelation, departmentRelationPairKey} from "./Departments/model/DepartmentRelation";
 import {User} from "./Users/model/User";
 import "./Departments/styles/departments.css";
 
@@ -125,6 +128,11 @@ const formatCoordinates = (department: Department) => {
     return `${department.coordinates.latitude}, ${department.coordinates.longitude}`;
 };
 
+const departmentRelationsKey = (relations: DepartmentRelation[]) => relations
+    .map(departmentRelationPairKey)
+    .sort()
+    .join("|");
+
 const Departments: React.FC = () => {
     const {user: currentUser} = useAuthState();
     const [departments, setDepartments] = useState<Department[]>([]);
@@ -140,6 +148,15 @@ const Departments: React.FC = () => {
     const [createDialogOpen, setCreateDialogOpen] = useState<boolean>(false);
     const [relationsDialogOpen, setRelationsDialogOpen] = useState<boolean>(false);
     const [departmentRelations, setDepartmentRelations] = useState<DepartmentRelation[]>([]);
+    const [savedDepartmentRelationsKey, setSavedDepartmentRelationsKey] = useState<string>("");
+    const [relationsLoading, setRelationsLoading] = useState<boolean>(false);
+    const [relationsLoaded, setRelationsLoaded] = useState<boolean>(false);
+    const [relationsSaving, setRelationsSaving] = useState<boolean>(false);
+    const [relationsExporting, setRelationsExporting] = useState<boolean>(false);
+    const [relationsImporting, setRelationsImporting] = useState<boolean>(false);
+    const [relationsError, setRelationsError] = useState<string>("");
+    const [relationsSuccess, setRelationsSuccess] = useState<string>("");
+    const relationsImportInputRef = useRef<HTMLInputElement | null>(null);
     const [editedDepartment, setEditedDepartment] = useState<Department | null>(null);
     const [usersDepartment, setUsersDepartment] = useState<Department | null>(null);
     const [selectedDepartmentId, setSelectedDepartmentId] = useState<number | null>(null);
@@ -211,6 +228,15 @@ const Departments: React.FC = () => {
             || filteredDepartments[0]
             || null;
     }, [filteredDepartments, selectedDepartmentId]);
+
+    const departmentRelationsChanged = useMemo(
+        () => departmentRelationsKey(departmentRelations) !== savedDepartmentRelationsKey,
+        [departmentRelations, savedDepartmentRelationsKey],
+    );
+    const departmentRelationsInvalid = useMemo(
+        () => getDepartmentsMissingSortingRelation(departments, departmentRelations).length > 0,
+        [departments, departmentRelations],
+    );
 
     const retrieveDepartments = useCallback((clearNotice = true) => {
         setLoading(true);
@@ -464,6 +490,98 @@ const Departments: React.FC = () => {
         setFilters({...emptyFilters});
     };
 
+    const openRelationsDialog = () => {
+        setRelationsDialogOpen(true);
+        setRelationsLoading(true);
+        setRelationsLoaded(false);
+        setRelationsError("");
+        setRelationsSuccess("");
+        DeliveryNetworkService.getCurrentNetwork()
+            .then((response) => {
+                setDepartmentRelations(response.data);
+                setSavedDepartmentRelationsKey(departmentRelationsKey(response.data));
+                setRelationsLoaded(true);
+            })
+            .catch((exception: unknown) => {
+                setDepartmentRelations([]);
+                setSavedDepartmentRelationsKey("");
+                setRelationsError(getBackendErrorMessage(exception, pl.departments.relations.loadError));
+            })
+            .finally(() => {
+                setRelationsLoading(false);
+            });
+    };
+
+    const closeRelationsDialog = () => {
+        if (!relationsSaving && !relationsImporting) {
+            setRelationsDialogOpen(false);
+        }
+    };
+
+    const exportDepartmentRelations = () => {
+        setRelationsExporting(true);
+        setRelationsError("");
+        setRelationsSuccess("");
+        DeliveryNetworkService.exportCurrentNetwork()
+            .then((workbook) => {
+                DeliveryNetworkService.saveWorkbook(workbook);
+                setRelationsSuccess(pl.departments.relations.exportSuccess);
+            })
+            .catch((exception: unknown) => {
+                setRelationsError(getBackendErrorMessage(exception, pl.departments.relations.exportError));
+            })
+            .finally(() => {
+                setRelationsExporting(false);
+            });
+    };
+
+    const importDepartmentRelations = (event: ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        event.target.value = "";
+        if (!file) {
+            return;
+        }
+
+        setRelationsImporting(true);
+        setRelationsError("");
+        setRelationsSuccess("");
+        DeliveryNetworkService.importCurrentNetwork(file)
+            .then((response) => {
+                setDepartmentRelations(response.data);
+                setSavedDepartmentRelationsKey(departmentRelationsKey(response.data));
+                setRelationsLoaded(true);
+                setRelationsSuccess(pl.departments.relations.importSuccess);
+            })
+            .catch((exception: unknown) => {
+                setRelationsError(getBackendErrorMessage(exception, pl.departments.relations.importError));
+            })
+            .finally(() => {
+                setRelationsImporting(false);
+            });
+    };
+
+    const saveDepartmentRelations = () => {
+        if (!relationsLoaded || departmentRelationsInvalid) {
+            return;
+        }
+
+        setRelationsSaving(true);
+        setRelationsError("");
+        setRelationsSuccess("");
+        DeliveryNetworkService.replaceCurrentNetwork(departmentRelations)
+            .then((response) => {
+                setDepartmentRelations(response.data);
+                setSavedDepartmentRelationsKey(departmentRelationsKey(response.data));
+                setRelationsSuccess(pl.departments.relations.saveSuccess);
+            })
+            .catch((exception: unknown) => {
+                setRelationsError(getBackendErrorMessage(exception, pl.departments.relations.saveError));
+            })
+            .finally(() => {
+                setRelationsSaving(false);
+            });
+    };
+
     useEffect(() => {
         if (!filteredDepartments.length) {
             setSelectedDepartmentId(null);
@@ -520,7 +638,7 @@ const Departments: React.FC = () => {
                                 disabled={loading}
                                 startIcon={<AccountTree />}
                                 variant="outlined"
-                                onClick={() => setRelationsDialogOpen(true)}
+                                onClick={openRelationsDialog}
                             >
                                 {pl.departments.relations.openMap}
                             </Button>
@@ -765,18 +883,78 @@ const Departments: React.FC = () => {
                 maxWidth={false}
                 PaperProps={{className: "departments-relations-dialog"}}
                 open={relationsDialogOpen}
-                onClose={() => setRelationsDialogOpen(false)}
+                onClose={closeRelationsDialog}
             >
                 <DialogContent className="departments-relations-dialog-content">
-                    <DepartmentRelationsMap
-                        departments={departments}
-                        relations={departmentRelations}
-                        onRelationsChange={setDepartmentRelations}
-                    />
+                    {relationsLoading ? (
+                        <div className="department-relations-loader">
+                            <CircularProgress size={32} />
+                            <span>{pl.departments.relations.loading}</span>
+                        </div>
+                    ) : (
+                        <div className="departments-relations-dialog-body">
+                            {relationsError ? <Alert severity="error">{relationsError}</Alert> : undefined}
+                            {relationsSuccess ? <Alert severity="success">{relationsSuccess}</Alert> : undefined}
+                            <DepartmentRelationsMap
+                                departments={departments}
+                                relations={departmentRelations}
+                                onRelationsChange={(relations) => {
+                                    setDepartmentRelations(relations);
+                                    setRelationsSuccess("");
+                                }}
+                            />
+                        </div>
+                    )}
                 </DialogContent>
                 <DialogActions>
-                    <Button variant="outlined" onClick={() => setRelationsDialogOpen(false)}>
+                    <input
+                        ref={relationsImportInputRef}
+                        hidden
+                        accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                        aria-label={pl.departments.relations.importExcel}
+                        type="file"
+                        onChange={importDepartmentRelations}
+                    />
+                    <Button
+                        disabled={relationsLoading || relationsSaving || relationsImporting || relationsExporting}
+                        startIcon={relationsExporting ? <CircularProgress size={18} /> : <FileDownload />}
+                        variant="outlined"
+                        onClick={exportDepartmentRelations}
+                    >
+                        {relationsExporting
+                            ? pl.departments.relations.exporting
+                            : pl.departments.relations.exportExcel}
+                    </Button>
+                    <Button
+                        disabled={relationsLoading || relationsSaving || relationsImporting || relationsExporting}
+                        startIcon={relationsImporting ? <CircularProgress size={18} /> : <Upload />}
+                        variant="outlined"
+                        onClick={() => relationsImportInputRef.current?.click()}
+                    >
+                        {relationsImporting
+                            ? pl.departments.relations.importing
+                            : pl.departments.relations.importExcel}
+                    </Button>
+                    <Button
+                        disabled={relationsSaving || relationsImporting}
+                        variant="outlined"
+                        onClick={closeRelationsDialog}
+                    >
                         {pl.common.close}
+                    </Button>
+                    <Button
+                        disabled={relationsLoading
+                            || !relationsLoaded
+                            || relationsSaving
+                            || relationsImporting
+                            || relationsExporting
+                            || departmentRelationsInvalid
+                            || !departmentRelationsChanged}
+                        startIcon={relationsSaving ? <CircularProgress size={18} /> : <Save />}
+                        variant="contained"
+                        onClick={saveDepartmentRelations}
+                    >
+                        {relationsSaving ? pl.departments.relations.saving : pl.common.saveChanges}
                     </Button>
                 </DialogActions>
             </Dialog>
