@@ -14,6 +14,7 @@ import {
 import {DeliveryHistoryEntry} from "../model/Delivery";
 import {courierLabel} from "./deliveryDetails";
 import {pickupPointLabel} from "./pickupPointLabels";
+import {useDeliveryPeople} from "./useDeliveryPeople";
 
 type DeliveryChangeHistoryProps = {
     history: DeliveryHistoryEntry[];
@@ -42,6 +43,7 @@ const sortByOccurrence = (history: DeliveryHistoryEntry[]) =>
     [...history].sort((left, right) => new Date(left.occurredAt).getTime() - new Date(right.occurredAt).getTime());
 
 function DeliveryChangeHistory({history, departments, couriers, pickupPoints}: DeliveryChangeHistoryProps) {
+    const {userName} = useDeliveryPeople();
     if (history.length === 0) {
         return <div className="deliveries-state">{pl.deliveries.details.noHistory}</div>;
     }
@@ -74,7 +76,7 @@ function DeliveryChangeHistory({history, departments, couriers, pickupPoints}: D
                             <strong>{pl.deliveries.details.historyEvent[entry.eventType]}</strong>
                             <small>{formatDeliveryDateTime(entry.occurredAt)}</small>
                         </div>
-                        <p>{pl.deliveries.userLabel}: {entry.userId || pl.common.dash}</p>
+                        <p>{pl.deliveries.userLabel}: {userName(entry.userId)}</p>
                         {changes.length > 0 && (
                             <dl className="deliveries-change-list">
                                 {changes.map((change) => (

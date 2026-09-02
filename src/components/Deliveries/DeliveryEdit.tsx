@@ -5,10 +5,12 @@ import {useNavigate, useParams} from "react-router-dom";
 import {ApiResult} from "../../api/ApiResult";
 import {getBackendErrorMessage} from "../../api/errorMessage";
 import Department from "../../class/depots/Department";
+import CarrierService from "../../hooks/CarrierService";
 import CourierService from "../../hooks/CourierService";
 import DeliveryService from "../../hooks/DeliveryService";
 import DepartmentService from "../../hooks/DepartmentService";
 import pl from "../../i18n/translate";
+import {CarrierDto} from "../Carriers/model/Carrier";
 import {CourierDto} from "../Couriers/dto/CourierDto";
 import DeliveryDialogHost from "./details/DeliveryDialogHost";
 import DeliveryHistoryPanel from "./details/DeliveryHistoryPanel";
@@ -39,6 +41,7 @@ function DeliveryEdit() {
     const [reloadKey, setReloadKey] = useState(0);
     const [departments, setDepartments] = useState<Department[]>([]);
     const [couriers, setCouriers] = useState<CourierDto[]>([]);
+    const [carriers, setCarriers] = useState<CarrierDto[]>([]);
     const [dialog, setDialog] = useState<DeliveryDialogState | null>(null);
     const context = useDeliveryContext(delivery);
 
@@ -64,6 +67,17 @@ function DeliveryEdit() {
             .catch(() => {
                 if (active) {
                     setCouriers([]);
+                }
+            });
+        CarrierService.findAll(false)
+            .then((response) => {
+                if (active) {
+                    setCarriers(Array.isArray(response.data) ? response.data : []);
+                }
+            })
+            .catch(() => {
+                if (active) {
+                    setCarriers([]);
                 }
             });
         return () => {active = false;};
@@ -168,7 +182,7 @@ function DeliveryEdit() {
                                     <DeliveryTargetTile delivery={delivery} shipment={context.shipment}/>
                                 </div>
                                 <div className="deliveries-cell">
-                                    <DeliveryCarrierTile delivery={delivery} couriers={couriers} editDisabled={locked}
+                                    <DeliveryCarrierTile delivery={delivery} couriers={couriers} carriers={carriers} editDisabled={locked}
                                                          onEdit={() => setDialog({kind: "carrier"})}/>
                                 </div>
                                 <div className="deliveries-cell">
@@ -199,7 +213,7 @@ function DeliveryEdit() {
                             </aside>
                         </div>
                         <DeliveryDialogHost dialog={dialog} delivery={delivery} departments={departments}
-                                            couriers={couriers} pickupPoints={context.pickupPoints} busy={busy}
+                                            couriers={couriers} carriers={carriers} pickupPoints={context.pickupPoints} busy={busy}
                                             onClose={() => setDialog(null)}
                                             onRun={runOperation}/>
                     </>
