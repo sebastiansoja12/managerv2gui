@@ -1,8 +1,12 @@
+import pl from "../../../i18n/translate";
 import Department from "../../../class/depots/Department";
 import {PickupPointDetails} from "../../PickupPoints/model/PickupPoint";
 import {Delivery, DeliveryHistoryEntry} from "../model/Delivery";
 import {describeChanges} from "./DeliveryChangeHistory";
-import {attemptLimitReached, deliveryLifecycleStage, deliverySla, failedAttempts, formatDuration} from "./deliveryDetails";
+import {
+    attemptLimitReached, courierCodeLabel, courierSupplierId, deliveryLifecycleStage, deliverySla, failedAttempts, formatDuration,
+    parseOptionalId, userLabel,
+} from "./deliveryDetails";
 import {deliveryMapPoints} from "./tiles/DeliveryMapTile";
 
 jest.mock("leaflet", () => ({}));
@@ -77,5 +81,57 @@ describe("delivery details helpers", () => {
         const points = deliveryMapPoints(delivery(), departments, pickupPoints);
 
         expect(points.map((point) => point.label)).toEqual(["KT1", "PP01"]);
+    });
+});
+
+describe("delivery identifiers", () => {
+    const courier = (supplierId: unknown) => ({
+        supplierId, supplierCode: {value: "SUP"}, firstName: "Jan", lastName: "Nowak", telephoneNumber: "",
+    }) as never;
+
+    it("reads supplier ids sent as numbers, strings or wrapped values", () => {
+        expect(courierSupplierId(courier(30))).toBe("30");
+        expect(courierSupplierId(courier("6047483447382963523"))).toBe("6047483447382963523");
+        expect(courierSupplierId(courier({value: "6047483447382963523"}))).toBe("6047483447382963523");
+        expect(courierSupplierId(courier(null))).toBeNull();
+    });
+
+    it("keeps large ids as exact strings", () => {
+        expect(parseOptionalId(" 6047483447382963523 ")).toBe("6047483447382963523");
+        expect(parseOptionalId("9223372036854775807")).toBe("9223372036854775807");
+        expect(parseOptionalId("94151")).toBe("94151");
+    });
+
+    it("treats empty input as no id and rejects invalid values", () => {
+        expect(parseOptionalId("  ")).toBeNull();
+        expect(parseOptionalId("0")).toBeUndefined();
+        expect(parseOptionalId("-5")).toBeUndefined();
+        expect(parseOptionalId("12.5")).toBeUndefined();
+        expect(parseOptionalId("abc")).toBeUndefined();
+        expect(parseOptionalId("9223372036854775808")).toBeUndefined();
+        expect(parseOptionalId("10000000000000000000")).toBeUndefined();
+    });
+});
+
+describe("people labels", () => {
+    const users = [
+        {userId: {value: 496925}, username: "s-soja"},
+        {userId: {value: "6047483447382963523"}, username: "kurier.kt1"},
+    ] as never[];
+    const couriers = [
+        {supplierId: "8639181497059506824", supplierCode: {value: "aezlgwa"}, firstName: "Sebastian", lastName: "Soja", telephoneNumber: ""},
+    ] as never[];
+
+    it("shows the username instead of the user id", () => {
+        expect(userLabel(users, "496925")).toBe("s-soja");
+        expect(userLabel(users, "6047483447382963523")).toBe("kurier.kt1");
+        expect(userLabel(users, "1")).toBe("1");
+        expect(userLabel(users, null)).toBe(pl.common.dash);
+    });
+
+    it("shows the supplier code instead of the supplier id", () => {
+        expect(courierCodeLabel(couriers, "8639181497059506824")).toBe("aezlgwa");
+        expect(courierCodeLabel(couriers, "42")).toBe("42");
+        expect(courierCodeLabel(couriers, undefined)).toBe(pl.common.dash);
     });
 });

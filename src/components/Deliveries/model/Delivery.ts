@@ -101,8 +101,8 @@ export type DeliveryConditionsRequest = {
 };
 
 export type DeliveryCarrierRequest = {
-    supplierId: number | null;
-    vehicleId: number | null;
+    supplierId: string | null;
+    vehicleId: string | null;
 };
 
 export type DeliverySortField =

@@ -76,8 +76,8 @@ const commentStep = (deliveryId: string, stepNumber: number, comment: string | n
 const correctStepStatus = (deliveryId: string, stepNumber: number, deliveryStatus: string) =>
     client.put<{deliveryStatus: string}, Delivery>(`${stepPath(deliveryId, stepNumber)}/status`, {deliveryStatus});
 
-const attachStepSignature = (deliveryId: string, stepNumber: number, signatureId: number) =>
-    client.put<{signatureId: number}, Delivery>(`${stepPath(deliveryId, stepNumber)}/signature`, {signatureId});
+const attachStepSignature = (deliveryId: string, stepNumber: number, signatureId: string) =>
+    client.put<{signatureId: string}, Delivery>(`${stepPath(deliveryId, stepNumber)}/signature`, {signatureId});
 
 const reassignStepCarrier = (deliveryId: string, stepNumber: number, request: DeliveryCarrierRequest) =>
     client.put<DeliveryCarrierRequest, Delivery>(`${stepPath(deliveryId, stepNumber)}/carrier`, request);

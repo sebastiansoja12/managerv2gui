@@ -3,7 +3,7 @@ export interface SupplierCodeDto {
 }
 
 export interface SupplierIdDto {
-    value: number;
+    value: number | string;
 }
 
 export interface DepartmentCodeDto {
@@ -11,7 +11,7 @@ export interface DepartmentCodeDto {
 }
 
 export interface VehicleIdDto {
-    value: number;
+    value: number | string;
 }
 
 export interface DeviceIdDto {
@@ -48,7 +48,7 @@ export interface UserIdDto {
 }
 
 export interface CourierDto {
-    supplierId?: number | SupplierIdDto | null;
+    supplierId?: number | string | SupplierIdDto | null;
     supplierCode: SupplierCodeDto;
     firstName: string;
     lastName: string;

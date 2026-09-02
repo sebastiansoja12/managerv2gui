@@ -1,5 +1,7 @@
 import {CourierDto} from "../../Couriers/dto/CourierDto";
+import {User} from "../../Users/model/User";
 import pl from "../../../i18n/translate";
+import {parseOptionalId} from "../../../utils/identifier";
 import {Delivery, DeliveryStep} from "../model/Delivery";
 
 export const deliveryStatuses = [
@@ -27,26 +29,47 @@ export type DeliveryStepAction = "stepComment" | "stepStatus" | "stepSignature" 
 export const isDeliveryActive = (delivery: Delivery) =>
     delivery.lifecycleStatus !== "CANCELED" && delivery.lifecycleStatus !== "COMPLETED";
 
-export const courierSupplierId = (courier: CourierDto): number | null => {
-    if (courier.supplierId === null || courier.supplierId === undefined) {
+// Supplier ids are random 63-bit numbers, so the HTTP client keeps them as strings to avoid losing precision.
+export const courierSupplierId = (courier: CourierDto): string | null => {
+    const supplierId = courier.supplierId;
+    if (supplierId === null || supplierId === undefined) {
         return null;
     }
-    return typeof courier.supplierId === "number" ? courier.supplierId : courier.supplierId.value;
+    const value = typeof supplierId === "object" ? supplierId.value : supplierId;
+    return value === null || value === undefined ? null : String(value);
 };
 
 export const courierName = (courier: CourierDto) =>
     `${courier.firstName} ${courier.lastName} (${courier.supplierCode.value})`;
 
 export const findCourier = (couriers: CourierDto[], supplierId?: string | null) => supplierId
-    ? couriers.find((candidate) => String(courierSupplierId(candidate)) === supplierId) || null
+    ? couriers.find((candidate) => courierSupplierId(candidate) === supplierId) || null
     : null;
 
 export const courierLabel = (couriers: CourierDto[], supplierId?: string | null) => {
     if (!supplierId) {
         return pl.common.dash;
     }
-    const courier = couriers.find((candidate) => String(courierSupplierId(candidate)) === supplierId);
+    const courier = couriers.find((candidate) => courierSupplierId(candidate) === supplierId);
     return courier ? courierName(courier) : supplierId;
+};
+
+export {parseOptionalId};
+
+// Shows the user's login; falls back to the raw id while users load or when the user is unknown.
+export const userLabel = (users: User[], userId?: string | null) => {
+    if (!userId) {
+        return pl.common.dash;
+    }
+    return users.find((user) => String(user.userId?.value) === String(userId))?.username || userId;
+};
+
+// Shows the courier's supplier code; falls back to the raw id when the courier is unknown.
+export const courierCodeLabel = (couriers: CourierDto[], supplierId?: string | null) => {
+    if (!supplierId) {
+        return pl.common.dash;
+    }
+    return findCourier(couriers, supplierId)?.supplierCode?.value || supplierId;
 };
 
 export const sortSteps = (steps: DeliveryStep[]) =>
@@ -55,14 +78,6 @@ export const sortSteps = (steps: DeliveryStep[]) =>
 export const toDateTimeInput = (value?: string | null) => value ? value.slice(0, 16) : "";
 
 export const fromDateTimeInput = (value: string) => value ? `${value}:00` : null;
-
-export const parseOptionalNumber = (value: string): number | null | undefined => {
-    if (!value.trim()) {
-        return null;
-    }
-    const parsed = Number(value);
-    return Number.isInteger(parsed) && parsed > 0 ? parsed : undefined;
-};
 
 export type DeliverySla = "UNPLANNED" | "ON_TIME" | "AT_RISK" | "OVERDUE" | "DELIVERED_ON_TIME" | "DELIVERED_LATE";
 

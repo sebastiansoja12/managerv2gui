@@ -2,14 +2,14 @@ import React, {useState} from "react";
 import {TextField} from "components/ui";
 import pl from "../../../../i18n/translate";
 import {DeliveryStep} from "../../model/Delivery";
-import {parseOptionalNumber} from "../deliveryDetails";
+import {parseOptionalId} from "../deliveryDetails";
 import DeliveryDialogFrame from "./DeliveryDialogFrame";
 
 type DeliveryStepSignatureDialogProps = {
     step: DeliveryStep;
     busy: boolean;
     onClose: () => void;
-    onSubmit: (signatureId: number) => void;
+    onSubmit: (signatureId: string) => void;
 };
 
 function DeliveryStepSignatureDialog({step, busy, onClose, onSubmit}: DeliveryStepSignatureDialogProps) {
@@ -17,7 +17,7 @@ function DeliveryStepSignatureDialog({step, busy, onClose, onSubmit}: DeliverySt
     const [validationError, setValidationError] = useState<string | null>(null);
 
     const submit = () => {
-        const parsed = parseOptionalNumber(signatureId);
+        const parsed = parseOptionalId(signatureId);
         if (!parsed) {
             setValidationError(pl.deliveries.details.invalidNumber);
             return;
