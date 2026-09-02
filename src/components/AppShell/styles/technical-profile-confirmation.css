@@ -103,10 +103,6 @@
         flex: 1 1 0;
         min-width: 0;
     }
-
-    .app-close-tabs-button span:last-child {
-        display: none;
-    }
 }
 
 [data-ui="alert"] {

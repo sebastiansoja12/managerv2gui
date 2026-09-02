@@ -1,66 +1,84 @@
 import React from "react";
-import {fireEvent, render, screen, waitFor, within} from "@testing-library/react";
-import AppTabs, {getVisibleTabIndexes} from "./AppTabs";
+import {fireEvent, render, screen, within} from "@testing-library/react";
+import AppTabs from "./AppTabs";
+import {AppTabDefinition} from "./types";
 
-describe("getVisibleTabIndexes", () => {
-    it("shows every tab when they fit in the strip", () => {
-        expect(getVisibleTabIndexes([100, 100, 100], 310, 54, 0)).toEqual([0, 1, 2]);
+const openTabs: AppTabDefinition[] = [
+    {label: "Strona startowa", path: "/", pinned: true},
+    {label: "Procesy", path: "/processes"},
+    {label: "Czat", path: "/chat", preview: true},
+];
+
+const renderTabs = () => {
+    const handlers = {
+        onCloseAllTabs: jest.fn(),
+        onCloseOtherTabs: jest.fn(),
+        onCloseTab: jest.fn(),
+        onCloseTabsToRight: jest.fn(),
+        onKeepTab: jest.fn(),
+        onSelectTab: jest.fn(),
+        onTogglePinnedTab: jest.fn(),
+    };
+    render(<AppTabs activePath="/processes" openTabs={openTabs} {...handlers} />);
+    return handlers;
+};
+
+describe("AppTabs", () => {
+    it("selects, keeps and closes tabs from the tab row", () => {
+        const handlers = renderTabs();
+
+        fireEvent.click(screen.getByRole("button", {name: "Czat"}));
+        expect(handlers.onSelectTab).toHaveBeenCalledWith("/chat");
+
+        fireEvent.doubleClick(screen.getByRole("button", {name: "Czat"}));
+        expect(handlers.onKeepTab).toHaveBeenCalledWith("/chat");
+
+        fireEvent.click(screen.getByRole("button", {name: "Zamknij kartę: Procesy"}));
+        expect(handlers.onCloseTab).toHaveBeenCalledWith("/processes");
     });
 
-    it("reserves room for the overflow control", () => {
-        expect(getVisibleTabIndexes([100, 100, 100, 100], 270, 54, 0)).toEqual([0, 1]);
+    it("does not offer closing a pinned tab directly", () => {
+        renderTabs();
+
+        expect(screen.queryByRole("button", {name: "Zamknij kartę: Strona startowa"})).not.toBeInTheDocument();
     });
 
-    it("keeps the selected tab visible when a later tab is active", () => {
-        expect(getVisibleTabIndexes([100, 100, 100, 100], 270, 54, 3)).toEqual([0, 3]);
-    });
+    it("closes a tab with the middle mouse button", () => {
+        const handlers = renderTabs();
 
-    it("moves all tabs to the overflow menu when the strip is too narrow", () => {
-        expect(getVisibleTabIndexes([100, 100], 120, 54, 1)).toEqual([]);
-    });
-
-    it("opens a list containing only the tabs that do not fit", async () => {
-        const rectSpy = jest.spyOn(HTMLElement.prototype, "getBoundingClientRect")
-            .mockImplementation(function (this: HTMLElement) {
-                const width = this.classList.contains("app-tab-measure")
-                    ? 100
-                    : this.classList.contains("app-tabs-overflow-measure")
-                        ? 54
-                        : this.classList.contains("app-tab-strip")
-                            ? 170
-                            : 0;
-                return {bottom: 0, height: 0, left: 0, right: width, top: 0, width, x: 0, y: 0, toJSON: () => ({})};
-            });
-        const onSelectTab = jest.fn();
-
-        render(
-            <AppTabs
-                activePath="/"
-                onCloseTab={jest.fn()}
-                onSelectTab={onSelectTab}
-                openTabs={[
-                    {label: "Strona startowa", path: "/"},
-                    {label: "Procesy", path: "/processes"},
-                    {label: "Czat", path: "/chat"},
-                ]}
-            />,
+        fireEvent(
+            screen.getByRole("button", {name: "Czat"}),
+            new MouseEvent("auxclick", {bubbles: true, button: 1}),
         );
-        fireEvent(window, new Event("resize"));
+        expect(handlers.onCloseTab).toHaveBeenCalledWith("/chat");
+    });
 
-        const overflowTrigger = await screen.findByRole("button", {
-            name: "Pokaż pozostałe otwarte karty: 2",
-        });
-        fireEvent.click(overflowTrigger);
+    it("runs tab actions from the context menu", () => {
+        const handlers = renderTabs();
 
-        const overflowGroup = screen.getByRole("group", {name: "Pozostałe otwarte karty"});
-        expect(within(overflowGroup).getByRole("button", {name: "Procesy"})).toBeInTheDocument();
-        expect(within(overflowGroup).getByRole("button", {name: "Czat"})).toBeInTheDocument();
-        expect(within(overflowGroup).queryByRole("button", {name: "Strona startowa"})).not.toBeInTheDocument();
+        fireEvent.contextMenu(screen.getByRole("button", {name: "Czat"}), {clientX: 40, clientY: 30});
+        const menu = screen.getByRole("menu", {name: "Akcje karty: Czat"});
+        expect(within(menu).getByRole("menuitem", {name: "Zamknij karty po prawej"})).toBeDisabled();
 
-        fireEvent.click(within(overflowGroup).getByRole("button", {name: "Procesy"}));
-        expect(onSelectTab).toHaveBeenCalledWith("/processes");
-        await waitFor(() => expect(screen.queryByRole("group", {name: "Pozostałe otwarte karty"})).not.toBeInTheDocument());
+        fireEvent.click(within(menu).getByRole("menuitem", {name: "Przypnij kartę"}));
+        expect(handlers.onTogglePinnedTab).toHaveBeenCalledWith("/chat");
+        expect(screen.queryByRole("menu")).not.toBeInTheDocument();
 
-        rectSpy.mockRestore();
+        fireEvent.contextMenu(screen.getByRole("button", {name: "Procesy"}), {clientX: 40, clientY: 30});
+        fireEvent.click(screen.getByRole("menuitem", {name: "Zamknij pozostałe"}));
+        expect(handlers.onCloseOtherTabs).toHaveBeenCalledWith("/processes");
+    });
+
+    it("filters every open tab in the all tabs list", () => {
+        const handlers = renderTabs();
+
+        fireEvent.click(screen.getByRole("button", {name: "Wszystkie otwarte karty: 3"}));
+        const panel = screen.getByRole("dialog", {name: "Wszystkie karty"});
+        fireEvent.change(within(panel).getByRole("searchbox"), {target: {value: "cza"}});
+
+        expect(within(panel).queryByRole("button", {name: /^Procesy/})).not.toBeInTheDocument();
+        fireEvent.click(within(panel).getByRole("button", {name: /^Czat/}));
+        expect(handlers.onSelectTab).toHaveBeenCalledWith("/chat");
+        expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     });
 });

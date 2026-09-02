@@ -4,6 +4,7 @@ import {Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography} f
 import {initializeAuthSession} from "../../auth/AuthSession";
 import {useAuthState} from "../../auth/AuthState";
 import Navbar from "../Navbar/Navbar";
+import AppTabs from "./AppTabs";
 import AnnouncementBanner from "../Announcements/AnnouncementBanner";
 import ImpersonationBanner from "../Impersonation/ImpersonationBanner";
 import ImpersonationConsentBanner from "../Impersonation/ImpersonationConsentBanner";
@@ -30,6 +31,16 @@ import {
 } from "../../i18n/languageStore";
 import AuthService from "../../hooks/AuthService";
 import {clearStoredTabs, OPEN_TABS_STORAGE_KEY} from "./tabStorage";
+import {
+    closeOtherTabs,
+    closeTabsToRight,
+    closeUnpinnedTabs,
+    keepTab,
+    normalizeTabFlags,
+    openPreviewTab,
+    removeTab,
+    togglePinnedTab,
+} from "./tabState";
 import {OrganizationChatDockProvider} from "../Chat/ChatDockContext";
 import OrganizationChatDock from "../Chat/OrganizationChatDock";
 import HomeModuleTiles from "../Home/HomeModuleTiles";
@@ -52,8 +63,8 @@ const buildTab = (path: string): AppTabDefinition => {
 const normalizeTabs = (tabs: AppTabDefinition[]): AppTabDefinition[] => {
     const visitedPaths = new Set<string>();
 
-    return tabs
-        .map((tab) => buildTab(tab.path))
+    return normalizeTabFlags(tabs
+        .map((tab) => ({...tab, ...buildTab(tab.path)}))
         .filter((tab) => {
             if (tab.path === "/login" || visitedPaths.has(tab.path)) {
                 return false;
@@ -61,7 +72,7 @@ const normalizeTabs = (tabs: AppTabDefinition[]): AppTabDefinition[] => {
 
             visitedPaths.add(tab.path);
             return true;
-        });
+        }));
 };
 
 const readStoredTabs = (): AppTabDefinition[] => {
@@ -98,6 +109,7 @@ function AppShell() {
     const location = useLocation();
     const navigate = useNavigate();
     const [openTabs, setOpenTabs] = React.useState<AppTabDefinition[]>(readStoredTabs);
+    const recentTabPathsRef = React.useRef<string[]>([]);
     const [selectedOperationalProfile, updateOperationalProfile] = React.useState<OperationalProfile>(getOperationalProfile);
     const [pendingOperationalProfile, setPendingOperationalProfile] = React.useState<OperationalProfile | null>(null);
     const [language, updateLanguage] = React.useState<Language>(getLanguage);
@@ -127,13 +139,7 @@ function AppShell() {
             path: normalizePath(tab.path),
         };
 
-        setOpenTabs((currentTabs) => {
-            if (currentTabs.some((currentTab) => currentTab.path === normalizedTab.path)) {
-                return currentTabs;
-            }
-
-            return currentTabs.concat(normalizedTab);
-        });
+        setOpenTabs((currentTabs) => openPreviewTab(currentTabs, normalizedTab, recentTabPathsRef.current));
         navigate(normalizedTab.path);
     };
 
@@ -183,14 +189,11 @@ function AppShell() {
             return;
         }
 
+        recentTabPathsRef.current = recentTabPathsRef.current
+            .filter((path) => path !== activePath)
+            .concat(activePath);
         const label = getTabTitle(activePath);
-        setOpenTabs((currentTabs) => {
-            if (currentTabs.some((tab) => tab.path === activePath)) {
-                return currentTabs;
-            }
-
-            return currentTabs.concat({label, path: activePath});
-        });
+        setOpenTabs((currentTabs) => openPreviewTab(currentTabs, {label, path: activePath}, recentTabPathsRef.current));
     }, [activePath, loginRoute, returnsAvailable]);
 
     React.useEffect(() => {
@@ -247,21 +250,20 @@ function AppShell() {
         }
     }, [loginRoute, openTabs]);
 
-    const closeTab = (path: string) => {
-        setOpenTabs((currentTabs) => {
-            const nextTabs = currentTabs.filter((tab) => tab.path !== path);
-            if (path === activePath) {
-                const fallbackTab = nextTabs[nextTabs.length - 1];
-                navigate(fallbackTab?.path || "/");
-            }
+    // Without an open active tab the view moves to its neighbour, like closing a browser tab.
+    const replaceTabs = (nextTabs: AppTabDefinition[]) => {
+        setOpenTabs(nextTabs);
+        if (nextTabs.some((tab) => tab.path === activePath)) {
+            return;
+        }
 
-            return nextTabs;
-        });
+        const closedIndex = openTabs.findIndex((tab) => tab.path === activePath);
+        const fallbackTab = nextTabs[Math.min(Math.max(closedIndex, 0), nextTabs.length - 1)];
+        navigate(fallbackTab?.path || "/");
     };
 
-    const closeAllTabs = () => {
-        setOpenTabs([]);
-        navigate("/");
+    const keepActiveTab = () => {
+        setOpenTabs((currentTabs) => keepTab(currentTabs, activePath));
     };
 
     if (authState.status === "initializing") {
@@ -288,17 +290,25 @@ function AppShell() {
             <Navbar
                 activePath={activePath}
                 language={language}
-                onCloseAllTabs={closeAllTabs}
-                onCloseTab={closeTab}
                 onLanguageChange={changeLanguage}
                 onOpenTab={openTab}
                 onOperationalProfileChange={changeOperationalProfile}
-                onSelectTab={navigate}
                 operationalProfile={operationalProfile}
                 operationalProfiles={allowedOperationalProfiles}
+            />
+            <AppTabs
+                activePath={activePath}
+                onCloseAllTabs={() => replaceTabs(closeUnpinnedTabs(openTabs))}
+                onCloseOtherTabs={(path) => replaceTabs(closeOtherTabs(openTabs, path))}
+                onCloseTab={(path) => replaceTabs(removeTab(openTabs, path))}
+                onCloseTabsToRight={(path) => replaceTabs(closeTabsToRight(openTabs, path))}
+                onKeepTab={(path) => setOpenTabs((currentTabs) => keepTab(currentTabs, path))}
+                onSelectTab={navigate}
+                onTogglePinnedTab={(path) => setOpenTabs((currentTabs) => togglePinnedTab(currentTabs, path))}
                 openTabs={visibleTabs}
             />
-            <div className="app-main-content">
+            {/* Typing in a previewed page keeps its tab, so the next navigation does not replace it. */}
+            <div className="app-main-content" onInput={keepActiveTab}>
                 <AppRoutes onOpenTab={openTab} operationalProfile={operationalProfile}/>
             </div>
             <AppFooter />
