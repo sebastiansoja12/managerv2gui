@@ -14,7 +14,7 @@ type CarrierVehicleCreateDialogProps = {
     onCreated: (carrier: CarrierDto) => void;
 };
 
-const emptyForm = {registrationNumber: "", vehicleType: "TRUCK" as VehicleTypeDto, trailerRegistrationNumber: "", maxLoadKg: ""};
+const emptyForm = {registrationNumber: "", brand: "", model: "", vehicleType: "TRUCK" as VehicleTypeDto, trailerRegistrationNumber: "", maxLoadKg: ""};
 
 function CarrierVehicleCreateDialog({carrier, open, onClose, onCreated}: CarrierVehicleCreateDialogProps) {
     const translations = pl.carriers.vehicles;
@@ -52,6 +52,8 @@ function CarrierVehicleCreateDialog({carrier, open, onClose, onCreated}: Carrier
         try {
             const response = await CarrierService.addVehicle(carrier.carrierId, {
                 registrationNumber: form.registrationNumber.trim(),
+                brand: form.brand.trim() || null,
+                model: form.model.trim() || null,
                 vehicleType: form.vehicleType,
                 trailerRegistrationNumber: form.trailerRegistrationNumber.trim() || null,
                 maxLoadKg: maxLoad,
@@ -71,6 +73,8 @@ function CarrierVehicleCreateDialog({carrier, open, onClose, onCreated}: Carrier
                 <DialogContent>
                     <div className="pallet-form-grid">
                         <TextField autoFocus disabled={saving} label={translations.registrationNumber} required size="small" value={form.registrationNumber} onChange={update("registrationNumber")} />
+                        <TextField disabled={saving} label={translations.brand} size="small" value={form.brand} onChange={update("brand")} />
+                        <TextField disabled={saving} label={translations.model} size="small" value={form.model} onChange={update("model")} />
                         <TextField select disabled={saving} label={translations.vehicleType} size="small" value={form.vehicleType} onChange={update("vehicleType")}>
                             {VEHICLE_TYPES.map((type) => <MenuItem key={type} value={type}>{pl.carriers.vehicleType[type]}</MenuItem>)}
                         </TextField>

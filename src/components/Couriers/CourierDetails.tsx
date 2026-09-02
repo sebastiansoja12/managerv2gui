@@ -27,15 +27,19 @@ import {
 } from "components/ui/icons";
 import {useNavigate, useParams} from "react-router-dom";
 import {getBackendErrorMessage} from "../../api/errorMessage";
-import Department from "../../class/depots/Department";
+import CarrierService from "../../hooks/CarrierService";
 import CourierService from "../../hooks/CourierService";
-import DepartmentService from "../../hooks/DepartmentService";
+import DeviceService from "../../hooks/DeviceService";
 import pl from "../../i18n/translate";
+import {CarrierDto} from "../Carriers/model/Carrier";
+import {DeviceDto} from "../Devices/dto/DeviceDto";
 import CourierConfigurationDialog from "./CourierConfigurationDialog";
 import {CourierDto, DangerousGoodCertificationDto, DriverLicenseDto} from "./dto/CourierDto";
+import {
+    courierDeviceOptions, courierVehicleOptions, deviceLabel, packageTypeLabel, PACKAGE_TYPES, vehicleLabel,
+} from "./courierOperationalData";
 import "./styles/couriers.css";
-
-const packageTypeOptions = ["SMALL", "MEDIUM", "LARGE", "FRAGILE", "OVERSIZED"];
+import {parseOptionalId} from "../../utils/identifier";
 
 const valueOrDash = (value?: string | number | null) => value || pl.common.dash;
 
@@ -87,8 +91,6 @@ const hasValidCertification = (courier: CourierDto) => Boolean(
     && isFutureDate(courier.dangerousGoodCertification.expiryDate)
 );
 
-const departmentCodeValue = (department: Department) => department.departmentCode?.value || "";
-
 const emptyDriverLicenseForm: DriverLicenseDto = {
     number: "",
     acquiredDate: "",
@@ -105,7 +107,6 @@ const emptyCertificationForm: DangerousGoodCertificationDto = {
 
 const emptyOperationalForm = {
     status: "",
-    departmentCode: "",
     vehicleId: "",
     deviceId: "",
     areaName: "",
@@ -115,7 +116,7 @@ const emptyOperationalForm = {
     region: "",
     country: "",
     postalCodes: "",
-    packageTypes: "",
+    packageTypes: [] as string[],
 };
 
 type CourierEditSection =
@@ -127,17 +128,18 @@ type CourierEditSection =
     | "device"
     | "vehicle"
     | "deliveryArea"
-    | "packageTypes"
-    | "department";
+    | "packageTypes";
 
 const CourierDetails: React.FC = () => {
     const navigate = useNavigate();
     const {supplierCode = ""} = useParams();
     const decodedSupplierCode = useMemo(() => decodeURIComponent(supplierCode), [supplierCode]);
     const [courier, setCourier] = useState<CourierDto | null>(null);
-    const [departments, setDepartments] = useState<Department[]>([]);
+    const [carriers, setCarriers] = useState<CarrierDto[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
-    const [departmentsLoading, setDepartmentsLoading] = useState<boolean>(false);
+    const [carriersLoading, setCarriersLoading] = useState<boolean>(false);
+    const [devices, setDevices] = useState<DeviceDto[]>([]);
+    const [devicesLoading, setDevicesLoading] = useState<boolean>(false);
     const [saving, setSaving] = useState<boolean>(false);
     const [error, setError] = useState<string>("");
     const [success, setSuccess] = useState<string>("");
@@ -148,29 +150,11 @@ const CourierDetails: React.FC = () => {
     const [operationalForm, setOperationalForm] = useState({...emptyOperationalForm});
     const [editingSection, setEditingSection] = useState<CourierEditSection>("");
 
-    const availableDepartments = useMemo(() => {
-        const options = departments
-            .filter((department) => department.status === "ACTIVE")
-            .map((department) => {
-                const code = departmentCodeValue(department);
-                const city = department.address?.city || pl.common.dash;
-                return {
-                    code,
-                    label: `${code} - ${city}`,
-                };
-            })
-            .filter((department) => Boolean(department.code));
+    const vehicleOptions = useMemo(() => courierVehicleOptions(carriers, courier?.vehicleId?.value),
+        [carriers, courier?.vehicleId?.value]);
 
-        const selectedDepartmentCode = operationalForm.departmentCode.trim();
-        if (selectedDepartmentCode && !options.some((department) => department.code === selectedDepartmentCode)) {
-            options.push({
-                code: selectedDepartmentCode,
-                label: selectedDepartmentCode,
-            });
-        }
-
-        return options.sort((left, right) => left.label.localeCompare(right.label, pl.common.locale));
-    }, [departments, operationalForm.departmentCode]);
+    const deviceOptions = useMemo(() => courierDeviceOptions(devices, courier?.deviceId?.value,
+        courier?.departmentCode?.value), [devices, courier?.deviceId?.value, courier?.departmentCode?.value]);
 
     const hydrateForms = (nextCourier: CourierDto) => {
         setBasicForm({
@@ -194,7 +178,6 @@ const CourierDetails: React.FC = () => {
             : emptyCertificationForm);
         setOperationalForm({
             status: nextCourier.status || "",
-            departmentCode: nextCourier.departmentCode?.value || "",
             vehicleId: nextCourier.vehicleId?.value ? String(nextCourier.vehicleId.value) : "",
             deviceId: nextCourier.deviceId?.value || "",
             areaName: nextCourier.deliveryArea?.areaName || "",
@@ -204,7 +187,7 @@ const CourierDetails: React.FC = () => {
             region: nextCourier.deliveryArea?.region || "",
             country: nextCourier.deliveryArea?.country || "",
             postalCodes: nextCourier.deliveryArea?.postalCodes?.join(", ") || "",
-            packageTypes: nextCourier.supportedPackageTypes?.join(", ") || "",
+            packageTypes: nextCourier.supportedPackageTypes ? [...nextCourier.supportedPackageTypes] : [],
         });
     };
 
@@ -229,28 +212,47 @@ const CourierDetails: React.FC = () => {
             });
     }, [decodedSupplierCode]);
 
-    const loadDepartments = useCallback(() => {
-        setDepartmentsLoading(true);
-        DepartmentService.getAll()
-            .then((response) => {
-                setDepartments(Array.isArray(response.data) ? response.data : []);
-            })
-            .catch((exception: unknown) => {
-                setDepartments([]);
-                setError(getBackendErrorMessage(exception, pl.departments.page.loadError));
-            })
-            .finally(() => {
-                setDepartmentsLoading(false);
-            });
-    }, []);
-
     useEffect(() => {
         loadCourier();
     }, [loadCourier]);
 
+    const loadCarriers = useCallback(() => {
+        setCarriersLoading(true);
+        CarrierService.findAll(false)
+            .then((response) => {
+                setCarriers(Array.isArray(response.data) ? response.data : []);
+            })
+            .catch((exception: unknown) => {
+                setCarriers([]);
+                setError(getBackendErrorMessage(exception, pl.couriers.page.loadError));
+            })
+            .finally(() => {
+                setCarriersLoading(false);
+            });
+    }, []);
+
     useEffect(() => {
-        loadDepartments();
-    }, [loadDepartments]);
+        loadCarriers();
+    }, [loadCarriers]);
+
+    const loadDevices = useCallback(() => {
+        setDevicesLoading(true);
+        DeviceService.allDevices()
+            .then((response) => {
+                setDevices(Array.isArray(response.data) ? response.data : []);
+            })
+            .catch((exception: unknown) => {
+                setDevices([]);
+                setError(getBackendErrorMessage(exception, pl.couriers.page.loadError));
+            })
+            .finally(() => {
+                setDevicesLoading(false);
+            });
+    }, []);
+
+    useEffect(() => {
+        loadDevices();
+    }, [loadDevices]);
 
     const updateCourier = (patch: Partial<CourierDto>) => {
         setCourier((currentCourier) => currentCourier ? {...currentCourier, ...patch} : currentCourier);
@@ -292,8 +294,6 @@ const CourierDetails: React.FC = () => {
                 return pl.couriers.fields.deliveryArea;
             case "packageTypes":
                 return pl.couriers.fields.packageTypes;
-            case "department":
-                return pl.couriers.fields.department;
             default:
                 return pl.couriers.actions.edit;
         }
@@ -324,9 +324,6 @@ const CourierDetails: React.FC = () => {
                 break;
             case "packageTypes":
                 saveOperationalPackageTypes();
-                break;
-            case "department":
-                saveOperationalDepartment();
                 break;
             default:
                 break;
@@ -422,10 +419,12 @@ const CourierDetails: React.FC = () => {
             });
     };
 
-    const parsePackageTypes = () => operationalForm.packageTypes
-        .split(",")
-        .map((packageType) => packageType.trim().toUpperCase())
-        .filter(Boolean);
+    const togglePackageType = (packageType: string) => setOperationalForm((current) => ({
+        ...current,
+        packageTypes: current.packageTypes.includes(packageType)
+            ? current.packageTypes.filter((selected) => selected !== packageType)
+            : [...current.packageTypes, packageType],
+    }));
 
     const deliveryAreaFromForm = () => ({
         areaName: operationalForm.areaName.trim(),
@@ -476,8 +475,9 @@ const CourierDetails: React.FC = () => {
             return;
         }
 
-        const vehicleId = Number(operationalForm.vehicleId);
-        if (!Number.isFinite(vehicleId)) {
+        // Vehicle ids are random 63-bit numbers; Number() would round them to a different id.
+        const vehicleId = parseOptionalId(operationalForm.vehicleId);
+        if (!vehicleId) {
             setError(pl.couriers.page.vehicleRequired);
             return;
         }
@@ -535,7 +535,11 @@ const CourierDetails: React.FC = () => {
             return;
         }
 
-        const supportedPackageTypes = parsePackageTypes();
+        const supportedPackageTypes = PACKAGE_TYPES.filter((packageType) => operationalForm.packageTypes.includes(packageType));
+        if (!supportedPackageTypes.length) {
+            setError(pl.couriers.fields.packageTypesRequired);
+            return;
+        }
         setSaving(true);
         setError("");
         setSuccess("");
@@ -546,37 +550,6 @@ const CourierDetails: React.FC = () => {
         })
             .then(() => {
                 updateCourier({supportedPackageTypes});
-                setSuccess(pl.couriers.page.operationalDataSaved);
-                setEditingSection("");
-            })
-            .catch((exception: unknown) => {
-                setError(getBackendErrorMessage(exception, pl.couriers.page.saveError));
-            })
-            .finally(() => {
-                setSaving(false);
-            });
-    };
-
-    const saveOperationalDepartment = () => {
-        if (!courier) {
-            return;
-        }
-
-        if (!operationalForm.departmentCode.trim()) {
-            setError(pl.couriers.page.departmentRequired);
-            return;
-        }
-
-        setSaving(true);
-        setError("");
-        setSuccess("");
-
-        CourierService.updateDepartment({
-            supplierCode: courier.supplierCode,
-            departmentCode: {value: operationalForm.departmentCode.trim()},
-        })
-            .then(() => {
-                updateCourier({departmentCode: {value: operationalForm.departmentCode.trim()}});
                 setSuccess(pl.couriers.page.operationalDataSaved);
                 setEditingSection("");
             })
@@ -747,7 +720,9 @@ const CourierDetails: React.FC = () => {
                                         <Edit fontSize="small" />
                                     </IconButton>
                                 </div>
-                                <dd>{valueOrDash(courier.deviceId?.value)}</dd>
+                                <dd>{courier.deviceId?.value
+                                    ? deviceLabel(deviceOptions, courier.deviceId.value)
+                                    : pl.couriers.fields.noDevice}</dd>
                             </div>
                             <div className="courier-operational-card">
                                 <div className="courier-operational-card-header">
@@ -756,7 +731,9 @@ const CourierDetails: React.FC = () => {
                                         <Edit fontSize="small" />
                                     </IconButton>
                                 </div>
-                                <dd>{valueOrDash(courier.vehicleId?.value)}</dd>
+                                <dd>{courier.vehicleId?.value
+                                    ? vehicleLabel(vehicleOptions, courier.vehicleId.value)
+                                    : pl.couriers.fields.noVehicle}</dd>
                             </div>
                             <div className="courier-operational-card">
                                 <div className="courier-operational-card-header">
@@ -774,16 +751,15 @@ const CourierDetails: React.FC = () => {
                                         <Edit fontSize="small" />
                                     </IconButton>
                                 </div>
-                                <dd>{courier.supportedPackageTypes?.join(", ") || pl.common.dash}</dd>
+                                <dd>{courier.supportedPackageTypes?.length
+                                    ? courier.supportedPackageTypes.map(packageTypeLabel).join(", ")
+                                    : pl.common.dash}</dd>
                             </div>
                             <div className="courier-operational-card">
                                 <div className="courier-operational-card-header">
                                     <dt>{pl.couriers.fields.department}</dt>
-                                    <IconButton aria-label={`${pl.common.edit}: ${pl.couriers.fields.department}`} disabled={saving} size="small" onClick={() => openEditDialog("department")}>
-                                        <Edit fontSize="small" />
-                                    </IconButton>
                                 </div>
-                                <dd>{valueOrDash(courier.departmentCode?.value)}</dd>
+                                <dd title={pl.couriers.fields.departmentLocked}>{valueOrDash(courier.departmentCode?.value)}</dd>
                             </div>
                         </div>
                     </aside>
@@ -864,11 +840,45 @@ const CourierDetails: React.FC = () => {
                     ) : undefined}
 
                     {editingSection === "device" ? (
-                        <TextField disabled={saving} fullWidth label={pl.couriers.fields.device} value={operationalForm.deviceId} onChange={(event) => setOperationalForm({...operationalForm, deviceId: event.target.value})} />
+                        <TextField
+                            disabled={saving || devicesLoading || !deviceOptions.length}
+                            fullWidth
+                            helperText={!devicesLoading && !deviceOptions.length ? pl.couriers.fields.devicesEmpty : undefined}
+                            label={pl.couriers.fields.deviceSelect}
+                            select
+                            value={operationalForm.deviceId}
+                            onChange={(event) => setOperationalForm({...operationalForm, deviceId: event.target.value})}
+                        >
+                            {devicesLoading ? (
+                                <MenuItem disabled value="">{pl.couriers.fields.devicesLoading}</MenuItem>
+                            ) : undefined}
+                            {deviceOptions.map((device) => (
+                                <MenuItem key={device.id} disabled={!device.selectable} value={device.id}>
+                                    {device.label}
+                                </MenuItem>
+                            ))}
+                        </TextField>
                     ) : undefined}
 
                     {editingSection === "vehicle" ? (
-                        <TextField disabled={saving} fullWidth label={pl.couriers.columns.vehicle} value={operationalForm.vehicleId} onChange={(event) => setOperationalForm({...operationalForm, vehicleId: event.target.value})} />
+                        <TextField
+                            disabled={saving || carriersLoading || !vehicleOptions.length}
+                            fullWidth
+                            helperText={!carriersLoading && !vehicleOptions.length ? pl.couriers.fields.vehiclesEmpty : undefined}
+                            label={pl.couriers.fields.vehicleSelect}
+                            select
+                            value={operationalForm.vehicleId}
+                            onChange={(event) => setOperationalForm({...operationalForm, vehicleId: event.target.value})}
+                        >
+                            {carriersLoading ? (
+                                <MenuItem disabled value="">{pl.couriers.fields.vehiclesLoading}</MenuItem>
+                            ) : undefined}
+                            {vehicleOptions.map((vehicle) => (
+                                <MenuItem key={vehicle.id} disabled={!vehicle.selectable} value={vehicle.id}>
+                                    {vehicle.label}
+                                </MenuItem>
+                            ))}
+                        </TextField>
                     ) : undefined}
 
                     {editingSection === "deliveryArea" ? (
@@ -885,40 +895,21 @@ const CourierDetails: React.FC = () => {
 
                     {editingSection === "packageTypes" ? (
                         <div className="courier-edit-dialog-stack">
-                            <TextField
-                                disabled={saving}
-                                fullWidth
-                                helperText={pl.couriers.fields.packageTypesHint}
-                                label={pl.couriers.fields.packageTypes}
-                                value={operationalForm.packageTypes}
-                                onChange={(event) => setOperationalForm({...operationalForm, packageTypes: event.target.value})}
-                            />
-                            <small>{pl.couriers.fields.availablePackageTypes}: {packageTypeOptions.join(", ")}</small>
-                        </div>
-                    ) : undefined}
-
-                    {editingSection === "department" ? (
-                        <TextField
-                            disabled={saving || departmentsLoading || !availableDepartments.length}
-                            fullWidth
-                            label={pl.couriers.fields.department}
-                            select
-                            value={operationalForm.departmentCode}
-                            onChange={(event) => setOperationalForm({...operationalForm, departmentCode: event.target.value})}
-                        >
-                            {departmentsLoading || !availableDepartments.length ? (
-                                <MenuItem disabled value="">
-                                    {departmentsLoading
-                                        ? pl.couriers.create.departmentLoading
-                                        : pl.couriers.create.departmentEmpty}
-                                </MenuItem>
-                            ) : undefined}
-                            {availableDepartments.map((department) => (
-                                <MenuItem key={department.code} value={department.code}>
-                                    {department.label}
-                                </MenuItem>
+                            <small>{pl.couriers.fields.packageTypesHint}</small>
+                            {PACKAGE_TYPES.map((packageType) => (
+                                <FormControlLabel
+                                    key={packageType}
+                                    control={(
+                                        <Checkbox
+                                            checked={operationalForm.packageTypes.includes(packageType)}
+                                            disabled={saving}
+                                            onChange={() => togglePackageType(packageType)}
+                                        />
+                                    )}
+                                    label={packageTypeLabel(packageType)}
+                                />
                             ))}
-                        </TextField>
+                        </div>
                     ) : undefined}
                 </DialogContent>
                 <DialogActions className="courier-edit-dialog-actions">

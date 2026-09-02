@@ -5,7 +5,7 @@ export type VehicleTypeDto = "VAN" | "TRUCK" | "SEMI_TRAILER" | "REFRIGERATED_TR
 export const VEHICLE_TYPES: VehicleTypeDto[] = ["VAN", "TRUCK", "SEMI_TRAILER", "REFRIGERATED_TRUCK", "OTHER"];
 
 export type CarrierField = "name" | "tax-id" | "phone" | "email" | "default-transport-type";
-export type VehicleField = "registration-number" | "vehicle-type" | "trailer-registration-number" | "max-load";
+export type VehicleField = "registration-number" | "brand" | "model" | "vehicle-type" | "trailer-registration-number" | "max-load";
 export type DriverField = "first-name" | "last-name" | "phone" | "license-number";
 
 export interface CarrierDriverDto {
@@ -20,6 +20,8 @@ export interface CarrierDriverDto {
 export interface CarrierVehicleDto {
     vehicleId: number | string;
     registrationNumber: string;
+    brand?: string | null;
+    model?: string | null;
     vehicleType: VehicleTypeDto;
     trailerRegistrationNumber?: string | null;
     maxLoadKg?: number | string | null;
@@ -69,6 +71,8 @@ export interface DriverRequestApi {
 
 export interface CarrierVehicleRequestApi {
     registrationNumber: string;
+    brand?: string | null;
+    model?: string | null;
     vehicleType?: VehicleTypeDto | null;
     trailerRegistrationNumber?: string | null;
     maxLoadKg?: number | null;
