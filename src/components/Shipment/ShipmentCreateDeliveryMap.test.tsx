@@ -62,20 +62,17 @@ const fillMeasurements = () => {
 };
 
 describe("shipment delivery map", () => {
-    it("sends countries in sender and recipient", async () => {
+    it("does not send countries, the backend assigns them from postal codes", async () => {
         renderForm();
         fillMeasurements();
-        selectOption(pl.shipments.form.fields.receiverCountry, "DE");
+        expect(screen.queryByRole("combobox", {name: pl.shipments.form.fields.receiverCountry})).not.toBeInTheDocument();
 
         fireEvent.click(screen.getByRole("button", {name: pl.shipments.actions.create}));
 
-        await waitFor(() => expect(ShipmentService.create).toHaveBeenCalledWith(
-            expect.objectContaining({
-                sender: expect.objectContaining({countryCode: "PL"}),
-                recipient: expect.objectContaining({countryCode: "DE"}),
-            }),
-        ));
+        await waitFor(() => expect(ShipmentService.create).toHaveBeenCalled());
         const request = (ShipmentService.create as jest.Mock).mock.calls[0][0];
+        expect(request.sender).not.toHaveProperty("countryCode");
+        expect(request.recipient).not.toHaveProperty("countryCode");
         expect(request).not.toHaveProperty("issuerCountryCode");
         expect(request).not.toHaveProperty("receiverCountryCode");
     });

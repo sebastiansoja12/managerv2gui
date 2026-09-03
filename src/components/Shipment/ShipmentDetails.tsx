@@ -77,6 +77,7 @@ import {valueObjectValue} from "../../utils/valueObject";
 import {shipmentEventDescription} from "./shipmentEventDescription";
 import "./styles/shipments.css";
 import ShipmentReturnSummary from "./ShipmentReturnSummary";
+import ShipmentAddressRouteMap from "./ShipmentAddressRouteMap";
 import {ReturnPackageDto} from "../Returns/model/ReturnPackage";
 import {Delivery} from "../Deliveries/model/Delivery";
 import {useDeliveryPeople} from "../Deliveries/details/useDeliveryPeople";
@@ -86,6 +87,7 @@ import {
     deliveryMethodLabel,
     deliveryOutcomeLabel,
     deliveryStatusLabel,
+    deliveryStepCommentText,
     departmentCodeLabel,
     formatDeliveryDateTime,
 } from "../Deliveries/deliveryLabels";
@@ -96,7 +98,7 @@ type Notice = {
 };
 
 type DocumentAction = "qr" | "excel";
-type ShipmentDetailsTab = "overview" | "sender" | "recipient";
+type ShipmentDetailsTab = "overview" | "sender" | "recipient" | "route";
 type ShipmentWorkspaceTab = "history" | "notes" | "documents" | "related" | "audit";
 
 type RouteDetail = RouteLogRecord["routeLogRecordDetails"]["routeLogRecordDetailSet"][number];
@@ -304,6 +306,7 @@ const ShipmentDetails: React.FC = () => {
     const qrPreviewRef = useRef<HTMLIFrameElement | null>(null);
     const noteInputRef = useRef<HTMLTextAreaElement | null>(null);
     const attachmentInputRef = useRef<HTMLInputElement | null>(null);
+    const detailTabsRef = useRef<HTMLElement | null>(null);
 
     const validShipmentId = Boolean(shipmentId && /^\d+$/.test(shipmentId) && !/^0+$/.test(shipmentId));
     const decodedTrackingNumber = trackingNumber ? decodeURIComponent(trackingNumber) : "";
@@ -448,11 +451,16 @@ const ShipmentDetails: React.FC = () => {
 
     const closeQrPreview = () => setQrPreviewUrl(null);
 
+    // Panels swap in place under the tabs, so the page scrolls only when the tabs are out of view.
     const selectDetailTab = (tab: ShipmentDetailsTab) => {
         setActiveDetailTab(tab);
         window.requestAnimationFrame(() => {
-            document.getElementById(tab === "overview" ? "shipment-overview" : `shipment-${tab}`)
-                ?.scrollIntoView({behavior: "smooth", block: "start"});
+            const detailTabs = detailTabsRef.current;
+            const scrollContainer = detailTabs?.closest(".app-main-content");
+            const visibleTop = scrollContainer?.getBoundingClientRect().top ?? 0;
+            if (detailTabs && detailTabs.getBoundingClientRect().top < visibleTop) {
+                detailTabs.scrollIntoView({behavior: "smooth", block: "start"});
+            }
         });
     };
 
@@ -1290,7 +1298,7 @@ const ShipmentDetails: React.FC = () => {
                     </div>
                 </div>
 
-                <nav className="shipment-detail-tabs" aria-label={pl.shipments.page.detailsTitle}>
+                <nav className="shipment-detail-tabs" aria-label={pl.shipments.page.detailsTitle} ref={detailTabsRef}>
                     <button
                         className={activeDetailTab === "overview" ? "shipment-detail-tab-active" : ""}
                         type="button"
@@ -1313,6 +1321,13 @@ const ShipmentDetails: React.FC = () => {
                         {pl.shipments.detailTabs.recipient}
                     </button>
                     <a href="#shipment-history">{pl.shipments.detailTabs.history}</a>
+                    <button
+                        className={activeDetailTab === "route" ? "shipment-detail-tab-active" : ""}
+                        type="button"
+                        onClick={() => selectDetailTab("route")}
+                    >
+                        {pl.shipments.detailTabs.route}
+                    </button>
                 </nav>
 
                 {!loadingShipment && shipment ? <ShipmentReturnSummary returnPackage={returnPackage} /> : null}
@@ -1570,6 +1585,7 @@ const ShipmentDetails: React.FC = () => {
                             ) : null}
                             {activeDetailTab === "sender" ? personFields(pl.shipments.form.sections.sender, "SENDER", sender) : null}
                             {activeDetailTab === "recipient" ? personFields(pl.shipments.form.sections.receiver, "RECIPIENT", recipient) : null}
+                            {activeDetailTab === "route" ? <ShipmentAddressRouteMap sender={sender} recipient={recipient} /> : null}
                         </main>
 
                         <aside className="shipment-dashboard-workflow">
@@ -1676,8 +1692,8 @@ const ShipmentDetails: React.FC = () => {
                                         <div><span>{pl.deliveries.courierLabel}</span><strong>{courierCode(step.supplierId)}</strong></div>
                                         <div><span>{pl.deliveries.vehicleLabel}</span><strong>{step.vehicleId || pl.common.dash}</strong></div>
                                     </div>
-                                    {step.comment ? (
-                                        <p><strong>{pl.deliveries.commentLabel}:</strong> {step.comment}</p>
+                                    {deliveryStepCommentText(step) ? (
+                                        <p><strong>{pl.deliveries.commentLabel}:</strong> {deliveryStepCommentText(step)}</p>
                                     ) : null}
                                     {step.failureReason ? (
                                         <p><strong>{pl.deliveries.failureReasonLabel}:</strong> {step.failureReason}</p>

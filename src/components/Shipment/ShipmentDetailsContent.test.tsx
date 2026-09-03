@@ -77,6 +77,22 @@ describe("Shipment details content", () => {
             .toHaveAttribute("aria-selected", "true"));
     });
 
+    it("switches detail tabs in place and scrolls only when the tabs are out of view", async () => {
+        const scrollIntoView = jest.fn();
+        Object.defineProperty(HTMLElement.prototype, "scrollIntoView", {configurable: true, value: scrollIntoView});
+        renderDetails();
+
+        const detailTabs = await screen.findByRole("navigation", {name: pl.shipments.page.detailsTitle});
+        fireEvent.click(screen.getByRole("button", {name: pl.shipments.detailTabs.sender}));
+        await new Promise((resolve) => window.requestAnimationFrame(resolve));
+        expect(scrollIntoView).not.toHaveBeenCalled();
+
+        jest.spyOn(detailTabs, "getBoundingClientRect").mockReturnValue({top: -240} as DOMRect);
+        fireEvent.click(screen.getByRole("button", {name: pl.shipments.detailTabs.recipient}));
+        await waitFor(() => expect(scrollIntoView).toHaveBeenCalledTimes(1));
+        expect(scrollIntoView.mock.instances[0]).toBe(detailTabs);
+    });
+
     it("uploads a document and lists it in the documents tab", async () => {
         const shipmentDocument = {
             documentId: "document-1", shipmentId, filename: "invoice.pdf",

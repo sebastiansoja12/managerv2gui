@@ -90,8 +90,11 @@ it("copies all reusable shipment fields into the new create request", async () =
 
     fireEvent.click(screen.getByRole("button", {name: pl.shipments.actions.create}));
 
+    const {countryCode: senderCountryCode, ...senderWithoutCountry} = sender;
+    const {countryCode: recipientCountryCode, ...recipientWithoutCountry} = recipient;
     await waitFor(() => expect(ShipmentService.create).toHaveBeenCalledWith(expect.objectContaining({
-        sender, recipient,
+        sender: senderWithoutCountry,
+        recipient: recipientWithoutCountry,
         dimensions: shipment.dimensions,
         weight: shipment.weight,
         contentDescription: shipment.contentDescription,

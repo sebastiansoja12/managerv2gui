@@ -1,11 +1,12 @@
 import React, {FormEvent, useCallback, useEffect, useState} from "react";
 import {useNavigate, useParams} from "react-router-dom";
-import {Alert, Button, Chip, MenuItem, TextField, Typography} from "components/ui";
+import {Alert, Button, Chip, TextField, Typography} from "components/ui";
 import {CheckCircleOutline, LocalShipping, Refresh, Save, Send} from "components/ui/icons";
 import ShipmentEditService from "../../hooks/ShipmentEditService";
 import {ApiErrorResponse} from "../../api/ApiResult";
 import pl from "../../i18n/translate";
-import {countryCodes} from "../Shipment/dto/ShipmentDto";
+import ShipmentPostalCodeField from "../Shipment/ShipmentPostalCodeField";
+import {PostalCodeDto} from "../Shipment/dto/PostalCode";
 import {
     ShipmentEditDetails,
     ShipmentEditParty,
@@ -52,9 +53,6 @@ export const validateShipmentEditParty = (party: ShipmentEditParty): Array<keyof
         }
         if (field === "email") {
             return !EMAIL_PATTERN.test(value);
-        }
-        if (field === "countryCode") {
-            return !(countryCodes as readonly string[]).includes(value);
         }
         return false;
     })
@@ -169,14 +167,26 @@ function ShipmentEditApplication() {
         }
     };
 
-    const updateParty = (partyType: PartyType, field: keyof ShipmentEditParty, value: string) => {
-        const update = (party: ShipmentEditParty | null) => (party ? {...party, [field]: value} : party);
+    const updatePartyValues = (partyType: PartyType, values: Partial<ShipmentEditParty>) => {
+        const update = (party: ShipmentEditParty | null) => (party ? {...party, ...values} : party);
         if (partyType === "sender") {
             setSender(update);
         } else {
             setRecipient(update);
         }
     };
+
+    const updateParty = (partyType: PartyType, field: keyof ShipmentEditParty, value: string) => (
+        updatePartyValues(partyType, {[field]: value})
+    );
+
+    const selectPostalCode = (partyType: PartyType, postalCode: PostalCodeDto) => (
+        updatePartyValues(partyType, {
+            postalCode: postalCode.postalCode,
+            city: postalCode.city,
+            countryCode: postalCode.countryCode,
+        })
+    );
 
     const saveShipment = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -212,21 +222,18 @@ function ShipmentEditApplication() {
         <fieldset className="shipment-edit-party">
             <legend>{translations.form[partyType]}</legend>
             <div className="shipment-edit-grid">
-                {shipmentEditPartyFields.map((field) => field === "countryCode" ? (
-                    <TextField
+                {shipmentEditPartyFields.map((field) => field === "postalCode" ? (
+                    <ShipmentPostalCodeField
                         key={field}
-                        select
                         required
                         error={invalidFields[partyType].includes(field)}
                         id={`shipment-edit-${partyType}-${field}`}
                         label={translations.fields[field]}
                         value={party[field] || ""}
-                        onChange={(event: React.ChangeEvent<HTMLSelectElement>) => updateParty(partyType, field, event.target.value)}
-                    >
-                        {countryCodes.map((countryCode) => (
-                            <MenuItem key={countryCode} value={countryCode}>{countryCode}</MenuItem>
-                        ))}
-                    </TextField>
+                        onChange={(value) => updateParty(partyType, field, value)}
+                        onSelect={(postalCode) => selectPostalCode(partyType, postalCode)}
+                        search={ShipmentEditService.searchPostalCodes}
+                    />
                 ) : (
                     <TextField
                         key={field}
