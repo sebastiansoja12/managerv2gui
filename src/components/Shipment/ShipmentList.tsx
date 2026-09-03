@@ -22,6 +22,7 @@ import {
     Person,
     Print,
     QrCode2,
+    Refresh,
     Route,
     TableView,
 } from "components/ui/icons";
@@ -122,7 +123,7 @@ const mapShipmentToRow = (shipment: ShipmentDto, destination: string): ShipmentR
         : pl.common.dash,
     sender: formatPersonName(shipment.sender?.firstName, shipment.sender?.lastName, shipmentTranslations.table.fallbackSender),
     recipient: formatPersonName(shipment.recipient?.firstName, shipment.recipient?.lastName, shipmentTranslations.table.fallbackRecipient),
-    deliveryDate: formatDeliveryDate(shipment.signature?.signedAt),
+    deliveryDate: formatDeliveryDate(shipment.shipmentStatus === "DELIVERY" ? shipment.updatedAt : null),
     price: formatPrice(shipment),
     user: shipmentTranslations.table.unassigned,
     destination,
@@ -387,6 +388,25 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
         }
     };
 
+    const refreshShipments = async () => {
+        if (readModelSearchResults) {
+            await applyAdvancedFilters();
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const refreshedShipments = await loadShipments();
+            shipmentListCache.loaded = true;
+            shipmentListCache.shipments = refreshedShipments;
+            setShipments([...refreshedShipments]);
+        } catch (error) {
+            showError(error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const resetAdvancedFilters = () => {
         setShipmentPriorityFilter("");
         setSenderNameFilter("");
@@ -583,14 +603,25 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
                         </Typography>
                         <p>{variant === "details" ? pl.shipments.page.detailsSubtitle : pl.shipments.page.subtitle}</p>
                     </div>
-                    <Button
-                        className="tm-add-new"
-                        startIcon={<Add />}
-                        variant="contained"
-                        onClick={() => navigate("/shipments/create")}
-                    >
-                        {shipmentTranslations.actions.create}
-                    </Button>
+                    <div className="tm-top-actions">
+                        <Button
+                            className="tm-refresh"
+                            disabled={loading}
+                            startIcon={<Refresh />}
+                            variant="outlined"
+                            onClick={refreshShipments}
+                        >
+                            {pl.common.refresh}
+                        </Button>
+                        <Button
+                            className="tm-add-new"
+                            startIcon={<Add />}
+                            variant="contained"
+                            onClick={() => navigate("/shipments/create")}
+                        >
+                            {shipmentTranslations.actions.create}
+                        </Button>
+                    </div>
                 </div>
 
                 <section className="tm-card tm-orders-card">

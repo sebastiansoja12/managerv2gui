@@ -1,7 +1,7 @@
 import React, {useCallback, useEffect, useState} from "react";
 import {Alert, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, MenuItem, TextField,
     Typography} from "components/ui";
-import {LocalShipping, Refresh} from "components/ui/icons";
+import {Refresh} from "components/ui/icons";
 import {useNavigate} from "react-router-dom";
 import {getBackendErrorMessage} from "../../api/errorMessage";
 import Department from "../../class/depots/Department";
@@ -9,6 +9,7 @@ import DeliveryService from "../../hooks/DeliveryService";
 import DepartmentService from "../../hooks/DepartmentService";
 import pl from "../../i18n/translate";
 import DeliveryFilters from "./list/DeliveryFilters";
+import DeliverySelectionActions from "./list/DeliverySelectionActions";
 import DeliveryTable from "./list/DeliveryTable";
 import {
     defaultDeliveryListFilters,
@@ -20,6 +21,7 @@ import {
 } from "./list/deliveryListModel";
 import {DeliveryListItem, DeliverySortField} from "./model/Delivery";
 import {exportDeliveryExcel, exportDeliveryPdf} from "./deliveryExport";
+import "../Shipment/styles/shipments.css";
 import "./styles/deliveries.css";
 
 function Deliveries() {
@@ -30,6 +32,7 @@ function Deliveries() {
     const [sort, setSort] = useState<DeliveryListSort>(defaultDeliveryListSort);
     const [reloadKey, setReloadKey] = useState(0);
     const [deliveries, setDeliveries] = useState<DeliveryListItem[]>([]);
+    const [selectedId, setSelectedId] = useState<string | null>(null);
     const [departments, setDepartments] = useState<Department[]>([]);
     const [deliveryToCancel, setDeliveryToCancel] = useState<DeliveryListItem | null>(null);
     const [canceling, setCanceling] = useState(false);
@@ -44,6 +47,11 @@ function Deliveries() {
         setFilters(next);
         setPage(0);
     }, []);
+
+    const selectedDelivery = deliveries.find((delivery) => delivery.id === selectedId) || null;
+
+    const openDelivery = (delivery: DeliveryListItem) =>
+        navigate(`/deliveries/${encodeURIComponent(delivery.id)}/edit`);
 
     const changeSort = (field: DeliverySortField) => {
         setSort((current) => toggleSort(current, field));
@@ -128,27 +136,26 @@ function Deliveries() {
     };
 
     return (
-        <div className="deliveries-page">
-            <div className="deliveries-shell">
-                <header className="deliveries-header">
-                    <div className="deliveries-title">
-                        <span className="deliveries-title-icon"><LocalShipping/></span>
-                        <div>
-                            <Typography variant="h4">{pl.deliveries.title}</Typography>
-                            <Typography variant="body2">{pl.deliveries.subtitle}</Typography>
-                        </div>
+        <div className="tm-page tm-page-shipment-catalog dlv-page">
+            <div className="tm-content">
+                <div className="tm-top-row">
+                    <div className="tm-page-heading">
+                        <span className="tm-heading-kicker">{pl.common.brand}</span>
+                        <Typography variant="h4">{pl.deliveries.title}</Typography>
+                        <p>{pl.deliveries.subtitle}</p>
                     </div>
-                    <Button variant="outlined" startIcon={<Refresh/>} disabled={loading}
-                            onClick={() => setReloadKey((current) => current + 1)}>
-                        {pl.common.refresh}
-                    </Button>
-                </header>
+                    <div className="tm-top-actions">
+                        <Button className="tm-refresh" variant="outlined" startIcon={<Refresh/>} disabled={loading}
+                                onClick={() => setReloadKey((current) => current + 1)}>
+                            {pl.common.refresh}
+                        </Button>
+                    </div>
+                </div>
 
-                <section className="deliveries-card" aria-label={pl.deliveries.listTitle}>
-                    <div className="deliveries-card-heading">
-                        <Typography variant="h6">{pl.deliveries.listTitle}</Typography>
-                        <div className="deliveries-list-meta">
-                            <span>{pl.deliveries.page.replace("{page}", String(page + 1))}</span>
+                <section className="tm-card tm-orders-card" aria-label={pl.deliveries.listTitle}>
+                    <div className="tm-orders-header">
+                        <Typography variant="h5">{pl.deliveries.listTitle}</Typography>
+                        <div className="dlv-page-size">
                             <TextField select size="small" label={pl.deliveries.filters.pageSize} value={String(pageSize)}
                                        onChange={(event: React.ChangeEvent<HTMLSelectElement>) => {
                                            setPageSize(Number(event.target.value));
@@ -158,32 +165,43 @@ function Deliveries() {
                             </TextField>
                         </div>
                     </div>
-                    <DeliveryFilters filters={filters} departments={departments} onChange={changeFilters}/>
-                    {exportError && <Alert severity="error">{exportError}</Alert>}
-                    {error && <Alert severity="error" action={
-                        <Button variant="text" onClick={() => setReloadKey((current) => current + 1)}>
-                            {pl.deliveries.retry}
-                        </Button>
-                    }>{error}</Alert>}
+                    <div className="dlv-card-section">
+                        <DeliveryFilters filters={filters} departments={departments} onChange={changeFilters}/>
+                        {exportError && <Alert severity="error">{exportError}</Alert>}
+                        {error && <Alert severity="error" action={
+                            <Button variant="text" onClick={() => setReloadKey((current) => current + 1)}>
+                                {pl.deliveries.retry}
+                            </Button>
+                        }>{error}</Alert>}
+                    </div>
                     {loading ? (
                         <div className="deliveries-state"><CircularProgress size={24}/>{pl.deliveries.loading}</div>
                     ) : !error && deliveries.length === 0 ? (
                         <div className="deliveries-state">{pl.deliveries.empty}</div>
                     ) : !error ? (
-                        <DeliveryTable deliveries={deliveries} departments={departments} sort={sort} busy={exporting}
-                                       onSort={changeSort}
-                                       onOpen={(delivery) => navigate(`/deliveries/${encodeURIComponent(delivery.id)}/edit`)}
-                                       onExport={exportDelivery}
-                                       onCancel={(delivery) => {
-                                           setCancelError(null);
-                                           setDeliveryToCancel(delivery);
-                                       }}/>
+                        <div className="tm-results-layout">
+                            <DeliveryTable deliveries={deliveries} departments={departments} sort={sort}
+                                           selectedId={selectedId}
+                                           onSort={changeSort}
+                                           onSelect={(delivery) => setSelectedId(delivery.id)}
+                                           onOpen={openDelivery}/>
+                            <DeliverySelectionActions delivery={selectedDelivery} busy={exporting}
+                                                      onOpen={openDelivery}
+                                                      onExport={exportDelivery}
+                                                      onCancel={(delivery) => {
+                                                          setCancelError(null);
+                                                          setDeliveryToCancel(delivery);
+                                                      }}/>
+                        </div>
                     ) : null}
-                    <div className="deliveries-pagination">
-                        <Button variant="outlined" disabled={loading || page === 0}
-                                onClick={() => setPage((current) => current - 1)}>{pl.deliveries.previous}</Button>
-                        <Button variant="outlined" disabled={loading || !hasNextPage}
-                                onClick={() => setPage((current) => current + 1)}>{pl.deliveries.next}</Button>
+                    <div className="tm-table-footer">
+                        <span>{pl.deliveries.page.replace("{page}", String(page + 1))}</span>
+                        <div className="dlv-pagination">
+                            <Button variant="outlined" disabled={loading || page === 0}
+                                    onClick={() => setPage((current) => current - 1)}>{pl.deliveries.previous}</Button>
+                            <Button variant="outlined" disabled={loading || !hasNextPage}
+                                    onClick={() => setPage((current) => current + 1)}>{pl.deliveries.next}</Button>
+                        </div>
                     </div>
                 </section>
 

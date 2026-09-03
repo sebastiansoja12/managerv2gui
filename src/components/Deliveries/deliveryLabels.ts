@@ -1,5 +1,6 @@
 import Department from "../../class/depots/Department";
 import pl from "../../i18n/translate";
+import {DeliveryStep} from "./model/Delivery";
 
 export const formatDeliveryDateTime = (value?: string | null) => {
     if (!value) {
@@ -32,6 +33,16 @@ export const deliveryMethodLabel = (method?: string | null) => method
 
 export const deliveryOutcomeLabel = (outcome: string) =>
     pl.deliveries.outcome[outcome as keyof typeof pl.deliveries.outcome] || pl.deliveries.unknown;
+
+export const deliveryStepCommentText = (step: Pick<DeliveryStep, "comment" | "commentCode">) => {
+    const codeLabel = step.commentCode
+        ? pl.deliveries.commentCode[step.commentCode as keyof typeof pl.deliveries.commentCode]
+        : null;
+    if (!codeLabel) {
+        return step.comment || step.commentCode || null;
+    }
+    return step.comment ? `${codeLabel} — ${step.comment}` : codeLabel;
+};
 
 export const pickupMethodLabel = (method?: string | null) => method
     ? pl.shipments.pickupMethod[method as keyof typeof pl.shipments.pickupMethod] || pl.deliveries.unknown

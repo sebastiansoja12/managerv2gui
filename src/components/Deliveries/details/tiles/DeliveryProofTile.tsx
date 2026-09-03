@@ -1,8 +1,7 @@
 import React from "react";
 import pl from "../../../../i18n/translate";
-import {SignatureDto} from "../../../Shipment/dto/ShipmentDto";
 import {formatDeliveryDateTime} from "../../deliveryLabels";
-import {Delivery} from "../../model/Delivery";
+import {Delivery, DeliverySignature} from "../../model/Delivery";
 import DeliveryTile from "./DeliveryTile";
 
 const signatureImageSource = (signature: string) => {
@@ -16,7 +15,7 @@ const signatureImageSource = (signature: string) => {
     return /^[A-Za-z0-9+/=\s]+$/.test(value) && value.length > 32 ? `data:image/png;base64,${value}` : null;
 };
 
-function DeliveryProofTile({delivery, signature}: {delivery: Delivery; signature: SignatureDto | null}) {
+function DeliveryProofTile({delivery, signature}: {delivery: Delivery; signature: DeliverySignature | null}) {
     const source = signature?.signature ? signatureImageSource(signature.signature) : null;
     const signedStep = delivery.steps.find((step) => step.signatureId);
     return (

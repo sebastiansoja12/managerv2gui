@@ -18,7 +18,7 @@ export const exportShipmentExcel = async (shipment: ShipmentDto) => {
             : pl.common.dash],
         [pl.shipments.table.columns.sender, personName(shipment.sender?.firstName, shipment.sender?.lastName)],
         [pl.shipments.table.columns.recipient, personName(shipment.recipient?.firstName, shipment.recipient?.lastName)],
-        [pl.shipments.table.columns.deliveryDate, shipment.signature?.signedAt || pl.common.dash],
+        [pl.shipments.table.columns.deliveryDate, (shipment.shipmentStatus === "DELIVERY" && shipment.updatedAt) || pl.common.dash],
         [pl.shipments.table.columns.price, shipment.price
             ? `${shipment.price.amount} ${shipment.price.currency}` : pl.common.dash],
         [pl.shipments.table.columns.user, shipment.operatorId?.value?.toString() || pl.shipments.table.unassigned],

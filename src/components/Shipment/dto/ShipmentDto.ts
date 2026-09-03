@@ -70,13 +70,6 @@ export interface ShipmentConfigurationApi {
     customRerouteDepartment: boolean;
 }
 
-export interface SignatureDto {
-    signerName: string;
-    signedAt: string;
-    signatureMethod: SignatureMethod;
-    signature: string;
-}
-
 export interface ShipmentDto {
     shipmentId: ShipmentIdDto;
     operatorId?: OperatorIdDto | null;
@@ -96,7 +89,6 @@ export interface ShipmentDto {
     price: MoneyApi;
     trackingNumber: TrackingNumberDto;
     locked: boolean;
-    signature?: SignatureDto | null;
     createdAt?: string | null;
     updatedAt?: string | null;
 }
@@ -166,8 +158,6 @@ export interface ShipmentUpdateRequestApi {
     price: MoneyApi;
     shipmentPriority: ShipmentPriorityDto;
     shipmentStatus: ShipmentStatusDto;
-    issuerCountryCode: string;
-    receiverCountryCode: string;
     shipmentConfiguration: ShipmentConfigurationApi;
 }
 
@@ -197,13 +187,6 @@ export interface ShipmentSearchRequestApi {
     size?: number;
 }
 
-export interface SignatureChangeRequestApi {
-    shipmentId: ShipmentIdDto;
-    signerName: string;
-    documentReference: string;
-    signature: string;
-}
-
 export interface ShipmentReturnRequestApi {
     shipmentId: ShipmentIdDto;
     reason: string;
@@ -217,11 +200,6 @@ export interface ShipmentDeliveryRequestApiDto {
     deliveryMethod: string;
     supplierCode: SupplierCodeDto;
     deliveryStatus: string;
-}
-
-export interface CountryRequestApi {
-    issuerCountryCode: string;
-    receiverCountryCode: string;
 }
 
 export interface ShipmentResponseInformation {
@@ -248,8 +226,6 @@ export type DeliveryMethodDto = "COURIER" | "PICKUP_POINT" | "LOCKER";
 
 export type ShipmentTypeDto = "PARENT" | "CHILD";
 
-export type SignatureMethod = "DIGITAL" | "HANDWRITTEN" | "BIOMETRIC" | "NONE";
-
 export const shipmentPriorities: ShipmentPriorityDto[] = ["LOW", "MEDIUM", "HIGH", "EXPRESS"];
 
 export const shipmentStatuses: ShipmentStatusDto[] = ["PLANNED", "CREATED", "PREPARED", "ACCEPTED", "REROUTE", "SENT", "DELIVERY", "RETURN", "REDIRECT", "CANCELED"];
@@ -263,8 +239,6 @@ export const shipmentChangeStatuses: ShipmentStatusDto[] = shipmentStatuses.filt
 );
 
 export const shipmentTypes: ShipmentTypeDto[] = ["PARENT", "CHILD"];
-
-export const signatureMethods: SignatureMethod[] = ["DIGITAL", "HANDWRITTEN", "BIOMETRIC", "NONE"];
 
 export const personTypes: PersonType[] = ["SENDER", "RECIPIENT"];
 

@@ -9,6 +9,7 @@ import {
     DeliveryQueryFilter,
     DeliveryRelation,
     DeliveryRouteRequest,
+    DeliverySignature,
 } from "../components/Deliveries/model/Delivery";
 import http from "../http-common";
 
@@ -50,6 +51,9 @@ const getRelated = (deliveryId: string) => client.get<DeliveryRelation[]>(`${del
 
 const getHistory = (deliveryId: string) =>
     client.get<DeliveryHistoryEntry[]>(`${deliveryPath(deliveryId)}/history`);
+
+const getSignature = (deliveryId: string) =>
+    client.get<DeliverySignature>(`${deliveryPath(deliveryId)}/signature`);
 
 const assignSupplier = (deliveryId: string, request: DeliveryCarrierRequest) =>
     client.put<DeliveryCarrierRequest, Delivery>(`${deliveryPath(deliveryId)}/supplier`, request);
@@ -93,6 +97,7 @@ const DeliveryService = {
     getByPalletId,
     getRelated,
     getHistory,
+    getSignature,
     assignSupplier,
     unassignSupplier,
     changeRoute,
