@@ -35,6 +35,7 @@ const providerLabels: Record<string, string> = {
     GEOAPIFY: pl.globalConfiguration.geocoding.providers.geoapify,
     POSITION_STACK: pl.globalConfiguration.geocoding.providers.positionStack,
     OPEN_CAGE: pl.globalConfiguration.geocoding.providers.openCage,
+    GEOCODIFY: pl.globalConfiguration.geocoding.providers.geocodify,
 };
 
 const getProviderLabel = (provider: GeocodingProvider) => providerLabels[provider]

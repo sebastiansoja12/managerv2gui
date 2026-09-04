@@ -1176,6 +1176,7 @@ export const en: typeof pl = {
                 GEOAPIFY: "Geoapify",
                 POSITION_STACK: "PositionStack",
                 OPEN_CAGE: "OpenCage",
+                GEOCODIFY: "Geocodify",
             },
             featuresTitle: "Operator features",
             featuresSubtitle: "Enable and disable capabilities for this operator",
@@ -2613,6 +2614,7 @@ export const en: typeof pl = {
                 geoapify: "Geoapify",
                 positionStack: "Positionstack",
                 openCage: "OpenCage",
+                geocodify: "Geocodify",
             },
             providerApis: {
                 geocodingApi: "Geocoding API",
