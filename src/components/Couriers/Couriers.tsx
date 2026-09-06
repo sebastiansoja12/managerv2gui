@@ -189,6 +189,17 @@ function Couriers() {
     }, [retrieveDepartments]);
 
     useEffect(() => {
+        if (!createDialogOpen || createForm.departmentCode || !availableDepartments.length) {
+            return;
+        }
+
+        setCreateForm((currentForm) => ({
+            ...currentForm,
+            departmentCode: availableDepartments[0].code,
+        }));
+    }, [availableDepartments, createDialogOpen, createForm.departmentCode]);
+
+    useEffect(() => {
         if (!filteredCouriers.length) {
             setSelectedCode("");
             return;
@@ -241,6 +252,22 @@ function Couriers() {
         if (!saving) {
             setCreateDialogOpen(false);
         }
+    };
+
+    const openCreateDialog = () => {
+        const selectedDepartmentCode = availableDepartments.some(
+            (department) => department.code === createForm.departmentCode,
+        )
+            ? createForm.departmentCode
+            : availableDepartments[0]?.code || "";
+
+        setError("");
+        setSuccess("");
+        setCreateForm((currentForm) => ({
+            ...currentForm,
+            departmentCode: selectedDepartmentCode,
+        }));
+        setCreateDialogOpen(true);
     };
 
     const createCourier = () => {
@@ -329,7 +356,7 @@ function Couriers() {
                     <div className="couriers-panel-header">
                         <Typography variant="h5">{pl.couriers.page.listTitle}</Typography>
                         <div className="couriers-table-actions">
-                            <Button disabled={saving} startIcon={<PersonAdd />} variant="contained" onClick={() => setCreateDialogOpen(true)}>
+                            <Button disabled={saving} startIcon={<PersonAdd />} variant="contained" onClick={openCreateDialog}>
                                 {createTranslations.title}
                             </Button>
                             <Button disabled={loading} startIcon={<Refresh />} variant="outlined" onClick={() => retrieveCouriers()}>
@@ -581,7 +608,7 @@ function Couriers() {
                     </div>
                 </DialogContent>
                 <DialogActions className="couriers-create-dialog-actions">
-                    <Button disabled={saving} onClick={closeCreateDialog}>{createTranslations.cancel}</Button>
+                    <Button disabled={saving} variant="outlined" onClick={closeCreateDialog}>{createTranslations.cancel}</Button>
                     <Button disabled={saving} startIcon={<Save />} variant="contained" onClick={createCourier}>
                         {saving ? createTranslations.saving : createTranslations.submit}
                     </Button>

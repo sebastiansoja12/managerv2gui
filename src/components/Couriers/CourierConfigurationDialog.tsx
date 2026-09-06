@@ -213,7 +213,7 @@ function CourierConfigurationDialog({open, onClose}: CourierConfigurationDialogP
                 {loadError ? <Alert severity="error">{loadError}</Alert> : undefined}
             </DialogContent>
             <DialogActions className="courier-configuration-dialog-actions">
-                <Button onClick={onClose}>{pl.couriers.actions.cancelEdit}</Button>
+                <Button variant="outlined" onClick={onClose}>{pl.couriers.actions.cancelEdit}</Button>
                 <Button startIcon={<Save />} variant="contained" onClick={saveCourierConfiguration}>
                     {pl.common.saveChanges}
                 </Button>
