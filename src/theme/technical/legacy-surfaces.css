@@ -1,0 +1,131 @@
+/* Surfaces and cards */
+.app-main-content :is(
+    [data-ui="paper"],
+    [data-ui="table-container"],
+    [class$="-panel"],
+    [class*="-panel "],
+    [class$="-card"],
+    [class*="-card "]
+),
+.super-admin-app :is([class$="-panel"], [class*="-panel "], [class$="-card"], [class*="-card "]),
+.super-admin-login-card,
+.login-card {
+    background-color: var(--technical-panel) !important;
+    background-image: none !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius-panel) !important;
+    box-shadow: none !important;
+    color: var(--card-foreground) !important;
+}
+
+.app-main-content :is(
+    .couriers-side-actions,
+    .departments-side-actions,
+    .users-side-actions,
+    .global-configuration-tabs,
+    .global-configuration-toolbar,
+    .shipment-scanner-side,
+    .shipment-scanner-help,
+    .shipment-scanner-record,
+    .department-relations-editor,
+    .department-relations-legend,
+    .department-relations-list-item,
+    .department-relations-instructions,
+    .geocoding-provider-list,
+    .geocoding-provider-main,
+    .integration-left-rail,
+    .tm-orders-controls,
+    .tm-manual-load,
+    .tm-advanced-filters
+) {
+    background: var(--technical-panel) !important;
+    background-image: none !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius-panel) !important;
+    box-shadow: none !important;
+    color: var(--foreground) !important;
+}
+
+.app-main-content :is(
+    .couriers-panel-header,
+    .couriers-side-actions-title,
+    .departments-table-header,
+    .departments-side-actions-title,
+    .users-toolbar,
+    .users-side-actions-title,
+    .microservice-status-panel-header,
+    .global-configuration-panel-header,
+    .device-pairing-table-header,
+    .shipment-scanner-side-header,
+    .shipment-cc-side-header,
+    .tm-card-header,
+    .tm-orders-header,
+    .tm-orders-controls
+) {
+    background: var(--card) !important;
+    background-image: none !important;
+    border-color: var(--border) !important;
+    box-shadow: none !important;
+}
+
+.app-main-content :is(
+    .global-configuration-section,
+    .shipment-configuration-group,
+    .shipment-edit-section,
+    .shipment-details-segment,
+    .integration-option-group,
+    .integration-provider-panel-section,
+    .geocoding-provider-card,
+    .couriers-form-section,
+    .returns-info-card,
+    .process-summary-grid > div,
+    .shipment-setting-row,
+    .shipment-detail-value,
+    .users-permissions-grid label
+) {
+    background-color: color-mix(in srgb, var(--surface) 84%, var(--card)) !important;
+    background-image: none !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius-control) !important;
+    box-shadow: none !important;
+}
+
+.app-main-content :is(
+    .couriers-header,
+    .departments-header,
+    .device-pairing-header,
+    .global-configuration-header,
+    .microservice-status-header,
+    .processes-header,
+    .returns-header,
+    .shipment-scanner-header,
+    .shipments-header,
+    .user-profile-header,
+    .users-header
+) {
+    background: transparent !important;
+    border: 0 !important;
+    border-bottom: 1px solid var(--border) !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding: 0 0 22px !important;
+}
+
+.app-main-content :is(
+    .device-pairing-header, .global-configuration-header,
+    .microservice-status-header, .processes-header,
+    .shipment-scanner-header, .user-profile-header
+) :is(h1, h4) {
+    font-size: clamp(2rem, 3vw, 3.25rem) !important;
+    line-height: 1.1;
+}
+
+.app-main-content :is(
+    .device-pairing-header, .global-configuration-header,
+    .microservice-status-header, .processes-header,
+    .shipment-scanner-header, .user-profile-header
+) {
+    flex-wrap: wrap;
+    gap: 16px;
+    text-align: left;
+}

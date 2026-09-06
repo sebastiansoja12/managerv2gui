@@ -48,7 +48,7 @@
 }
 
 .processes-title-icon {
-    box-shadow: 0 12px 22px rgba(30, 58, 138, 0.18);
+    box-shadow: none;
     height: 44px;
     width: 44px;
 }
@@ -56,14 +56,14 @@
 .processes-header [data-ui="typography"][data-variant="h4"] {
     color: var(--brand-ink);
     font-size: 1.5rem;
-    font-weight: 900;
+    font-weight: 600;
     letter-spacing: 0;
 }
 
 .processes-header [data-ui="button"],
 .processes-panel [data-ui="button"] {
     border-radius: 8px;
-    font-weight: 800;
+    font-weight: 600;
     text-transform: none;
 }
 
@@ -71,7 +71,7 @@
     background: var(--brand-surface);
     border: 1px solid var(--brand-border);
     border-radius: 8px;
-    box-shadow: 0 8px 22px var(--brand-shadow);
+    box-shadow: none;
     overflow: hidden;
 }
 
@@ -84,7 +84,7 @@
 .processes-panel-header [data-ui="typography"],
 .process-section-heading [data-ui="typography"] {
     color: var(--brand-ink);
-    font-weight: 900;
+    font-weight: 600;
 }
 
 .processes-panel-header span,
@@ -115,10 +115,10 @@
 }
 
 .processes-table th {
-    background: #fbfcfe;
-    color: #5f6877;
+    background: var(--surface);
+    color: var(--muted-foreground);
     font-size: 0.86rem;
-    font-weight: 900;
+    font-weight: 600;
 }
 
 .processes-table tbody tr {
@@ -127,7 +127,7 @@
 }
 
 .processes-table tbody tr:hover {
-    background: #f5f8ff;
+    background: var(--surface-secondary);
 }
 
 .processes-table td:first-child strong {
@@ -142,7 +142,7 @@
 .processes-service {
     color: var(--brand-ink-soft);
     gap: 8px;
-    font-weight: 800;
+    font-weight: 600;
 }
 
 .processes-empty {
@@ -157,17 +157,17 @@
 
 .process-status {
     border-radius: 8px;
-    font-weight: 900;
+    font-weight: 600;
 }
 
 .process-status-success {
-    background: #dcfce7 !important;
-    color: #15803d !important;
+    background: var(--technical-success-soft) !important;
+    color: var(--success) !important;
 }
 
 .process-status-failure {
-    background: #fee2e2 !important;
-    color: #b91c1c !important;
+    background: var(--technical-danger-soft) !important;
+    color: var(--danger) !important;
 }
 
 .process-status-in_progress,
@@ -203,7 +203,7 @@
     color: var(--brand-muted);
     display: block;
     font-size: 0.78rem;
-    font-weight: 800;
+    font-weight: 600;
     margin-bottom: 6px;
     text-transform: uppercase;
 }
@@ -211,7 +211,7 @@
 .process-summary-grid strong,
 .process-communication-meta dd {
     color: var(--brand-ink);
-    font-weight: 900;
+    font-weight: 600;
     margin: 0;
 }
 

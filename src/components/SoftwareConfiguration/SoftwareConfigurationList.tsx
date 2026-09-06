@@ -40,10 +40,13 @@ const SoftwarePropertyList: React.FC = () => {
     };
 
     return (
-        <div>
-            <h1>{pl.softwareConfiguration.title}</h1>
+        <main className="software-configuration-page">
+            <header className="software-configuration-header">
+                <span className="software-configuration-kicker">Manager 2.0</span>
+                <h1>{pl.softwareConfiguration.title}</h1>
+            </header>
             <SoftwareConfigurationList softwareProperties={softwareProperties} onUpdate={handleUpdate} />
-        </div>
+        </main>
     );
 };
 

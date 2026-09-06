@@ -1,0 +1,83 @@
+/* Application-wide technical system. Every legacy feature is routed through
+   semantic theme tokens so all saved skins keep their contrast and identity. */
+:root {
+    --technical-accent-soft: color-mix(in srgb, var(--primary) 9%, var(--surface));
+    --technical-accent-line: color-mix(in srgb, var(--primary) 32%, var(--border));
+    --technical-panel: color-mix(in srgb, var(--card) 97%, var(--background));
+    --technical-row-hover: color-mix(in srgb, var(--primary) 5%, var(--card));
+    --technical-success-soft: color-mix(in srgb, var(--success) 10%, var(--card));
+    --technical-warning-soft: color-mix(in srgb, var(--warning) 10%, var(--card));
+    --technical-danger-soft: color-mix(in srgb, var(--danger) 10%, var(--card));
+    --technical-info-soft: color-mix(in srgb, var(--info) 10%, var(--card));
+    --radius-control: 4px;
+    --radius-panel: 6px;
+    --shadow-panel: none;
+}
+
+html,
+body,
+#root,
+.App,
+.super-admin-app {
+    font-family: var(--font-ui);
+}
+
+.App :is(button, input, select, textarea),
+.super-admin-app :is(button, input, select, textarea),
+[data-ui] {
+    font-family: var(--font-ui) !important;
+}
+
+.App :is(h1, h4),
+.super-admin-app :is(h1, h4),
+.login-card h1 {
+    color: var(--foreground) !important;
+    font-family: var(--font-display) !important;
+    font-weight: 400 !important;
+    letter-spacing: -0.035em !important;
+}
+
+.App :is(h2, h3, h5, h6),
+.super-admin-app :is(h2, h3, h5, h6) {
+    color: var(--foreground) !important;
+    font-family: var(--font-ui) !important;
+    font-weight: 600 !important;
+    letter-spacing: -0.02em !important;
+}
+
+.App :is(code, pre, kbd, samp),
+.process-payload,
+.shipments-json,
+.returns-info-card-token,
+.device-pairing-qr {
+    font-family: var(--font-mono) !important;
+}
+
+.app-main-content :is(
+    .couriers-page,
+    .departments-page,
+    .device-pairing-page,
+    .global-configuration-page,
+    .home-dashboard-page,
+    .microservice-status-page,
+    .module-placeholder-page,
+    .processes-page,
+    .returns-page,
+    .shipment-scanner-page,
+    .shipments-page,
+    .user-profile-page,
+    .users-page
+) {
+    background-color: transparent !important;
+    background-image: none !important;
+    color: var(--foreground) !important;
+    padding: clamp(16px, 2.1vw, 32px) !important;
+}
+
+.app-main-content :is([class$="-page"], [class*="-page "]) {
+    background-image: none !important;
+}
+
+.app-main-content {
+    text-align: left;
+}

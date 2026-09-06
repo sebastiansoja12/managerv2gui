@@ -1,0 +1,91 @@
+/* Compact technical tags */
+[data-ui="chip"],
+.couriers-status,
+.departments-status,
+.microservice-status-badge,
+.process-status,
+.shipment-history-status,
+.shipment-status-pill,
+.users-role,
+.super-admin-status,
+.super-admin-directory-tag,
+.super-admin-directory-status,
+.global-configuration-category {
+    border: 1px solid var(--border) !important;
+    border-radius: 5px !important;
+    box-shadow: none !important;
+    font-family: var(--font-mono) !important;
+    font-size: 0.68rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.035em !important;
+    text-transform: uppercase;
+}
+
+:is(
+    .couriers-status-active,
+    .departments-status-active,
+    .microservice-status-badge-online,
+    .process-status-success,
+    .return-status-completed,
+    .shipment-status-green,
+    .tm-status-delivered,
+    .tm-status-on-delivery,
+    .super-admin-status.is-active
+) {
+    background: var(--technical-success-soft) !important;
+    border-color: color-mix(in srgb, var(--success) 34%, var(--border)) !important;
+    color: var(--success) !important;
+}
+
+:is(
+    .couriers-status-suspended,
+    .departments-status-suspended,
+    .process-status-in_progress,
+    .return-status-processing,
+    .shipment-status-orange,
+    .tm-status-pending
+) {
+    background: var(--technical-warning-soft) !important;
+    border-color: color-mix(in srgb, var(--warning) 34%, var(--border)) !important;
+    color: var(--warning) !important;
+}
+
+:is(
+    .couriers-status-deleted,
+    .departments-status-deleted,
+    .microservice-status-badge-offline,
+    .process-status-failure,
+    .return-status-cancelled,
+    .tm-status-canceled
+) {
+    background: var(--technical-danger-soft) !important;
+    border-color: color-mix(in srgb, var(--danger) 34%, var(--border)) !important;
+    color: var(--danger) !important;
+}
+
+:is(
+    .couriers-status-inactive,
+    .departments-status-inactive,
+    .departments-status-archived,
+    .microservice-status-badge-unknown,
+    .process-status-null,
+    .return-status-created,
+    .tm-status-created,
+    .tm-status-reroute,
+    .tm-status-sent,
+    .tm-status-delivery,
+    .tm-status-return,
+    .tm-status-redirect,
+    .tm-status-shipping,
+    .tm-status-returned,
+    .users-role-admin,
+    .users-role-manager,
+    .users-role-supplier,
+    .users-role-user,
+    .super-admin-status.is-inactive
+) {
+    background: var(--technical-info-soft) !important;
+    border-color: color-mix(in srgb, var(--info) 30%, var(--border)) !important;
+    color: var(--foreground) !important;
+}
+

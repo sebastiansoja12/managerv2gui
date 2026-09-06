@@ -1,0 +1,115 @@
+.shipment-scanner-heading {
+    border-left: 0;
+    padding-left: 0;
+}
+
+.shipment-scanner-page p,
+.shipment-scanner-feedback span {
+    font-weight: 400;
+    line-height: 1.5;
+}
+
+.shipment-scanner-layout > *,
+.shipment-scanner-side > *,
+.shipment-scanner-record > * {
+    min-width: 0;
+}
+
+.shipment-scanner-side-header {
+    flex-wrap: wrap;
+}
+
+.shipment-scanner-side-header strong {
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+.app-main-content .shipment-scanner-page :is(
+    .shipment-scanner-card-copy h2, .shipment-scanner-side-header h2
+) {
+    font-family: var(--font-ui) !important;
+    font-size: 1.15rem;
+    font-weight: 600 !important;
+    letter-spacing: -0.015em !important;
+    line-height: 1.4;
+}
+
+.shipment-scanner-status,
+.shipment-scanner-side-header strong,
+.shipment-scanner-record-badge {
+    border-radius: var(--radius-control);
+    box-shadow: none;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+}
+
+.shipment-scanner-main-card {
+    gap: 18px;
+    min-height: 0;
+    padding: 24px;
+}
+
+.shipment-scanner-card-icon {
+    height: 44px;
+    width: 44px;
+}
+
+.shipment-scanner-card-icon svg {
+    font-size: 24px;
+}
+
+.shipment-scanner-form button {
+    background: var(--foreground);
+    border: 1px solid var(--foreground);
+    border-radius: var(--radius-control);
+    color: var(--background);
+    font-size: 0.875rem;
+    font-weight: 600;
+    min-height: 56px;
+}
+
+.shipment-scanner-form button:hover:not(:disabled),
+.shipment-scanner-form button:focus-visible:not(:disabled) {
+    background: var(--foreground);
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+}
+
+.shipment-scanner-form button:disabled {
+    background: var(--muted);
+    border-color: var(--border);
+    color: var(--muted-foreground);
+}
+
+.shipment-scanner-input-shell input {
+    min-height: 54px;
+    font-family: var(--font-mono) !important;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.shipment-scanner-feedback-icon,
+.shipment-scanner-result-grid div,
+.shipment-scanner-mini-stats div {
+    border-radius: var(--radius-control);
+}
+
+.shipment-scanner-result-grid {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
+}
+
+.shipment-scanner-status span {
+    box-shadow: none;
+}
+
+@media (max-width: 1000px) {
+    .shipment-scanner-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 560px) {
+    .shipment-scanner-form {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

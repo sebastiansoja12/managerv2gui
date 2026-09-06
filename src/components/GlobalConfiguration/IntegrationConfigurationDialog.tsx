@@ -248,7 +248,7 @@ function IntegrationConfigurationDialog({
                     ) : undefined}
                 </DialogContent>
                 <DialogActions>
-                    <Button disabled={saving || testing} type="button" onClick={close}>
+                    <Button disabled={saving || testing} type="button" variant="outlined" onClick={close}>
                         {pl.common.cancel}
                     </Button>
                     <Button

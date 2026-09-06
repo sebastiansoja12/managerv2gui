@@ -1,0 +1,575 @@
+/* Users — compact access directory with a technical inspector panel. */
+.app-main-content main.users-page {
+    color: var(--foreground) !important;
+    margin: 0 !important;
+    max-width: none !important;
+    padding: 26px clamp(18px, 2.2vw, 34px) 38px !important;
+}
+
+.app-main-content .users-page .users-header {
+    align-items: end !important;
+    background: transparent !important;
+    border: 0 !important;
+    border-bottom: 1px solid var(--border) !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    gap: 24px !important;
+    margin-bottom: 16px !important;
+    padding: 0 0 18px !important;
+}
+
+.users-page .users-heading {
+    border-left: 0 !important;
+    padding-left: 0 !important;
+}
+
+.users-page .users-heading > span {
+    align-items: center;
+    color: var(--muted-foreground) !important;
+    display: inline-flex;
+    font-family: var(--font-mono);
+    font-size: 0.68rem !important;
+    font-weight: 600 !important;
+    gap: 8px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.users-page .users-heading > span::before {
+    background: var(--primary);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 10%, transparent);
+    content: "";
+    height: 5px;
+    width: 5px;
+}
+
+.users-page .users-heading h4 {
+    color: var(--foreground) !important;
+    font-family: var(--font-display) !important;
+    font-size: clamp(2.6rem, 4vw, 3.65rem) !important;
+    font-weight: 400 !important;
+    letter-spacing: -0.045em !important;
+    line-height: 0.95 !important;
+    margin: 7px 0 0 !important;
+}
+
+.users-page .users-heading p {
+    color: var(--muted-foreground) !important;
+    font-size: 0.88rem !important;
+    font-weight: 400 !important;
+    line-height: 1.5;
+    margin: 10px 0 0 !important;
+}
+
+.users-page .users-stats {
+    background: color-mix(in srgb, var(--surface) 94%, transparent);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    gap: 0 !important;
+    grid-template-columns: repeat(3, minmax(165px, 1fr)) !important;
+    overflow: hidden;
+}
+
+.app-main-content .users-page .users-stats > div {
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    border-right: 1px solid var(--border) !important;
+    box-shadow: none !important;
+    gap: 3px 9px !important;
+    grid-template-columns: 28px minmax(0, 1fr) !important;
+    min-height: 78px !important;
+    padding: 12px 14px !important;
+}
+
+.app-main-content .users-page .users-stats > div:last-child {
+    border-right: 0 !important;
+}
+
+.users-page .users-stats svg {
+    align-self: start;
+    background: transparent;
+    border: 1px solid var(--technical-accent-line);
+    border-radius: 4px;
+    color: var(--primary) !important;
+    grid-row: 1 / span 2 !important;
+    height: 28px;
+    padding: 5px;
+    width: 28px;
+}
+
+.users-page .users-stats span {
+    color: var(--muted-foreground) !important;
+    font-family: var(--font-mono);
+    font-size: 0.66rem !important;
+    font-weight: 550 !important;
+    letter-spacing: 0.025em;
+    line-height: 1.3;
+    order: 2;
+    text-transform: uppercase;
+}
+
+.users-page .users-stats strong {
+    color: var(--foreground) !important;
+    font-size: 1.4rem !important;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600 !important;
+    line-height: 1 !important;
+    order: 1;
+}
+
+.users-page > [data-ui="alert"] {
+    margin: 0 0 12px !important;
+}
+
+.users-page .users-workspace {
+    align-items: stretch !important;
+    gap: 14px !important;
+    grid-template-columns: minmax(0, 1fr) 268px !important;
+}
+
+.app-main-content .users-page .users-panel,
+.app-main-content .users-page .users-side-actions {
+    background: color-mix(in srgb, var(--surface) 94%, transparent) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 6px !important;
+    box-shadow: none !important;
+}
+
+.users-page .users-panel {
+    min-height: 520px;
+}
+
+.users-page .users-toolbar {
+    border-bottom: 1px solid var(--border);
+    gap: 14px !important;
+    min-height: 66px;
+    padding: 12px 14px !important;
+}
+
+.users-page .users-toolbar h5 {
+    color: var(--foreground) !important;
+    font-family: var(--font-ui) !important;
+    font-size: 0.9rem !important;
+    font-weight: 650 !important;
+    letter-spacing: -0.02em;
+}
+
+.users-page .users-toolbar-actions {
+    gap: 6px !important;
+}
+
+.users-page .users-primary-button,
+.users-page .users-secondary-button,
+.users-page .users-actions-table button {
+    border-radius: 4px !important;
+    box-shadow: none !important;
+    font-family: var(--font-ui) !important;
+    font-size: 0.78rem !important;
+    font-weight: 600 !important;
+    min-height: 36px !important;
+    padding: 0 12px !important;
+    transform: none !important;
+}
+
+.users-page .users-primary-button {
+    background: var(--foreground) !important;
+    border: 1px solid var(--foreground) !important;
+    color: var(--background) !important;
+}
+
+.users-page .users-primary-button:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--foreground) 86%, var(--background)) !important;
+    border-color: color-mix(in srgb, var(--foreground) 86%, var(--background)) !important;
+}
+
+.users-page .users-secondary-button {
+    background: transparent !important;
+    border: 1px solid var(--border-strong) !important;
+    color: var(--foreground) !important;
+}
+
+.users-page .users-secondary-button:hover:not(:disabled) {
+    background: var(--surface-secondary) !important;
+}
+
+.users-page .users-primary-button:disabled,
+.users-page .users-secondary-button:disabled {
+    background: var(--muted) !important;
+    border-color: var(--border) !important;
+    color: var(--muted-foreground) !important;
+    opacity: 0.72 !important;
+}
+
+.app-main-content .users-page .users-search {
+    background: var(--input) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 4px !important;
+    gap: 8px !important;
+    min-height: 36px !important;
+    padding: 0 10px !important;
+}
+
+.app-main-content .users-page .users-search:focus-within {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 12%, transparent);
+}
+
+.users-page .users-search svg {
+    color: var(--muted-foreground) !important;
+}
+
+.users-page .users-search input {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    color: var(--foreground) !important;
+    font-size: 0.82rem !important;
+    min-height: 34px;
+    min-width: 230px !important;
+    padding: 0 !important;
+}
+
+.users-page .users-table-wrap {
+    background: transparent;
+    overflow-x: auto;
+}
+
+.users-page .users-table {
+    background: transparent !important;
+    min-width: 920px !important;
+}
+
+.users-page .users-table th,
+.users-page .users-table td {
+    border-color: var(--border) !important;
+    padding: 12px 14px !important;
+}
+
+.users-page .users-table th {
+    background: var(--surface-secondary) !important;
+    color: var(--muted-foreground) !important;
+    font-family: var(--font-mono) !important;
+    font-size: 0.66rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.055em;
+    text-transform: uppercase;
+}
+
+.users-page .users-table td {
+    background: transparent;
+    color: var(--foreground) !important;
+    font-size: 0.82rem !important;
+    font-weight: 500 !important;
+    height: 62px;
+}
+
+.users-page .users-table tbody tr:hover td {
+    background: color-mix(in srgb, var(--foreground) 3.5%, transparent) !important;
+}
+
+.users-page .users-table tbody tr.users-row-selected td {
+    background: color-mix(in srgb, var(--primary) 7%, var(--surface)) !important;
+    box-shadow: none !important;
+}
+
+.users-page .users-table tbody tr.users-row-selected td:first-child {
+    box-shadow: inset 2px 0 var(--primary) !important;
+}
+
+.users-page .users-person-cell {
+    gap: 10px !important;
+}
+
+.users-page .users-person-cell strong {
+    color: var(--foreground);
+    font-size: 0.84rem;
+    font-weight: 650;
+}
+
+.users-page .users-person-cell small {
+    color: var(--muted-foreground) !important;
+    font-family: var(--font-mono);
+    font-size: 0.66rem !important;
+    margin-top: 3px !important;
+}
+
+.users-page .users-avatar {
+    background: transparent !important;
+    border: 1px solid var(--technical-accent-line);
+    border-radius: 4px !important;
+    color: var(--primary) !important;
+    font-size: 0.72rem;
+    font-weight: 650 !important;
+    height: 34px !important;
+    width: 34px !important;
+}
+
+.users-page .users-role {
+    background: transparent !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 3px !important;
+    color: var(--muted-foreground) !important;
+    font-family: var(--font-mono) !important;
+    font-size: 0.62rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.045em;
+    padding: 5px 7px !important;
+    text-transform: uppercase;
+}
+
+.users-page .users-role-admin {
+    border-color: color-mix(in srgb, var(--danger) 36%, var(--border)) !important;
+    color: var(--danger) !important;
+}
+
+.users-page .users-role-manager {
+    border-color: color-mix(in srgb, var(--warning) 38%, var(--border)) !important;
+    color: var(--warning) !important;
+}
+
+.users-page .users-role-supplier,
+.users-page .users-role-user {
+    border-color: var(--technical-accent-line) !important;
+    color: var(--primary) !important;
+}
+
+.users-page .users-loader {
+    color: var(--muted-foreground) !important;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    min-height: 320px !important;
+}
+
+.users-page .users-empty {
+    color: var(--muted-foreground) !important;
+    font-size: 0.82rem !important;
+    height: 180px !important;
+}
+
+.users-page .users-side-actions {
+    align-self: start;
+    min-height: 0 !important;
+    overflow: hidden;
+    position: sticky;
+    top: 12px;
+}
+
+.users-page .users-side-actions-title {
+    background: var(--surface-secondary) !important;
+    border-bottom: 1px solid var(--border) !important;
+    gap: 5px !important;
+    min-height: 68px !important;
+    padding: 13px 14px !important;
+}
+
+.users-page .users-side-actions-title span,
+.users-page .users-selection-details dt {
+    color: var(--muted-foreground) !important;
+    font-family: var(--font-mono);
+    font-size: 0.64rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.065em;
+    text-transform: uppercase;
+}
+
+.users-page .users-side-actions-title strong {
+    color: var(--foreground) !important;
+    font-size: 0.84rem !important;
+    font-weight: 650 !important;
+}
+
+.users-page .users-selection-details div {
+    border-color: var(--border) !important;
+    gap: 4px !important;
+    padding: 11px 14px !important;
+}
+
+.users-page .users-selection-details dd {
+    color: var(--foreground) !important;
+    font-family: var(--font-mono);
+    font-size: 0.72rem !important;
+    font-weight: 500 !important;
+}
+
+.users-page .users-actions-table {
+    border-top: 1px solid var(--border);
+}
+
+.users-page .users-actions-table td {
+    border-color: var(--border) !important;
+}
+
+.users-page .users-actions-table button {
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    color: var(--foreground) !important;
+    display: grid !important;
+    grid-template-columns: 20px minmax(0, 1fr) !important;
+    justify-content: stretch !important;
+    min-height: 44px !important;
+    padding: 0 14px !important;
+    text-align: left;
+    width: 100%;
+}
+
+.users-page .users-actions-table button:hover:not(:disabled) {
+    background: var(--surface-secondary) !important;
+}
+
+.users-page .users-actions-table button:disabled {
+    color: var(--muted-foreground) !important;
+    opacity: 0.45;
+}
+
+/* Every dialog belonging to the users module uses the compact shared form rhythm. */
+:root[data-theme] [data-ui="dialog"] :is(.users-create-dialog-content, .users-edit-dialog-content, .users-dialog-grid) {
+    align-content: start !important;
+    gap: 12px !important;
+    padding-top: 18px !important;
+}
+
+:root[data-theme] [data-ui="dialog"] :is(.users-create-dialog-paper, .users-edit-dialog-paper) form {
+    min-height: 0 !important;
+}
+
+:root[data-theme] [data-ui="dialog"] .users-dialog-heading {
+    gap: 9px !important;
+}
+
+:root[data-theme] [data-ui="dialog"] .users-dialog-heading strong {
+    font-size: 0.9rem !important;
+    font-weight: 650 !important;
+}
+
+:root[data-theme] [data-ui="dialog"] .users-dialog-icon {
+    height: 30px !important;
+    width: 30px !important;
+}
+
+:root[data-theme] [data-ui="dialog"].users-permissions-dialog .users-permissions-grid {
+    gap: 7px !important;
+}
+
+:root[data-theme] [data-ui="dialog"].users-permissions-dialog .users-permissions-grid label {
+    background: transparent !important;
+    border-color: var(--border) !important;
+    border-radius: 4px !important;
+    font-size: 0.76rem !important;
+    font-weight: 500 !important;
+    min-height: 44px !important;
+    padding: 8px 10px !important;
+}
+
+:root[data-theme] [data-ui="dialog"].users-permissions-dialog .users-permissions-grid label.is-selected {
+    background: color-mix(in srgb, var(--primary) 6%, var(--surface)) !important;
+    border-color: var(--technical-accent-line) !important;
+    box-shadow: inset 2px 0 var(--primary);
+}
+
+:root[data-theme] [data-ui="dialog"] .users-role-context {
+    color: var(--foreground) !important;
+    font-size: 0.84rem !important;
+    font-weight: 650 !important;
+}
+
+:root[data-theme] [data-ui="dialog"] .users-role-context span {
+    color: var(--muted-foreground) !important;
+    font-family: var(--font-mono);
+    font-size: 0.66rem !important;
+    font-weight: 500 !important;
+}
+
+@media (max-width: 1160px) {
+    .users-page .users-header {
+        align-items: stretch !important;
+        grid-template-columns: 1fr !important;
+    }
+
+    .users-page .users-stats {
+        max-width: 680px;
+    }
+
+    .users-page .users-workspace {
+        grid-template-columns: 1fr !important;
+    }
+
+    .users-page .users-side-actions {
+        position: static;
+    }
+
+    .users-page .users-selection-details {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .users-page .users-selection-details div {
+        border-right: 1px solid var(--border);
+    }
+
+    .users-page .users-selection-details div:last-child {
+        border-right: 0;
+    }
+
+    .users-page .users-actions-table tbody {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .users-page .users-actions-table tr,
+    .users-page .users-actions-table td {
+        display: block;
+    }
+
+    .users-page .users-actions-table tr:not(:last-child) {
+        border-right: 1px solid var(--border);
+    }
+}
+
+@media (max-width: 780px) {
+    .app-main-content main.users-page {
+        padding: 16px 12px 28px !important;
+    }
+
+    .users-page .users-heading h4 {
+        font-size: 2.65rem !important;
+    }
+
+    .users-page .users-toolbar,
+    .users-page .users-toolbar-actions {
+        align-items: stretch !important;
+        flex-direction: column !important;
+    }
+
+    .users-page .users-toolbar-actions > button {
+        justify-content: center;
+    }
+
+    .users-page .users-search input {
+        min-width: 0 !important;
+        width: 100% !important;
+    }
+}
+
+@media (max-width: 580px) {
+    .users-page .users-stats,
+    .users-page .users-selection-details,
+    .users-page .users-actions-table tbody {
+        grid-template-columns: 1fr !important;
+    }
+
+    .app-main-content .users-page .users-stats > div {
+        border-bottom: 1px solid var(--border) !important;
+        border-right: 0 !important;
+    }
+
+    .app-main-content .users-page .users-stats > div:last-child {
+        border-bottom: 0 !important;
+    }
+
+    .users-page .users-selection-details div,
+    .users-page .users-actions-table tr:not(:last-child) {
+        border-right: 0;
+    }
+}
+

@@ -1,0 +1,46 @@
+/* Fields, native selects, checkboxes and search shells */
+.App :is(input:not([type="checkbox"]):not([type="radio"]), select, textarea),
+.super-admin-app :is(input:not([type="checkbox"]):not([type="radio"]), select, textarea) {
+    background-color: var(--input) !important;
+    border-color: var(--border) !important;
+    border-radius: var(--radius-control) !important;
+    box-shadow: none !important;
+    color: var(--foreground) !important;
+}
+
+.App :is(input, textarea)::placeholder,
+.super-admin-app :is(input, textarea)::placeholder {
+    color: var(--muted-foreground) !important;
+    opacity: 0.78;
+}
+
+.App :is(input:not([type="checkbox"]):not([type="radio"]), select, textarea):focus,
+.super-admin-app :is(input:not([type="checkbox"]):not([type="radio"]), select, textarea):focus {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 14%, transparent) !important;
+    outline: none !important;
+}
+
+.App input[type="checkbox"],
+.App input[type="radio"],
+.super-admin-app input[type="checkbox"],
+.super-admin-app input[type="radio"] {
+    accent-color: var(--primary);
+}
+
+.app-main-content :is(
+    .couriers-filter-bar,
+    .departments-filter-bar,
+    .users-search,
+    .super-admin-search,
+    .tm-manual-load,
+    .tm-advanced-filters,
+    .shipments-list-tools,
+    .shipment-scanner-input-shell
+) {
+    background: var(--surface) !important;
+    border-color: var(--border) !important;
+    border-radius: var(--radius-control) !important;
+    box-shadow: none !important;
+}
+

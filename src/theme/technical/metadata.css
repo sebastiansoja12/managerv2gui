@@ -1,0 +1,28 @@
+/* Technical labels and metadata */
+.app-main-content :is(
+    [class$="-kicker"],
+    [class*="-kicker "],
+    [class$="-section-kicker"],
+    [class*="-section-kicker "],
+    dt
+),
+.super-admin-app :is(.super-admin-kicker, dt),
+[data-ui="input-label"] {
+    color: var(--muted-foreground) !important;
+    font-family: var(--font-mono) !important;
+    font-size: 0.68rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.075em !important;
+    text-transform: uppercase;
+}
+
+.app-main-content :is(p, small, dd),
+.super-admin-app :is(p, small, dd) {
+    color: var(--muted-foreground);
+}
+
+.app-main-content dd,
+.super-admin-app dd {
+    color: var(--foreground);
+}
+

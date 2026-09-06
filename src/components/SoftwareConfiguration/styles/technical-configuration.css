@@ -1,0 +1,100 @@
+/* The software configuration route was the last active legacy-only page. */
+.app-main-content .software-configuration-page {
+    box-sizing: border-box;
+    color: var(--foreground);
+    min-height: 100%;
+    padding: clamp(22px, 2.4vw, 38px) clamp(18px, 3vw, 48px) 48px;
+    text-align: left;
+}
+
+.software-configuration-header {
+    border-bottom: 1px solid var(--border);
+    margin: 0 auto 16px;
+    max-width: 1760px;
+    padding-bottom: 18px;
+}
+
+.software-configuration-kicker {
+    color: var(--muted-foreground);
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.software-configuration-header h1 {
+    font-family: var(--font-display) !important;
+    font-size: clamp(2rem, 3vw, 3.15rem) !important;
+    font-weight: 400 !important;
+    letter-spacing: -0.045em !important;
+    line-height: 0.98;
+    margin: 7px 0 0;
+}
+
+.software-configuration-panel[data-ui="table-container"] {
+    background: var(--technical-panel) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 4px !important;
+    box-shadow: none !important;
+    margin: 0 auto;
+    max-width: 1760px !important;
+    overflow-x: auto;
+}
+
+.software-configuration-table {
+    min-width: 880px;
+}
+
+.software-configuration-table th,
+.software-configuration-table td {
+    padding: 11px 12px;
+}
+
+.software-configuration-table [data-ui="text-field"] :is([data-ui="input"], [data-ui="select"]) {
+    min-height: 38px;
+}
+
+.software-configuration-save[data-ui="button"] {
+    background: var(--foreground) !important;
+    border: 1px solid var(--foreground) !important;
+    border-radius: 4px !important;
+    box-shadow: none !important;
+    color: var(--background) !important;
+    font-size: 0.78rem !important;
+    min-height: 36px !important;
+    transform: none !important;
+}
+
+@media (max-width: 1100px) {
+    .shipment-history-page .shipment-history-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .returns-page .returns-lookup-panel,
+    .returns-page .returns-secondary-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 760px) {
+    .shipment-history-page .shipments-header,
+    .returns-page .returns-header,
+    .returns-page .returns-list-header,
+    .returns-page .returns-detail-header {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .shipment-history-page .shipment-edit-header-actions,
+    .returns-page .returns-actions {
+        justify-content: flex-start;
+    }
+
+    .returns-page .returns-department-filter {
+        max-width: none;
+        min-width: 0;
+        width: 100%;
+    }
+}
+

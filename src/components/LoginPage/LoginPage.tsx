@@ -31,11 +31,11 @@ const Login: React.FC = () => {
     };
 
     return (
-        <main className="grid min-h-screen place-items-center bg-background px-4 py-10">
+        <main className="login-page grid min-h-screen place-items-center bg-background px-4 py-10">
             <Container maxWidth="xs" className="max-w-md px-0">
-                <section className="rounded-3xl border border-border bg-card p-6 text-left shadow-floating sm:p-8">
-                    <div className="mb-7 text-center">
-                        <span className="mx-auto mb-4 flex size-12 items-center justify-center rounded-2xl bg-primary text-lg font-black text-primary-foreground shadow-panel">M</span>
+                <section className="login-card rounded-3xl border border-border bg-card p-6 text-left shadow-floating sm:p-8">
+                    <div className="login-heading mb-7 text-center">
+                        <span className="login-brand-mark mx-auto mb-4 flex size-12 items-center justify-center rounded-2xl bg-primary text-lg font-black text-primary-foreground shadow-panel">M</span>
                         <Typography component="h1" variant="h4" className="text-card-foreground">
                             {pl.login.title}
                         </Typography>

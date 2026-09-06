@@ -1,0 +1,240 @@
+/* Every application popup shares one compact, theme-safe technical shell. */
+:root[data-theme] [data-ui="dialog-backdrop"] {
+    background: color-mix(in srgb, var(--background) 34%, transparent) !important;
+    backdrop-filter: blur(4px) saturate(0.82) !important;
+    padding: 16px !important;
+}
+
+:root[data-theme] [data-ui="dialog"] {
+    background: var(--card) !important;
+    background-image:
+        linear-gradient(color-mix(in srgb, var(--foreground) 1.8%, transparent) 1px, transparent 1px),
+        linear-gradient(90deg, color-mix(in srgb, var(--foreground) 1.8%, transparent) 1px, transparent 1px) !important;
+    background-size: 24px 24px !important;
+    border: 1px solid var(--border-strong) !important;
+    border-radius: 6px !important;
+    box-shadow: 0 22px 64px color-mix(in srgb, var(--background) 58%, transparent) !important;
+    color: var(--card-foreground) !important;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+:root[data-theme] [data-ui="dialog"] [data-ui="dialog-title"] {
+    flex: 0 0 auto;
+    background: color-mix(in srgb, var(--surface) 96%, transparent) !important;
+    background-image: none !important;
+    border-bottom: 1px solid var(--border) !important;
+    color: var(--foreground) !important;
+    font-family: var(--font-ui) !important;
+    font-size: 0.94rem !important;
+    font-weight: 650 !important;
+    letter-spacing: -0.02em !important;
+    line-height: 1.25 !important;
+    min-height: 54px;
+    padding: 16px 18px !important;
+}
+
+:root[data-theme] [data-ui="dialog"] [data-ui="dialog-content"] {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background: color-mix(in srgb, var(--card) 96%, transparent) !important;
+    border-color: var(--border) !important;
+    color: var(--card-foreground) !important;
+    font-size: 0.8rem;
+    padding: 18px !important;
+}
+
+:root[data-theme] [data-ui="dialog"] [data-ui="dialog-content-text"] {
+    color: var(--muted-foreground) !important;
+    font-size: 0.8rem !important;
+    line-height: 1.55 !important;
+}
+
+:root[data-theme] [data-ui="dialog"] [data-ui="dialog-actions"] {
+    flex: 0 0 auto;
+    flex-wrap: wrap;
+    background: color-mix(in srgb, var(--surface) 96%, transparent) !important;
+    background-image: none !important;
+    border-top: 1px solid var(--border) !important;
+    color: var(--foreground) !important;
+    gap: 8px !important;
+    min-height: 60px;
+    padding: 11px 16px !important;
+}
+
+:root[data-theme] [data-ui="dialog"] [data-ui="button"],
+:root[data-theme] [data-ui="dialog"] .super-admin-primary-button,
+:root[data-theme] [data-ui="dialog"] .super-admin-secondary-button {
+    border-radius: 4px !important;
+    box-shadow: none !important;
+    font-family: var(--font-ui) !important;
+    font-size: 0.74rem !important;
+    font-weight: 600 !important;
+    min-height: 36px !important;
+    padding-inline: 14px !important;
+    transform: none !important;
+}
+
+:root[data-theme] [data-ui="dialog"] [data-ui="button"][data-variant="contained"]:not([data-color="error"]),
+:root[data-theme] [data-ui="dialog"] .super-admin-primary-button {
+    background: var(--foreground) !important;
+    border-color: var(--foreground) !important;
+    color: var(--background) !important;
+}
+
+:root[data-theme] [data-ui="dialog"] [data-ui="button"][data-variant="contained"]:not([data-color="error"]):hover:not(:disabled),
+:root[data-theme] [data-ui="dialog"] .super-admin-primary-button:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--foreground) 86%, var(--background)) !important;
+    border-color: color-mix(in srgb, var(--foreground) 86%, var(--background)) !important;
+}
+
+:root[data-theme] [data-ui="dialog"] [data-ui="button"][data-variant="text"],
+:root[data-theme] [data-ui="dialog"] [data-ui="button"][data-variant="outlined"],
+:root[data-theme] [data-ui="dialog"] .super-admin-secondary-button {
+    background: transparent !important;
+    border-color: transparent !important;
+    color: var(--muted-foreground) !important;
+}
+
+:root[data-theme] [data-ui="dialog"] [data-ui="button"][data-variant="outlined"],
+:root[data-theme] [data-ui="dialog"] .super-admin-secondary-button {
+    border-color: var(--border-strong) !important;
+}
+
+:root[data-theme] [data-ui="dialog"] [data-ui="button"][data-variant="text"]:hover:not(:disabled),
+:root[data-theme] [data-ui="dialog"] [data-ui="button"][data-variant="outlined"]:hover:not(:disabled),
+:root[data-theme] [data-ui="dialog"] .super-admin-secondary-button:hover:not(:disabled) {
+    background: var(--surface-secondary) !important;
+    border-color: var(--border-strong) !important;
+    color: var(--foreground) !important;
+}
+
+:root[data-theme] [data-ui="dialog"] [data-ui="button"][data-color="error"] {
+    background: color-mix(in srgb, var(--danger) 13%, var(--surface)) !important;
+    border-color: color-mix(in srgb, var(--danger) 58%, var(--border)) !important;
+    color: var(--danger) !important;
+}
+
+:root[data-theme] [data-ui="dialog"] [data-ui="button"][data-color="error"]:hover:not(:disabled) {
+    background: var(--danger) !important;
+    border-color: var(--danger) !important;
+    color: var(--danger-foreground) !important;
+}
+
+:root[data-theme] [data-ui="dialog"] [data-ui="icon-button"] {
+    background: transparent !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 4px !important;
+    color: var(--muted-foreground) !important;
+}
+
+:root[data-theme] [data-ui="dialog"] [data-ui="icon-button"]:hover:not(:disabled) {
+    background: var(--surface-secondary) !important;
+    border-color: var(--border-strong) !important;
+    color: var(--foreground) !important;
+}
+
+:root[data-theme] [data-ui="dialog"] :is(
+    [data-ui="input"],
+    [data-ui="select"],
+    input:not([type="checkbox"]):not([type="radio"]),
+    select,
+    textarea
+) {
+    background-color: var(--input) !important;
+    border-color: var(--border) !important;
+    border-radius: 4px !important;
+    box-shadow: none !important;
+    color: var(--foreground) !important;
+}
+
+:root[data-theme] [data-ui="dialog"] :is(
+    [data-ui="input"],
+    input:not([type="checkbox"]):not([type="radio"]),
+    select,
+    textarea
+):focus {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 12%, transparent) !important;
+}
+
+:root[data-theme] [data-ui="dialog"] :is(
+    [data-ui="input-label"],
+    [data-ui="form-control-label-text"],
+    .shipment-person-dialog-field > span,
+    .shipment-status-dialog-field > span,
+    .geocoding-dialog-field > span
+) {
+    color: var(--muted-foreground) !important;
+    font-family: var(--font-mono) !important;
+    font-size: 0.72rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.065em !important;
+    text-transform: uppercase;
+}
+
+:root[data-theme] [data-ui="dialog"] :is(
+    .users-dialog-icon,
+    .departments-dialog-icon,
+    .couriers-create-dialog-icon,
+    .courier-edit-dialog-icon,
+    .courier-configuration-dialog-icon,
+    .shipment-person-dialog-icon,
+    .shipment-status-dialog-icon
+) {
+    background: transparent !important;
+    border: 1px solid var(--technical-accent-line) !important;
+    border-radius: 4px !important;
+    box-shadow: none !important;
+    color: var(--primary) !important;
+}
+
+/* Disabled actions must override contained and semantic variants, including
+   dialogs portaled outside .app-main-content. */
+:root[data-theme] [data-ui="dialog"] :is(
+    button[data-ui="button"][data-variant],
+    button.super-admin-primary-button,
+    button.super-admin-secondary-button,
+    button.users-primary-button,
+    button.users-secondary-button
+):disabled {
+    background: var(--muted) !important;
+    border-color: var(--border) !important;
+    color: var(--muted-foreground) !important;
+    box-shadow: none !important;
+    cursor: not-allowed;
+}
+
+@media (max-width: 560px) {
+    :root[data-theme] [data-ui="dialog-backdrop"] {
+        align-items: flex-end !important;
+        padding: 8px !important;
+    }
+
+    :root[data-theme] [data-ui="dialog"] {
+        max-height: calc(100dvh - 16px) !important;
+        max-width: none !important;
+        width: 100% !important;
+    }
+
+    :root[data-theme] [data-ui="dialog"] [data-ui="dialog-title"] {
+        min-height: 50px;
+        padding: 14px !important;
+    }
+
+    :root[data-theme] [data-ui="dialog"] [data-ui="dialog-content"] {
+        padding: 14px !important;
+    }
+
+    :root[data-theme] [data-ui="dialog"] [data-ui="dialog-actions"] {
+        padding: 10px 12px !important;
+    }
+
+    :root[data-theme] [data-ui="dialog"] [data-ui="dialog-actions"] [data-ui="button"] {
+        flex: 1 1 0;
+        min-width: 0 !important;
+    }
+}

@@ -1,0 +1,55 @@
+.app-main-content .process-summary-grid {
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-control);
+    gap: 1px;
+    overflow: hidden;
+}
+
+.app-main-content .process-summary-grid > div {
+    background: var(--card) !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    min-width: 0;
+}
+
+.process-summary-grid :is(span, strong),
+.process-communication-meta dd {
+    overflow-wrap: anywhere;
+}
+
+.process-summary-grid span {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+}
+
+.processes-actions,
+.process-communication-actions,
+.processes-panel-header {
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.app-main-content .process-communication-icon {
+    background: var(--surface-secondary);
+    border: 1px solid var(--border);
+    color: var(--foreground);
+    flex-shrink: 0;
+}
+
+.process-communication-main {
+    min-width: 0;
+}
+
+.process-communication-main > div {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.app-main-content .process-payload {
+    background: var(--surface) !important;
+    color: var(--foreground) !important;
+    font-size: 0.8125rem;
+    line-height: 1.6;
+}

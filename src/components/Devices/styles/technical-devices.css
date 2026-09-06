@@ -1,0 +1,35 @@
+.app-main-content .device-pairing-pair-details {
+    background: var(--surface-secondary);
+    border-radius: var(--radius-control);
+    flex-wrap: wrap;
+}
+
+.device-pairing-pair-details strong {
+    overflow-wrap: anywhere;
+}
+
+.device-pairing-grid > * {
+    min-width: 0;
+}
+
+/* QR data itself keeps its original black/white contrast, independent of skin. */
+.device-pairing-qr,
+.device-pairing-empty-qr {
+    max-width: 100%;
+    object-fit: contain;
+}
+
+.device-pairing-empty-qr {
+    padding: 16px;
+    text-align: center;
+}
+
+.device-pairing-header .device-pairing-title-icon {
+    flex-shrink: 0;
+}
+
+@media (max-width: 760px) {
+    .device-pairing-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

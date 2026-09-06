@@ -1,0 +1,120 @@
+/* Super-admin and login are outside the regular application content shell. */
+.super-admin-app,
+.super-admin-login-page,
+.login-page {
+    background-color: var(--background) !important;
+    background-image:
+        linear-gradient(color-mix(in srgb, var(--foreground) 2.4%, transparent) 1px, transparent 1px),
+        linear-gradient(90deg, color-mix(in srgb, var(--foreground) 2.4%, transparent) 1px, transparent 1px) !important;
+    background-size: 32px 32px !important;
+    color: var(--foreground) !important;
+}
+
+.super-admin-sidebar {
+    background: color-mix(in srgb, var(--surface) 96%, transparent) !important;
+    border-color: var(--border) !important;
+}
+
+.super-admin-table-row {
+    border-color: var(--border) !important;
+    color: var(--foreground) !important;
+}
+
+.super-admin-sidebar-note,
+.super-admin-directory-list,
+.super-admin-editor-section,
+.super-admin-feature,
+.super-admin-access-card,
+.super-admin-configuration-workspace {
+    background: var(--surface) !important;
+    border-color: var(--border) !important;
+    border-radius: var(--radius-control) !important;
+    box-shadow: none !important;
+    color: var(--foreground) !important;
+}
+
+.login-card,
+.super-admin-login-card {
+    border-radius: var(--radius-panel) !important;
+}
+
+.login-brand-mark,
+.super-admin-login-brand span {
+    background: var(--technical-accent-soft) !important;
+    border: 1px solid var(--technical-accent-line) !important;
+    border-radius: var(--radius-control) !important;
+    box-shadow: none !important;
+    color: var(--primary) !important;
+}
+
+@media (max-width: 720px) {
+    .app-main-content :is(
+        .couriers-page,
+        .departments-page,
+        .device-pairing-page,
+        .global-configuration-page,
+        .home-dashboard-page,
+        .microservice-status-page,
+        .module-placeholder-page,
+        .processes-page,
+        .returns-page,
+        .shipment-scanner-page,
+        .shipments-page,
+        .user-profile-page,
+        .users-page
+    ) {
+        padding: 14px !important;
+    }
+}
+
+@keyframes technicalSelectIn {
+    from { opacity: 0; transform: translateY(-5px) scale(0.985); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (max-width: 1060px) {
+    .top-nav-island,
+    .top-nav-island-scrolled:not(.top-nav-island-expanded),
+    .top-nav-island-expanded {
+        grid-template-columns: max-content minmax(0, 1fr);
+        inline-size: calc(100vw - 132px);
+        max-inline-size: calc(100vw - 132px);
+    }
+}
+
+@media (max-width: 680px) {
+    .top-nav-shell,
+    .top-nav-shell-scrolled {
+        min-height: 58px;
+        padding: 7px 10px;
+    }
+
+    .top-nav-island,
+    .top-nav-island-scrolled:not(.top-nav-island-expanded),
+    .top-nav-island-expanded {
+        border-radius: 0;
+        inline-size: calc(100vw - 64px);
+        max-inline-size: calc(100vw - 64px);
+        padding: 0;
+    }
+
+    .top-nav-actions {
+        right: 10px;
+        top: 7px;
+    }
+
+    .home-dashboard-hero h1,
+    .module-placeholder-panel h1 {
+        font-size: 2.2rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .technical-select-menu,
+    .technical-select-chevron,
+    .home-tile::before {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+

@@ -1,0 +1,414 @@
+/* Departments: dense, legible technical workspace. */
+.app-main-content .departments-page {
+    gap: 0;
+    height: auto !important;
+    margin: 0 auto;
+    max-width: 1920px;
+    min-height: 100%;
+    overflow: visible !important;
+}
+
+.app-main-content .departments-page .departments-header {
+    align-items: center;
+    background: transparent !important;
+    border: 0 !important;
+    border-bottom: 1px solid var(--border) !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    margin: 0 0 16px !important;
+    padding: 0 0 18px !important;
+}
+
+.app-main-content .departments-heading {
+    border-left: 0;
+    min-width: 0;
+    padding-left: 0;
+}
+
+.app-main-content .departments-kicker {
+    align-items: center;
+    color: var(--muted-foreground) !important;
+    gap: 8px;
+    margin-bottom: 7px;
+}
+
+.app-main-content .departments-kicker::before {
+    background: var(--primary);
+    border-radius: 50%;
+    box-shadow: 0 0 0 4px var(--technical-accent-soft);
+    content: "";
+    height: 5px;
+    width: 5px;
+}
+
+.app-main-content .departments-heading [data-ui="typography"] {
+    font-family: var(--font-display) !important;
+    font-size: clamp(2rem, 3vw, 3.15rem) !important;
+    font-weight: 400 !important;
+    letter-spacing: -0.045em !important;
+    line-height: 0.98;
+}
+
+.app-main-content .departments-heading p {
+    font-size: 0.86rem;
+    font-weight: 450;
+    margin-top: 9px;
+}
+
+.app-main-content .departments-stats {
+    gap: 8px;
+    grid-template-columns: repeat(3, minmax(126px, 1fr));
+}
+
+.app-main-content .departments-stats div {
+    gap: 2px 9px;
+    min-height: 58px;
+    padding: 9px 11px;
+}
+
+.app-main-content .departments-stats span {
+    color: var(--muted-foreground);
+    font-family: var(--font-mono);
+    font-size: 0.61rem;
+    font-weight: 600;
+    letter-spacing: 0.045em;
+    text-transform: uppercase;
+}
+
+.app-main-content .departments-stats strong {
+    font-size: 1.12rem;
+    font-weight: 650;
+    line-height: 1;
+}
+
+.app-main-content .departments-workspace {
+    flex: 0 0 auto;
+    gap: 12px;
+    grid-template-columns: minmax(0, 1fr) 250px;
+    min-height: auto;
+}
+
+.app-main-content .departments-table-panel,
+.app-main-content .departments-side-actions {
+    border-radius: var(--radius-panel) !important;
+    box-shadow: none !important;
+}
+
+.app-main-content .departments-table-header {
+    min-height: 58px;
+    padding: 10px 12px !important;
+}
+
+.app-main-content .departments-table-header [data-ui="typography"] {
+    font-size: 0.9rem;
+    font-weight: 650;
+}
+
+.app-main-content .departments-table-actions {
+    flex-wrap: nowrap;
+    gap: 8px;
+}
+
+.app-main-content .departments-table-actions [data-ui="button"] {
+    background: transparent !important;
+    border: 1px solid var(--border-strong) !important;
+    border-radius: 4px !important;
+    color: var(--foreground) !important;
+    font-family: var(--font-ui) !important;
+    font-size: 0.78rem;
+    font-weight: 600 !important;
+    min-height: 36px;
+    padding: 0 12px;
+    transform: none !important;
+    white-space: nowrap;
+}
+
+.app-main-content .departments-table-actions [data-ui="button"]:hover:not(:disabled) {
+    background: var(--surface-secondary) !important;
+    border-color: var(--border-strong) !important;
+}
+
+.app-main-content .departments-table-actions [data-ui="button"][data-variant="contained"] {
+    background: var(--foreground) !important;
+    border-color: var(--foreground) !important;
+    color: var(--background) !important;
+}
+
+.app-main-content .departments-table-actions [data-ui="button"][data-variant="contained"]:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--foreground) 86%, var(--background)) !important;
+    border-color: color-mix(in srgb, var(--foreground) 86%, var(--background)) !important;
+}
+
+.app-main-content .departments-table-actions [data-ui="button"] svg {
+    height: 18px;
+    width: 18px;
+}
+
+.app-main-content .departments-filter-bar {
+    align-items: end;
+    border-left: 0 !important;
+    border-right: 0 !important;
+    display: grid;
+    gap: 9px;
+    grid-template-columns: minmax(190px, 1.15fr) minmax(145px, 0.72fr) minmax(170px, 0.85fr) auto auto;
+    padding: 12px 14px;
+}
+
+.app-main-content .departments-filter-bar [data-ui="text-field"],
+.app-main-content .departments-code-filter {
+    min-width: 0;
+}
+
+.app-main-content .departments-filter-bar [data-ui="text-field"] > [data-ui="input"],
+.app-main-content .departments-filter-bar [data-ui="text-field"] > [data-ui="select"],
+.app-main-content .departments-filter-bar [data-ui="button"] {
+    border-radius: var(--radius-control) !important;
+    min-height: 40px;
+}
+
+.app-main-content .departments-filter-bar [data-ui="button"] {
+    background: transparent !important;
+    border: 1px solid var(--border-strong) !important;
+    border-radius: 4px !important;
+    color: var(--foreground) !important;
+    font-family: var(--font-ui) !important;
+    font-size: 0.78rem;
+    font-weight: 600 !important;
+    min-height: 40px;
+    padding: 0 12px;
+    transform: none !important;
+    white-space: nowrap;
+}
+
+.app-main-content .departments-filter-bar [data-ui="button"]:hover:not(:disabled) {
+    background: var(--surface-secondary) !important;
+    border-color: var(--border-strong) !important;
+}
+
+.app-main-content .departments-filter-icon {
+    bottom: 10px;
+}
+
+.app-main-content .departments-filter-count {
+    align-self: end;
+    border-radius: var(--radius-control);
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    font-weight: 600;
+    height: 40px;
+    line-height: 22px;
+    padding: 8px 10px;
+}
+
+.app-main-content .departments-table-wrap {
+    flex: 0 0 auto;
+    overflow-x: auto;
+    overflow-y: visible;
+    scrollbar-gutter: stable;
+}
+
+.app-main-content .departments-table {
+    min-width: 1370px;
+    table-layout: fixed;
+}
+
+.app-main-content .departments-table th,
+.app-main-content .departments-table td {
+    overflow: hidden;
+    padding: 10px 10px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    word-break: normal;
+}
+
+.app-main-content .departments-table th {
+    height: 48px;
+    line-height: 1.2;
+}
+
+.app-main-content .departments-table td {
+    font-size: 0.76rem;
+    font-weight: 500;
+}
+
+.app-main-content .departments-table th:nth-child(1) { width: 86px; }
+.app-main-content .departments-table th:nth-child(2) { width: 130px; }
+.app-main-content .departments-table th:nth-child(3) { width: 170px; }
+.app-main-content .departments-table th:nth-child(4) { width: 70px; }
+.app-main-content .departments-table th:nth-child(5) { width: 104px; }
+.app-main-content .departments-table th:nth-child(6) { width: 126px; }
+.app-main-content .departments-table th:nth-child(7) { width: 132px; }
+.app-main-content .departments-table th:nth-child(8) { width: 190px; }
+.app-main-content .departments-table th:nth-child(9) { width: 116px; }
+.app-main-content .departments-table th:nth-child(10) { width: 104px; }
+.app-main-content .departments-table th:nth-child(11) { width: 112px; }
+
+.app-main-content .departments-table tbody tr.departments-row-selected td {
+    box-shadow: none !important;
+}
+
+.app-main-content .departments-table tbody tr.departments-row-selected td:first-child {
+    box-shadow: inset 2px 0 var(--primary) !important;
+}
+
+.app-main-content .departments-status,
+.app-main-content .departments-users-link {
+    border-radius: var(--radius-control) !important;
+    min-height: 26px;
+    padding: 4px 7px;
+}
+
+.app-main-content .departments-users-link {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--foreground);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 650;
+}
+
+.app-main-content .departments-side-actions {
+    min-height: 0;
+    position: sticky;
+    top: 0;
+}
+
+.app-main-content .departments-side-actions-title {
+    gap: 5px;
+    min-height: 64px;
+    padding: 12px 14px;
+}
+
+.app-main-content .departments-side-actions-title span,
+.app-main-content .departments-side-actions-title strong {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.045em;
+    text-transform: uppercase;
+}
+
+.app-main-content .departments-side-actions-title strong {
+    color: var(--primary);
+}
+
+.app-main-content .departments-selection-details div {
+    gap: 4px;
+    padding: 9px 12px;
+}
+
+.app-main-content .departments-selection-details dd {
+    font-size: 0.76rem;
+    font-weight: 550;
+    overflow-wrap: anywhere;
+}
+
+.app-main-content .departments-actions-table button {
+    align-items: center;
+    display: flex;
+    border-radius: 0 !important;
+    font-family: var(--font-ui) !important;
+    font-size: 0.78rem;
+    font-weight: 600;
+    gap: 9px;
+    grid-template-columns: none;
+    min-height: 42px;
+    padding: 9px 12px;
+    transition: background-color 140ms ease, color 140ms ease;
+}
+
+.app-main-content .departments-actions-table button svg {
+    height: 18px;
+    width: 18px;
+}
+
+.departments-create-dialog,
+.departments-edit-dialog-paper {
+    border-radius: var(--radius-panel) !important;
+    box-shadow: none !important;
+}
+
+.departments-dialog-title {
+    background: var(--surface) !important;
+    font-family: var(--font-display) !important;
+    font-weight: 400 !important;
+}
+
+.departments-dialog-actions {
+    background: var(--surface) !important;
+}
+
+@media (max-width: 1180px) {
+    .app-main-content .departments-workspace {
+        grid-template-columns: minmax(0, 1fr) 224px;
+    }
+
+    .app-main-content .departments-filter-bar {
+        grid-template-columns: minmax(180px, 1fr) minmax(140px, 0.7fr) minmax(160px, 0.8fr) auto;
+    }
+
+    .app-main-content .departments-filter-count {
+        display: none;
+    }
+}
+
+@media (max-width: 980px) {
+    .app-main-content .departments-page {
+        overflow: visible;
+    }
+
+    .app-main-content .departments-header,
+    .app-main-content .departments-workspace {
+        grid-template-columns: 1fr;
+    }
+
+    .app-main-content .departments-stats {
+        width: 100%;
+    }
+
+    .app-main-content .departments-side-actions {
+        position: static;
+    }
+}
+
+@media (max-width: 720px) {
+    .app-main-content .departments-page .departments-header {
+        padding-bottom: 14px !important;
+    }
+
+    .app-main-content .departments-stats {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .app-main-content .departments-stats div {
+        grid-template-columns: 1fr;
+        min-width: 0;
+    }
+
+    .app-main-content .departments-stats svg {
+        display: none;
+    }
+
+    .app-main-content .departments-table-header {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .app-main-content .departments-table-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .app-main-content .departments-table-actions [data-ui="button"] {
+        justify-content: center;
+    }
+
+    .app-main-content .departments-filter-bar {
+        grid-template-columns: 1fr;
+    }
+
+    .app-main-content .departments-filter-count {
+        display: inline-flex;
+        justify-self: stretch;
+    }
+}
+
