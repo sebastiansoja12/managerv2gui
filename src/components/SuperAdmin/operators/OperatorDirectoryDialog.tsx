@@ -82,7 +82,7 @@ function OperatorDirectoryDialog({mode, operatorId, operatorName, onClose, onCre
     ] as const;
 
     return (
-        <Dialog fullWidth maxWidth="sm" open={Boolean(mode)} onClose={saving ? undefined : onClose}>
+        <Dialog className="super-admin-dialog" fullWidth maxWidth="sm" open={Boolean(mode)} onClose={saving ? undefined : onClose}>
             <form className="super-admin-directory-dialog" onSubmit={submit}>
                 <DialogTitle>
                     {mode === "department" ? pl.superAdmin.workspace.createDepartment : pl.superAdmin.workspace.createCourier}
