@@ -292,7 +292,9 @@ const formatMoneyBuckets = (buckets: MoneyBucket[], key: keyof Pick<MoneyBucket,
         .join(" + ") || `0 ${buckets[0].currency}`;
 };
 
-const DEFAULT_STATUS_FILTER: ShipmentStatusDto = "CREATED";
+type ShipmentStatusFilter = ShipmentStatusDto | "ALL";
+
+const DEFAULT_STATUS_FILTER: ShipmentStatusFilter = "ALL";
 
 type ShipmentListProps = {
     onOpenTab?: (tab: AppTabDefinition) => void;
@@ -305,7 +307,7 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
     const [lookupId, setLookupId] = useState<string>("");
     const [appliedLookupTrackingNumber, setAppliedLookupTrackingNumber] = useState<string>("");
     const [appliedLookupId, setAppliedLookupId] = useState<string>("");
-    const [activeStatus, setActiveStatus] = useState<ShipmentStatusDto>(DEFAULT_STATUS_FILTER);
+    const [activeStatus, setActiveStatus] = useState<ShipmentStatusFilter>(DEFAULT_STATUS_FILTER);
     const [dangerousGoodsFilter, setDangerousGoodsFilter] = useState<"ALL" | "YES" | "NO">("ALL");
     const [unNumberFilter, setUnNumberFilter] = useState<string>("");
     const [hazardClassFilter, setHazardClassFilter] = useState<string>("");
@@ -339,7 +341,7 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
 
     const visibleShipments = useMemo(() => {
         return displayedShipments
-            .filter((shipment) => shipment.shipmentStatus === activeStatus)
+            .filter((shipment) => activeStatus === "ALL" || shipment.shipmentStatus === activeStatus)
             .filter((shipment) => !appliedLookupId || shipment.shipmentId.value.toString() === appliedLookupId)
             .filter((shipment) => {
                 const trackingNumber = shipment.trackingNumber?.value || "";
@@ -364,6 +366,18 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
     const shipmentRows = useMemo(() => {
         return visibleShipments.map(mapShipmentToRow);
     }, [visibleShipments]);
+
+    const statusCounts = useMemo(() => {
+        const counts = shipmentTranslations.statusTabs.reduce((result, status) => {
+            result[status] = 0;
+            return result;
+        }, {} as Record<ShipmentStatusDto, number>);
+
+        displayedShipments.forEach((shipment) => {
+            counts[shipment.shipmentStatus] += 1;
+        });
+        return counts;
+    }, [displayedShipments]);
 
     const shipmentMetrics = useMemo(() => {
         const total = shipments.length;
@@ -806,17 +820,26 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
 
                     <div className="tm-orders-controls">
                         <div className="tm-tabs">
-                            {shipmentTranslations.statusTabs.map((status) => (
-                                <button
-                                    className={status === activeStatus ? "tm-tab-active" : ""}
-                                    disabled={loading && status === activeStatus}
-                                    key={status}
-                                    onClick={() => setActiveStatus(status)}
-                                    type="button"
-                                >
-                                    {shipmentTranslations.status[status]}
-                                </button>
-                            ))}
+                            {(["ALL", ...shipmentTranslations.statusTabs] as ShipmentStatusFilter[]).map((status) => {
+                                const label = status === "ALL" ? pl.common.all : shipmentTranslations.status[status];
+                                const count = status === "ALL" ? displayedShipments.length : statusCounts[status];
+                                return (
+                                    <button
+                                        aria-label={label}
+                                        aria-pressed={status === activeStatus}
+                                        className={status === activeStatus ? "tm-tab-active" : ""}
+                                        data-status={status.toLowerCase()}
+                                        disabled={loading && status === activeStatus}
+                                        key={status}
+                                        onClick={() => setActiveStatus(status)}
+                                        title={label}
+                                        type="button"
+                                    >
+                                        <span>{label}</span>
+                                        <strong>{count}</strong>
+                                    </button>
+                                );
+                            })}
                         </div>
                     </div>
 
@@ -831,18 +854,20 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
                             <MenuItem value="SYSTEM">{shipmentTranslations.externalSearch.system}</MenuItem>
                             <MenuItem value="EXTERNAL">{shipmentTranslations.externalSearch.external}</MenuItem>
                         </TextField>
-                        {searchSource === "SYSTEM" ? (<>
-                            <TextField
-                                label={shipmentTranslations.table.shipmentId}
-                                size="small"
-                                inputProps={{inputMode: "numeric", pattern: "[0-9]*"}}
-                                value={lookupId}
-                                onChange={(event: ChangeEvent<HTMLInputElement>) => setLookupId(event.target.value)}
-                            />
-                            <Button disabled={loading || !lookupId} variant="outlined" onClick={findById}>
-                                {shipmentTranslations.table.filterById}
-                            </Button>
-                        </>) : (
+                        {searchSource === "SYSTEM" ? (
+                            <div className="tm-filter-cluster">
+                                <TextField
+                                    label={shipmentTranslations.table.shipmentId}
+                                    size="small"
+                                    inputProps={{inputMode: "numeric", pattern: "[0-9]*"}}
+                                    value={lookupId}
+                                    onChange={(event: ChangeEvent<HTMLInputElement>) => setLookupId(event.target.value)}
+                                />
+                                <Button disabled={loading || !lookupId} variant="outlined" onClick={findById}>
+                                    {shipmentTranslations.table.filterById}
+                                </Button>
+                            </div>
+                        ) : (
                             <TextField
                                 label={shipmentTranslations.externalSearch.provider}
                                 select
@@ -855,20 +880,19 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
                                 ))}
                             </TextField>
                         )}
-                        <TextField
-                            label={shipmentTranslations.table.trackingNumber}
-                            size="small"
-                            value={lookupTrackingNumber}
-                            onChange={(event: ChangeEvent<HTMLInputElement>) => setLookupTrackingNumber(event.target.value)}
-                        />
-                        <Button disabled={loading || externalLoading || !lookupTrackingNumber || (searchSource === "EXTERNAL" && !trackingProvider)} variant="outlined" onClick={findByTrackingNumber}>
-                            {externalLoading ? <CircularProgress size={18}/> : searchSource === "EXTERNAL"
-                                ? shipmentTranslations.externalSearch.search
-                                : shipmentTranslations.table.filterByTracking}
-                        </Button>
-                        <Button disabled={!appliedLookupId && !appliedLookupTrackingNumber && !externalResult} variant="text" onClick={clearLocalFilters}>
-                            {shipmentTranslations.table.clearFilters}
-                        </Button>
+                        <div className="tm-filter-cluster tm-filter-cluster-wide">
+                            <TextField
+                                label={shipmentTranslations.table.trackingNumber}
+                                size="small"
+                                value={lookupTrackingNumber}
+                                onChange={(event: ChangeEvent<HTMLInputElement>) => setLookupTrackingNumber(event.target.value)}
+                            />
+                            <Button disabled={loading || externalLoading || !lookupTrackingNumber || (searchSource === "EXTERNAL" && !trackingProvider)} variant="outlined" onClick={findByTrackingNumber}>
+                                {externalLoading ? <CircularProgress size={18}/> : searchSource === "EXTERNAL"
+                                    ? shipmentTranslations.externalSearch.search
+                                    : shipmentTranslations.table.filterByTracking}
+                            </Button>
+                        </div>
                         <TextField
                             label={shipmentTranslations.table.hasDangerousGoods}
                             select
@@ -892,6 +916,9 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
                             value={hazardClassFilter}
                             onChange={(event) => setHazardClassFilter(event.target.value)}
                         />
+                        <Button disabled={!appliedLookupId && !appliedLookupTrackingNumber && !externalResult} variant="text" onClick={clearLocalFilters}>
+                            {shipmentTranslations.table.clearFilters}
+                        </Button>
                     </div>
 
                     {filtersExpanded ? (

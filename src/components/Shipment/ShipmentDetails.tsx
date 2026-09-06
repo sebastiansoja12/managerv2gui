@@ -1404,6 +1404,7 @@ const ShipmentDetails: React.FC = () => {
                     <Button
                         disabled={savingDangerousGood}
                         onClick={() => setDangerousGoodDialogOpen(false)}
+                        variant="outlined"
                     >
                         {pl.common.cancel}
                     </Button>
@@ -1437,6 +1438,7 @@ const ShipmentDetails: React.FC = () => {
                     <Button
                         disabled={savingDangerousGood}
                         onClick={() => setDangerousGoodDeleteDialogOpen(false)}
+                        variant="outlined"
                     >
                         {pl.common.cancel}
                     </Button>
