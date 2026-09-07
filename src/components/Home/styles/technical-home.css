@@ -1,9 +1,4 @@
 /* Home: one accent, dense information, and surfaces separated by lines. */
-.home-dashboard-heading {
-    border-left: 0;
-    padding-left: 0;
-}
-
 .home-dashboard-kicker,
 .home-tracking-lookup-intro span:not(.home-tracking-lookup-icon),
 .home-tracking-criterion > span,
@@ -15,7 +10,6 @@
     text-transform: uppercase;
 }
 
-.home-dashboard-hero h1,
 .module-placeholder-panel h1 {
     font-family: var(--font-display);
     font-size: clamp(2.25rem, 4vw, 3.4rem);
@@ -24,21 +18,15 @@
     line-height: 0.98;
 }
 
-.home-dashboard-hero p,
 .module-placeholder-panel p {
     font-weight: 450;
 }
 
-.home-dashboard-summary,
 .home-tracking-lookup,
 .home-tile,
 .module-placeholder-panel {
     border-radius: var(--radius-panel);
     box-shadow: none;
-}
-
-.home-dashboard-summary {
-    background: var(--surface);
 }
 
 .home-tracking-lookup {
