@@ -3,6 +3,7 @@
   "version": "2026.3",
   "private": true,
   "dependencies": {
+    "@stomp/stompjs": "^7.3.0",
     "@tanstack/match-sorter-utils": "^8.11.3",
     "@tanstack/react-table": "^8.11.3",
     "@testing-library/jest-dom": "^5.17.0",
