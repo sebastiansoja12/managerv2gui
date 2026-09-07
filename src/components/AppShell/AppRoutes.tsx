@@ -1,5 +1,6 @@
 import React from "react";
 import {Route, Routes} from "react-router-dom";
+import OrganizationChat from "../Chat/OrganizationChat";
 import Couriers from "../Couriers/Couriers";
 import CourierDetails from "../Couriers/CourierDetails";
 import Departments from "../Departments";
@@ -11,6 +12,7 @@ import LoginPage from "../LoginPage/LoginPage";
 import MicroserviceStatus from "../MicroserviceStatus/MicroserviceStatus";
 import ProcessDetails from "../Process/ProcessDetails";
 import Processes from "../Process/Processes";
+import PickupPointCatalog from "../PickupPoints/PickupPointCatalog";
 import Returns from "../Returns/Returns";
 import ShipmentCreate from "../Shipment/ShipmentCreate";
 import ShipmentDetails from "../Shipment/ShipmentDetails";
@@ -40,6 +42,7 @@ function AppRoutes({onOpenTab, operationalProfile = "warehouse"}: AppRoutesProps
         <Routes>
             <Route path="/" element={<HomeDashboard onOpenTab={onOpenTab} operationalProfile={operationalProfile}/>}/>
             <Route path="depots" element={guarded("/depots", <Departments/>)}/>
+            <Route path="pickup-points" element={guarded("/pickup-points", <PickupPointCatalog/>)}/>
             <Route path="parcels" element={guarded("/shipments/list", <ShipmentList onOpenTab={onOpenTab}/>)}/>
             <Route path="shipment-details" element={guarded("/shipment-details", <ShipmentList onOpenTab={onOpenTab} variant="details"/>)}/>
             <Route path="shipment-control-center" element={guarded("/shipment-details", <ShipmentList onOpenTab={onOpenTab} variant="details"/>)}/>
@@ -63,6 +66,7 @@ function AppRoutes({onOpenTab, operationalProfile = "warehouse"}: AppRoutesProps
             <Route path="courier-deliveries" element={guarded("/courier-deliveries", <ModulePlaceholder title={pl.home.tiles.courierDeliveries.title}/>)}/>
             <Route path="suppliers" element={guarded("/suppliers", <ModulePlaceholder title={pl.navigation.suppliers}/>)}/>
             <Route path="users" element={guarded("/users", <UsersPage/>)}/>
+            <Route path="chat" element={guarded("/chat", <OrganizationChat/>)}/>
             <Route path="deals" element={guarded("/deals", <ModulePlaceholder title={pl.navigation.deals}/>)}/>
             <Route path="billing" element={guarded("/billing", <ModulePlaceholder title={pl.navigation.billing}/>)}/>
             <Route path="microservices" element={guarded("/microservices", <MicroserviceStatus/>)}/>
