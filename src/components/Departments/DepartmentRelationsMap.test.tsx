@@ -4,6 +4,7 @@ import Department from "../../class/depots/Department";
 import pl from "../../i18n/translate";
 import DepartmentRelationsMap, {
     getDepartmentsMissingSortingRelation,
+    getRelationsWithAutomaticSortingAssignments,
     getUniqueDepartmentRelations,
 } from "./DepartmentRelationsMap";
 import {DepartmentRelation} from "./model/DepartmentRelation";
@@ -59,6 +60,43 @@ describe("DepartmentRelationsMap", () => {
             {sourceDepartmentId: "1", targetDepartmentId: "2"},
             {sourceDepartmentId: "2", targetDepartmentId: "1"},
         ])).toEqual([{sourceDepartmentId: "1", targetDepartmentId: "2"}]);
+    });
+
+    it("automatically connects missing departments to their nearest active sorting facility", () => {
+        const locatedDepartments = [
+            {...department(1, "WAW01"), coordinates: {latitude: 52.23, longitude: 21.01}},
+            {...department(2, "SORT-WAW", "SORTING_FACILITY"), coordinates: {latitude: 52.25, longitude: 21.02}},
+            {...department(3, "KRK01"), coordinates: {latitude: 50.06, longitude: 19.94}},
+            {...department(4, "SORT-KRK", "SORTING_FACILITY"), coordinates: {latitude: 50.08, longitude: 19.96}},
+        ];
+        const existingRelations = [{sourceDepartmentId: "1", targetDepartmentId: "2"}];
+
+        expect(getRelationsWithAutomaticSortingAssignments(locatedDepartments, existingRelations)).toEqual([
+            ...existingRelations,
+            {sourceDepartmentId: "3", targetDepartmentId: "4"},
+        ]);
+    });
+
+    it("offers automatic assignment in the editor and stages the generated relations", () => {
+        const Harness = () => {
+            const [relations, setRelations] = useState<DepartmentRelation[]>([]);
+            return (
+                <DepartmentRelationsMap
+                    departments={departments}
+                    relations={relations}
+                    onRelationsChange={setRelations}
+                />
+            );
+        };
+
+        render(<Harness />);
+
+        fireEvent.click(screen.getByRole("button", {
+            name: pl.departments.relations.automaticAction.replace("{count}", "2"),
+        }));
+
+        expect(screen.getByText(pl.departments.relations.validationSuccess)).toBeInTheDocument();
+        expect(screen.getByText("2", {selector: ".department-relations-list-heading span"})).toBeInTheDocument();
     });
 
     it("creates and removes one bidirectional relation with the accessible form", () => {
