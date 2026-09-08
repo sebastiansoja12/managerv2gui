@@ -1,0 +1,233 @@
+.pickup-point-page {
+    min-height: 100%;
+    padding: 1.5rem;
+}
+
+.pickup-point-shell {
+    display: grid;
+    gap: 1rem;
+    margin: 0 auto;
+    max-width: 96rem;
+}
+
+.pickup-point-header,
+.pickup-point-header-actions,
+.pickup-point-title,
+.pickup-point-filters,
+.pickup-point-capabilities {
+    align-items: center;
+    display: flex;
+}
+
+.pickup-point-header {
+    justify-content: space-between;
+}
+
+.pickup-point-header-actions {
+    gap: 0.75rem;
+}
+
+.pickup-point-title {
+    gap: 0.875rem;
+}
+
+.pickup-point-title-icon {
+    align-items: center;
+    background: color-mix(in srgb, var(--primary) 14%, transparent);
+    border-radius: 0.875rem;
+    color: var(--primary);
+    display: inline-flex;
+    height: 2.75rem;
+    justify-content: center;
+    width: 2.75rem;
+}
+
+.pickup-point-panel {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+    display: grid;
+    gap: 1rem;
+    padding: 1rem;
+}
+
+.pickup-point-filters {
+    align-items: end;
+    display: grid;
+    gap: 0.75rem;
+    grid-template-columns: minmax(14rem, 2fr) repeat(3, minmax(10rem, 1fr)) auto;
+}
+
+.pickup-point-capabilities {
+    flex-wrap: wrap;
+    gap: 0.375rem;
+}
+
+.pickup-point-map-panel {
+    border: 1px solid var(--border);
+    border-radius: 0.875rem;
+    overflow: hidden;
+}
+
+.pickup-point-map-header {
+    align-items: baseline;
+    background: var(--surface-secondary);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+}
+
+.pickup-point-map-header strong {
+    color: var(--foreground);
+    font-size: 0.9rem;
+}
+
+.pickup-point-map-header span {
+    color: var(--muted-foreground);
+    font-size: 0.78rem;
+}
+
+.pickup-point-map,
+.pickup-point-map-empty {
+    height: 20rem;
+    width: 100%;
+}
+
+.pickup-point-map {
+    background: var(--surface-secondary);
+    z-index: 0;
+}
+
+.pickup-point-map-empty {
+    align-items: center;
+    color: var(--muted-foreground);
+    display: flex;
+    justify-content: center;
+    padding: 2rem;
+    text-align: center;
+}
+
+.pickup-point-map-popup {
+    display: grid;
+    gap: 0.2rem;
+}
+
+.pickup-point-map-popup span {
+    display: block;
+}
+
+.pickup-point-map-popup span:last-child {
+    color: #64748b;
+    font-size: 0.78rem;
+}
+
+.pickup-point-row-selected {
+    background: color-mix(in srgb, var(--primary) 8%, transparent);
+}
+
+.pickup-point-map-label {
+    font-size: 0.72rem;
+    font-weight: 800;
+}
+
+.pickup-point-map-marker-container {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+}
+
+.pickup-point-map-marker {
+    background: #2563a9;
+    border: 3px solid #fff;
+    border-radius: 50%;
+    box-shadow: 0 1px 5px rgba(15, 23, 42, 0.42);
+    display: block;
+    height: 20px;
+    width: 20px;
+}
+
+.pickup-point-map-marker.is-locker {
+    background: #0f766e;
+}
+
+.pickup-point-map-marker.is-suspended {
+    background: #d97706;
+}
+
+.pickup-point-map-marker.is-closed {
+    background: #64748b;
+}
+
+.pickup-point-map-marker.is-selected {
+    border-color: #f59e0b;
+    height: 26px;
+    width: 26px;
+}
+
+.pickup-point-create-form {
+    display: grid;
+    gap: 1rem;
+}
+
+.pickup-point-create-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.pickup-point-field-label {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.pickup-point-create-capabilities {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.pickup-point-empty {
+    align-items: center;
+    color: var(--muted-foreground);
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    min-height: 8rem;
+}
+
+@media (max-width: 960px) {
+    .pickup-point-filters {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 640px) {
+    .pickup-point-page {
+        padding: 1rem;
+    }
+
+    .pickup-point-header {
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .pickup-point-header-actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .pickup-point-filters {
+        grid-template-columns: 1fr;
+    }
+
+    .pickup-point-create-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .pickup-point-map-header {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+}
