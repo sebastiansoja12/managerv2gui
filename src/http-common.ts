@@ -14,7 +14,7 @@ const normalizeShipmentIdentifiers = (value: unknown): unknown => {
     }
 
     const record = value as Record<string, unknown>;
-    ["shipmentId", "shipmentRelatedId", "parcelId"].forEach((key) => {
+    ["shipmentId", "shipmentRelatedId", "parcelId", "departmentId"].forEach((key) => {
         const identifier = record[key];
         if (identifier && typeof identifier === "object" && "value" in identifier) {
             const identifierRecord = identifier as Record<string, unknown>;

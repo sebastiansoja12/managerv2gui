@@ -1,4 +1,5 @@
 import RouteLogRecord from "../../RouteLog/model/RouteLogRecord";
+import {ReturnPackageDto} from "../../Returns/model/ReturnPackage";
 import {valueObjectValue, ValueObject} from "../../../utils/valueObject";
 
 export interface ShipmentIdDto {
@@ -101,6 +102,10 @@ export interface ShipmentDto {
     shipmentSize: ShipmentSizeDto;
     destination: DepartmentCodeValue;
     originDepartmentId?: DepartmentIdDto | null;
+    pickupPointId?: PickupPointIdDto | null;
+    deliveryPickupPointId?: PickupPointIdDto | null;
+    pickupMethod?: PickupMethodDto | null;
+    deliveryMethod?: DeliveryMethodDto | null;
     originCountry?: CountryCodeDto | null;
     destinationCountry?: CountryCodeDto | null;
     shipmentStatus: ShipmentStatusDto;
@@ -119,6 +124,7 @@ export interface ShipmentDto {
 export interface ShipmentDetailsDto {
     shipment: ShipmentDto;
     routeLog: RouteLogRecord | null;
+    returnPackage?: ReturnPackageDto | null;
 }
 
 export interface TrackingNumberDto {
@@ -134,6 +140,10 @@ export interface ShipmentCreateRequestApi {
     shipmentPriority: ShipmentPriorityDto;
     issuerCountryCode: string;
     receiverCountryCode: string;
+    pickupMethod: PickupMethodDto;
+    deliveryMethod: DeliveryMethodDto;
+    pickupPointId?: PickupPointIdDto;
+    deliveryPickupPointId?: PickupPointIdDto;
 }
 
 export interface ShipmentCreateResponseDto {
@@ -151,6 +161,9 @@ export interface ShipmentCreateInitialState {
     issuerCountryCode: CountryCodeDto;
     receiverCountryCode: CountryCodeDto;
     dangerousGood?: DangerousGoodApi | null;
+    pickupMethod?: PickupMethodDto;
+    deliveryMethod?: DeliveryMethodDto;
+    pickupPointId?: string;
 }
 
 export interface ShipmentUpdateRequestApi {
@@ -171,6 +184,10 @@ export interface ShipmentUpdateRequestApi {
 export interface ShipmentStatusRequestApi {
     shipmentId: ShipmentIdDto;
     shipmentStatus: ShipmentStatusDto;
+}
+
+export interface PickupPointIdDto {
+    value: string;
 }
 
 export interface ShipmentSearchRequestApi {
@@ -236,7 +253,11 @@ export type ShipmentSizeDto = "TINY" | "SMALL" | "MEDIUM" | "AVERAGE" | "BIG" | 
 
 export type CountryCodeDto = typeof countryCodes[number];
 
-export type ShipmentStatusDto = "CREATED" | "PREPARED" | "ACCEPTED" | "REROUTE" | "SENT" | "DELIVERY" | "RETURN" | "REDIRECT" | "CANCELED";
+export type ShipmentStatusDto = "PLANNED" | "CREATED" | "PREPARED" | "ACCEPTED" | "REROUTE" | "SENT" | "DELIVERY" | "RETURN" | "REDIRECT" | "CANCELED";
+
+export type PickupMethodDto = "DEPARTMENT" | "COURIER" | "PICKUP_POINT" | "LOCKER";
+
+export type DeliveryMethodDto = "COURIER" | "PICKUP_POINT" | "LOCKER";
 
 export type ShipmentTypeDto = "PARENT" | "CHILD";
 
@@ -246,9 +267,15 @@ export const shipmentSizes: ShipmentSizeDto[] = ["TINY", "SMALL", "MEDIUM", "AVE
 
 export const shipmentPriorities: ShipmentPriorityDto[] = ["LOW", "MEDIUM", "HIGH", "EXPRESS"];
 
-export const shipmentStatuses: ShipmentStatusDto[] = ["CREATED", "PREPARED", "ACCEPTED", "REROUTE", "SENT", "DELIVERY", "RETURN", "REDIRECT", "CANCELED"];
+export const shipmentStatuses: ShipmentStatusDto[] = ["PLANNED", "CREATED", "PREPARED", "ACCEPTED", "REROUTE", "SENT", "DELIVERY", "RETURN", "REDIRECT", "CANCELED"];
 
-export const shipmentChangeStatuses: ShipmentStatusDto[] = shipmentStatuses.filter((status) => status !== "CANCELED");
+export const pickupMethods: PickupMethodDto[] = ["DEPARTMENT", "COURIER", "PICKUP_POINT", "LOCKER"];
+
+export const deliveryMethods: DeliveryMethodDto[] = ["COURIER", "PICKUP_POINT", "LOCKER"];
+
+export const shipmentChangeStatuses: ShipmentStatusDto[] = shipmentStatuses.filter(
+    (status) => status !== "PLANNED" && status !== "CANCELED",
+);
 
 export const shipmentTypes: ShipmentTypeDto[] = ["PARENT", "CHILD"];
 
