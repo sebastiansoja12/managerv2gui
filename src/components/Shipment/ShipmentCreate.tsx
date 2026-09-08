@@ -11,14 +11,18 @@ import {
     TextField,
     Typography,
 } from "components/ui";
-import {ArrowBack, LocalShipping, Save} from "components/ui/icons";
+import {ArrowBack, LocalShipping, Map, Save} from "components/ui/icons";
 import {useLocation, useNavigate} from "react-router-dom";
 import ShipmentService from "../../hooks/ShipmentService";
 import {ApiErrorResponse} from "../../api/ApiResult";
 import {
     countryCodes,
     DangerousGoodApi,
+    DeliveryMethodDto,
+    deliveryMethods,
     PersonApi,
+    PickupMethodDto,
+    pickupMethods,
     ShipmentCreateInitialState,
     ShipmentCreateRequestApi,
     ShipmentPriorityDto,
@@ -27,7 +31,9 @@ import {
     ShipmentSizeDto,
 } from "./dto/ShipmentDto";
 import pl from "../../i18n/translate";
+import {PickupPointSummary} from "../PickupPoints/model/PickupPoint";
 import DangerousGoodForm, {createEmptyDangerousGood, isDangerousGoodValid} from "./DangerousGoodForm";
+import ShipmentDeliveryPointMapDialog from "./ShipmentDeliveryPointMapDialog";
 import "./styles/shipments.css";
 
 type Notice = {
@@ -54,7 +60,9 @@ const initialShipmentPriority: ShipmentPriorityDto = "MEDIUM";
 const initialPriceAmount = "15";
 const initialCurrency = "PLN";
 const initialIssuerCountryCode = "PL";
-const initialReceiverCountryCode = "DE";
+const initialReceiverCountryCode = "PL";
+const initialPickupMethod: PickupMethodDto = "DEPARTMENT";
+const initialDeliveryMethod: DeliveryMethodDto = "COURIER";
 
 const clonePerson = (person?: PersonApi): PersonApi => ({
     ...emptyPerson,
@@ -76,6 +84,11 @@ const ShipmentCreate: React.FC = () => {
     const [currency, setCurrency] = useState<string>(similarShipment?.currency || initialCurrency);
     const [issuerCountryCode, setIssuerCountryCode] = useState<string>(similarShipment?.issuerCountryCode || initialIssuerCountryCode);
     const [receiverCountryCode, setReceiverCountryCode] = useState<string>(similarShipment?.receiverCountryCode || initialReceiverCountryCode);
+    const [pickupMethod, setPickupMethod] = useState<PickupMethodDto>(similarShipment?.pickupMethod || initialPickupMethod);
+    const [deliveryMethod, setDeliveryMethod] = useState<DeliveryMethodDto>(similarShipment?.deliveryMethod || initialDeliveryMethod);
+    const [deliveryMapOpen, setDeliveryMapOpen] = useState(false);
+    const [deliveryPickupPoint, setDeliveryPickupPoint] = useState<PickupPointSummary | null>(null);
+    const [pickupPointId, setPickupPointId] = useState<string>(similarShipment?.pickupPointId || "");
     const [dangerousEnabled, setDangerousEnabled] = useState<boolean>(Boolean(similarShipment?.dangerousGood));
     const [dangerousGood, setDangerousGood] = useState<DangerousGoodApi>(() => (
         similarShipment?.dangerousGood
@@ -163,7 +176,15 @@ const ShipmentCreate: React.FC = () => {
         ...(dangerousEnabled ? {dangerousGood} : {}),
         shipmentPriority,
         issuerCountryCode,
-        receiverCountryCode
+        receiverCountryCode,
+        pickupMethod,
+        deliveryMethod,
+        ...(["PICKUP_POINT", "LOCKER"].includes(pickupMethod) && pickupPointId.trim()
+            ? {pickupPointId: {value: pickupPointId.trim()}}
+            : {}),
+        ...(deliveryMethod !== "COURIER" && deliveryPickupPoint
+            ? {deliveryPickupPointId: deliveryPickupPoint.pickupPointId}
+            : {}),
     });
 
     const resetForm = () => {
@@ -175,6 +196,11 @@ const ShipmentCreate: React.FC = () => {
         setCurrency(initialCurrency);
         setIssuerCountryCode(initialIssuerCountryCode);
         setReceiverCountryCode(initialReceiverCountryCode);
+        setPickupMethod(initialPickupMethod);
+        setDeliveryMethod(initialDeliveryMethod);
+        setDeliveryMapOpen(false);
+        setDeliveryPickupPoint(null);
+        setPickupPointId("");
         setDangerousEnabled(false);
         setDangerousGood(createEmptyDangerousGood());
     };
@@ -186,6 +212,10 @@ const ShipmentCreate: React.FC = () => {
     };
 
     const createShipment = async () => {
+        if (deliveryMethod !== "COURIER" && !deliveryPickupPoint) {
+            setNotice({severity: "error", message: shipmentTranslations.messages.deliveryPickupPointRequired});
+            return;
+        }
         if (dangerousEnabled && !isDangerousGoodValid(dangerousGood)) {
             setNotice({severity: "error", message: shipmentTranslations.dangerousGood.invalid});
             return;
@@ -234,12 +264,46 @@ const ShipmentCreate: React.FC = () => {
                     </div>
 
                     <div className="shipments-form-grid-three shipments-create-data-grid">
-                        {selectField(shipmentTranslations.form.fields.size, shipmentSize, shipmentSizes, setShipmentSize, (option) => shipmentTranslations.size[option])}
+                        {selectField(shipmentTranslations.form.fields.size, shipmentSize, shipmentSizes, (value) => {
+                            setShipmentSize(value);
+                            setDeliveryPickupPoint(null);
+                        }, (option) => shipmentTranslations.size[option])}
                         {selectField(shipmentTranslations.form.fields.priority, shipmentPriority, shipmentPriorities, setShipmentPriority, (option) => shipmentTranslations.priority[option])}
                         {textField(shipmentTranslations.form.fields.amount, priceAmount, setPriceAmount, "number")}
                         {textField(shipmentTranslations.form.fields.currency, currency, setCurrency)}
                         {selectField(shipmentTranslations.form.fields.issuerCountry, issuerCountryCode, countryCodes, setIssuerCountryCode)}
-                        {selectField(shipmentTranslations.form.fields.receiverCountry, receiverCountryCode, countryCodes, setReceiverCountryCode)}
+                        {selectField(shipmentTranslations.form.fields.receiverCountry, receiverCountryCode, countryCodes, (value) => {
+                            setReceiverCountryCode(value);
+                            setDeliveryPickupPoint(null);
+                        })}
+                        {selectField(shipmentTranslations.form.fields.pickupMethod, pickupMethod, pickupMethods, setPickupMethod, (option) => shipmentTranslations.pickupMethod[option])}
+                        <div className="shipment-delivery-method-field">
+                            {selectField(shipmentTranslations.form.fields.deliveryMethod, deliveryMethod, deliveryMethods, (value) => {
+                                setDeliveryMethod(value);
+                                setDeliveryMapOpen(false);
+                                setDeliveryPickupPoint(null);
+                            }, (option) => shipmentTranslations.deliveryMethod[option])}
+                            {deliveryMethod !== "COURIER" && (
+                                <Button variant="outlined" startIcon={<Map />} onClick={() => setDeliveryMapOpen(true)}>
+                                    {shipmentTranslations.deliveryPointMap.open}
+                                </Button>
+                            )}
+                        </div>
+                        {deliveryMethod !== "COURIER" && deliveryPickupPoint ? (
+                            <div className="shipment-delivery-point-selection">
+                                <span>{shipmentTranslations.deliveryPointMap.selected}</span>
+                                <strong>{deliveryPickupPoint.code} · {deliveryPickupPoint.name}</strong>
+                                <small>{deliveryPickupPoint.address
+                                    ? `${deliveryPickupPoint.address.street} ${deliveryPickupPoint.address.buildingNumber}, ${deliveryPickupPoint.address.city}`
+                                    : pl.common.dash}</small>
+                                <Button onClick={() => setDeliveryPickupPoint(null)} variant="text">
+                                    {shipmentTranslations.deliveryPointMap.removeSelection}
+                                </Button>
+                            </div>
+                        ) : null}
+                        {["PICKUP_POINT", "LOCKER"].includes(pickupMethod)
+                            ? textField(shipmentTranslations.form.fields.pickupPoint, pickupPointId, setPickupPointId)
+                            : null}
                     </div>
 
                     {personFields(shipmentTranslations.form.sections.sender, sender, setSender, "sender")}
@@ -251,6 +315,7 @@ const ShipmentCreate: React.FC = () => {
                             <FormControlLabel
                                 control={<Checkbox checked={dangerousEnabled} onChange={(event) => {
                                     setDangerousEnabled(event.target.checked);
+                                    setDeliveryPickupPoint(null);
                                     if (!event.target.checked) {
                                         setDangerousGood(createEmptyDangerousGood());
                                     }
@@ -270,6 +335,21 @@ const ShipmentCreate: React.FC = () => {
                     </div>
                 </div>
             </div>
+
+            {deliveryMapOpen && deliveryMethod !== "COURIER" && (
+                <ShipmentDeliveryPointMapDialog
+                    deliveryMethod={deliveryMethod}
+                    hasDangerousGoods={dangerousEnabled}
+                    onClose={() => setDeliveryMapOpen(false)}
+                    onSelect={(point) => {
+                        setDeliveryPickupPoint(point);
+                        setDeliveryMapOpen(false);
+                    }}
+                    receiverCountryCode={receiverCountryCode}
+                    selectedPointId={deliveryPickupPoint?.pickupPointId.value || null}
+                    shipmentSize={shipmentSize}
+                />
+            )}
 
             <Snackbar open={Boolean(notice)} autoHideDuration={4500} onClose={() => setNotice(null)}>
                 {notice ? <Alert severity={notice.severity} onClose={() => setNotice(null)}>{notice.message}</Alert> : undefined}
