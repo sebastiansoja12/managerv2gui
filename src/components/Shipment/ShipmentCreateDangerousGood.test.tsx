@@ -51,6 +51,9 @@ describe("ShipmentCreate dangerous goods", () => {
 
         await waitFor(() => expect(ShipmentService.create).toHaveBeenCalledTimes(1));
         expect(ShipmentService.create).toHaveBeenCalledWith(
+            expect.objectContaining({pickupMethod: "DEPARTMENT", deliveryMethod: "COURIER"}),
+        );
+        expect(ShipmentService.create).toHaveBeenCalledWith(
             expect.not.objectContaining({dangerousGood: expect.anything()})
         );
         await waitFor(() => expect(
