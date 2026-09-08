@@ -46,14 +46,11 @@ const changeReasonCode = (returnPackageId: string, reasonCode: ReturnReasonCode)
         },
     );
 
+const process = (shipmentId: string) =>
+    managerClient.put<undefined, {status: "OK"}>(`/shipments/returns/${shipmentId}/process`, undefined);
+
 const complete = (shipmentId: string) =>
-    returningClient.put<{shipmentId: {value: string}; returnStatus: "COMPLETED"}, void>(
-        "/returns/complete",
-        {
-            shipmentId: {value: shipmentId},
-            returnStatus: "COMPLETED",
-        },
-    );
+    managerClient.put<undefined, {status: "OK"}>(`/shipments/returns/${shipmentId}/complete`, undefined);
 
 const validateToken = (request: ReturnTokenValidationRequest) =>
     returningClient.post<ReturnTokenValidationRequest, ReturnTokenValidationResponse>(
@@ -71,6 +68,7 @@ const ReturnService = {
     create,
     get,
     getAllByDepartment,
+    process,
     validateToken,
 };
 
