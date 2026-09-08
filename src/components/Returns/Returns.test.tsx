@@ -19,6 +19,7 @@ jest.mock("../../hooks/ReturnService", () => ({
         create: jest.fn(),
         get: jest.fn(),
         getAllByDepartment: jest.fn(),
+        process: jest.fn(),
         validateToken: jest.fn(),
     },
 }));
@@ -160,9 +161,28 @@ describe("Returns", () => {
         renderReturns({}, `/returns/${returnPackage.returnPackageId.value}`);
 
         await waitFor(() => expect(mockedReturnService.get).toHaveBeenCalledWith(returnPackage.returnPackageId.value));
-        expect(await screen.findByRole("button", {name: pl.returns.actions.complete})).toBeInTheDocument();
+        expect(await screen.findByRole("button", {name: pl.returns.actions.process})).toBeInTheDocument();
+        expect(screen.queryByRole("button", {name: pl.returns.actions.complete})).not.toBeInTheDocument();
         expect(screen.queryByRole("table", {name: pl.returns.list.tableLabel})).not.toBeInTheDocument();
         expect(screen.getByRole("button", {name: pl.returns.actions.cancelReturn})).toBeInTheDocument();
+    });
+
+    it("starts processing a created return and then exposes completion", async () => {
+        mockedReturnService.get.mockResolvedValue({data: returnPackage, status: 200});
+        mockedReturnService.process.mockResolvedValue({data: {status: "OK"}, status: 200});
+
+        renderReturns({}, `/returns/${returnPackage.returnPackageId.value}`);
+
+        fireEvent.click(await screen.findByRole("button", {name: pl.returns.actions.process}));
+        fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", {
+            name: pl.returns.actions.process,
+        }));
+
+        await waitFor(() => expect(mockedReturnService.process).toHaveBeenCalledWith(returnPackage.shipmentId.value));
+        expect(mockedReturnService.get).toHaveBeenCalledTimes(1);
+        expect(await screen.findByText(pl.returns.messages.processSuccess)).toBeInTheDocument();
+        expect(screen.getByRole("button", {name: pl.returns.actions.complete})).toBeInTheDocument();
+        expect(screen.queryByRole("button", {name: pl.returns.actions.process})).not.toBeInTheDocument();
     });
 
     it("reloads the table when the handling department changes", async () => {
