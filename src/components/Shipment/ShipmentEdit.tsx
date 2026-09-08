@@ -313,7 +313,12 @@ const ShipmentEdit: React.FC = () => {
                         <Button disabled={loading} startIcon={<Refresh />} variant="outlined" onClick={loadShipment}>
                             {pl.common.refresh}
                         </Button>
-                        <Button disabled={loading || saving || !shipment || status === shipment.shipmentStatus} startIcon={<Save />} variant="contained" onClick={saveShipment}>
+                        <Button
+                            disabled={loading || saving || !shipment || status === shipment.shipmentStatus}
+                            startIcon={<Save />}
+                            variant="contained"
+                            onClick={saveShipment}
+                        >
                             {pl.common.saveChanges}
                         </Button>
                     </div>
@@ -362,11 +367,19 @@ const ShipmentEdit: React.FC = () => {
                                     value={status}
                                     onChange={(event) => setStatus(event.target.value as ShipmentStatusDto)}
                                 >
-                                    {shipmentChangeStatuses.map((shipmentStatus) => (
-                                        <MenuItem key={shipmentStatus} value={shipmentStatus}>
-                                            {pl.shipments.status[shipmentStatus]}
+                                    {shipment.shipmentStatus === "PLANNED" ? (
+                                        <MenuItem disabled value="PLANNED">
+                                            {pl.shipments.status.PLANNED}
                                         </MenuItem>
-                                    ))}
+                                    ) : null}
+                                    {shipmentChangeStatuses
+                                        .filter((shipmentStatus) => shipment.shipmentStatus !== "PLANNED"
+                                            || !["CREATED", "PREPARED"].includes(shipmentStatus))
+                                        .map((shipmentStatus) => (
+                                            <MenuItem key={shipmentStatus} value={shipmentStatus}>
+                                                {pl.shipments.status[shipmentStatus]}
+                                            </MenuItem>
+                                        ))}
                                 </TextField>
                             </section>
 
