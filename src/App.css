@@ -24,6 +24,10 @@
   overscroll-behavior: contain;
 }
 
+.app-main-content[hidden] {
+  display: none;
+}
+
 
 .App-logo {
   height: 40vmin;
