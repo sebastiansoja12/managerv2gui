@@ -43,6 +43,7 @@
     .process-status-in_progress,
     .return-status-processing,
     .shipment-status-orange,
+    .tm-status-planned,
     .tm-status-pending
 ) {
     background: var(--technical-warning-soft) !important;
@@ -88,4 +89,3 @@
     border-color: color-mix(in srgb, var(--info) 30%, var(--border)) !important;
     color: var(--foreground) !important;
 }
-
