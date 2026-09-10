@@ -52,8 +52,6 @@ support.
 | --- | --- |
 | `src/components` | Application pages and UI modules. |
 | `src/components/AppShell` | Main layout, routing, tabs and tab persistence. |
-| `src/components/PickupPoints` | Pickup-point catalog, editor, map, selection models and feature styles. |
-| `src/components/Chat` | Organization chat directory, docked conversations, message state and presence tracking. |
 | `src/auth` | Authentication session and user profile types. |
 | `src/hooks` | API service hooks and domain-specific HTTP wrappers. |
 | `src/api` | Shared backend client and API result/error helpers. |
@@ -142,34 +140,3 @@ Authentication is cookie/JWT based and the backend CORS configuration must allow
 the GUI origin, usually `http://localhost:3000`.
 
 Release notes are maintained in `CHANGELOG.md`.
-
-## Pickup Points and Shipments
-
-The `/pickup-points` route provides the operator's pickup-point catalog and map.
-Search accepts names, codes, streets and cities, while moving the map requests
-points inside the visible bounding box. Creating and editing a point sends its
-address to the backend; coordinates are returned after server-side resolution.
-
-Shipment create and edit forms open a delivery-point map for pickup-point or
-locker methods. Selecting a marker stores the pickup-point identifier in the
-shipment request. Shipment details resolve the identifier to a human-readable
-pickup-point code. Eligibility requests include country, point type, shipment
-size and dangerous-goods information.
-
-## Returns
-
-Return lists and the processing and completion actions use the Manager API under
-`/shipments/returns`. A shipment without `RETURN` status does not request return
-details, and unavailable optional return data hides only the return summary
-instead of blocking the shipment view. Reason-code changes and token validation
-continue to use the configured returning-service client.
-
-## Chat Presence and Notifications
-
-The green indicator means that a user has an active WebSocket connection from a
-visible application tab. Every tab has its own STOMP session, and the backend
-publishes the online-user list through `/user/queue/chat/presence`. Hiding a tab,
-losing the connection or logging out removes presence through connection events
-without REST polling. Unread conversation tiles remain highlighted until the
-conversation is viewed, and notification counters are shared across views in the
-current GUI session.
