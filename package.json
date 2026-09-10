@@ -1,6 +1,6 @@
 {
   "name": "managerv2gui",
-  "version": "2026.3",
+  "version": "2026.4",
   "private": true,
   "dependencies": {
     "@stomp/stompjs": "^7.3.0",
