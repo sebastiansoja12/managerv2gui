@@ -1,5 +1,5 @@
 import React from "react";
-import {Route, Routes} from "react-router-dom";
+import {Location, Route, Routes} from "react-router-dom";
 import OrganizationChat from "../Chat/OrganizationChat";
 import Couriers from "../Couriers/Couriers";
 import MyCourierSettings from "../Couriers/MyCourierSettings";
@@ -31,6 +31,7 @@ import ShipmentCreate from "../Shipment/ShipmentCreate";
 import ShipmentDetails from "../Shipment/ShipmentDetails";
 import ShipmentHistoryDetails from "../Shipment/ShipmentHistoryDetails";
 import ShipmentList from "../Shipment/ShipmentList";
+import ShipmentRoute from "../ShipmentRoute/ShipmentRoute";
 import ShipmentScanner from "../ShipmentScanner/ShipmentScanner";
 import UserProfile from "../UserProfile/UserProfile";
 import UsersPage from "../Users/UsersPage";
@@ -42,9 +43,10 @@ import {useOperatorCapabilities} from "./OperatorCapabilitiesContext";
 type AppRoutesProps = {
     onOpenTab?: (tab: AppTabDefinition) => void;
     operationalProfile?: OperationalProfile;
+    location?: Partial<Location> | string;
 };
 
-function AppRoutes({onOpenTab, operationalProfile = "warehouse"}: AppRoutesProps) {
+function AppRoutes({onOpenTab, operationalProfile = "warehouse", location}: AppRoutesProps) {
     const {returnsStatus} = useOperatorCapabilities();
     const guarded = (path: string, element: React.ReactElement) => (
         isPathAllowedForProfile(path, operationalProfile)
@@ -59,10 +61,10 @@ function AppRoutes({onOpenTab, operationalProfile = "warehouse"}: AppRoutesProps
     );
 
     return (
-        <Routes>
+        <Routes location={location}>
             <Route path="/" element={<OperationalDashboard onOpenTab={onOpenTab}/>}/>
             <Route path="depots" element={guarded("/depots", <Departments onOpenTab={onOpenTab}/>)}/>
-            <Route path="departments/:departmentId" element={guarded("/departments/1", <DepartmentDetailsView/>)}/>
+            <Route path="departments/:departmentId" element={guarded("/departments/1", <DepartmentDetailsView onOpenTab={onOpenTab}/>)}/>
             <Route path="pickup-points" element={guarded("/pickup-points", <PickupPointCatalog/>)}/>
             <Route path="parcels" element={guarded("/shipments/list", <ShipmentList onOpenTab={onOpenTab}/>)}/>
             <Route path="shipment-details" element={guarded("/shipment-details", <ShipmentList onOpenTab={onOpenTab} variant="details"/>)}/>
@@ -78,7 +80,8 @@ function AppRoutes({onOpenTab, operationalProfile = "warehouse"}: AppRoutesProps
             <Route path="processes" element={guarded("/processes", <Processes/>)}/>
             <Route path="processes/:processId" element={guarded("/processes/1", <ProcessDetails/>)}/>
             <Route path="returns" element={guardedReturns(<Returns onOpenTab={onOpenTab}/>)}/>
-            <Route path="deliveries" element={guarded("/deliveries", <Deliveries/>)}/>
+            <Route path="deliveries" element={guarded("/deliveries", <Deliveries key="all"/>)}/>
+            <Route path="deliveries/incomplete" element={guarded("/deliveries/incomplete", <Deliveries key="incomplete" variant="incomplete"/>)}/>
             <Route path="deliveries/:deliveryId/edit" element={guarded("/deliveries/1/edit", <DeliveryEdit/>)}/>
             <Route path="returns/:returnId" element={guardedReturns(<Returns onOpenTab={onOpenTab}/>)}/>
             <Route path="couriers" element={guarded("/couriers", <Couriers/>)}/>
@@ -97,6 +100,7 @@ function AppRoutes({onOpenTab, operationalProfile = "warehouse"}: AppRoutesProps
             <Route path="pallets/by-id/:palletId" element={guarded("/pallets/tracking/1", <PalletByIdRedirect/>)}/>
             <Route path="pallets/tracking/:trackingNumber" element={guarded("/pallets/tracking/1", <PalletDetailsView onOpenTab={onOpenTab}/>)}/>
             <Route path="shipment-scanner" element={guarded("/shipment-scanner", <ShipmentScanner/>)}/>
+            <Route path="shipment-route" element={guarded("/shipment-route", <ShipmentRoute/>)}/>
             <Route path="courier-deliveries" element={guarded("/courier-deliveries", <ModulePlaceholder title={pl.home.tiles.courierDeliveries.title}/>)}/>
             <Route path="suppliers" element={guarded("/suppliers", <ModulePlaceholder title={pl.navigation.suppliers}/>)}/>
             <Route path="users" element={guarded("/users", <UsersPage/>)}/>

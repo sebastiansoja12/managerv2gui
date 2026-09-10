@@ -4,9 +4,9 @@ import AppTabs from "./AppTabs";
 import {AppTabDefinition} from "./types";
 
 const openTabs: AppTabDefinition[] = [
-    {label: "Strona startowa", path: "/", pinned: true},
+    {label: "Strona startowa", path: "/"},
     {label: "Procesy", path: "/processes"},
-    {label: "Czat", path: "/chat", preview: true},
+    {label: "Czat", path: "/chat"},
 ];
 
 const renderTabs = () => {
@@ -15,7 +15,6 @@ const renderTabs = () => {
         onCloseOtherTabs: jest.fn(),
         onCloseTab: jest.fn(),
         onCloseTabsToRight: jest.fn(),
-        onKeepTab: jest.fn(),
         onSelectTab: jest.fn(),
         onTogglePinnedTab: jest.fn(),
     };
@@ -24,23 +23,31 @@ const renderTabs = () => {
 };
 
 describe("AppTabs", () => {
-    it("selects, keeps and closes tabs from the tab row", () => {
+    it("selects and closes tabs from the tab row", () => {
         const handlers = renderTabs();
 
         fireEvent.click(screen.getByRole("button", {name: "Czat"}));
         expect(handlers.onSelectTab).toHaveBeenCalledWith("/chat");
 
-        fireEvent.doubleClick(screen.getByRole("button", {name: "Czat"}));
-        expect(handlers.onKeepTab).toHaveBeenCalledWith("/chat");
-
         fireEvent.click(screen.getByRole("button", {name: "Zamknij kartę: Procesy"}));
         expect(handlers.onCloseTab).toHaveBeenCalledWith("/processes");
     });
 
-    it("does not offer closing a pinned tab directly", () => {
-        renderTabs();
+    it("never offers closing or pinning the home tab", () => {
+        const handlers = renderTabs();
 
         expect(screen.queryByRole("button", {name: "Zamknij kartę: Strona startowa"})).not.toBeInTheDocument();
+        fireEvent(
+            screen.getByRole("button", {name: "Strona startowa"}),
+            new MouseEvent("auxclick", {bubbles: true, button: 1}),
+        );
+        expect(handlers.onCloseTab).not.toHaveBeenCalled();
+
+        fireEvent.contextMenu(screen.getByRole("button", {name: "Strona startowa"}), {clientX: 40, clientY: 30});
+        const menu = screen.getByRole("menu", {name: "Akcje karty: Strona startowa"});
+        expect(within(menu).queryByRole("menuitem", {name: "Przypnij kartę"})).not.toBeInTheDocument();
+        expect(within(menu).queryByRole("menuitem", {name: "Zamknij kartę"})).not.toBeInTheDocument();
+        expect(within(menu).getByRole("menuitem", {name: "Zamknij pozostałe"})).toBeEnabled();
     });
 
     it("closes a tab with the middle mouse button", () => {
