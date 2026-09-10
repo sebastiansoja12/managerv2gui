@@ -44,6 +44,7 @@ import pl from "../i18n/translate";
 import {applyDepartmentAutomations} from "./GlobalConfiguration/departmentAutomation";
 import {useDepartmentConfiguration} from "./GlobalConfiguration/model/DepartmentConfiguration";
 import DeliveryAreasMap from "./Departments/DeliveryAreasMap";
+import {notifyDeliveryAreasChanged} from "./Departments/model/DeliveryArea";
 import DepartmentRelationsMap, {getDepartmentsMissingSortingRelation} from "./Departments/DepartmentRelationsMap";
 import {DepartmentRelation, departmentRelationPairKey} from "./Departments/model/DepartmentRelation";
 import {AppTabDefinition} from "./AppShell/types";
@@ -320,11 +321,14 @@ const Departments: React.FC<DepartmentsProps> = ({onOpenTab}) => {
             setSuccess(createTranslations.success);
             setCreateForm({...emptyDepartmentForm});
             setCreateDialogOpen(false);
-            if (departmentConfiguration.autoAssignDeliveryAreas || departmentConfiguration.autoConnectDepartments) {
+            if (departmentConfiguration.autoAssignDeliveryAreas) {
+                notifyDeliveryAreasChanged();
+            }
+            if (departmentConfiguration.autoConnectDepartments) {
                 try {
                     const allDepartments = (await departmentService.getAll()).data || [];
-                    const result = await applyDepartmentAutomations(departmentConfiguration, allDepartments,
-                        currentUser?.operatorId?.value, newDepartmentCode);
+                    const result = await applyDepartmentAutomations(
+                        {...departmentConfiguration, autoAssignDeliveryAreas: false}, allDepartments, newDepartmentCode);
                     if (result.connectionSkipped) {
                         setError(pl.globalConfiguration.departmentConfiguration.connectionSkipped);
                     }
@@ -373,6 +377,9 @@ const Departments: React.FC<DepartmentsProps> = ({onOpenTab}) => {
                         ? pl.departments.actions.deleteSuccess
                         : pl.departments.actions.restoreSuccess);
                 setPendingStatusChange(null);
+                if (status === "DELETED") {
+                    notifyDeliveryAreasChanged();
+                }
                 retrieveDepartments(false);
             })
             .catch((exception: unknown) => {
@@ -553,7 +560,7 @@ const Departments: React.FC<DepartmentsProps> = ({onOpenTab}) => {
 
             {success ? <Alert severity="success">{success}</Alert> : undefined}
 
-            <DeliveryAreasMap departments={filteredDepartments} operatorId={currentUser?.operatorId?.value} />
+            <DeliveryAreasMap departments={filteredDepartments} />
 
             <div className="departments-workspace">
                 <section className="departments-table-panel">
