@@ -1,10 +1,18 @@
 import {AppTabDefinition} from "./types";
 
 export const MAX_OPEN_TABS = 15;
+export const HOME_TAB_PATH = "/";
 
-const pinnedFirst = (tabs: AppTabDefinition[]) => tabs
-    .filter((tab) => tab.pinned)
-    .concat(tabs.filter((tab) => !tab.pinned));
+export const isHomeTab = (tab: AppTabDefinition) => tab.path === HOME_TAB_PATH;
+
+/** Tabs the user cannot close: the home tab and pinned tabs. */
+const isFixedTab = (tab: AppTabDefinition) => isHomeTab(tab) || Boolean(tab.pinned);
+
+/** The home tab always stays first, followed by pinned tabs and then the rest in opening order. */
+const orderTabs = (tabs: AppTabDefinition[]) => tabs
+    .filter(isHomeTab)
+    .concat(tabs.filter((tab) => !isHomeTab(tab) && tab.pinned))
+    .concat(tabs.filter((tab) => !isFixedTab(tab)));
 
 const updateTab = (
     tabs: AppTabDefinition[],
@@ -13,7 +21,7 @@ const updateTab = (
 ) => tabs.map((tab) => tab.path === path ? update(tab) : tab);
 
 /**
- * Removes the least recently used tabs above the limit. Pinned tabs and the tab being opened
+ * Removes the least recently used tabs above the limit. Fixed tabs and the tab being opened
  * are never removed; `recentPaths` is ordered from the oldest to the newest visit.
  */
 export const trimTabs = (
@@ -24,7 +32,7 @@ export const trimTabs = (
 ): AppTabDefinition[] => {
     let nextTabs = tabs;
     while (nextTabs.length > maxTabs) {
-        const removable = nextTabs.filter((tab) => !tab.pinned && tab.path !== keepPath);
+        const removable = nextTabs.filter((tab) => !isFixedTab(tab) && tab.path !== keepPath);
         if (!removable.length) {
             return nextTabs;
         }
@@ -38,11 +46,8 @@ export const trimTabs = (
     return nextTabs;
 };
 
-/**
- * Opens a page in the preview tab: an already open page is only activated, otherwise the page
- * replaces the current preview tab or is appended as a new one.
- */
-export const openPreviewTab = (
+/** Opens a page in its own tab: an already open page is only activated, otherwise a new tab is appended. */
+export const addTab = (
     tabs: AppTabDefinition[],
     tab: AppTabDefinition,
     recentPaths: string[] = [],
@@ -51,50 +56,31 @@ export const openPreviewTab = (
         return tabs;
     }
 
-    const previewTab: AppTabDefinition = {label: tab.label, path: tab.path, preview: true};
-    const previewIndex = tabs.findIndex((currentTab) => currentTab.preview);
-    if (previewIndex >= 0) {
-        return tabs.map((currentTab, index) => index === previewIndex ? previewTab : currentTab);
-    }
-
-    return trimTabs(tabs.concat(previewTab), tab.path, recentPaths);
+    return trimTabs(orderTabs(tabs.concat({label: tab.label, path: tab.path})), tab.path, recentPaths);
 };
 
-export const keepTab = (tabs: AppTabDefinition[], path: string) => (
-    tabs.some((tab) => tab.path === path && tab.preview)
-        ? updateTab(tabs, path, (tab) => ({...tab, preview: false}))
-        : tabs
+export const togglePinnedTab = (tabs: AppTabDefinition[], path: string) => (
+    path === HOME_TAB_PATH ? tabs : orderTabs(updateTab(tabs, path, (tab) => ({...tab, pinned: !tab.pinned})))
 );
 
-export const togglePinnedTab = (tabs: AppTabDefinition[], path: string) => pinnedFirst(
-    updateTab(tabs, path, (tab) => ({...tab, pinned: !tab.pinned, preview: false})),
-);
-
-export const removeTab = (tabs: AppTabDefinition[], path: string) => tabs.filter((tab) => tab.path !== path);
+export const removeTab = (tabs: AppTabDefinition[], path: string) => tabs.filter((tab) => (
+    isHomeTab(tab) || tab.path !== path
+));
 
 export const closeOtherTabs = (tabs: AppTabDefinition[], path: string) => tabs.filter((tab) => (
-    tab.pinned || tab.path === path
+    isFixedTab(tab) || tab.path === path
 ));
 
 export const closeTabsToRight = (tabs: AppTabDefinition[], path: string) => {
     const index = tabs.findIndex((tab) => tab.path === path);
-    return tabs.filter((tab, tabIndex) => tab.pinned || tabIndex <= index);
+    return tabs.filter((tab, tabIndex) => isFixedTab(tab) || tabIndex <= index);
 };
 
-export const closeUnpinnedTabs = (tabs: AppTabDefinition[]) => tabs.filter((tab) => tab.pinned);
+export const closeUnpinnedTabs = (tabs: AppTabDefinition[]) => tabs.filter(isFixedTab);
 
-/** Keeps stored tabs consistent: pinned tabs first and at most one preview tab. */
-export const normalizeTabFlags = (tabs: AppTabDefinition[]): AppTabDefinition[] => {
-    let previewFound = false;
-
-    return pinnedFirst(tabs.map((tab) => {
-        const preview = Boolean(tab.preview) && !tab.pinned && !previewFound;
-        previewFound = previewFound || preview;
-        return {
-            label: tab.label,
-            path: tab.path,
-            ...(tab.pinned ? {pinned: true} : {}),
-            ...(preview ? {preview: true} : {}),
-        };
-    }));
-};
+/** Keeps stored tabs consistent: the home tab first, then pinned tabs, without legacy flags. */
+export const normalizeTabFlags = (tabs: AppTabDefinition[]): AppTabDefinition[] => orderTabs(tabs.map((tab) => ({
+    label: tab.label,
+    path: tab.path,
+    ...(tab.pinned && !isHomeTab(tab) ? {pinned: true} : {}),
+})));
