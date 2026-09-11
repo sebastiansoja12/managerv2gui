@@ -6,7 +6,7 @@ import CourierDetails from "../Couriers/CourierDetails";
 import Departments from "../Departments";
 import DevicePairing from "../Devices/DevicePairing";
 import GlobalConfiguration from "../GlobalConfiguration/GlobalConfiguration";
-import HomeDashboard from "../Home/HomeDashboard";
+import OperationalDashboard from "../Home/OperationalDashboard";
 import ModulePlaceholder from "../Home/ModulePlaceholder";
 import LoginPage from "../LoginPage/LoginPage";
 import MicroserviceStatus from "../MicroserviceStatus/MicroserviceStatus";
@@ -40,7 +40,7 @@ function AppRoutes({onOpenTab, operationalProfile = "warehouse"}: AppRoutesProps
 
     return (
         <Routes>
-            <Route path="/" element={<HomeDashboard onOpenTab={onOpenTab} operationalProfile={operationalProfile}/>}/>
+            <Route path="/" element={<OperationalDashboard onOpenTab={onOpenTab}/>}/>
             <Route path="depots" element={guarded("/depots", <Departments/>)}/>
             <Route path="pickup-points" element={guarded("/pickup-points", <PickupPointCatalog/>)}/>
             <Route path="parcels" element={guarded("/shipments/list", <ShipmentList onOpenTab={onOpenTab}/>)}/>

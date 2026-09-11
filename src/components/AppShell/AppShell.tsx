@@ -26,6 +26,7 @@ import AuthService from "../../hooks/AuthService";
 import {clearStoredTabs, OPEN_TABS_STORAGE_KEY} from "./tabStorage";
 import {OrganizationChatDockProvider} from "../Chat/ChatDockContext";
 import OrganizationChatDock from "../Chat/OrganizationChatDock";
+import HomeModuleTiles from "../Home/HomeModuleTiles";
 
 const homeTab = (): AppTabDefinition => ({
     label: pl.navigation.home,
@@ -265,6 +266,7 @@ function AppShell() {
             <div className="app-main-content">
                 <AppRoutes onOpenTab={openTab} operationalProfile={operationalProfile}/>
             </div>
+            <HomeModuleTiles onOpenTab={openTab} operationalProfile={operationalProfile}/>
             <OrganizationChatDock />
             <Dialog
                 className="operational-profile-dialog"
