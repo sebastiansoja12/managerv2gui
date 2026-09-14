@@ -1,0 +1,146 @@
+.audit-log {
+    display: grid;
+    gap: 8px;
+}
+
+.audit-log-list {
+    display: grid;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.audit-log-entry {
+    display: grid;
+    gap: 14px;
+    grid-template-columns: 10px minmax(0, 1fr);
+    padding-bottom: 18px;
+    position: relative;
+}
+
+.audit-log-entry:not(:last-child)::before {
+    background: var(--border);
+    bottom: 0;
+    content: "";
+    left: 4px;
+    position: absolute;
+    top: 18px;
+    width: 2px;
+}
+
+.audit-log-marker {
+    background: var(--primary);
+    border-radius: 999px;
+    height: 10px;
+    margin-top: 6px;
+    width: 10px;
+}
+
+.audit-log-content {
+    display: grid;
+    gap: 6px;
+    min-width: 0;
+}
+
+.audit-log-heading {
+    align-items: baseline;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+}
+
+.audit-log-heading strong {
+    color: var(--foreground);
+    font-size: 0.9375rem;
+    font-weight: 600;
+}
+
+.audit-log-heading time {
+    color: var(--muted-foreground);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+}
+
+.audit-log-meta {
+    color: var(--muted-foreground);
+    display: flex;
+    flex-wrap: wrap;
+    font-size: 0.8125rem;
+    gap: 4px;
+}
+
+.audit-log-meta span:not(:last-child)::after {
+    content: "·";
+    margin-left: 4px;
+}
+
+.audit-log-changes {
+    border-left: 2px solid var(--border);
+    display: grid;
+    gap: 4px;
+    margin: 2px 0 0;
+    padding: 4px 0 4px 12px;
+}
+
+.audit-log-change {
+    align-items: baseline;
+    display: grid;
+    font-size: 0.8125rem;
+    gap: 12px;
+    grid-template-columns: minmax(120px, 200px) minmax(0, 1fr);
+}
+
+.audit-log-change dt {
+    color: var(--muted-foreground);
+}
+
+.audit-log-change dd {
+    align-items: baseline;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.audit-log-change del {
+    color: var(--muted-foreground);
+}
+
+.audit-log-change ins {
+    color: var(--foreground);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.audit-log-arrow {
+    color: var(--muted-foreground);
+}
+
+.audit-log-state {
+    align-items: center;
+    color: var(--muted-foreground);
+    display: flex;
+    font-size: 0.875rem;
+    gap: 8px;
+    padding: 8px 0;
+}
+
+.audit-log-inset {
+    padding: 16px 20px;
+}
+
+.audit-log-more {
+    justify-self: start;
+}
+
+@media (max-width: 600px) {
+    .audit-log-inset {
+        padding: 12px;
+    }
+
+    .audit-log-change {
+        gap: 2px;
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
