@@ -13,6 +13,10 @@ import DeliveryEdit from "./DeliveryEdit";
 import {Delivery, DeliveryHistoryEntry, DeliveryListItem, DeliveryListPage} from "./model/Delivery";
 import {exportDeliveryExcel, exportDeliveryPdf} from "./deliveryExport";
 
+jest.mock("../../hooks/AuditLogService", () => ({
+    __esModule: true,
+    default: {findByResource: () => Promise.resolve({data: {content: [], page: 0, size: 20, totalElements: 0}, status: 200})},
+}));
 jest.mock("../../hooks/DeliveryService", () => ({
     __esModule: true,
     default: {
@@ -24,6 +28,7 @@ jest.mock("../../hooks/DeliveryService", () => ({
         assignSupplier: jest.fn(),
         unassignSupplier: jest.fn(),
         changeRoute: jest.fn(),
+        resolveDestination: jest.fn(),
         changeConditions: jest.fn(),
         registerAttempt: jest.fn(),
         complete: jest.fn(),
@@ -437,6 +442,86 @@ describe("Deliveries", () => {
         fireEvent.click(screen.getByRole("button", {name: pl.deliveries.filters.reset}));
         await waitFor(() => expect(mockedService.query).toHaveBeenLastCalledWith(0, 25,
             {hideCanceled: true, hideCompleted: false, sort: "STEP_COUNT", direction: "desc"}));
+    });
+
+    it("lists incomplete deliveries and opens the route dialog to set the destination", async () => {
+        const incompleteDelivery = {...delivery, destinationDepartmentId: null};
+        mockedService.query.mockResolvedValue(listPage([listItem(incompleteDelivery)]));
+        mockedService.get.mockResolvedValue({data: incompleteDelivery, status: 200});
+        render(
+            <MemoryRouter initialEntries={["/deliveries/incomplete"]}>
+                <Routes>
+                    <Route path="/deliveries/incomplete" element={<Deliveries variant="incomplete"/>}/>
+                    <Route path="/deliveries/:deliveryId/edit" element={<DeliveryEdit/>}/>
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByText(delivery.shipmentId as string)).toBeInTheDocument();
+        expect(mockedService.query).toHaveBeenCalledWith(0, 25, {hideCanceled: true, hideCompleted: true,
+            missingDestination: true, sort: "CREATED", direction: "desc"});
+        expect(screen.getByRole("heading", {name: pl.navigation.incompleteDeliveries})).toBeInTheDocument();
+        expect(screen.getByText(pl.deliveries.destinationNotDetermined)).toBeInTheDocument();
+
+        fireEvent.click(screen.getByText(delivery.id.slice(0, 8)));
+        fireEvent.click(screen.getByRole("button", {name: pl.deliveries.incomplete.setDestination}));
+
+        expect(await within(await screen.findByRole("dialog")).findByText(pl.deliveries.details.routeTitle))
+            .toBeInTheDocument();
+    });
+
+    it("recalculates the destination of an incomplete delivery and reloads the list", async () => {
+        const incompleteDelivery = {...delivery, destinationDepartmentId: null};
+        mockedService.query.mockResolvedValueOnce(listPage([listItem(incompleteDelivery)]))
+            .mockResolvedValueOnce(listPage([]));
+        mockedService.resolveDestination.mockResolvedValue({data: delivery, status: 200});
+        render(
+            <MemoryRouter initialEntries={["/deliveries/incomplete"]}>
+                <Routes>
+                    <Route path="/deliveries/incomplete" element={<Deliveries variant="incomplete"/>}/>
+                </Routes>
+            </MemoryRouter>
+        );
+
+        await screen.findByText(delivery.shipmentId as string);
+        fireEvent.click(screen.getByText(delivery.id.slice(0, 8)));
+        fireEvent.click(screen.getByRole("button", {name: pl.deliveries.incomplete.resolveDestination}));
+
+        expect(await screen.findByText(pl.deliveries.incomplete.resolved.replace("{id}", delivery.id)))
+            .toBeInTheDocument();
+        expect(mockedService.resolveDestination).toHaveBeenCalledWith(delivery.id);
+        expect(await screen.findByText(pl.deliveries.incomplete.empty)).toBeInTheDocument();
+    });
+
+    it("shows an error when the destination cannot be recalculated", async () => {
+        mockedService.query.mockResolvedValue(listPage([listItem({...delivery, destinationDepartmentId: null})]));
+        mockedService.resolveDestination.mockRejectedValue({status: 422});
+        render(
+            <MemoryRouter initialEntries={["/deliveries/incomplete"]}>
+                <Routes>
+                    <Route path="/deliveries/incomplete" element={<Deliveries variant="incomplete"/>}/>
+                </Routes>
+            </MemoryRouter>
+        );
+
+        await screen.findByText(delivery.shipmentId as string);
+        fireEvent.click(screen.getByText(delivery.id.slice(0, 8)));
+        fireEvent.click(screen.getByRole("button", {name: pl.deliveries.incomplete.resolveDestination}));
+
+        expect(await screen.findByText(pl.deliveries.incomplete.resolveError)).toBeInTheDocument();
+    });
+
+    it("shows a dedicated empty state for incomplete deliveries", async () => {
+        mockedService.query.mockResolvedValue(listPage([]));
+        render(
+            <MemoryRouter initialEntries={["/deliveries/incomplete"]}>
+                <Routes>
+                    <Route path="/deliveries/incomplete" element={<Deliveries variant="incomplete"/>}/>
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByText(pl.deliveries.incomplete.empty)).toBeInTheDocument();
     });
 
     it("shows an empty state", async () => {

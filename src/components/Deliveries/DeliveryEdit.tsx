@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react";
 import {Alert, Button, CircularProgress, Typography} from "components/ui";
 import {ArrowBack, LocalShipping, Refresh} from "components/ui/icons";
-import {useNavigate, useParams} from "react-router-dom";
+import {useNavigate, useParams, useSearchParams} from "react-router-dom";
 import {ApiResult} from "../../api/ApiResult";
 import {getBackendErrorMessage} from "../../api/errorMessage";
 import Department from "../../class/depots/Department";
@@ -25,6 +25,7 @@ import DeliveryRelatedTile from "./details/tiles/DeliveryRelatedTile";
 import DeliveryRouteTile from "./details/tiles/DeliveryRouteTile";
 import DeliveryStatusTile from "./details/tiles/DeliveryStatusTile";
 import DeliveryTargetTile from "./details/tiles/DeliveryTargetTile";
+import AuditLogTimeline from "../AuditLog/AuditLogTimeline";
 import {useDeliveryContext} from "./details/useDeliveryContext";
 import {exportDeliveryExcel, exportDeliveryPdf} from "./deliveryExport";
 import {Delivery, DeliveryStep} from "./model/Delivery";
@@ -42,7 +43,9 @@ function DeliveryEdit() {
     const [departments, setDepartments] = useState<Department[]>([]);
     const [couriers, setCouriers] = useState<CourierDto[]>([]);
     const [carriers, setCarriers] = useState<CarrierDto[]>([]);
-    const [dialog, setDialog] = useState<DeliveryDialogState | null>(null);
+    const [searchParams] = useSearchParams();
+    const [dialog, setDialog] = useState<DeliveryDialogState | null>(
+        () => searchParams.get("dialog") === "route" ? {kind: "route"} : null);
     const context = useDeliveryContext(delivery);
 
     useEffect(() => {
@@ -203,6 +206,22 @@ function DeliveryEdit() {
                                 </div>
                                 <div className="deliveries-cell deliveries-cell-full">
                                     <DeliveryRelatedTile relations={context.relations}/>
+                                </div>
+                                <div className="deliveries-cell deliveries-cell-full">
+                                    <article className="deliveries-info-tile deliveries-info-tile-wide"
+                                             aria-label={pl.auditLog.title}>
+                                        <div className="deliveries-tile-heading">
+                                            <h3>{pl.auditLog.title}</h3>
+                                        </div>
+                                        <AuditLogTimeline
+                                            departmentLabel={(departmentId) => departments.find((department) =>
+                                                department.departmentId === departmentId)?.departmentCode?.value
+                                                || String(departmentId)}
+                                            reloadKey={reloadKey}
+                                            resourceId={delivery.id}
+                                            resourceType="DELIVERY"
+                                        />
+                                    </article>
                                 </div>
                             </section>
                             <aside className="deliveries-history-aside">
