@@ -2,7 +2,7 @@ import React from "react";
 import Department from "../../../../class/depots/Department";
 import pl from "../../../../i18n/translate";
 import {PickupPointDetails} from "../../../PickupPoints/model/PickupPoint";
-import {departmentCodeLabel, pickupMethodLabel} from "../../deliveryLabels";
+import {departmentCodeLabel, destinationDepartmentLabel, pickupMethodLabel} from "../../deliveryLabels";
 import {Delivery} from "../../model/Delivery";
 import {pickupPointAddress, pickupPointLabel} from "../pickupPointLabels";
 import DeliveryTile from "./DeliveryTile";
@@ -26,7 +26,7 @@ const pointValue = (pickupPoints: Record<string, PickupPointDetails>, pickupPoin
 function DeliveryRouteTile({delivery, departments, pickupPoints, onEdit, editDisabled}: DeliveryRouteTileProps) {
     return <DeliveryTile onEdit={onEdit} editDisabled={editDisabled} title={pl.deliveries.details.routeTitle} rows={[
         [pl.shipments.summary.originDepartment, departmentCodeLabel(departments, delivery.originDepartmentId)],
-        [pl.shipments.summary.destination, departmentCodeLabel(departments, delivery.destinationDepartmentId)],
+        [pl.shipments.summary.destination, destinationDepartmentLabel(departments, delivery)],
         [pl.shipments.form.fields.pickupMethod, pickupMethodLabel(delivery.pickupMethod)],
         [pl.shipments.summary.pickupPoint, pointValue(pickupPoints, delivery.pickupPointId)],
         [pl.shipments.summary.deliveryPickupPoint, pointValue(pickupPoints, delivery.deliveryPickupPointId)],
