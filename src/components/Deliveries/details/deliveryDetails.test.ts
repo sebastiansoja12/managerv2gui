@@ -58,6 +58,14 @@ describe("delivery details helpers", () => {
         expect(deliveryLifecycleStage(delivery({lifecycleStatus: "COMPLETED"}))).toBe("COMPLETED");
     });
 
+    it("does not treat pallet handling steps as a delivery attempt", () => {
+        const unloaded = {...step(2, "IN_PROGRESS"), commentCode: "UNLOADED_FROM_PALLET"};
+
+        expect(deliveryLifecycleStage(delivery({steps: [step(1, "IN_PROGRESS"), unloaded]}))).toBe("CREATED");
+        expect(deliveryLifecycleStage(delivery({supplierId: "4", steps: [step(1, "IN_PROGRESS"), unloaded]})))
+            .toBe("ASSIGNED");
+    });
+
     it("describes only changed fields between history entries", () => {
         const base = {stepCount: 1, destinationDepartmentId: "5"} as DeliveryHistoryEntry;
         const fields = [
