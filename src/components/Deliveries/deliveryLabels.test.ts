@@ -1,5 +1,6 @@
 import {setLanguage} from "../../i18n/languageStore";
-import {deliveryStepCommentText} from "./deliveryLabels";
+import Department from "../../class/depots/Department";
+import {deliveryStepCommentText, destinationDepartmentLabel} from "./deliveryLabels";
 
 describe("deliveryStepCommentText", () => {
     afterEach(() => setLanguage("pl"));
@@ -27,5 +28,32 @@ describe("deliveryStepCommentText", () => {
         expect(deliveryStepCommentText({comment: "Left at reception", commentCode: "NEW_CODE"})).toBe("Left at reception");
         expect(deliveryStepCommentText({comment: null, commentCode: "NEW_CODE"})).toBe("NEW_CODE");
         expect(deliveryStepCommentText({comment: null, commentCode: null})).toBeNull();
+    });
+});
+
+describe("destinationDepartmentLabel", () => {
+    afterEach(() => setLanguage("pl"));
+
+    const departments = [{departmentId: 7, departmentCode: {value: "WA1"}}] as unknown as Department[];
+
+    it.each([
+        ["pl", "Nie ustalono"],
+        ["en", "Not determined"],
+        ["de", "Nicht ermittelt"],
+    ] as const)("marks shipment delivery without destination as not determined in %s", (language, label) => {
+        setLanguage(language);
+
+        expect(destinationDepartmentLabel(departments, {targetType: "SHIPMENT", destinationDepartmentId: null}))
+            .toBe(label);
+    });
+
+    it("shows department code when destination is set", () => {
+        expect(destinationDepartmentLabel(departments, {targetType: "SHIPMENT", destinationDepartmentId: "7"}))
+            .toBe("WA1");
+    });
+
+    it("keeps dash for pallet delivery without destination", () => {
+        expect(destinationDepartmentLabel(departments, {targetType: "PALLET", destinationDepartmentId: null}))
+            .toBe("-");
     });
 });
