@@ -50,7 +50,7 @@ export type Delivery = {
 };
 
 export type DeliveryRelation = {
-    relation: "SOURCE" | "DERIVED" | "REPLACED_BY" | "REPLACES";
+    relation: "SOURCE" | "DERIVED" | "REPLACED_BY" | "REPLACES" | "CONTINUES" | "CONTINUED_BY";
     delivery: Delivery;
 };
 
@@ -132,6 +132,7 @@ export type DeliveryQueryFilter = {
     targetType?: string;
     method?: string;
     departmentId?: string;
+    missingDestination?: boolean;
     createdFrom?: string;
     createdTo?: string;
     sort?: DeliverySortField;
