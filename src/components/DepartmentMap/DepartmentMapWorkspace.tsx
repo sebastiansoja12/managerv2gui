@@ -32,22 +32,27 @@ import DepartmentMapService from "../../hooks/DepartmentMapService";
 import pl from "../../i18n/translate";
 import {departmentMapErrorCode, departmentMapErrorMessage, isStaleStateRejection} from "./departmentMapLabels";
 import MapCanvas, {MapMode, MapTool} from "./MapCanvas";
-import {generateLayout, randomSeed} from "./layoutGenerator";
+import {GeneratedLayout, generateLayout} from "./layoutGenerator";
 import MapElementPanel from "./MapElementPanel";
 import {
+    createElement,
+    directionCodesWithRamp,
     duplicateElement,
     generateRackSlots,
     LOCATION_STATUS_COLOR,
     normalizeRotation,
     snap,
+    suggestDestination,
     validateLayout,
 } from "./mapGeometry";
 import {
+    DepartmentDirectionDto,
     DepartmentIdValue,
     DepartmentMapDto,
     DepartmentMapLayout,
     DepartmentMapSummaryDto,
     LocationStatus,
+    isDirectionalType,
     MAP_ELEMENT_TYPES,
     MapElementDto,
     PalletLocationDto,
@@ -67,15 +72,11 @@ type CreateMapForm = {
     height: string;
     gridSize: string;
     autoLayout: boolean;
-    includeSorter: boolean;
-    slotCapacity: string;
 };
 
 type GeneratorForm = {
     width: string;
     height: string;
-    includeSorter: boolean;
-    slotCapacity: string;
 };
 
 const UNDO_LIMIT = 50;
@@ -97,23 +98,27 @@ const emptyCreateForm = (departmentCode: string): CreateMapForm => ({
     height: "40",
     gridSize: "1",
     autoLayout: true,
-    includeSorter: true,
-    slotCapacity: "1",
 });
 
 const generatorLabels = () => ({
     hall: pl.departmentMap.generator.labels.hall,
     inbound: pl.departmentMap.generator.labels.inbound,
-    outbound: pl.departmentMap.generator.labels.outbound,
+    inboundRamp: pl.departmentMap.generator.labels.inboundRamp,
+    infeed: pl.departmentMap.generator.labels.infeed,
+    workstation: pl.departmentMap.generator.labels.workstation,
     sorter: pl.departmentMap.generator.labels.sorter,
     chute: pl.departmentMap.generator.labels.chute,
-    mainAisle: pl.departmentMap.generator.labels.mainAisle,
-    aisle: pl.departmentMap.generator.labels.aisle,
 });
 
-const parseCapacity = (value: string) => {
-    const capacity = Number(value);
-    return Number.isInteger(capacity) && capacity >= 1 && capacity <= 99 ? capacity : null;
+const directionCodesOf = (directions: DepartmentDirectionDto[] = []) =>
+    directions.map((direction) => direction.departmentCode);
+
+const generatedMessage = (template: string, generated: GeneratedLayout, name = "") => {
+    const message = template.replace("{name}", name)
+        .replace("{inboundRamps}", String(generated.inboundRampCount))
+        .replace("{workstations}", String(generated.workstationCount))
+        .replace("{ramps}", String(generated.rampCount));
+    return generated.rampCount ? message : `${message} ${pl.departmentMap.generator.noDirections}`;
 };
 
 type MapDimensionFieldProps = {
@@ -170,8 +175,7 @@ function DepartmentMapWorkspace({departmentId, departmentCode}: DepartmentMapWor
     const [creating, setCreating] = useState(false);
     const [deleteOpen, setDeleteOpen] = useState(false);
     const [generatorOpen, setGeneratorOpen] = useState(false);
-    const [generatorForm, setGeneratorForm] = useState<GeneratorForm>({width: "60", height: "40", includeSorter: true,
-        slotCapacity: "1"});
+    const [generatorForm, setGeneratorForm] = useState<GeneratorForm>({width: "60", height: "40"});
     const [generatorError, setGeneratorError] = useState<string | null>(null);
     const [deleting, setDeleting] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
@@ -201,6 +205,8 @@ function DepartmentMapWorkspace({departmentId, departmentCode}: DepartmentMapWor
         [layout, selectedElementId]);
 
     const selectedLocation = selectedElementId ? locationsById[selectedElementId] : undefined;
+
+    const directionCodes = useMemo(() => directionCodesOf(map?.directions), [map]);
 
     const loadSummaries = useCallback(async (preferredMapId?: string | null) => {
         setSummariesLoading(true);
@@ -356,14 +362,14 @@ function DepartmentMapWorkspace({departmentId, departmentCode}: DepartmentMapWor
         if (!map || !layout) {
             return;
         }
-        const problems = validateLayout(layout.elements, layout.width, layout.height);
+        const problems = validateLayout(layout.elements, layout.width, layout.height, directionCodes);
         if (!layout.name.trim()) {
             setValidationProblems([translations.validation.nameRequired]);
             return;
         }
         if (problems.length) {
-            setValidationProblems(problems.map((problem) => translations.validation[problem.type]
-                .replace("{value}", problem.type === "missingCode" ? "" : problem.value)));
+            setValidationProblems(Array.from(new Set(problems.map((problem) => translations.validation[problem.type]
+                .replace("{value}", problem.type === "missingCode" ? "" : problem.value)))));
             return;
         }
         setValidationProblems([]);
@@ -379,6 +385,8 @@ function DepartmentMapWorkspace({departmentId, departmentCode}: DepartmentMapWor
                     label: element.label && element.label.trim() ? element.label.trim() : null,
                     locationCode: element.type === "STORAGE_LOCATION" ? (element.locationCode || "").trim().toUpperCase() : null,
                     capacity: element.type === "STORAGE_LOCATION" ? element.capacity || 1 : null,
+                    destinationDepartmentCode: isDirectionalType(element.type)
+                        ? element.destinationDepartmentCode || null : null,
                 })),
                 version: map.version,
             });
@@ -459,11 +467,6 @@ function DepartmentMapWorkspace({departmentId, departmentCode}: DepartmentMapWor
             setCreateError(translations.create.gridInvalid);
             return;
         }
-        const slotCapacity = parseCapacity(createForm.slotCapacity);
-        if (createForm.autoLayout && slotCapacity === null) {
-            setCreateError(translations.generator.capacityInvalid);
-            return;
-        }
         setCreating(true);
         setCreateError(null);
         try {
@@ -476,8 +479,8 @@ function DepartmentMapWorkspace({departmentId, departmentCode}: DepartmentMapWor
             });
             let message = translations.create.created.replace("{name}", response.data.name);
             if (createForm.autoLayout) {
-                const generated = generateLayout({width, height, seed: randomSeed(), includeSorter: createForm.includeSorter,
-                    slotCapacity: slotCapacity || 1, labels: generatorLabels()});
+                const generated = generateLayout({width, height,
+                    directionCodes: directionCodesOf(response.data.directions), labels: generatorLabels()});
                 try {
                     await DepartmentMapService.saveLayout(response.data.mapId, {
                         name: response.data.name,
@@ -487,9 +490,8 @@ function DepartmentMapWorkspace({departmentId, departmentCode}: DepartmentMapWor
                         version: response.data.version,
                         elements: generated.elements,
                     });
-                    message = translations.generator.createdWithLayout.replace("{name}", response.data.name)
-                        .replace("{racks}", String(generated.rackCount))
-                        .replace("{locations}", String(generated.locationCount));
+                    message = generatedMessage(translations.generator.createdWithLayout, generated,
+                        response.data.name);
                 } catch (layoutError) {
                     setError(departmentMapErrorMessage(layoutError, translations.generator.layoutSaveError));
                 }
@@ -519,28 +521,36 @@ function DepartmentMapWorkspace({departmentId, departmentCode}: DepartmentMapWor
         }
         const width = Number(generatorForm.width.replace(",", "."));
         const height = Number(generatorForm.height.replace(",", "."));
-        const slotCapacity = parseCapacity(generatorForm.slotCapacity);
         if (![width, height].every((value) => Number.isFinite(value) && value >= 1 && value <= 5000)) {
             setGeneratorError(translations.create.dimensionsInvalid);
-            return;
-        }
-        if (slotCapacity === null) {
-            setGeneratorError(translations.generator.capacityInvalid);
             return;
         }
         if (map.locations.some((location) => location.pallets.length > 0)) {
             setGeneratorError(translations.generator.occupiedBlocked);
             return;
         }
-        const generated = generateLayout({width, height, seed: randomSeed(), includeSorter: generatorForm.includeSorter,
-            slotCapacity, labels: generatorLabels()});
+        const generated = generateLayout({width, height, directionCodes, labels: generatorLabels()});
         pushUndo();
         setLayout({...layout, width, height, elements: generated.elements});
         setSelectedElementId(null);
         setValidationProblems([]);
         setGeneratorOpen(false);
-        setNotice(translations.generator.generated.replace("{racks}", String(generated.rackCount))
-            .replace("{locations}", String(generated.locationCount)));
+        setNotice(generatedMessage(translations.generator.generated, generated));
+    };
+
+    const addRamp = (code: string) => {
+        if (!layout) {
+            return;
+        }
+        const ramp = createElement("RAMP", 0, 0, layout.elements);
+        const offset = layout.elements.filter((element) => element.type === "RAMP").length * (ramp.width + 0.5);
+        addElements([{
+            ...ramp,
+            x: Math.max(0, Math.min(layout.width - ramp.width, 1 + offset)),
+            y: Math.max(0, layout.height - ramp.height - 0.5),
+            label: code,
+            destinationDepartmentCode: code,
+        }], ramp.elementId);
     };
 
     const deleteMap = async () => {
@@ -669,6 +679,32 @@ function DepartmentMapWorkspace({departmentId, departmentCode}: DepartmentMapWor
         [status]: (map?.locations || []).filter((location) => location.status === status).length,
     }), {FREE: 0, PARTIALLY_OCCUPIED: 0, OCCUPIED: 0, RESERVED: 0}), [map]);
 
+    const renderDirections = () => {
+        const served = directionCodesWithRamp(layout?.elements || []);
+        return (
+            <section className="department-map-panel-section department-map-directions">
+                <Typography variant="h6">{translations.editor.directions.title}</Typography>
+                <p className="department-map-hint">{translations.editor.directions.description}</p>
+                {directionCodes.length ? (
+                    <ul>
+                        {directionCodes.map((code) => (
+                            <li key={code}>
+                                <strong>{code}</strong>
+                                {served.has(code) ? (
+                                    <span className="department-map-hint">{translations.editor.directions.served}</span>
+                                ) : (
+                                    <Button size="small" startIcon={<Add />} variant="outlined" onClick={() => addRamp(code)}>
+                                        {translations.editor.directions.addRamp}
+                                    </Button>
+                                )}
+                            </li>
+                        ))}
+                    </ul>
+                ) : <p className="department-map-hint">{translations.editor.directions.noConnections}</p>}
+            </section>
+        );
+    };
+
     const renderSidePanel = () => {
         if (!layout || !map) {
             return null;
@@ -678,7 +714,9 @@ function DepartmentMapWorkspace({departmentId, departmentCode}: DepartmentMapWor
                 <>
                     <MapElementPanel
                         element={selectedElement}
+                        directionCodes={directionCodes}
                         elementCount={layout.elements.length}
+                        elements={layout.elements}
                         location={selectedElement ? locationsById[selectedElement.elementId] : undefined}
                         onChange={(element) => updateElement(element)}
                         onDelete={deleteElement}
@@ -712,6 +750,7 @@ function DepartmentMapWorkspace({departmentId, departmentCode}: DepartmentMapWor
                             </div>
                         </section>
                     ) : null}
+                    {!selectedElement ? renderDirections() : null}
                 </>
             );
         }
@@ -986,7 +1025,11 @@ function DepartmentMapWorkspace({departmentId, departmentCode}: DepartmentMapWor
                                 width={layout.width}
                                 onBeginChange={pushUndo}
                                 onCreateElement={(element) => {
-                                    addElements([element], element.elementId);
+                                    const destination = isDirectionalType(element.type)
+                                        ? suggestDestination(layout.elements, directionCodes) : null;
+                                    const created = destination ? {...element, destinationDepartmentCode: destination,
+                                        label: element.type === "RAMP" ? destination : element.label} : element;
+                                    addElements([created], created.elementId);
                                     setTool("SELECT");
                                 }}
                                 onElementsChange={setElements}
@@ -1034,14 +1077,6 @@ function DepartmentMapWorkspace({departmentId, departmentCode}: DepartmentMapWor
                     {createForm.autoLayout ? (
                         <div className="department-map-generator-options">
                             <p className="department-map-hint">{translations.generator.description}</p>
-                            <label className="department-map-toggle">
-                                <input checked={createForm.includeSorter} type="checkbox"
-                                       onChange={(event) => setCreateForm({...createForm, includeSorter: event.target.checked})} />
-                                {translations.generator.includeSorter}
-                            </label>
-                            <TextField label={translations.generator.slotCapacity} size="small" type="number"
-                                       value={createForm.slotCapacity}
-                                       onChange={(event) => setCreateForm({...createForm, slotCapacity: event.target.value})} />
                         </div>
                     ) : null}
                 </DialogContent>
@@ -1067,15 +1102,7 @@ function DepartmentMapWorkspace({departmentId, departmentCode}: DepartmentMapWor
                         <TextField label={translations.create.fields.height} required size="small" type="number"
                                    value={generatorForm.height}
                                    onChange={(event) => setGeneratorForm({...generatorForm, height: event.target.value})} />
-                        <TextField label={translations.generator.slotCapacity} size="small" type="number"
-                                   value={generatorForm.slotCapacity}
-                                   onChange={(event) => setGeneratorForm({...generatorForm, slotCapacity: event.target.value})} />
                     </div>
-                    <label className="department-map-toggle">
-                        <input checked={generatorForm.includeSorter} type="checkbox"
-                               onChange={(event) => setGeneratorForm({...generatorForm, includeSorter: event.target.checked})} />
-                        {translations.generator.includeSorter}
-                    </label>
                 </DialogContent>
                 <DialogActions>
                     <Button variant="outlined" onClick={() => setGeneratorOpen(false)}>{pl.common.cancel}</Button>

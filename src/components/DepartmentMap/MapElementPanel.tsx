@@ -2,13 +2,21 @@ import React, {useEffect, useState} from "react";
 import {Button, MenuItem, TextField, Typography} from "components/ui";
 import {ContentCopy, DeleteOutline, GridView, Loop} from "components/ui/icons";
 import pl from "../../i18n/translate";
-import {MAP_ELEMENT_TYPES, MapElementDto, MapElementType, StorageLocationDto} from "./model/DepartmentMap";
-import {normalizeRotation} from "./mapGeometry";
+import {
+    isDirectionalType,
+    MAP_ELEMENT_TYPES,
+    MapElementDto,
+    MapElementType,
+    StorageLocationDto,
+} from "./model/DepartmentMap";
+import {normalizeRotation, suggestDestination} from "./mapGeometry";
 
 type MapElementPanelProps = {
     element: MapElementDto | null;
     location?: StorageLocationDto;
     elementCount: number;
+    elements: MapElementDto[];
+    directionCodes: string[];
     onChange: (element: MapElementDto) => void;
     onDelete: (element: MapElementDto) => void;
     onDuplicate: (element: MapElementDto) => void;
@@ -28,6 +36,8 @@ function MapElementPanel({
                              element,
                              location,
                              elementCount,
+                             elements,
+                             directionCodes,
                              onChange,
                              onDelete,
                              onDuplicate,
@@ -87,7 +97,15 @@ function MapElementPanel({
         type,
         locationCode: type === "STORAGE_LOCATION" ? element.locationCode || element.label || "" : null,
         capacity: type === "STORAGE_LOCATION" ? element.capacity || 1 : null,
+        destinationDepartmentCode: isDirectionalType(type)
+            ? element.destinationDepartmentCode || suggestDestination(elements, directionCodes)
+            : null,
     });
+
+    const destination = element.destinationDepartmentCode || "";
+    const destinationOptions = destination && !directionCodes.includes(destination)
+        ? directionCodes.concat(destination)
+        : directionCodes;
 
     const slotCountValue = Number(slotCount);
     const slotCapacityValue = Number(slotCapacity);
@@ -135,6 +153,28 @@ function MapElementPanel({
                             onChange={(event) => onChange({...element, capacity: Number(event.target.value)})}
                         />
                     </>
+                ) : null}
+                {isDirectionalType(element.type) ? (
+                    <TextField
+                        select
+                        error={!destination || !directionCodes.includes(destination)}
+                        helperText={!directionCodes.length ? translations.directions.noConnections
+                            : destination && !directionCodes.includes(destination)
+                                ? translations.directions.notConnected : translations.directions.destinationHint}
+                        label={translations.fields.destination}
+                        required
+                        size="small"
+                        value={destination}
+                        onChange={(event) => onChange({
+                            ...element,
+                            destinationDepartmentCode: event.target.value || null,
+                            label: element.type === "RAMP" && (!element.label || element.label === destination)
+                                ? event.target.value : element.label,
+                        })}
+                    >
+                        {!destination ? <MenuItem value="">{pl.common.dash}</MenuItem> : null}
+                        {destinationOptions.map((code) => <MenuItem key={code} value={code}>{code}</MenuItem>)}
+                    </TextField>
                 ) : null}
                 {numericFields.map((field) => (
                     <TextField

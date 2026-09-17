@@ -396,7 +396,7 @@ function MapCanvas({
                             ? (location ? LOCATION_STATUS_COLOR[location.status] : "#9AA6B5")
                             : element.color || "#FFFFFF";
                         const fontSize = elementFontSize(element);
-                        const text = isLocation ? element.locationCode : element.label;
+                        const text = isLocation ? element.locationCode : element.label || element.destinationDepartmentCode;
                         const occupancy = isLocation && location ? `${location.pallets.length}/${location.capacity}` : null;
                         const ariaLabel = isLocation
                             ? pl.departmentMap.canvas.locationLabel
@@ -449,7 +449,7 @@ function MapCanvas({
                                 <rect
                                     className="department-map-shape"
                                     fill={fill}
-                                    fillOpacity={element.type === "ROOM" || element.type === "ZONE" ? 0.55 : 0.92}
+                                    fillOpacity={["ROOM", "ZONE", "INBOUND"].includes(element.type) ? 0.55 : 0.92}
                                     height={element.height}
                                     rx={element.type === "ZONE" ? Math.min(element.width, element.height) * 0.06 : 0}
                                     vectorEffect="non-scaling-stroke"
@@ -457,7 +457,7 @@ function MapCanvas({
                                     x={-element.width / 2}
                                     y={-element.height / 2}
                                 />
-                                {element.type === "SORTER" ? (
+                                {element.type === "SORTER" || element.type === "CHUTE" ? (
                                     <>
                                         <path className="department-map-sorter-chevrons" d={sorterChevrons(element)}
                                               fill="none" pointerEvents="none" vectorEffect="non-scaling-stroke" />
@@ -465,6 +465,11 @@ function MapCanvas({
                                               vectorEffect="non-scaling-stroke" x1={-element.width / 2} x2={element.width / 2}
                                               y1={0} y2={0} />
                                     </>
+                                ) : null}
+                                {element.type === "RAMP" || element.type === "INBOUND_RAMP" ? (
+                                    <line className="department-map-ramp-door" pointerEvents="none"
+                                          vectorEffect="non-scaling-stroke" x1={-element.width / 2} x2={element.width / 2}
+                                          y1={element.height / 2} y2={element.height / 2} />
                                 ) : null}
                                 {location?.reservation && !editable ? (
                                     <rect className="department-map-reservation-mark" fill="none"
