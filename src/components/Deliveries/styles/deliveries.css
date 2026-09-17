@@ -411,7 +411,7 @@ a.dlv-target:hover {
     color: var(--muted-foreground);
     font-size: 0.72rem;
     font-weight: 700;
-    text-transform: uppercase;
+    text-transform: none;
 }
 
 .deliveries-attempt-details dd {
