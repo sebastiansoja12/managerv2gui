@@ -1,4 +1,4 @@
-import {LocationStatus, MapElementDto, MapElementType, StorageLocationDto} from "./model/DepartmentMap";
+import {isDirectionalType, LocationStatus, MapElementDto, MapElementType, StorageLocationDto} from "./model/DepartmentMap";
 
 export type Point = {
     x: number;
@@ -23,7 +23,12 @@ export const DEFAULT_ELEMENT_SIZE: Record<MapElementType, {width: number; height
     AISLE: {width: 10, height: 3},
     ZONE: {width: 6, height: 6},
     RACK: {width: 6, height: 1.2},
+    INBOUND: {width: 8, height: 6},
+    INBOUND_RAMP: {width: 3.5, height: 2.5},
+    WORKSTATION: {width: 1.2, height: 1.2},
     SORTER: {width: 12, height: 1.2},
+    CHUTE: {width: 3, height: 1},
+    RAMP: {width: 3.5, height: 2.5},
     STORAGE_LOCATION: {width: 1.2, height: 1},
 };
 
@@ -33,7 +38,12 @@ export const DEFAULT_ELEMENT_COLOR: Record<MapElementType, string> = {
     AISLE: "#F6F1DE",
     ZONE: "#DCEFE6",
     RACK: "#B9C7D8",
+    INBOUND: "#D6E4F5",
+    INBOUND_RAMP: "#7FA7E8",
+    WORKSTATION: "#5BB98C",
     SORTER: "#4B5563",
+    CHUTE: "#8A94A6",
+    RAMP: "#F2C14E",
     STORAGE_LOCATION: "#FFFFFF",
 };
 
@@ -167,7 +177,17 @@ export const createElement = (type: MapElementType, x: number, y: number, elemen
         color: DEFAULT_ELEMENT_COLOR[type],
         locationCode: type === "STORAGE_LOCATION" ? nextLocationCode(elements) : null,
         capacity: type === "STORAGE_LOCATION" ? 1 : null,
+        destinationDepartmentCode: null,
     };
+};
+
+export const directionCodesWithRamp = (elements: MapElementDto[]) => new Set(elements
+    .filter((element) => element.type === "RAMP" && element.destinationDepartmentCode)
+    .map((element) => element.destinationDepartmentCode as string));
+
+export const suggestDestination = (elements: MapElementDto[], directionCodes: string[]) => {
+    const served = directionCodesWithRamp(elements);
+    return directionCodes.find((code) => !served.has(code)) || directionCodes[0] || null;
 };
 
 export const generateRackSlots = (rack: MapElementDto, count: number, prefix: string, capacity: number,
@@ -202,6 +222,7 @@ export const generateRackSlots = (rack: MapElementDto, count: number, prefix: st
             color: DEFAULT_ELEMENT_COLOR.STORAGE_LOCATION,
             locationCode: code,
             capacity,
+            destinationDepartmentCode: null,
         });
     }
     return slots;
@@ -234,8 +255,13 @@ export const findDuplicateLocationCodes = (elements: MapElementDto[]) => {
     return result;
 };
 
-export const validateLayout = (elements: MapElementDto[], width: number, height: number) => {
-    const problems: Array<{type: "missingCode" | "duplicateCode" | "outside" | "capacity"; value: string}> = [];
+export type LayoutProblemType = "missingCode" | "duplicateCode" | "outside" | "capacity" | "missingDestination"
+    | "unknownDestination" | "chuteWithoutRamp";
+
+export const validateLayout = (elements: MapElementDto[], width: number, height: number,
+                               directionCodes?: string[]) => {
+    const problems: Array<{type: LayoutProblemType; value: string}> = [];
+    const rampDirections = directionCodesWithRamp(elements);
     elements.forEach((element) => {
         const center = elementCenter(element);
         if (center.x < 0 || center.y < 0 || center.x > width || center.y > height) {
@@ -247,6 +273,17 @@ export const validateLayout = (elements: MapElementDto[], width: number, height:
             }
             if (!element.capacity || element.capacity < 1 || element.capacity > 99) {
                 problems.push({type: "capacity", value: element.locationCode || element.elementId});
+            }
+        }
+        if (isDirectionalType(element.type)) {
+            const destination = element.destinationDepartmentCode;
+            const name = element.label || element.type;
+            if (!destination) {
+                problems.push({type: "missingDestination", value: name});
+            } else if (directionCodes && !directionCodes.includes(destination)) {
+                problems.push({type: "unknownDestination", value: destination});
+            } else if (element.type === "CHUTE" && !rampDirections.has(destination)) {
+                problems.push({type: "chuteWithoutRamp", value: destination});
             }
         }
     });
