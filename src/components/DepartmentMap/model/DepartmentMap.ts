@@ -1,6 +1,13 @@
-export const MAP_ELEMENT_TYPES = ["ROOM", "WALL", "AISLE", "ZONE", "RACK", "SORTER", "STORAGE_LOCATION"] as const;
+export const MAP_ELEMENT_TYPES = [
+    "ROOM", "WALL", "AISLE", "ZONE", "RACK", "INBOUND", "INBOUND_RAMP", "WORKSTATION", "SORTER", "CHUTE", "RAMP",
+    "STORAGE_LOCATION",
+] as const;
 
 export type MapElementType = typeof MAP_ELEMENT_TYPES[number];
+
+export const DIRECTIONAL_ELEMENT_TYPES: MapElementType[] = ["CHUTE", "RAMP"];
+
+export const isDirectionalType = (type: MapElementType) => DIRECTIONAL_ELEMENT_TYPES.includes(type);
 
 export type LocationStatus = "FREE" | "PARTIALLY_OCCUPIED" | "OCCUPIED" | "RESERVED";
 
@@ -20,6 +27,12 @@ export type MapElementDto = {
     color?: string | null;
     locationCode?: string | null;
     capacity?: number | null;
+    destinationDepartmentCode?: string | null;
+};
+
+export type DepartmentDirectionDto = {
+    departmentId: number | string;
+    departmentCode: string;
 };
 
 export type PalletPlacementDto = {
@@ -58,6 +71,7 @@ export type DepartmentMapDto = {
     updatedAt: string;
     elements: MapElementDto[];
     locations: StorageLocationDto[];
+    directions: DepartmentDirectionDto[];
 };
 
 export type DepartmentMapSummaryDto = {
