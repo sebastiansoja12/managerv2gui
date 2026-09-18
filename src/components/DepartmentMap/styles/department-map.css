@@ -355,7 +355,7 @@
     color: var(--primary);
     font-size: 0.72rem;
     font-weight: 900;
-    text-transform: uppercase;
+    text-transform: none;
 }
 
 .department-map-panel-section {
@@ -634,6 +634,57 @@
     stroke: #1f2933;
     stroke-width: 3px;
     vector-effect: non-scaling-stroke;
+}
+
+.department-map-element-chute .department-map-shape {
+    stroke: #4b5563;
+    stroke-width: 1px;
+}
+
+.department-map-element-chute .department-map-text,
+.department-map-element-ramp .department-map-text {
+    font-weight: 700;
+}
+
+.department-map-element-ramp .department-map-shape {
+    stroke: #8a6100;
+    stroke-width: 1.5px;
+}
+
+.department-map-ramp-door {
+    stroke: #1f2933;
+    stroke-dasharray: 4 3;
+    stroke-width: 3px;
+}
+
+.department-map-element-inbound_ramp .department-map-shape {
+    stroke: #2c4f9e;
+    stroke-width: 1.5px;
+}
+
+.department-map-element-workstation .department-map-shape {
+    stroke: #1f6b47;
+    stroke-width: 1px;
+}
+
+.department-map-element-inbound .department-map-shape {
+    stroke: #3a66d6;
+    stroke-dasharray: 6 4;
+}
+
+.department-map-directions ul {
+    display: grid;
+    gap: 6px;
+    list-style: none;
+    margin: 8px 0;
+    padding: 0;
+}
+
+.department-map-directions li {
+    align-items: center;
+    display: flex;
+    gap: 8px;
+    justify-content: space-between;
 }
 
 @keyframes department-map-flow {
