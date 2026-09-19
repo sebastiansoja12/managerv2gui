@@ -1,20 +1,27 @@
 import React, {useCallback, useEffect, useMemo, useRef, useState} from "react";
 import * as L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import {Alert, Button, Typography} from "components/ui";
+import {Alert, Button, CircularProgress, Typography} from "components/ui";
 import {Coordinates} from "../../class/depots/Department";
 import Department from "../../class/depots/Department";
+import DeliveryAreaService from "../../hooks/DeliveryAreaService";
 import pl from "../../i18n/translate";
-import {DeliveryArea, readAreas, storageKeyFor, writeAreas} from "./deliveryAreaDraft";
+import {deliveryAreaErrorMessage} from "./deliveryAreaErrorMessage";
 import {AreaPoint, insertionIndex, isValidArea} from "./deliveryAreaGeometry";
-import {countryBoundary, GeneratedDepartmentAreas, generateDeliveryAreas, isEligibleForAutomaticAreas} from "./generateDeliveryAreas";
+import {DepartmentDeliveryAreasDto} from "./dto/DeliveryAreaDto";
+import {
+    DeliveryArea,
+    fromDeliveryAreaDto,
+    notifyDeliveryAreasChanged,
+    toDeliveryAreaRequest,
+} from "./model/DeliveryArea";
+import {countryBoundary, isEligibleForAutomaticAreas} from "./polandBoundary";
 import "./styles/delivery-area-editor.css";
 
 type DeliveryAreaEditorProps = {
     departmentId: string;
     departmentCode: string;
     coordinates?: Coordinates | null;
-    operatorId?: number;
     canEdit: boolean;
     active: boolean;
     automaticOnly?: boolean;
@@ -36,16 +43,18 @@ const toLatLng = ({latitude, longitude}: AreaPoint): L.LatLngTuple => [latitude,
 
 
 const DeliveryAreaEditor: React.FC<DeliveryAreaEditorProps> = ({
-    departmentId, departmentCode, coordinates, operatorId, canEdit, active,
+    departmentId, departmentCode, coordinates, canEdit, active,
     automaticOnly = false, automaticDepartments = EMPTY_DEPARTMENTS, onAutomaticClose, onAutomaticApplied,
 }) => {
     const labels = pl.departments.deliveryArea;
-    const storageKey = storageKeyFor(operatorId, departmentId);
     const mapElementRef = useRef<HTMLDivElement | null>(null);
     const mapRef = useRef<L.Map | null>(null);
     const layerRef = useRef<L.LayerGroup | null>(null);
     const previewRef = useRef<L.Polyline | null>(null);
-    const [areas, setAreas] = useState<DeliveryArea[]>(() => readAreas(storageKey));
+    const [areas, setAreas] = useState<DeliveryArea[]>([]);
+    const [loading, setLoading] = useState(!automaticOnly);
+    const [saving, setSaving] = useState(false);
+    const [reloadRevision, setReloadRevision] = useState(0);
     const [selectedAreaId, setSelectedAreaId] = useState<string | null>(null);
     const [selectedVertexIndex, setSelectedVertexIndex] = useState<number | null>(null);
     const [mode, setMode] = useState<EditorMode>("idle");
@@ -63,7 +72,7 @@ const DeliveryAreaEditor: React.FC<DeliveryAreaEditorProps> = ({
     const [selectedDepartmentIds, setSelectedDepartmentIds] = useState<number[]>(
         () => automaticDepartments.filter(isEligibleForAutomaticAreas).map((item) => item.departmentId),
     );
-    const [generatedPreview, setGeneratedPreview] = useState<GeneratedDepartmentAreas[]>([]);
+    const [generatedPreview, setGeneratedPreview] = useState<DepartmentDeliveryAreasDto[]>([]);
     const selectedArea = useMemo(() => areas.find((area) => area.id === selectedAreaId), [areas, selectedAreaId]);
     const latitude = coordinates?.latitude;
     const longitude = coordinates?.longitude;
@@ -73,7 +82,7 @@ const DeliveryAreaEditor: React.FC<DeliveryAreaEditorProps> = ({
     const tileAttribution = process.env.REACT_APP_MAP_TILE_ATTRIBUTION || DEFAULT_ATTRIBUTION;
 
     useEffect(() => {
-        setAreas(readAreas(storageKey));
+        setAreas([]);
         setSelectedAreaId(null);
         setSelectedVertexIndex(null);
         setMode("idle");
@@ -91,13 +100,31 @@ const DeliveryAreaEditor: React.FC<DeliveryAreaEditorProps> = ({
             setExcludedCount(automaticDepartments.length - eligible.length);
             setSelectedDepartmentIds(eligible.map((item) => item.departmentId));
         }
-    }, [automaticDepartments, automaticOnly, storageKey]);
+    }, [automaticDepartments, automaticOnly, departmentId]);
 
     useEffect(() => {
-        if (active && !dirty && automaticStep === "closed") {
-            setAreas(readAreas(storageKey));
+        if (automaticOnly || !active || dirty) {
+            return undefined;
         }
-    }, [active, automaticStep, dirty, storageKey]);
+        let current = true;
+        setLoading(true);
+        DeliveryAreaService.getByDepartment(departmentId)
+            .then((response) => {
+                if (!current) return;
+                setAreas((response.data || []).map(fromDeliveryAreaDto));
+                setError(null);
+            })
+            .catch((cause) => {
+                if (current) setError(deliveryAreaErrorMessage(cause, labels.loadError));
+            })
+            .finally(() => {
+                if (current) setLoading(false);
+            });
+        return () => {
+            current = false;
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [active, automaticOnly, departmentId, reloadRevision]);
 
     useEffect(() => {
         if (!mapElementRef.current) {
@@ -141,7 +168,8 @@ const DeliveryAreaEditor: React.FC<DeliveryAreaEditorProps> = ({
             nextAreaNumber += 1;
         }
         const area: DeliveryArea = {
-            id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+            id: `new-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+            deliveryAreaId: null,
             name: `${labels.areaName} ${nextAreaNumber}`,
             points: draftPoints,
         };
@@ -256,7 +284,7 @@ const DeliveryAreaEditor: React.FC<DeliveryAreaEditorProps> = ({
                         color, fillColor: color, fillOpacity: 0.23, weight: 2,
                     }).bindTooltip(generated.departmentCode).addTo(layer);
                 });
-                const branch = eligibleDepartments.find((item) => String(item.departmentId) === generated.departmentId);
+                const branch = eligibleDepartments.find((item) => String(item.departmentId) === String(generated.departmentId));
                 if (branch?.coordinates) {
                     L.circleMarker([branch.coordinates.latitude, branch.coordinates.longitude], {
                         color: "#ffffff", fillColor: color, fillOpacity: 1, radius: 6, weight: 2,
@@ -358,36 +386,32 @@ const DeliveryAreaEditor: React.FC<DeliveryAreaEditorProps> = ({
         return () => cancelAnimationFrame(frame);
     }, [active, automaticOnly]);
 
-    const previewAutomatic = () => {
-        const selected = eligibleDepartments.filter((item) => selectedDepartmentIds.includes(item.departmentId));
-        if (selected.length === 0) {
+    const previewAutomatic = async () => {
+        if (selectedDepartmentIds.length === 0) {
             setError(labels.automaticSelectOne);
             return;
         }
+        setSaving(true);
         try {
-            setGeneratedPreview(generateDeliveryAreas(selected));
+            setGeneratedPreview((await DeliveryAreaService.previewAutomatic(selectedDepartmentIds)).data || []);
             setAutomaticStep("preview");
             setError(null);
             requestAnimationFrame(fitPoland);
         } catch (cause) {
-            setError(cause instanceof Error && cause.message === "DUPLICATE_COORDINATES"
-                ? labels.automaticDuplicate : labels.automaticGenerateError);
+            setError(deliveryAreaErrorMessage(cause, labels.automaticGenerateError));
+        } finally {
+            setSaving(false);
         }
     };
 
-    const applyAutomatic = () => {
-        let previous: Array<{key: string; value: string | null}> = [];
+    const applyAutomatic = async () => {
+        setSaving(true);
         try {
-            previous = generatedPreview.map((generated) => {
-                const key = storageKeyFor(operatorId, generated.departmentId);
-                return {key, value: window.localStorage.getItem(key)};
-            });
-            generatedPreview.forEach((generated) => {
-                writeAreas(storageKeyFor(operatorId, generated.departmentId), generated.areas);
-            });
-            const current = generatedPreview.find((generated) => generated.departmentId === departmentId);
+            const applied = (await DeliveryAreaService.applyAutomatic(
+                generatedPreview.map((generated) => generated.departmentId))).data || [];
+            const current = applied.find((generated) => String(generated.departmentId) === departmentId);
             if (current) {
-                setAreas(current.areas);
+                setAreas(current.areas.map(fromDeliveryAreaDto));
                 setSelectedAreaId(null);
                 setSelectedVertexIndex(null);
             }
@@ -395,32 +419,38 @@ const DeliveryAreaEditor: React.FC<DeliveryAreaEditorProps> = ({
             setGeneratedPreview([]);
             setDirty(false);
             setError(null);
-            setNotice(labels.automaticApplied.replace("{count}", String(previous.length)));
-            onAutomaticApplied?.(previous.length);
-        } catch {
-            previous.forEach(({key, value}) => {
-                try {
-                    if (value === null) window.localStorage.removeItem(key);
-                    else window.localStorage.setItem(key, value);
-                } catch { /* The browser may have disabled storage. */ }
-            });
-            setError(labels.automaticApplyError);
+            setNotice(labels.automaticApplied.replace("{count}", String(applied.length)));
+            notifyDeliveryAreasChanged();
+            onAutomaticApplied?.(applied.length);
+        } catch (cause) {
+            setError(deliveryAreaErrorMessage(cause, labels.automaticApplyError));
+        } finally {
+            setSaving(false);
         }
     };
 
-    const save = () => {
+    const save = async () => {
+        setSaving(true);
         try {
-            writeAreas(storageKey, areas);
+            const saved = (await DeliveryAreaService.replaceDepartmentAreas(departmentId,
+                areas.map(toDeliveryAreaRequest))).data || [];
+            const savedAreas = saved.map(fromDeliveryAreaDto);
+            const selectedIndex = areas.findIndex((area) => area.id === selectedAreaId);
+            setAreas(savedAreas);
+            setSelectedAreaId(selectedIndex >= 0 ? savedAreas[selectedIndex]?.id ?? null : null);
             setDirty(false);
             setNotice(labels.saved);
             setError(null);
-        } catch {
-            setError(labels.saveError);
+            notifyDeliveryAreasChanged();
+        } catch (cause) {
+            setError(deliveryAreaErrorMessage(cause, labels.saveError));
+        } finally {
+            setSaving(false);
         }
     };
 
     const discard = () => {
-        setAreas(readAreas(storageKey));
+        setReloadRevision((current) => current + 1);
         setSelectedAreaId(null);
         setSelectedVertexIndex(null);
         setMode("idle");
@@ -444,17 +474,18 @@ const DeliveryAreaEditor: React.FC<DeliveryAreaEditorProps> = ({
                             {expanded ? labels.exitFullScreen : labels.fullScreen}
                         </Button>
                         {canEdit ? <>
-                            <Button variant="outlined" disabled={automaticStep !== "closed" || (!dirty && mode === "idle")} onClick={discard}>
+                            <Button variant="outlined" disabled={saving || automaticStep !== "closed" || (!dirty && mode === "idle")} onClick={discard}>
                                 {labels.discard}
                             </Button>
-                            <Button variant="contained" disabled={automaticStep !== "closed" || !dirty || mode !== "idle"} onClick={save}>
-                                {labels.saveDraft}
+                            <Button variant="contained" disabled={saving || automaticStep !== "closed" || !dirty || mode !== "idle"}
+                                    startIcon={saving ? <CircularProgress size={18} /> : undefined} onClick={save}>
+                                {labels.save}
                             </Button>
                         </> : null}
                         </> : null}
                     </div>
             </div>
-            {!automaticOnly ? <Alert severity="info">{labels.localDraft}</Alert> : null}
+            {!automaticOnly && loading ? <Alert severity="info">{labels.loading}</Alert> : null}
             {!automaticOnly && !hasCoordinates ? <Alert severity="warning">{labels.missingCoordinates}</Alert> : null}
             {error ? <Alert severity="error" onClose={() => setError(null)}>{error}</Alert> : null}
             {notice ? <Alert severity="success" onClose={() => setNotice(null)}>{notice}</Alert> : null}
@@ -517,7 +548,7 @@ const DeliveryAreaEditor: React.FC<DeliveryAreaEditorProps> = ({
                                         <span><strong>{item.departmentCode.value}</strong><small>{item.address.city}</small></span>
                                     </label>)}
                                 </div>
-                                <Button variant="contained" disabled={selectedDepartmentIds.length === 0}
+                                <Button variant="contained" disabled={saving || selectedDepartmentIds.length === 0}
                                         onClick={previewAutomatic}>{labels.automaticPreview}</Button>
                             </>}
                             <Button variant="outlined" onClick={automaticOnly ? onAutomaticClose : () => setAutomaticStep("closed")}>
@@ -532,7 +563,7 @@ const DeliveryAreaEditor: React.FC<DeliveryAreaEditorProps> = ({
                                     <strong>{generated.departmentCode}</strong>
                                 </div>)}
                             </div>
-                            <Button variant="contained" onClick={applyAutomatic}>{labels.automaticApply}</Button>
+                            <Button variant="contained" disabled={saving} onClick={applyAutomatic}>{labels.automaticApply}</Button>
                             <Button variant="outlined" onClick={() => setAutomaticStep("choose")}>{labels.automaticBack}</Button>
                             <Button variant="text" onClick={automaticOnly ? onAutomaticClose
                                 : () => {setAutomaticStep("closed"); setGeneratedPreview([]);}}>

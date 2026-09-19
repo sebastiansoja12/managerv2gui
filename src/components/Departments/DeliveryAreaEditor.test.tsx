@@ -1,9 +1,20 @@
 import React from "react";
-import {act, fireEvent, render, screen} from "@testing-library/react";
+import {act, fireEvent, render, screen, waitFor} from "@testing-library/react";
 import * as L from "leaflet";
 import Department from "../../class/depots/Department";
+import DeliveryAreaService from "../../hooks/DeliveryAreaService";
 import pl from "../../i18n/translate";
 import DeliveryAreaEditor from "./DeliveryAreaEditor";
+
+jest.mock("../../hooks/DeliveryAreaService", () => ({
+    __esModule: true,
+    default: {
+        getByDepartment: jest.fn(),
+        replaceDepartmentAreas: jest.fn(),
+        previewAutomatic: jest.fn(),
+        applyAutomatic: jest.fn(),
+    },
+}));
 
 jest.mock("leaflet", () => {
     const mockListeners = new Map();
@@ -65,54 +76,82 @@ const clickStart = () => {
     (L as unknown as {__clickStart: () => void}).__clickStart();
 };
 
+const service = DeliveryAreaService as jest.Mocked<typeof DeliveryAreaService>;
+
+const triangle = [{latitude: 50, longitude: 19}, {latitude: 50, longitude: 20}, {latitude: 51, longitude: 20}];
+
+const savedArea = (deliveryAreaId: number, departmentId: number) => ({
+    deliveryAreaId, departmentId, name: "Obszar 1", source: "MANUAL" as const, points: triangle, updatedAt: "",
+});
+
 const editor = () => <DeliveryAreaEditor departmentId="100" departmentCode="KT1"
-                                         coordinates={{latitude: 50, longitude: 19}} operatorId={7}
-                                         canEdit active />;
+                                         coordinates={{latitude: 50, longitude: 19}} canEdit active />;
+
+const drawTriangle = () => {
+    fireEvent.click(screen.getByRole("button", {name: pl.departments.deliveryArea.newArea}));
+    act(() => clickMap(50, 19));
+    act(() => clickMap(50, 20));
+    act(() => clickMap(51, 20));
+};
 
 describe("DeliveryAreaEditor", () => {
     beforeEach(() => {
-        window.localStorage.clear();
+        jest.clearAllMocks();
+        service.getByDepartment.mockResolvedValue({data: [], status: 200});
     });
 
-    it("draws an area, saves the draft locally and restores it", () => {
-        const view = render(editor());
+    it("draws an area and saves it on the server", async () => {
+        service.replaceDepartmentAreas.mockResolvedValue({data: [savedArea(5, 100)], status: 200});
+        render(editor());
+        await waitFor(() => expect(service.getByDepartment).toHaveBeenCalledWith("100"));
         expect(screen.queryByRole("button", {name: pl.departments.deliveryArea.automatic})).not.toBeInTheDocument();
-        fireEvent.click(screen.getByRole("button", {name: pl.departments.deliveryArea.newArea}));
 
-        act(() => clickMap(50, 19));
-        act(() => clickMap(50, 20));
-        act(() => clickMap(51, 20));
+        drawTriangle();
         fireEvent.click(screen.getByRole("button", {name: pl.departments.deliveryArea.finishArea}));
         expect(screen.getByText(pl.departments.deliveryArea.pointCount.replace("{count}", "3"))).toBeInTheDocument();
 
-        fireEvent.click(screen.getByRole("button", {name: pl.departments.deliveryArea.saveDraft}));
-        const saved = JSON.parse(window.localStorage.getItem("manager.delivery-area-draft.v1.7.100") || "{}");
-        expect(saved.areas).toHaveLength(1);
-        expect(saved.areas[0].points).toHaveLength(3);
+        fireEvent.click(screen.getByRole("button", {name: pl.departments.deliveryArea.save}));
 
-        view.unmount();
-        render(editor());
-        expect(screen.getByText(pl.departments.deliveryArea.pointCount.replace("{count}", "3"))).toBeInTheDocument();
+        await waitFor(() => expect(screen.getByText(pl.departments.deliveryArea.saved)).toBeInTheDocument());
+        expect(service.replaceDepartmentAreas).toHaveBeenCalledWith("100", [
+            {deliveryAreaId: null, name: `${pl.departments.deliveryArea.areaName} 1`, points: triangle},
+        ]);
     });
 
-    it("offers a larger map and closes a boundary by clicking its starting point", () => {
+    it("loads saved areas and sends their identifiers when edited", async () => {
+        service.getByDepartment.mockResolvedValue({data: [savedArea(5, 100)], status: 200});
         render(editor());
+
+        expect(await screen.findByText(pl.departments.deliveryArea.pointCount.replace("{count}", "3"))).toBeInTheDocument();
+    });
+
+    it("shows a translated backend validation error", async () => {
+        service.replaceDepartmentAreas.mockRejectedValue({message: "Bad", details: {properties: {code: "INVALID_BOUNDARY"}}});
+        render(editor());
+        await waitFor(() => expect(service.getByDepartment).toHaveBeenCalled());
+        drawTriangle();
+        fireEvent.click(screen.getByRole("button", {name: pl.departments.deliveryArea.finishArea}));
+        fireEvent.click(screen.getByRole("button", {name: pl.departments.deliveryArea.save}));
+
+        expect(await screen.findByText(pl.departments.deliveryArea.errors.INVALID_BOUNDARY)).toBeInTheDocument();
+    });
+
+    it("offers a larger map and closes a boundary by clicking its starting point", async () => {
+        render(editor());
+        await waitFor(() => expect(service.getByDepartment).toHaveBeenCalled());
         fireEvent.click(screen.getByRole("button", {name: pl.departments.deliveryArea.fullScreen}));
         expect(screen.getByRole("button", {name: pl.departments.deliveryArea.exitFullScreen})).toHaveAttribute("aria-pressed", "true");
         expect(screen.getByRole("button", {name: pl.departments.deliveryArea.exitFullScreen})
             .closest(".delivery-area-editor")).toHaveClass("expanded");
 
-        fireEvent.click(screen.getByRole("button", {name: pl.departments.deliveryArea.newArea}));
-        act(() => clickMap(50, 19));
-        act(() => clickMap(50, 20));
-        act(() => clickMap(51, 20));
+        drawTriangle();
         act(clickStart);
 
         expect(screen.getByText(pl.departments.deliveryArea.pointCount.replace("{count}", "3"))).toBeInTheDocument();
-        expect(screen.getByRole("button", {name: pl.departments.deliveryArea.saveDraft})).toBeEnabled();
+        expect(screen.getByRole("button", {name: pl.departments.deliveryArea.save})).toBeEnabled();
     });
 
-    it("previews automatic boundaries and saves drafts for selected departments", async () => {
+    it("previews automatic boundaries on the server and applies them to selected departments", async () => {
         const automaticDepartments = [
             {departmentId: 100, departmentCode: {value: "KT1"},
                 address: {city: "Katowice", countryCode: "PL"}, coordinates: {latitude: 50.26, longitude: 19.02}, status: "ACTIVE"},
@@ -121,8 +160,14 @@ describe("DeliveryAreaEditor", () => {
             {departmentId: 300, departmentCode: {value: "ZZ1"},
                 address: {city: "Berlin", countryCode: "DE"}, coordinates: {latitude: 52.52, longitude: 13.4}, status: "ACTIVE"},
         ] as Department[];
+        const generated = [
+            {departmentId: 100, departmentCode: "KT1", areas: [savedArea(1, 100)]},
+            {departmentId: 200, departmentCode: "WA1", areas: [savedArea(2, 200)]},
+        ];
+        service.previewAutomatic.mockResolvedValue({data: generated, status: 200});
+        service.applyAutomatic.mockResolvedValue({data: generated, status: 200});
         const onAutomaticApplied = jest.fn();
-        render(<DeliveryAreaEditor departmentId="" departmentCode="" operatorId={7} canEdit active
+        render(<DeliveryAreaEditor departmentId="" departmentCode="" canEdit active
                                    automaticOnly automaticDepartments={automaticDepartments}
                                    onAutomaticApplied={onAutomaticApplied} />);
         expect(screen.getByText(pl.departments.deliveryArea.automaticSelected
@@ -131,15 +176,13 @@ describe("DeliveryAreaEditor", () => {
             .replace("{count}", "1"))).toBeInTheDocument();
 
         fireEvent.click(screen.getByRole("button", {name: pl.departments.deliveryArea.automaticPreview}));
-        expect(screen.getByText(pl.departments.deliveryArea.automaticPreviewTitle)).toBeInTheDocument();
-        expect(window.localStorage.getItem("manager.delivery-area-draft.v1.7.200")).toBeNull();
+        expect(await screen.findByText(pl.departments.deliveryArea.automaticPreviewTitle)).toBeInTheDocument();
+        expect(service.previewAutomatic).toHaveBeenCalledWith([100, 200]);
+        expect(service.applyAutomatic).not.toHaveBeenCalled();
+
         fireEvent.click(screen.getByRole("button", {name: pl.departments.deliveryArea.automaticApply}));
 
-        const current = JSON.parse(window.localStorage.getItem("manager.delivery-area-draft.v1.7.100") || "{}");
-        const second = JSON.parse(window.localStorage.getItem("manager.delivery-area-draft.v1.7.200") || "{}");
-        expect(current.areas.length).toBeGreaterThan(0);
-        expect(second.areas.length).toBeGreaterThan(0);
-        expect(window.localStorage.getItem("manager.delivery-area-draft.v1.7.300")).toBeNull();
-        expect(onAutomaticApplied).toHaveBeenCalledWith(2);
+        await waitFor(() => expect(onAutomaticApplied).toHaveBeenCalledWith(2));
+        expect(service.applyAutomatic).toHaveBeenCalledWith([100, 200]);
     });
 });

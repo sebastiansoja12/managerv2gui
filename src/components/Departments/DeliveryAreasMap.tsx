@@ -2,13 +2,14 @@ import React, {useEffect, useRef, useState} from "react";
 import * as L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import Department from "../../class/depots/Department";
+import DeliveryAreaService from "../../hooks/DeliveryAreaService";
 import pl from "../../i18n/translate";
-import {deliveryAreasChangedEvent, readAreas, storageKeyFor} from "./deliveryAreaDraft";
-import {countryBoundary} from "./generateDeliveryAreas";
+import {DeliveryAreaDto} from "./dto/DeliveryAreaDto";
+import {deliveryAreasChangedEvent} from "./model/DeliveryArea";
+import {countryBoundary} from "./polandBoundary";
 
 type DeliveryAreasMapProps = {
     departments: Department[];
-    operatorId?: number;
 };
 
 const DEFAULT_TILE_URL = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
@@ -16,24 +17,38 @@ const DEFAULT_ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyr
 const COLORS = ["#2563eb", "#dc2626", "#059669", "#9333ea", "#d97706", "#0891b2", "#be185d"];
 const polandBounds = L.latLngBounds(countryBoundary.map(([longitude, latitude]) => [latitude, longitude]));
 
-const DeliveryAreasMap: React.FC<DeliveryAreasMapProps> = ({departments, operatorId}) => {
+const DeliveryAreasMap: React.FC<DeliveryAreasMapProps> = ({departments}) => {
     const mapElementRef = useRef<HTMLDivElement | null>(null);
     const mapRef = useRef<L.Map | null>(null);
     const layerRef = useRef<L.LayerGroup | null>(null);
     const [revision, setRevision] = useState(0);
     const [areaCount, setAreaCount] = useState(0);
+    const [deliveryAreas, setDeliveryAreas] = useState<DeliveryAreaDto[]>([]);
+    const [loadError, setLoadError] = useState(false);
     const labels = pl.departments.deliveryArea;
     const tileUrl = process.env.REACT_APP_MAP_TILE_URL || DEFAULT_TILE_URL;
     const tileAttribution = process.env.REACT_APP_MAP_TILE_ATTRIBUTION || DEFAULT_ATTRIBUTION;
     useEffect(() => {
         const refresh = () => setRevision((current) => current + 1);
         window.addEventListener(deliveryAreasChangedEvent, refresh);
-        window.addEventListener("storage", refresh);
-        return () => {
-            window.removeEventListener(deliveryAreasChangedEvent, refresh);
-            window.removeEventListener("storage", refresh);
-        };
+        return () => window.removeEventListener(deliveryAreasChangedEvent, refresh);
     }, []);
+
+    useEffect(() => {
+        let active = true;
+        DeliveryAreaService.getAll()
+            .then((response) => {
+                if (!active) return;
+                setDeliveryAreas(response.data || []);
+                setLoadError(false);
+            })
+            .catch(() => {
+                if (active) setLoadError(true);
+            });
+        return () => {
+            active = false;
+        };
+    }, [revision]);
 
     useEffect(() => {
         if (!mapElementRef.current) return undefined;
@@ -60,7 +75,7 @@ const DeliveryAreasMap: React.FC<DeliveryAreasMapProps> = ({departments, operato
         const visibleBounds = L.latLngBounds([]);
         let nextAreaCount = 0;
         departments.filter((department) => department.status === "ACTIVE").forEach((department, index) => {
-            const areas = readAreas(storageKeyFor(operatorId, String(department.departmentId)));
+            const areas = deliveryAreas.filter((area) => String(area.departmentId) === String(department.departmentId));
             nextAreaCount += areas.length;
             const color = COLORS[index % COLORS.length];
             const code = department.departmentCode?.value || "";
@@ -87,7 +102,7 @@ const DeliveryAreasMap: React.FC<DeliveryAreasMapProps> = ({departments, operato
         map.fitBounds(nextAreaCount > 0 && visibleBounds.isValid() ? visibleBounds : polandBounds,
             {padding: [18, 18], maxZoom: 10, animate: false});
         map.invalidateSize({pan: false});
-    }, [departments, operatorId, revision]);
+    }, [departments, deliveryAreas]);
 
     return <section className="departments-areas-panel" aria-label={labels.overviewTitle}>
         <div className="departments-areas-header">
@@ -95,7 +110,8 @@ const DeliveryAreasMap: React.FC<DeliveryAreasMapProps> = ({departments, operato
             <span>{labels.overviewCount.replace("{count}", String(areaCount))}</span>
         </div>
         <div className="departments-areas-map" ref={mapElementRef} aria-label={labels.overviewTitle} />
-        {areaCount === 0 ? <p className="departments-areas-empty">{labels.overviewEmpty}</p> : null}
+        {loadError ? <p className="departments-areas-empty">{labels.loadError}</p>
+            : areaCount === 0 ? <p className="departments-areas-empty">{labels.overviewEmpty}</p> : null}
     </section>;
 };
 
