@@ -1,10 +1,11 @@
 import React, {useCallback, useEffect, useMemo, useRef, useState} from "react";
 import * as L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import {Alert, Button, MenuItem, TextField} from "components/ui";
+import {Alert, Button, TextField} from "components/ui";
 import {AccountTree, Add, Close, Hub, Map as MapIcon, WarningAmberOutlined} from "components/ui/icons";
 import Department from "../../class/depots/Department";
 import pl from "../../i18n/translate";
+import DepartmentPicker from "./DepartmentPicker";
 import {DepartmentRelation, departmentRelationPairKey} from "./model/DepartmentRelation";
 import "./styles/department-relations-map.css";
 
@@ -23,6 +24,11 @@ const DEFAULT_CENTER: L.LatLngExpression = [52.0693, 19.4803];
 const DEFAULT_TILE_URL = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
 const DEFAULT_ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 const SORTING_FACILITY = "SORTING_FACILITY";
+const LABEL_ZOOM_THRESHOLD = 8;
+const OVERLAP_SPREAD_DEGREES = 0.012;
+const LINE_COLOR = "#2563a9";
+const ACTIVE_COLOR = "#f59e0b";
+const SELECTED_RELATION_COLOR = "#dc2626";
 
 const departmentCode = (department: Department) => department.departmentCode?.value || String(department.departmentId);
 const departmentId = (department: Department) => String(department.departmentId);
@@ -70,18 +76,6 @@ export const getDepartmentsMissingSortingRelation = (
         });
     });
 };
-
-const relationArrowAngle = (source: [number, number], target: [number, number]) => {
-    const averageLatitude = (source[0] + target[0]) / 2 * Math.PI / 180;
-    const horizontal = (target[1] - source[1]) * Math.cos(averageLatitude);
-    const vertical = -(target[0] - source[0]);
-    return Math.atan2(vertical, horizontal) * 180 / Math.PI;
-};
-
-const relationArrowPosition = (source: [number, number], target: [number, number]): [number, number] => ([
-    source[0] + (target[0] - source[0]) * 0.5,
-    source[1] + (target[1] - source[1]) * 0.5,
-]);
 
 export const getUniqueDepartmentRelations = (relations: DepartmentRelation[]) => {
     const relationKeys = new Set<string>();
@@ -151,38 +145,65 @@ export const getRelationsWithAutomaticSortingAssignments = (
     return [...relations, ...automaticRelations];
 };
 
-const popupContent = (department: Department) => {
-    const popup = document.createElement("div");
-    popup.className = "department-relations-popup";
+const relationLabel = (first: string, second: string) => `${first} ↔ ${second}`;
 
-    const code = document.createElement("strong");
-    code.textContent = departmentCode(department);
-    popup.appendChild(code);
+const departmentTypeLabel = (department: Department) => (
+    pl.departments.type[department.departmentType as keyof typeof pl.departments.type]
+    || department.departmentType
+    || pl.common.dash
+);
 
-    const city = document.createElement("span");
-    city.textContent = department.address?.city || pl.common.dash;
-    popup.appendChild(city);
+const positionKey = ([latitude, longitude]: [number, number]) => `${latitude.toFixed(4)}:${longitude.toFixed(4)}`;
 
-    const type = document.createElement("span");
-    type.textContent = pl.departments.type[department.departmentType as keyof typeof pl.departments.type]
-        || department.departmentType
-        || pl.common.dash;
-    popup.appendChild(type);
+export const spreadOverlappingDepartments = (departments: MappedDepartment[]): MappedDepartment[] => {
+    const departmentsByPosition = departments.reduce<Map<string, MappedDepartment[]>>((groups, item) => {
+        const key = positionKey(item.position);
+        groups.set(key, [...(groups.get(key) || []), item]);
+        return groups;
+    }, new Map());
 
-    return popup;
+    return departments.map((item) => {
+        const group = departmentsByPosition.get(positionKey(item.position)) || [];
+        if (group.length < 2) {
+            return item;
+        }
+        const index = group.indexOf(item);
+        const angle = 2 * Math.PI * index / group.length;
+        return {
+            department: item.department,
+            position: [
+                item.position[0] + OVERLAP_SPREAD_DEGREES * Math.sin(angle),
+                item.position[1] + OVERLAP_SPREAD_DEGREES * Math.cos(angle) / Math.cos(item.position[0] * Math.PI / 180),
+            ],
+        };
+    });
 };
+
+type Feedback = {
+    severity: "success" | "info";
+    message: string;
+};
+
 
 const DepartmentRelationsMap: React.FC<DepartmentRelationsMapProps> = ({
     departments,
     relations,
     onRelationsChange,
 }) => {
+    const translations = pl.departments.relations;
     const mapElementRef = useRef<HTMLDivElement | null>(null);
     const mapRef = useRef<L.Map | null>(null);
-    const contentLayerRef = useRef<L.LayerGroup | null>(null);
+    const relationLayerRef = useRef<L.LayerGroup | null>(null);
+    const markerLayerRef = useRef<L.LayerGroup | null>(null);
+    const markersRef = useRef<Map<string, L.CircleMarker>>(new Map());
+    const fittedDepartmentsKeyRef = useRef<string>("");
     const [sourceDepartmentId, setSourceDepartmentId] = useState<string | null>(null);
+    const [hoveredDepartmentId, setHoveredDepartmentId] = useState<string | null>(null);
+    const [selectedRelationKey, setSelectedRelationKey] = useState<string | null>(null);
+    const [feedback, setFeedback] = useState<Feedback | null>(null);
     const [formSourceId, setFormSourceId] = useState<string>("");
     const [formTargetId, setFormTargetId] = useState<string>("");
+    const [relationFilter, setRelationFilter] = useState<string>("");
     const tileUrl = process.env.REACT_APP_MAP_TILE_URL || DEFAULT_TILE_URL;
     const tileAttribution = process.env.REACT_APP_MAP_TILE_ATTRIBUTION || DEFAULT_ATTRIBUTION;
 
@@ -194,13 +215,15 @@ const DepartmentRelationsMap: React.FC<DepartmentRelationsMapProps> = ({
         () => new Map(departments.map((department) => [departmentId(department), department])),
         [departments],
     );
-    const mappedDepartments = useMemo(() => relationCandidates.reduce<MappedDepartment[]>((result, department) => {
-        const position = departmentPosition(department);
-        if (position) {
-            result.push({department, position});
-        }
-        return result;
-    }, []), [relationCandidates]);
+    const mappedDepartments = useMemo(() => spreadOverlappingDepartments(
+        relationCandidates.reduce<MappedDepartment[]>((result, department) => {
+            const position = departmentPosition(department);
+            if (position) {
+                result.push({department, position});
+            }
+            return result;
+        }, []),
+    ), [relationCandidates]);
     const mappedDepartmentsById = useMemo(
         () => new Map(mappedDepartments.map((item) => [departmentId(item.department), item])),
         [mappedDepartments],
@@ -213,6 +236,20 @@ const DepartmentRelationsMap: React.FC<DepartmentRelationsMapProps> = ({
         () => getUniqueDepartmentRelations(relations),
         [relations],
     );
+    const relationKeys = useMemo(
+        () => new Set(uniqueRelations.map(departmentRelationPairKey)),
+        [uniqueRelations],
+    );
+    const connectedDepartmentIds = useMemo(() => {
+        const connections = new Map<string, Set<string>>();
+        uniqueRelations.forEach((relation) => {
+            connections.set(relation.sourceDepartmentId, (connections.get(relation.sourceDepartmentId) || new Set())
+                .add(relation.targetDepartmentId));
+            connections.set(relation.targetDepartmentId, (connections.get(relation.targetDepartmentId) || new Set())
+                .add(relation.sourceDepartmentId));
+        });
+        return connections;
+    }, [uniqueRelations]);
     const missingDepartmentIds = useMemo(
         () => new Set(missingDepartments.map(departmentId)),
         [missingDepartments],
@@ -228,6 +265,12 @@ const DepartmentRelationsMap: React.FC<DepartmentRelationsMapProps> = ({
     const automaticAssignmentCount = relationsWithAutomaticAssignments.length - relations.length;
     const hasMappedDepartments = mappedDepartments.length > 0;
     const unmappedCount = relationCandidates.length - mappedDepartments.length;
+    const focusedDepartmentId = sourceDepartmentId ?? hoveredDepartmentId;
+
+    const codeOf = useCallback((id: string) => {
+        const department = departmentsById.get(id);
+        return department ? departmentCode(department) : id;
+    }, [departmentsById]);
 
     const addRelation = useCallback((sourceId: string, targetId: string) => {
         if (sourceId === targetId
@@ -237,33 +280,62 @@ const DepartmentRelationsMap: React.FC<DepartmentRelationsMapProps> = ({
         }
 
         const relation = {sourceDepartmentId: sourceId, targetDepartmentId: targetId};
-        const currentRelationKeys = new Set(relations.map(departmentRelationPairKey));
-        if (currentRelationKeys.has(departmentRelationPairKey(relation))) {
+        const label = relationLabel(codeOf(sourceId), codeOf(targetId));
+        if (relationKeys.has(departmentRelationPairKey(relation))) {
+            setFeedback({severity: "info", message: translations.relationExists.replace("{relation}", label)});
             return;
         }
 
         onRelationsChange([...relations, relation]);
-    }, [departmentsById, onRelationsChange, relations]);
+        setFeedback({severity: "success", message: translations.relationAdded.replace("{relation}", label)});
+    }, [codeOf, departmentsById, onRelationsChange, relationKeys, relations, translations]);
 
     const selectMapDepartment = useCallback((selectedDepartmentId: string) => {
+        setSelectedRelationKey(null);
         if (sourceDepartmentId === null) {
             setSourceDepartmentId(selectedDepartmentId);
+            setFeedback(null);
             return;
         }
 
-        if (sourceDepartmentId !== selectedDepartmentId) {
-            addRelation(sourceDepartmentId, selectedDepartmentId);
+        if (sourceDepartmentId === selectedDepartmentId) {
+            setSourceDepartmentId(null);
+            return;
         }
-        setSourceDepartmentId(null);
+
+        addRelation(sourceDepartmentId, selectedDepartmentId);
     }, [addRelation, sourceDepartmentId]);
 
+    const clearSelection = useCallback(() => {
+        setSourceDepartmentId(null);
+        setSelectedRelationKey(null);
+    }, []);
+
     const removeRelation = (relation: DepartmentRelation) => {
-        onRelationsChange(relations.filter((currentRelation) => !(
-            (currentRelation.sourceDepartmentId === relation.sourceDepartmentId
-                && currentRelation.targetDepartmentId === relation.targetDepartmentId)
-            || (currentRelation.sourceDepartmentId === relation.targetDepartmentId
-                && currentRelation.targetDepartmentId === relation.sourceDepartmentId)
-        )));
+        const relationKey = departmentRelationPairKey(relation);
+        onRelationsChange(relations.filter((currentRelation) => departmentRelationPairKey(currentRelation) !== relationKey));
+        setSelectedRelationKey(null);
+        setFeedback({
+            severity: "info",
+            message: translations.relationRemoved.replace(
+                "{relation}",
+                relationLabel(codeOf(relation.sourceDepartmentId), codeOf(relation.targetDepartmentId)),
+            ),
+        });
+    };
+
+    const focusRelation = (relation: DepartmentRelation) => {
+        setSourceDepartmentId(null);
+        setSelectedRelationKey(departmentRelationPairKey(relation));
+        const source = mappedDepartmentsById.get(relation.sourceDepartmentId);
+        const target = mappedDepartmentsById.get(relation.targetDepartmentId);
+        if (mapRef.current && source && target) {
+            mapRef.current.fitBounds(L.latLngBounds([source.position, target.position]), {
+                animate: false,
+                maxZoom: 10,
+                padding: [80, 80],
+            });
+        }
     };
 
     const submitFormRelation = () => {
@@ -272,45 +344,137 @@ const DepartmentRelationsMap: React.FC<DepartmentRelationsMapProps> = ({
         }
 
         addRelation(formSourceId, formTargetId);
-        setFormSourceId("");
         setFormTargetId("");
     };
+
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === "Escape") {
+                clearSelection();
+            }
+        };
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [clearSelection]);
 
     useEffect(() => {
         if (!hasMappedDepartments || !mapElementRef.current) {
             return undefined;
         }
 
-        const map = L.map(mapElementRef.current, {
+        const mapElement = mapElementRef.current;
+        const map = L.map(mapElement, {
             scrollWheelZoom: true,
             zoomAnimation: false,
             fadeAnimation: false,
             markerZoomAnimation: false,
         }).setView(DEFAULT_CENTER, 6);
-        const contentLayer = L.layerGroup().addTo(map);
+        const relationLayer = L.layerGroup().addTo(map);
+        const markerLayer = L.layerGroup().addTo(map);
+        const updateZoomClass = () => {
+            mapElement.classList.toggle("is-zoomed-out", map.getZoom() < LABEL_ZOOM_THRESHOLD);
+        };
 
         L.tileLayer(tileUrl, {attribution: tileAttribution}).addTo(map);
+        map.on("zoomend", updateZoomClass);
+        map.on("click", clearSelection);
+        updateZoomClass();
         mapRef.current = map;
-        contentLayerRef.current = contentLayer;
+        relationLayerRef.current = relationLayer;
+        markerLayerRef.current = markerLayer;
+        fittedDepartmentsKeyRef.current = "";
 
         return () => {
-            contentLayerRef.current = null;
+            relationLayerRef.current = null;
+            markerLayerRef.current = null;
             mapRef.current = null;
+            markersRef.current = new Map();
             map.stop();
-            contentLayer.clearLayers();
             map.remove();
         };
-    }, [hasMappedDepartments, tileAttribution, tileUrl]);
+    }, [clearSelection, hasMappedDepartments, tileAttribution, tileUrl]);
 
     useEffect(() => {
         const map = mapRef.current;
-        const contentLayer = contentLayerRef.current;
-        if (!map || !contentLayer || !mappedDepartments.length) {
+        const markerLayer = markerLayerRef.current;
+        if (!map || !markerLayer) {
             return;
         }
 
-        contentLayer.clearLayers();
+        markerLayer.clearLayers();
+        const markers = new Map<string, L.CircleMarker>();
+        mappedDepartments.forEach(({department, position}) => {
+            const currentDepartmentId = departmentId(department);
+            const sortingFacility = department.departmentType === SORTING_FACILITY;
+            const marker = L.circleMarker(position, {
+                bubblingMouseEvents: false,
+                className: "department-relations-marker",
+                fillColor: sortingFacility ? "#0f766e" : LINE_COLOR,
+                fillOpacity: 1,
+                radius: sortingFacility ? 12 : 9,
+            });
+            marker
+                .bindTooltip(departmentCode(department), {
+                    className: `department-relations-marker-label${sortingFacility ? " is-sorting" : ""}`,
+                    direction: "top",
+                    offset: [0, -8],
+                    opacity: 1,
+                    permanent: true,
+                })
+                .on("click", () => selectMapDepartment(currentDepartmentId))
+                .on("mouseover", () => setHoveredDepartmentId(currentDepartmentId))
+                .on("mouseout", () => setHoveredDepartmentId((current) => (
+                    current === currentDepartmentId ? null : current
+                )))
+                .addTo(markerLayer);
+            markers.set(currentDepartmentId, marker);
+        });
+        markersRef.current = markers;
 
+        const departmentsKey = mappedDepartments.map((item) => departmentId(item.department)).sort().join(",");
+        if (fittedDepartmentsKeyRef.current !== departmentsKey) {
+            fittedDepartmentsKeyRef.current = departmentsKey;
+            map.invalidateSize({pan: false});
+            const positions = mappedDepartments.map((item) => item.position);
+            if (positions.length === 1) {
+                map.setView(positions[0], 12, {animate: false});
+            } else if (positions.length > 1) {
+                map.fitBounds(L.latLngBounds(positions), {animate: false, maxZoom: 12, padding: [44, 44]});
+            }
+        }
+    }, [mappedDepartments, selectMapDepartment]);
+
+    useEffect(() => {
+        const focusedConnections = focusedDepartmentId ? connectedDepartmentIds.get(focusedDepartmentId) : undefined;
+        markersRef.current.forEach((marker, currentDepartmentId) => {
+            const selectedSource = sourceDepartmentId === currentDepartmentId;
+            const focused = focusedDepartmentId === currentDepartmentId;
+            const connectedToFocus = Boolean(focusedConnections?.has(currentDepartmentId));
+            const missingSortingRelation = missingDepartmentIds.has(currentDepartmentId);
+            const dimmed = Boolean(focusedDepartmentId) && !focused && !connectedToFocus;
+            marker.setStyle({
+                color: selectedSource || connectedToFocus
+                    ? ACTIVE_COLOR
+                    : missingSortingRelation ? "#dc2626" : "#ffffff",
+                fillOpacity: dimmed ? 0.55 : 1,
+                weight: selectedSource ? 5 : connectedToFocus || missingSortingRelation ? 4 : 2,
+            });
+            if (selectedSource || focused) {
+                marker.bringToFront();
+            }
+            const label = marker.getTooltip()?.getElement();
+            label?.classList.toggle("is-active", selectedSource || focused || connectedToFocus);
+            label?.classList.toggle("is-source", selectedSource);
+        });
+    }, [connectedDepartmentIds, focusedDepartmentId, missingDepartmentIds, sourceDepartmentId, mappedDepartments]);
+
+    useEffect(() => {
+        const relationLayer = relationLayerRef.current;
+        if (!relationLayer) {
+            return;
+        }
+
+        relationLayer.clearLayers();
         uniqueRelations.forEach((relation) => {
             const source = mappedDepartmentsById.get(relation.sourceDepartmentId);
             const target = mappedDepartmentsById.get(relation.targetDepartmentId);
@@ -318,219 +482,231 @@ const DepartmentRelationsMap: React.FC<DepartmentRelationsMapProps> = ({
                 return;
             }
 
-            const lineColor = "#2563a9";
-            const relationLabel = `${departmentCode(source.department)} ↔ ${departmentCode(target.department)}`;
+            const relationKey = departmentRelationPairKey(relation);
+            const selected = selectedRelationKey === relationKey;
+            const focused = Boolean(focusedDepartmentId)
+                && (relation.sourceDepartmentId === focusedDepartmentId || relation.targetDepartmentId === focusedDepartmentId);
+            const dimmed = (Boolean(focusedDepartmentId) && !focused) || (Boolean(selectedRelationKey) && !selected);
             L.polyline([source.position, target.position], {
+                bubblingMouseEvents: false,
                 className: "department-relations-line",
-                color: lineColor,
-                opacity: 0.8,
-                weight: 4,
+                color: selected ? SELECTED_RELATION_COLOR : focused ? ACTIVE_COLOR : LINE_COLOR,
+                opacity: dimmed ? 0.18 : 0.85,
+                weight: selected || focused ? 5 : 3,
             })
-                .bindTooltip(relationLabel)
-                .addTo(contentLayer);
-
-            const angle = relationArrowAngle(source.position, target.position);
-            L.marker(relationArrowPosition(source.position, target.position), {
-                interactive: false,
-                keyboard: false,
-                icon: L.divIcon({
-                    className: "department-relations-arrow-icon",
-                    html: `<span class="department-relations-arrow" style="transform: rotate(${angle}deg)"></span>`,
-                    iconAnchor: [14, 8],
-                    iconSize: [28, 16],
-                }),
-            }).addTo(contentLayer);
-        });
-
-        mappedDepartments.forEach(({department, position}) => {
-            const sortingFacility = department.departmentType === SORTING_FACILITY;
-            const currentDepartmentId = departmentId(department);
-            const selectedSource = sourceDepartmentId === currentDepartmentId;
-            const missingSortingRelation = missingDepartmentIds.has(currentDepartmentId);
-            const marker = L.circleMarker(position, {
-                className: "department-relations-marker",
-                color: selectedSource ? "#f59e0b" : missingSortingRelation ? "#dc2626" : "#ffffff",
-                fillColor: sortingFacility ? "#0f766e" : "#2563a9",
-                fillOpacity: 1,
-                radius: sortingFacility ? 13 : 11,
-                weight: selectedSource || missingSortingRelation ? 4 : 3,
-            });
-
-            marker
-                .bindTooltip(departmentCode(department), {
-                    className: "department-relations-marker-label",
-                    direction: "top",
-                    offset: [0, -10],
-                    opacity: 1,
-                    permanent: true,
+                .bindTooltip(relationLabel(departmentCode(source.department), departmentCode(target.department)), {
+                    sticky: true,
                 })
-                .bindPopup(popupContent(department))
-                .on("click", () => selectMapDepartment(currentDepartmentId))
-                .addTo(contentLayer);
+                .on("click", () => {
+                    setSourceDepartmentId(null);
+                    setSelectedRelationKey(relationKey);
+                })
+                .addTo(relationLayer);
         });
-
-        map.invalidateSize({pan: false});
-        const positions = mappedDepartments.map((item) => item.position);
-        if (positions.length === 1) {
-            map.setView(positions[0], 12, {animate: false});
-        } else {
-            map.fitBounds(L.latLngBounds(positions), {
-                animate: false,
-                maxZoom: 12,
-                padding: [44, 44],
-            });
-        }
-    }, [mappedDepartments, mappedDepartmentsById, missingDepartmentIds, selectMapDepartment, sourceDepartmentId, uniqueRelations]);
+    }, [focusedDepartmentId, mappedDepartmentsById, selectedRelationKey, uniqueRelations]);
 
     const selectedSource = sourceDepartmentId === null ? null : departmentsById.get(sourceDepartmentId);
+    const hoveredDepartment = hoveredDepartmentId === null ? null : departmentsById.get(hoveredDepartmentId);
+    const selectedRelation = selectedRelationKey === null
+        ? null
+        : uniqueRelations.find((relation) => departmentRelationPairKey(relation) === selectedRelationKey) || null;
     const formRelationCanBeAdded = Boolean(formSourceId && formTargetId && formSourceId !== formTargetId);
+    const formTargetDisabledIds = useMemo(() => new Set([
+        formSourceId,
+        ...Array.from(connectedDepartmentIds.get(formSourceId) || []),
+    ].filter(Boolean)), [connectedDepartmentIds, formSourceId]);
+    const normalizedRelationFilter = relationFilter.trim().toLowerCase();
+    const filteredRelations = normalizedRelationFilter
+        ? uniqueRelations.filter((relation) => (
+            relationLabel(codeOf(relation.sourceDepartmentId), codeOf(relation.targetDepartmentId))
+                .toLowerCase()
+                .includes(normalizedRelationFilter)
+        ))
+        : uniqueRelations;
+
+    const departmentSummary = (department: Department) => translations.departmentSummary
+        .replace("{code}", departmentCode(department))
+        .replace("{city}", department.address?.city || pl.common.dash)
+        .replace("{type}", departmentTypeLabel(department))
+        .replace("{count}", String(connectedDepartmentIds.get(departmentId(department))?.size || 0));
+
+    const instructions = () => {
+        if (selectedRelation) {
+            const label = relationLabel(codeOf(selectedRelation.sourceDepartmentId), codeOf(selectedRelation.targetDepartmentId));
+            return (
+                <>
+                    <span>{translations.selectedRelation.replace("{relation}", label)}</span>
+                    <Button color="error" variant="outlined" startIcon={<Close fontSize="small" />}
+                            onClick={() => removeRelation(selectedRelation)}>
+                        {translations.removeSelectedRelation}
+                    </Button>
+                    <Button variant="text" onClick={clearSelection}>{pl.common.cancel}</Button>
+                </>
+            );
+        }
+        if (selectedSource) {
+            return (
+                <>
+                    <span>{translations.selectTarget.replace(/\{code}/g, departmentCode(selectedSource))}</span>
+                    <Button variant="text" startIcon={<Close fontSize="small" />} onClick={clearSelection}>
+                        {translations.finishSelection}
+                    </Button>
+                </>
+            );
+        }
+        return <span>{hoveredDepartment ? departmentSummary(hoveredDepartment) : translations.selectSource}</span>;
+    };
 
     return (
-        <section className="department-relations" aria-label={pl.departments.relations.title}>
+        <section className="department-relations" aria-label={translations.title}>
             <header className="department-relations-header">
                 <div>
-                    <span className="department-relations-kicker"><AccountTree fontSize="small" /> {pl.departments.relations.kicker}</span>
-                    <h2>{pl.departments.relations.title}</h2>
-                    <p>{pl.departments.relations.subtitle}</p>
+                    <span className="department-relations-kicker"><AccountTree fontSize="small" /> {translations.kicker}</span>
+                    <h2>{translations.title}</h2>
+                    <p>{translations.subtitle}</p>
                 </div>
                 <div className="department-relations-summary">
-                    <div><span>{pl.departments.relations.points}</span><strong>{mappedDepartments.length}</strong></div>
-                    <div><span>{pl.departments.relations.relationCount}</span><strong>{uniqueRelations.length}</strong></div>
+                    <div><span>{translations.points}</span><strong>{mappedDepartments.length}</strong></div>
+                    <div><span>{translations.relationCount}</span><strong>{uniqueRelations.length}</strong></div>
                     <div className={missingDepartments.length ? "is-invalid" : "is-valid"}>
-                        <span>{pl.departments.relations.missingCount}</span><strong>{missingDepartments.length}</strong>
+                        <span>{translations.missingCount}</span><strong>{missingDepartments.length}</strong>
                     </div>
                 </div>
             </header>
 
             {!sortingFacilities.length ? (
-                <Alert severity="error">{pl.departments.relations.noSortingFacility}</Alert>
+                <Alert severity="error">{translations.noSortingFacility}</Alert>
             ) : missingDepartments.length ? (
                 <Alert severity="warning">
-                    {pl.departments.relations.validationError.replace(
+                    {translations.validationError.replace(
                         "{codes}",
                         missingDepartments.map(departmentCode).join(", "),
                     )}
                 </Alert>
             ) : relationCandidates.length ? (
-                <Alert severity="success">{pl.departments.relations.validationSuccess}</Alert>
+                <Alert severity="success">{translations.validationSuccess}</Alert>
             ) : undefined}
 
             {unmappedCount > 0 ? (
                 <Alert severity="warning">
-                    {pl.departments.relations.missingCoordinates.replace("{count}", String(unmappedCount))}
+                    {translations.missingCoordinates.replace("{count}", String(unmappedCount))}
                 </Alert>
             ) : undefined}
 
             <div className="department-relations-workspace">
                 <div className="department-relations-map-panel">
-                    <div className="department-relations-instructions">
+                    <div className={`department-relations-instructions${selectedSource ? " is-selecting" : ""}${selectedRelation ? " is-relation" : ""}`}>
                         <MapIcon fontSize="small" />
-                        <span>{selectedSource
-                            ? pl.departments.relations.selectTarget.replace("{code}", departmentCode(selectedSource))
-                            : pl.departments.relations.selectSource}</span>
-                        {selectedSource ? (
-                            <Button variant="text" startIcon={<Close fontSize="small" />} onClick={() => setSourceDepartmentId(null)}>
-                                {pl.common.cancel}
-                            </Button>
-                        ) : undefined}
+                        {instructions()}
                     </div>
+                    {feedback ? (
+                        <div className={`department-relations-feedback is-${feedback.severity}`} role="status">
+                            {feedback.message}
+                        </div>
+                    ) : null}
                     {mappedDepartments.length ? (
                         <div className="department-relations-leaflet-map" ref={mapElementRef} />
                     ) : (
                         <div className="department-relations-map-empty">
                             <WarningAmberOutlined />
-                            <strong>{pl.departments.relations.mapEmpty}</strong>
-                            <span>{pl.departments.relations.mapEmptyDescription}</span>
+                            <strong>{translations.mapEmpty}</strong>
+                            <span>{translations.mapEmptyDescription}</span>
                         </div>
                     )}
                     <div className="department-relations-legend">
-                        <span><i className="department-relations-legend-marker is-department" />{pl.departments.relations.legendDepartment}</span>
-                        <span><i className="department-relations-legend-marker is-sorting" />{pl.departments.relations.legendSortingFacility}</span>
-                        <span><i className="department-relations-legend-marker is-missing" />{pl.departments.relations.legendMissing}</span>
+                        <span><i className="department-relations-legend-marker is-department" />{translations.legendDepartment}</span>
+                        <span><i className="department-relations-legend-marker is-sorting" />{translations.legendSortingFacility}</span>
+                        <span><i className="department-relations-legend-marker is-missing" />{translations.legendMissing}</span>
+                        <span><i className="department-relations-legend-marker is-active" />{translations.legendActive}</span>
                     </div>
                 </div>
 
                 <aside className="department-relations-editor">
-                    <div>
-                        <span className="department-relations-editor-kicker">{pl.departments.relations.formKicker}</span>
-                        <h3>{pl.departments.relations.formTitle}</h3>
-                        <p>{pl.departments.relations.formDescription}</p>
-                    </div>
                     <div className="department-relations-automatic">
-                        <span className="department-relations-editor-kicker">{pl.departments.relations.automaticKicker}</span>
-                        <strong>{pl.departments.relations.automaticTitle}</strong>
-                        <p>{pl.departments.relations.automaticDescription}</p>
+                        <span className="department-relations-editor-kicker">{translations.automaticKicker}</span>
+                        <strong>{translations.automaticTitle}</strong>
+                        <p>{translations.automaticDescription}</p>
                         <Button
                             disabled={!automaticAssignmentCount}
                             startIcon={<Hub />}
                             variant="outlined"
                             onClick={() => onRelationsChange(relationsWithAutomaticAssignments)}
                         >
-                            {pl.departments.relations.automaticAction.replace(
+                            {translations.automaticAction.replace(
                                 "{count}",
                                 String(automaticAssignmentCount),
                             )}
                         </Button>
                     </div>
-                    <TextField
-                        select
-                        label={pl.departments.relations.source}
-                        value={formSourceId}
-                        onChange={(event) => setFormSourceId(event.target.value)}
+                    <form
+                        className="department-relations-form"
+                        onSubmit={(event) => {
+                            event.preventDefault();
+                            submitFormRelation();
+                        }}
                     >
-                        <MenuItem value="">{pl.departments.relations.chooseDepartment}</MenuItem>
-                        {relationCandidates.map((department) => (
-                            <MenuItem key={departmentId(department)} value={departmentId(department)}>
-                                {departmentCode(department)} · {department.address?.city || pl.common.dash}
-                            </MenuItem>
-                        ))}
-                    </TextField>
-                    <TextField
-                        select
-                        label={pl.departments.relations.target}
-                        value={formTargetId}
-                        onChange={(event) => setFormTargetId(event.target.value)}
-                    >
-                        <MenuItem value="">{pl.departments.relations.chooseDepartment}</MenuItem>
-                        {relationCandidates.map((department) => (
-                            <MenuItem
-                                disabled={departmentId(department) === formSourceId}
-                                key={departmentId(department)}
-                                value={departmentId(department)}
-                            >
-                                {departmentCode(department)} · {department.address?.city || pl.common.dash}
-                            </MenuItem>
-                        ))}
-                    </TextField>
-                    <Button
-                        disabled={!formRelationCanBeAdded}
-                        startIcon={<Add />}
-                        variant="contained"
-                        onClick={submitFormRelation}
-                    >
-                        {pl.departments.relations.addRelation}
-                    </Button>
+                        <span className="department-relations-editor-kicker">{translations.formKicker}</span>
+                        <DepartmentPicker
+                            departments={relationCandidates}
+                            label={translations.source}
+                            value={formSourceId}
+                            onChange={(selectedDepartmentId) => {
+                                setFormSourceId(selectedDepartmentId);
+                                setFormTargetId("");
+                            }}
+                        />
+                        <DepartmentPicker
+                            departments={relationCandidates}
+                            disabled={!formSourceId}
+                            disabledDepartmentIds={formTargetDisabledIds}
+                            label={translations.target}
+                            value={formTargetId}
+                            onChange={setFormTargetId}
+                        />
+                        <Button
+                            disabled={!formRelationCanBeAdded}
+                            startIcon={<Add />}
+                            type="submit"
+                            variant="contained"
+                        >
+                            {translations.addRelation}
+                        </Button>
+                    </form>
 
                     <div className="department-relations-list">
                         <div className="department-relations-list-heading">
-                            <strong>{pl.departments.relations.currentRelations}</strong>
+                            <strong>{translations.currentRelations}</strong>
                             <span>{uniqueRelations.length}</span>
                         </div>
-                        {uniqueRelations.length ? uniqueRelations.map((relation) => {
-                            const source = departmentsById.get(relation.sourceDepartmentId);
-                            const target = departmentsById.get(relation.targetDepartmentId);
+                        <TextField
+                            aria-label={translations.filterRelations}
+                            autoComplete="off"
+                            placeholder={translations.filterRelations}
+                            size="small"
+                            value={relationFilter}
+                            onChange={(event: React.ChangeEvent<HTMLInputElement>) => setRelationFilter(event.target.value)}
+                        />
+                        {filteredRelations.length ? filteredRelations.map((relation) => {
+                            const label = relationLabel(codeOf(relation.sourceDepartmentId), codeOf(relation.targetDepartmentId));
+                            const relationKey = departmentRelationPairKey(relation);
                             return (
-                                <div className="department-relations-list-item" key={departmentRelationPairKey(relation)}>
-                                    <span>
-                                        <strong>{source ? departmentCode(source) : relation.sourceDepartmentId}</strong>
-                                        <i aria-hidden="true">↔</i>
-                                        <strong>{target ? departmentCode(target) : relation.targetDepartmentId}</strong>
-                                    </span>
+                                <div
+                                    className={`department-relations-list-item${selectedRelationKey === relationKey ? " is-selected" : ""}`}
+                                    key={relationKey}
+                                >
                                     <button
-                                        aria-label={pl.departments.relations.removeRelation.replace(
-                                            "{relation}",
-                                            `${source ? departmentCode(source) : relation.sourceDepartmentId} ↔ ${target ? departmentCode(target) : relation.targetDepartmentId}`,
-                                        )}
+                                        className="department-relations-list-focus"
+                                        title={translations.showOnMap}
+                                        type="button"
+                                        onClick={() => focusRelation(relation)}
+                                    >
+                                        <strong>{codeOf(relation.sourceDepartmentId)}</strong>
+                                        <i aria-hidden="true">↔</i>
+                                        <strong>{codeOf(relation.targetDepartmentId)}</strong>
+                                    </button>
+                                    <button
+                                        aria-label={translations.removeRelation.replace("{relation}", label)}
+                                        className="department-relations-list-remove"
                                         type="button"
                                         onClick={() => removeRelation(relation)}
                                     >
@@ -539,7 +715,9 @@ const DepartmentRelationsMap: React.FC<DepartmentRelationsMapProps> = ({
                                 </div>
                             );
                         }) : (
-                            <div className="department-relations-list-empty">{pl.departments.relations.emptyRelations}</div>
+                            <div className="department-relations-list-empty">
+                                {uniqueRelations.length ? translations.noMatchingRelations : translations.emptyRelations}
+                            </div>
                         )}
                     </div>
                 </aside>
