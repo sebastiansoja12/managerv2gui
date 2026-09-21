@@ -5,6 +5,7 @@ import departmentService from "../../hooks/DepartmentService";
 import UserManagementService from "../../hooks/UserManagementService";
 import pl from "../../i18n/translate";
 import DepartmentDetailsView from "./DepartmentDetailsView";
+import {deliveryAreasChangedEvent} from "./model/DeliveryArea";
 
 jest.mock("../../auth/AuthState", () => ({
     useAuthState: () => ({user: {role: "ADMIN", departmentCode: "KT1"}}),
@@ -30,6 +31,12 @@ jest.mock("../DepartmentMap/DepartmentMapWorkspace", () => ({
     __esModule: true,
     default: ({departmentId, departmentCode}: {departmentId: string; departmentCode: string}) => (
         <div>{`map-workspace ${departmentId} ${departmentCode}`}</div>
+    ),
+}));
+jest.mock("./DepartmentConnectionsPanel", () => ({
+    __esModule: true,
+    default: ({department}: {department: {departmentCode: {value: string}}}) => (
+        <div>{`connections-panel ${department.departmentCode.value}`}</div>
     ),
 }));
 jest.mock("./DeliveryAreaEditor", () => ({
@@ -124,6 +131,24 @@ describe("DepartmentDetailsView", () => {
 
         expect(screen.getByText("delivery-area-editor 100 KT1")).toBeInTheDocument();
         expect(screen.queryByText("map-workspace 100 KT1")).not.toBeInTheDocument();
+    });
+
+    it("refreshes delivery areas after the department is deleted", async () => {
+        departments.updateAddress.mockResolvedValue({data: undefined} as never);
+        departments.changeStatus.mockResolvedValue({data: undefined} as never);
+        const deliveryAreasChanged = jest.fn();
+        window.addEventListener(deliveryAreasChangedEvent, deliveryAreasChanged);
+        renderView();
+        await screen.findByRole("heading", {name: "KT1"});
+
+        fireEvent.click(screen.getByRole("button", {name: pl.common.edit}));
+        fireEvent.click(screen.getByRole("combobox", {name: pl.departments.columns.status}));
+        fireEvent.click(screen.getByRole("option", {name: pl.departments.status.DELETED}));
+        fireEvent.click(screen.getByRole("button", {name: pl.common.saveChanges}));
+
+        await waitFor(() => expect(deliveryAreasChanged).toHaveBeenCalledTimes(1));
+        expect(departments.changeStatus).toHaveBeenCalledWith({departmentCode: {value: "KT1"}, status: "DELETED"});
+        window.removeEventListener(deliveryAreasChangedEvent, deliveryAreasChanged);
     });
 
     it("omits archived status when configuration blocks archiving", async () => {
