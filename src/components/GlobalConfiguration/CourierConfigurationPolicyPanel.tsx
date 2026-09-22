@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect, useState} from "react";
-import {Alert, Button, CircularProgress, MenuItem, TextField} from "components/ui";
+import {Alert, Button, Chip, CircularProgress} from "components/ui";
 import {Refresh, Save} from "components/ui/icons";
 import CourierConfigurationService from "../../hooks/CourierConfigurationService";
 import pl from "../../i18n/translate";
@@ -56,6 +56,11 @@ function CourierConfigurationPolicyPanel() {
         setSuccessMessage("");
     };
 
+    const enforcedCount = Object.keys(enforcedSettings).length;
+    const totalCount = courierSettingGroups.reduce((total, group) => total + courierSettingsByGroup[group].length, 0);
+    const hasUnsavedChanges = policy !== null
+        && JSON.stringify(sortedSettings(enforcedSettings)) !== JSON.stringify(sortedSettings(policy.enforcedSettings));
+
     const savePolicy = () => {
         setSaving(true);
         setError("");
@@ -76,16 +81,23 @@ function CourierConfigurationPolicyPanel() {
     };
 
     return (
-        <section className="courier-policy-panel">
-            <header className="courier-policy-header">
+        <section className="global-configuration-section courier-policy-panel">
+            <div className="global-configuration-panel-header courier-policy-header">
                 <div>
                     <h3>{translation.policy.title}</h3>
                     <p>{translation.policy.description}</p>
                 </div>
-                <Button disabled={loading || saving || conflict} startIcon={<Save />} variant="contained" onClick={savePolicy}>
-                    {translation.actions.savePolicy}
-                </Button>
-            </header>
+                <div className="courier-policy-actions">
+                    {hasUnsavedChanges ? <Chip size="small" color="warning" label={translation.messages.unsavedChanges} /> : null}
+                    <Chip size="small" variant="outlined" label={translation.policy.enforcedSummary
+                        .replace("{count}", String(enforcedCount)).replace("{total}", String(totalCount))} />
+                    <Button disabled={loading || saving || conflict || !hasUnsavedChanges}
+                            startIcon={saving ? <CircularProgress size={18} /> : <Save />}
+                            variant="contained" onClick={savePolicy}>
+                        {translation.actions.savePolicy}
+                    </Button>
+                </div>
+            </div>
             {successMessage ? <Alert severity="success">{successMessage}</Alert> : undefined}
             {conflict ? (
                 <Alert
@@ -102,31 +114,58 @@ function CourierConfigurationPolicyPanel() {
                     <span>{pl.common.loading}</span>
                 </div>
             ) : (
-                courierSettingGroups.map((group) => (
-                    <fieldset className="courier-policy-group" key={group}>
-                        <legend>{translation.tabs[group]}</legend>
-                        {courierSettingsByGroup[group].map((setting) => (
-                            <div className="courier-policy-row" key={setting}>
-                                <span>{translation.settings[setting].label}</span>
-                                <TextField
-                                    aria-label={translation.settings[setting].label}
-                                    disabled={saving}
-                                    select
-                                    size="small"
-                                    value={toCourierPolicyMode(enforcedSettings[setting])}
-                                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => changeMode(setting, event.target.value as CourierPolicyMode)}
-                                >
-                                    {courierPolicyModes.map((mode) => (
-                                        <MenuItem key={mode} value={mode}>{translation.policy.modes[mode]}</MenuItem>
-                                    ))}
-                                </TextField>
-                            </div>
-                        ))}
-                    </fieldset>
-                ))
+                <div className="courier-policy-groups">
+                    {courierSettingGroups.map((group) => {
+                        const settings = courierSettingsByGroup[group];
+                        const groupEnforced = settings.filter((setting) => enforcedSettings[setting] !== undefined).length;
+                        return (
+                            <section className="courier-policy-group" key={group} aria-labelledby={`courier-policy-${group}`}>
+                                <header className="courier-policy-group-header">
+                                    <h4 id={`courier-policy-${group}`}>{translation.tabs[group]}</h4>
+                                    {groupEnforced > 0 ? (
+                                        <span className="courier-policy-group-count">
+                                            {translation.policy.groupEnforced.replace("{count}", String(groupEnforced))}
+                                        </span>
+                                    ) : null}
+                                </header>
+                                <ul className="courier-policy-rows">
+                                    {settings.map((setting) => {
+                                        const mode = toCourierPolicyMode(enforcedSettings[setting]);
+                                        return (
+                                            <li className={`courier-policy-row${mode === "SUPPLIER" ? "" : " is-enforced"}`} key={setting}>
+                                                <div className="courier-policy-row-text">
+                                                    <span className="courier-policy-row-label">{translation.settings[setting].label}</span>
+                                                    <span className="courier-policy-row-description">
+                                                        {translation.settings[setting].description}
+                                                    </span>
+                                                </div>
+                                                <div className="courier-policy-segmented" role="radiogroup"
+                                                     aria-label={`${translation.settings[setting].label}: ${translation.policy.modeLabel}`}>
+                                                    {courierPolicyModes.map((option) => (
+                                                        <label className={`courier-policy-segment courier-policy-segment-${option.toLowerCase()}`}
+                                                               key={option} title={translation.policy.modes[option]}>
+                                                            <input type="radio" name={`courier-policy-${setting}`} value={option}
+                                                                   checked={mode === option} disabled={saving}
+                                                                   aria-label={translation.policy.modes[option]}
+                                                                   onChange={() => changeMode(setting, option)} />
+                                                            <span>{translation.policy.modesShort[option]}</span>
+                                                        </label>
+                                                    ))}
+                                                </div>
+                                            </li>
+                                        );
+                                    })}
+                                </ul>
+                            </section>
+                        );
+                    })}
+                </div>
             )}
         </section>
     );
 }
+
+const sortedSettings = (settings: EnforcedSettings) => Object.fromEntries(
+    Object.entries(settings).sort(([first], [second]) => first.localeCompare(second)));
 
 export default CourierConfigurationPolicyPanel;

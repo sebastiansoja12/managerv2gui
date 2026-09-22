@@ -1,9 +1,11 @@
 import React from "react";
-import {fireEvent, render, screen, waitFor} from "@testing-library/react";
+import {act, fireEvent, render, screen, waitFor} from "@testing-library/react";
 import departmentService from "../../hooks/DepartmentService";
+import OperatorConfigurationService from "../../hooks/OperatorConfigurationService";
 import pl from "../../i18n/translate";
 import DepartmentConfigurationPanel from "./DepartmentConfigurationPanel";
 import {applyDepartmentAutomations} from "./departmentAutomation";
+import {defaultDepartmentPolicies} from "./model/DepartmentConfiguration";
 
 jest.mock("../../auth/AuthState", () => ({
     useAuthState: () => ({user: {operatorId: {value: 7}}}),
@@ -12,18 +14,30 @@ jest.mock("../../hooks/DepartmentService", () => ({
     __esModule: true,
     default: {getAll: jest.fn()},
 }));
+jest.mock("../../hooks/OperatorConfigurationService", () => ({
+    __esModule: true,
+    default: {getCurrentDepartmentConfiguration: jest.fn(), updateCurrentDepartmentConfiguration: jest.fn()},
+}));
 jest.mock("./departmentAutomation", () => ({applyDepartmentAutomations: jest.fn()}));
+
+const configurationService = OperatorConfigurationService as jest.Mocked<typeof OperatorConfigurationService>;
 
 describe("DepartmentConfigurationPanel", () => {
     beforeEach(() => {
         jest.clearAllMocks();
-        window.localStorage.clear();
         (departmentService.getAll as jest.Mock).mockResolvedValue({data: []});
+        configurationService.getCurrentDepartmentConfiguration.mockResolvedValue({data: {
+            autoAssignDeliveryAreas: false, autoConnectDepartments: false,
+            preventDepartmentDeletion: false, preventDepartmentArchiving: false,
+        }, status: 200});
+        configurationService.updateCurrentDepartmentConfiguration.mockImplementation(async (configuration) => (
+            {data: configuration, status: 200}));
         (applyDepartmentAutomations as jest.Mock).mockResolvedValue({assignedAreas: 0, createdConnections: 0});
     });
 
-    it("saves all four department rules for the current operator", async () => {
+    it("saves all four department rules in the operator configuration", async () => {
         render(<DepartmentConfigurationPanel />);
+        await waitFor(() => expect(configurationService.getCurrentDepartmentConfiguration).toHaveBeenCalled());
         const settings = pl.globalConfiguration.departmentConfiguration.settings;
         for (const setting of Object.values(settings)) {
             fireEvent.click(screen.getByRole("checkbox", {name: setting.label}));
@@ -32,8 +46,54 @@ describe("DepartmentConfigurationPanel", () => {
 
         await waitFor(() => expect(applyDepartmentAutomations).toHaveBeenCalled());
         expect(departmentService.getAll).toHaveBeenCalledTimes(1);
-        await waitFor(() => expect(JSON.parse(window.localStorage.getItem("manager.department-configuration.v1.7") || "{}"))
-            .toEqual({autoAssignDeliveryAreas: true, autoConnectDepartments: true,
-                preventDepartmentDeletion: true, preventDepartmentArchiving: true}));
+        expect(configurationService.updateCurrentDepartmentConfiguration).toHaveBeenCalledWith(expect.objectContaining({
+            autoAssignDeliveryAreas: true, autoConnectDepartments: true,
+            preventDepartmentDeletion: true, preventDepartmentArchiving: true,
+            capacityPolicy: defaultDepartmentPolicies.capacityPolicy,
+        }));
+    });
+
+    const renderLoadedPanel = async () => {
+        render(<DepartmentConfigurationPanel />);
+        await waitFor(() => expect(configurationService.getCurrentDepartmentConfiguration).toHaveBeenCalled());
+        await act(async () => undefined);
+    };
+
+    it("saves department policies together with the rules", async () => {
+        await renderLoadedPanel();
+        const policies = pl.globalConfiguration.departmentConfiguration.policies;
+
+        const capacity = await screen.findByRole("spinbutton", {
+            name: policies.capacityPolicy.fields.defaultDailyCapacity.label,
+        });
+        fireEvent.change(capacity, {target: {value: "2500"}});
+        fireEvent.click(screen.getByRole("checkbox", {
+            name: policies.lifecyclePolicy.fields.requireStatusChangeReason.label,
+        }));
+        fireEvent.click(screen.getByRole("button", {name: pl.common.saveChanges}));
+
+        await waitFor(() => expect(configurationService.updateCurrentDepartmentConfiguration).toHaveBeenCalledWith(
+            expect.objectContaining({
+                capacityPolicy: {...defaultDepartmentPolicies.capacityPolicy, defaultDailyCapacity: 2500},
+                lifecyclePolicy: {...defaultDepartmentPolicies.lifecyclePolicy, requireStatusChangeReason: true},
+            }),
+        ));
+    });
+
+    it("blocks saving an out-of-range policy value and enables radius only in radius mode", async () => {
+        await renderLoadedPanel();
+        const labels = pl.globalConfiguration.departmentConfiguration;
+
+        expect(await screen.findByRole("spinbutton", {
+            name: labels.policies.deliveryAreaPolicy.fields.maxDeliveryRadiusKm.label,
+        })).toBeDisabled();
+
+        fireEvent.change(screen.getByRole("spinbutton", {
+            name: labels.policies.capacityPolicy.fields.capacityWarningThresholdPercent.label,
+        }), {target: {value: "150"}});
+
+        expect(screen.getByText(labels.validation.range.replace("{min}", "1").replace("{max}", "100")))
+            .toBeInTheDocument();
+        expect(screen.getByRole("button", {name: pl.common.saveChanges})).toBeDisabled();
     });
 });
