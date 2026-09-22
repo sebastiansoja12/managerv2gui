@@ -1,0 +1,112 @@
+.department-connections {
+    grid-column: 1 / -1;
+}
+
+.department-connections-list {
+    display: grid;
+    gap: 8px;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.department-connections-list li {
+    align-items: stretch;
+    background: var(--surface-secondary);
+    border: 1px solid var(--border);
+    border-left: 4px solid #2563a9;
+    border-radius: 10px;
+    display: flex;
+    min-width: 0;
+}
+
+.department-connections-list li.is-sorting {
+    border-left-color: #0f766e;
+}
+
+.department-connections-open {
+    background: transparent;
+    border: 0;
+    color: inherit;
+    cursor: pointer;
+    display: grid;
+    flex: 1;
+    gap: 2px;
+    min-width: 0;
+    padding: 9px 12px;
+    text-align: left;
+}
+
+.department-connections-open:hover strong {
+    text-decoration: underline;
+}
+
+.department-connections-open strong {
+    font-family: var(--font-mono);
+    font-size: 0.95rem;
+}
+
+.department-connections-open span,
+.department-connections-open small {
+    color: var(--muted-foreground);
+    font-size: 0.78rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.department-connections-list li.is-sorting small {
+    color: #0f766e;
+    font-weight: 800;
+}
+
+.department-connections-remove {
+    align-items: center;
+    background: transparent;
+    border: 0;
+    border-radius: 0 10px 10px 0;
+    color: var(--muted-foreground);
+    cursor: pointer;
+    display: inline-flex;
+    justify-content: center;
+    width: 36px;
+}
+
+.department-connections-remove:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--danger) 12%, transparent);
+    color: var(--danger);
+}
+
+.department-connections-empty {
+    border: 1px dashed var(--border);
+    border-radius: 10px;
+    color: var(--muted-foreground);
+    font-size: 0.85rem;
+    margin: 0;
+    padding: 14px;
+    text-align: center;
+}
+
+.department-connections-form {
+    align-items: start;
+    border-top: 1px solid var(--border);
+    display: grid;
+    gap: 10px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    padding-top: 14px;
+}
+
+.department-connections-form > [data-ui="button"] {
+    margin-top: 26px;
+}
+
+@media (max-width: 640px) {
+    .department-connections-form {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .department-connections-form > [data-ui="button"] {
+        margin-top: 0;
+    }
+}

@@ -37,7 +37,7 @@
     font-weight: 900;
     letter-spacing: 0;
     margin-bottom: 8px;
-    text-transform: uppercase;
+    text-transform: none;
 }
 
 .departments-heading [data-ui="typography"] {
@@ -256,8 +256,8 @@
     color: var(--muted-foreground);
     font-size: 0.7rem;
     font-weight: 850;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
+    letter-spacing: 0;
+    text-transform: none;
 }
 
 .departments-filter-bar [data-ui="text-field"] > [data-ui="input"],

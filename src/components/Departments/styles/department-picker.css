@@ -1,0 +1,70 @@
+.department-picker {
+    display: grid;
+    gap: 4px;
+    min-width: 0;
+}
+
+.department-picker-options {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.18);
+    list-style: none;
+    margin: 0;
+    max-height: 240px;
+    overflow-y: auto;
+    padding: 4px;
+}
+
+.department-picker-option {
+    align-items: center;
+    border-radius: 7px;
+    cursor: pointer;
+    display: grid;
+    gap: 10px;
+    grid-template-columns: minmax(48px, auto) minmax(0, 1fr) auto;
+    padding: 7px 9px;
+}
+
+.department-picker-option strong {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+}
+
+.department-picker-option span {
+    color: var(--muted-foreground);
+    font-size: 0.8rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.department-picker-option small {
+    color: var(--muted-foreground);
+    font-size: 0.7rem;
+}
+
+.department-picker-option small.is-sorting {
+    color: #0f766e;
+    font-weight: 800;
+}
+
+.department-picker-option.is-highlighted {
+    background: var(--surface-secondary);
+}
+
+.department-picker-option[aria-selected="true"] {
+    box-shadow: inset 3px 0 0 var(--brand-accent-strong);
+}
+
+.department-picker-option.is-disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+}
+
+.department-picker-empty {
+    color: var(--muted-foreground);
+    font-size: 0.8rem;
+    padding: 10px;
+    text-align: center;
+}

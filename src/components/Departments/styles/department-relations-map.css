@@ -21,8 +21,8 @@
     font-size: 0.75rem;
     font-weight: 900;
     gap: 7px;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
+    letter-spacing: 0;
+    text-transform: none;
 }
 
 .department-relations-header h2 {
@@ -203,6 +203,72 @@
     border-color: #dc2626;
 }
 
+.department-relations-legend-marker.is-active {
+    border-color: #f59e0b;
+}
+
+.department-relations-form {
+    display: grid;
+    gap: 10px;
+}
+
+.department-relations-form > [data-ui="button"] {
+    border-radius: 9px;
+    width: 100%;
+}
+
+.department-relations-instructions.is-selecting {
+    background: color-mix(in srgb, #f59e0b 16%, var(--surface-secondary));
+}
+
+.department-relations-instructions.is-relation {
+    background: color-mix(in srgb, #dc2626 12%, var(--surface-secondary));
+}
+
+.department-relations-feedback {
+    border-bottom: 1px solid var(--brand-border);
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 7px 14px;
+}
+
+.department-relations-feedback.is-success {
+    background: color-mix(in srgb, var(--success) 12%, var(--surface));
+    color: var(--success);
+}
+
+.department-relations-feedback.is-info {
+    background: var(--surface-secondary);
+    color: var(--brand-muted);
+}
+
+.department-relations-leaflet-map .department-relations-marker {
+    cursor: pointer;
+}
+
+.department-relations-leaflet-map .department-relations-line {
+    cursor: pointer;
+}
+
+.department-relations-leaflet-map.is-zoomed-out .department-relations-marker-label:not(.is-sorting):not(.is-active) {
+    display: none;
+}
+
+.department-relations-marker-label.is-sorting {
+    border-color: #0f766e;
+}
+
+.department-relations-marker-label.is-active {
+    border-color: #f59e0b;
+    z-index: 650;
+}
+
+.department-relations-marker-label.is-source {
+    background: #f59e0b;
+    border-color: #f59e0b;
+    color: #111827;
+}
+
 .department-relations-editor {
     background: var(--surface);
     border: 1px solid var(--brand-border);
@@ -219,8 +285,8 @@
     color: var(--brand-accent-strong);
     font-size: 0.68rem;
     font-weight: 900;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
+    letter-spacing: 0;
+    text-transform: none;
 }
 
 .department-relations-editor h3 {
@@ -325,12 +391,28 @@
     padding: 7px 7px 7px 10px;
 }
 
-.department-relations-list-item > span {
+.department-relations-list-item.is-selected {
+    border-color: #dc2626;
+    box-shadow: inset 3px 0 0 #dc2626;
+}
+
+.department-relations-list-focus {
     align-items: center;
+    background: transparent;
+    border: 0;
+    color: inherit;
+    cursor: pointer;
     display: flex;
+    flex: 1;
     font-size: 0.76rem;
     gap: 6px;
     min-width: 0;
+    padding: 0;
+    text-align: left;
+}
+
+.department-relations-list-focus:hover strong {
+    text-decoration: underline;
 }
 
 .department-relations-list-item i {
@@ -339,7 +421,7 @@
     font-style: normal;
 }
 
-.department-relations-list-item button {
+.department-relations-list-remove {
     align-items: center;
     background: transparent;
     border: 0;
@@ -353,7 +435,7 @@
     width: 28px;
 }
 
-.department-relations-list-item button:hover {
+.department-relations-list-remove:hover {
     background: color-mix(in srgb, var(--danger) 12%, transparent);
     color: var(--danger);
 }
@@ -371,39 +453,6 @@
     text-align: center;
 }
 
-.department-relations-arrow-icon {
-    background: transparent;
-    border: 0;
-}
-
-.department-relations-arrow {
-    background: #2563a9;
-    display: block;
-    height: 3px;
-    margin: 6px 4px;
-    position: relative;
-    transform-origin: center;
-    width: 20px;
-}
-
-.department-relations-arrow::before,
-.department-relations-arrow::after {
-    border-bottom: 6px solid transparent;
-    border-top: 6px solid transparent;
-    content: "";
-    position: absolute;
-    top: -4px;
-}
-
-.department-relations-arrow::before {
-    border-right: 8px solid #2563a9;
-    left: -4px;
-}
-
-.department-relations-arrow::after {
-    border-left: 8px solid #2563a9;
-    right: -4px;
-}
 
 .department-relations-marker-label {
     background: var(--surface);
@@ -420,22 +469,6 @@
     border-top-color: var(--brand-border);
 }
 
-.department-relations-popup {
-    display: flex;
-    flex-direction: column;
-    min-width: 130px;
-}
-
-.department-relations-popup strong {
-    color: #172033;
-    font-size: 0.9rem;
-    margin-bottom: 3px;
-}
-
-.department-relations-popup span {
-    color: #556274;
-    font-size: 0.76rem;
-}
 
 .departments-relations-dialog {
     display: flex;
