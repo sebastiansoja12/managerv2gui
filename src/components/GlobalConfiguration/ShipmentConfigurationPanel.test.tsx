@@ -12,6 +12,7 @@ jest.mock("../../hooks/OperatorConfigurationService", () => ({
     default: {
         getCurrentShipmentConfiguration: jest.fn(),
         updateCurrentShipmentConfiguration: jest.fn(),
+        updateCurrentShipmentConfigurationSection: jest.fn(),
     },
 }));
 
@@ -69,6 +70,40 @@ const shipmentConfigurationApi: ShipmentConfigurationApi = {
         notifySenderOnException: true,
         notificationChannel: "SMS",
     },
+    deliveryConfiguration: {
+        requireDeliveryToken: false,
+        proofOfDelivery: "SIGNATURE",
+        maxDeliveryAttempts: 2,
+        allowNeighbourDelivery: false,
+        allowSafePlaceDelivery: false,
+        redirectToPickupPointAfterFailure: true,
+    },
+    returnConfiguration: {
+        allowReturns: true,
+        returnWindowDays: 14,
+        autoReturnAfterFailedDelivery: true,
+        pickupPointStorageDays: 7,
+        requireReturnReason: false,
+    },
+    paymentConfiguration: {
+        allowCashOnDelivery: true,
+        maxCashOnDeliveryAmount: 5000,
+        cashOnDeliveryPaymentMethod: "BOTH",
+        requireInsuranceAboveValue: 0,
+    },
+    slaConfiguration: {
+        economySlaHours: 96,
+        standardSlaHours: 48,
+        expressSlaHours: 24,
+        flagDelayedAfterHours: 24,
+        requireExceptionNote: true,
+        escalateDelaysToDepartmentManager: false,
+    },
+    dataRetentionConfiguration: {
+        anonymizeRecipientDataAfterDays: 365,
+        archiveClosedShipmentsAfterDays: 90,
+        deliveryPhotoRetentionDays: 180,
+    },
 };
 
 const operatorConfigurationServiceMock = jest.mocked(OperatorConfigurationService);
@@ -81,10 +116,12 @@ describe("ShipmentConfigurationPanel", () => {
             data: shipmentConfigurationApi,
             status: 200,
         });
-        operatorConfigurationServiceMock.updateCurrentShipmentConfiguration.mockResolvedValue({
-            data: shipmentConfigurationApi,
-            status: 200,
-        });
+        operatorConfigurationServiceMock.updateCurrentShipmentConfigurationSection.mockImplementation(
+            async (section, sectionConfiguration) => ({
+                data: {...shipmentConfigurationApi, [section]: sectionConfiguration},
+                status: 200,
+            }),
+        );
     });
 
     const waitForConfigurationLoad = async () => {
@@ -93,6 +130,10 @@ describe("ShipmentConfigurationPanel", () => {
                 .not.toBeInTheDocument();
         });
     };
+
+    const saveGroupButton = (category: string) => screen.getByRole("button", {
+        name: `${pl.common.saveChanges}: ${category}`,
+    });
 
     it("loads shipment settings from API and saves changes", async () => {
         render(<ShipmentConfigurationPanel />);
@@ -111,28 +152,50 @@ describe("ShipmentConfigurationPanel", () => {
             name: pl.globalConfiguration.shipmentConfiguration.fields.requireRecipientEmail.label,
         })).not.toBeChecked();
 
+        const validationSaveButton = saveGroupButton(
+            pl.globalConfiguration.shipmentConfiguration.categories.validation,
+        );
+        expect(validationSaveButton).toBeDisabled();
+
         fireEvent.click(addressValidation);
-        fireEvent.click(screen.getByRole("button", {name: pl.common.saveChanges}));
+        expect(validationSaveButton).toBeEnabled();
+        expect(saveGroupButton(pl.globalConfiguration.shipmentConfiguration.categories.limits)).toBeDisabled();
+        fireEvent.click(validationSaveButton);
 
         await waitFor(() => {
-            expect(operatorConfigurationServiceMock.updateCurrentShipmentConfiguration).toHaveBeenCalledWith(
+            expect(operatorConfigurationServiceMock.updateCurrentShipmentConfigurationSection).toHaveBeenCalledWith(
+                "validationConfiguration",
                 expect.objectContaining({
-                    validationConfiguration: expect.objectContaining({
-                        validateAddressData: false,
-                    }),
-                    shipmentLimits: expect.objectContaining({
-                        maxWeight: 31.5,
-                        minWeight: 0.2,
-                    }),
+                    validateAddressData: false,
                 }),
             );
         });
+        expect(operatorConfigurationServiceMock.updateCurrentShipmentConfigurationSection).toHaveBeenCalledTimes(1);
+        expect(operatorConfigurationServiceMock.updateCurrentShipmentConfiguration).not.toHaveBeenCalled();
         const storedConfiguration = JSON.parse(
             window.localStorage.getItem(SHIPMENT_CONFIGURATION_STORAGE_KEY) || "{}",
         );
         expect(storedConfiguration.validateAddressData).toBe(true);
         expect(await screen.findByText(pl.globalConfiguration.shipmentConfiguration.messages.saved))
             .toBeInTheDocument();
+    });
+
+    it("disables shipment limits when oversized shipments are allowed", async () => {
+        render(<ShipmentConfigurationPanel />);
+
+        await waitForConfigurationLoad();
+        const maximumWeight = await screen.findByDisplayValue("31.5");
+        const dimensionLimits = screen.getAllByDisplayValue(/^(120|80)$/);
+        expect(maximumWeight).toBeEnabled();
+        dimensionLimits.forEach((limit) => expect(limit).toBeEnabled());
+
+        fireEvent.click(screen.getByRole("checkbox", {
+            name: pl.globalConfiguration.shipmentConfiguration.fields.allowOversized.label,
+        }));
+
+        expect(maximumWeight).toBeDisabled();
+        expect(dimensionLimits).toHaveLength(3);
+        dimensionLimits.forEach((limit) => expect(limit).toBeDisabled());
     });
 
     it("configures the tracking number rule in the draft", async () => {
@@ -178,15 +241,14 @@ describe("ShipmentConfigurationPanel", () => {
         fireEvent.click(screen.getByRole("button", {
             name: pl.globalConfiguration.shipmentConfiguration.trackingNumber.save,
         }));
-        fireEvent.click(screen.getByRole("button", {name: pl.common.saveChanges}));
+        fireEvent.click(saveGroupButton(pl.globalConfiguration.shipmentConfiguration.categories.workflow));
 
         await waitFor(() => {
-            expect(operatorConfigurationServiceMock.updateCurrentShipmentConfiguration).toHaveBeenCalledWith(
+            expect(operatorConfigurationServiceMock.updateCurrentShipmentConfigurationSection).toHaveBeenCalledWith(
+                "trackingNumberRule",
                 expect.objectContaining({
-                    trackingNumberRule: expect.objectContaining({
-                        prefixMode: "DEPARTMENT_CODE",
-                        key: "KT1",
-                    }),
+                    prefixMode: "DEPARTMENT_CODE",
+                    key: "KT1",
                 }),
             );
         });
@@ -212,15 +274,14 @@ describe("ShipmentConfigurationPanel", () => {
         expect(saveRuleButton).toBeEnabled();
         expect(screen.getByText("20260814-000042")).toBeInTheDocument();
         fireEvent.click(saveRuleButton);
-        fireEvent.click(screen.getByRole("button", {name: pl.common.saveChanges}));
+        fireEvent.click(saveGroupButton(pl.globalConfiguration.shipmentConfiguration.categories.workflow));
 
         await waitFor(() => {
-            expect(operatorConfigurationServiceMock.updateCurrentShipmentConfiguration).toHaveBeenCalledWith(
+            expect(operatorConfigurationServiceMock.updateCurrentShipmentConfigurationSection).toHaveBeenCalledWith(
+                "trackingNumberRule",
                 expect.objectContaining({
-                    trackingNumberRule: expect.objectContaining({
-                        prefixMode: "NONE",
-                        key: "",
-                    }),
+                    prefixMode: "NONE",
+                    key: "",
                 }),
             );
         });
