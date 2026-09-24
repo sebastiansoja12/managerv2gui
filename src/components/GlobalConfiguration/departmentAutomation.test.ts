@@ -1,8 +1,13 @@
 import Department from "../../class/depots/Department";
+import DeliveryAreaService from "../../hooks/DeliveryAreaService";
 import DeliveryNetworkService from "../../hooks/DeliveryNetworkService";
 import {applyDepartmentAutomations} from "./departmentAutomation";
 import {defaultDepartmentConfiguration} from "./model/DepartmentConfiguration";
 
+jest.mock("../../hooks/DeliveryAreaService", () => ({
+    __esModule: true,
+    default: {applyAutomatic: jest.fn()},
+}));
 jest.mock("../../hooks/DeliveryNetworkService", () => ({
     __esModule: true,
     default: {getCurrentNetwork: jest.fn(), replaceCurrentNetwork: jest.fn()},
@@ -19,11 +24,11 @@ const department = (id: number, code: string, type: string, latitude: number, lo
 });
 
 const network = DeliveryNetworkService as jest.Mocked<typeof DeliveryNetworkService>;
+const deliveryAreas = DeliveryAreaService as jest.Mocked<typeof DeliveryAreaService>;
 
 describe("department automation", () => {
     beforeEach(() => {
         jest.clearAllMocks();
-        window.localStorage.clear();
         network.getCurrentNetwork.mockResolvedValue({data: []} as never);
         network.replaceCurrentNetwork.mockResolvedValue({data: []} as never);
     });
@@ -36,7 +41,7 @@ describe("department automation", () => {
             department(4, "OTHER", "BRANCH", 51, 20),
         ];
         const configuration = {...defaultDepartmentConfiguration, autoConnectDepartments: true};
-        const result = await applyDepartmentAutomations(configuration, departments, 7, "NEW");
+        const result = await applyDepartmentAutomations(configuration, departments, "NEW");
         expect(result.createdConnections).toBe(1);
         expect(result.connectionSkipped).toBe(false);
         expect(network.replaceCurrentNetwork).toHaveBeenCalledWith([
@@ -44,27 +49,29 @@ describe("department automation", () => {
         ]);
 
         jest.clearAllMocks();
-        await applyDepartmentAutomations(configuration, departments, 7);
+        await applyDepartmentAutomations(configuration, departments);
         expect(network.getCurrentNetwork).not.toHaveBeenCalled();
     });
 
-    it("assigns local delivery drafts to all eligible departments", async () => {
+    it("asks the server to assign boundaries to all eligible departments", async () => {
+        deliveryAreas.applyAutomatic.mockResolvedValue({data: [
+            {departmentId: 1, departmentCode: "KT1", areas: []},
+            {departmentId: 2, departmentCode: "WA1", areas: []},
+        ], status: 200});
         const configuration = {...defaultDepartmentConfiguration, autoAssignDeliveryAreas: true};
         const result = await applyDepartmentAutomations(configuration, [
             department(1, "KT1", "BRANCH", 50.26, 19.02),
             department(2, "WA1", "BRANCH", 52.23, 21.01),
-        ], 7);
+            department(3, "BER", "BRANCH", 52.52, 13.4),
+        ]);
         expect(result.assignedAreas).toBe(2);
-        expect(JSON.parse(window.localStorage.getItem("manager.delivery-area-draft.v1.7.1") || "{}").areas.length)
-            .toBeGreaterThan(0);
-        expect(JSON.parse(window.localStorage.getItem("manager.delivery-area-draft.v1.7.2") || "{}").areas.length)
-            .toBeGreaterThan(0);
+        expect(deliveryAreas.applyAutomatic).toHaveBeenCalledWith([1, 2]);
     });
 
     it("reports that a new department cannot be connected without a sorting facility", async () => {
         const configuration = {...defaultDepartmentConfiguration, autoConnectDepartments: true};
         const result = await applyDepartmentAutomations(configuration,
-            [department(1, "NEW", "BRANCH", 50, 19)], 7, "NEW");
+            [department(1, "NEW", "BRANCH", 50, 19)], "NEW");
         expect(result.connectionSkipped).toBe(true);
         expect(network.replaceCurrentNetwork).not.toHaveBeenCalled();
     });
