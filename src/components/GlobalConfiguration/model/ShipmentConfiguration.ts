@@ -6,6 +6,8 @@ export type ShipmentServiceLevelApi = "ECONOMY" | "STANDARD" | "EXPRESS";
 
 export type TrackingNumberSourceApi = "SEQUENCE" | "SHIPMENT_ID" | "RANDOM";
 
+export type TrackingNumberPrefixModeApi = "CUSTOM" | "DEPARTMENT_CODE" | "NONE";
+
 export type TrackingNumberDateFormatApi = "YYYYMMDD" | "YYMMDD" | "YYYYMM";
 
 export type ShipmentNotificationChannelApi = "SMS" | "EMAIL" | "BOTH";
@@ -47,6 +49,7 @@ export type ShipmentWorkflowConfigurationApi = {
 };
 
 export type TrackingNumberRuleApi = {
+    prefixMode: TrackingNumberPrefixModeApi;
     key: string;
     separator: string;
     source: TrackingNumberSourceApi;

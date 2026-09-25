@@ -7,8 +7,14 @@ import {
     Typography,
 } from "components/ui";
 import {
+    Cable,
+    Inventory2Outlined,
+    LocalShipping,
+    Map,
     Refresh,
     Save,
+    SettingsOutlined,
+    SettingsSuggest,
 } from "components/ui/icons";
 import {getBackendErrorMessage} from "../../api/errorMessage";
 import SoftwareConfigurationService from "../../hooks/SoftwareConfigurationService";
@@ -47,6 +53,14 @@ const sections: GlobalConfigurationSection[] = [
         categoryAliases: [],
     },
 ];
+
+const sectionIcons: Record<GlobalConfigurationSectionKey, React.ReactNode> = {
+    suppliers: <LocalShipping fontSize="small" />,
+    shipments: <Inventory2Outlined fontSize="small" />,
+    configuration: <SettingsOutlined fontSize="small" />,
+    geocoding: <Map fontSize="small" />,
+    integrations: <Cable fontSize="small" />,
+};
 
 const isDedicatedConfigurationSection = (sectionKey: GlobalConfigurationSectionKey) => (
     sectionKey === "shipments" || sectionKey === "geocoding" || sectionKey === "integrations"
@@ -163,72 +177,82 @@ function GlobalConfiguration() {
 
     return (
         <main className="global-configuration-page">
-            <section className="global-configuration-header">
-                <div>
-                    <span className="global-configuration-kicker">{pl.globalConfiguration.page.kicker}</span>
-                    <Typography variant="h4">{pl.globalConfiguration.page.title}</Typography>
-                    <p>{pl.globalConfiguration.page.subtitle}</p>
-                </div>
-            </section>
-
-            <nav className="global-configuration-tabs" aria-label={pl.globalConfiguration.page.sectionsTitle}>
-                <div className="global-configuration-tab-list">
-                    {sections.map((section) => {
-                        const sectionTranslation = pl.globalConfiguration.sections[section.key];
-                        const isActive = activeSectionKey === section.key;
-
-                        return (
-                            <button
-                                className={`global-configuration-tab${isActive ? " global-configuration-tab-active" : ""}`}
-                                key={section.key}
-                                aria-pressed={isActive}
-                                onClick={() => setActiveSectionKey(section.key)}
-                                type="button"
-                            >
-                                {sectionTranslation.title}
-                            </button>
-                        );
-                    })}
-                </div>
-            </nav>
-
-            {!isDedicatedConfigurationSection(activeSection.key) && error
-                ? <Alert severity="error">{error}</Alert>
-                : undefined}
-            {!isDedicatedConfigurationSection(activeSection.key) && success
-                ? <Alert severity="success">{success}</Alert>
-                : undefined}
-
-            {activeSection.key !== "integrations" ? (
-                <section className="global-configuration-toolbar">
-                    <div>
-                        <h2>{activeSectionTranslation.title}</h2>
-                        <p>{activeSectionTranslation.description}</p>
+            <div className="global-configuration-shell">
+                <section className="global-configuration-header">
+                    <div className="global-configuration-title-icon" aria-hidden="true">
+                        <SettingsSuggest />
                     </div>
-                    {!isDedicatedConfigurationSection(activeSection.key) ? (
-                        <Button disabled={loading} startIcon={<Refresh />} variant="outlined" onClick={retrieveProperties}>
-                            {pl.common.refresh}
-                        </Button>
-                    ) : undefined}
+                    <div className="global-configuration-heading">
+                        <span className="global-configuration-kicker">{pl.globalConfiguration.page.kicker}</span>
+                        <Typography variant="h4">{pl.globalConfiguration.page.title}</Typography>
+                        <p>{pl.globalConfiguration.page.subtitle}</p>
+                    </div>
                 </section>
-            ) : undefined}
 
-            {activeSection.key === "geocoding" ? (
-                <GeocodingConfigurationPanel />
-            ) : activeSection.key === "integrations" ? (
-                <IntegrationsConfigurationPanel />
-            ) : activeSection.key === "shipments" ? (
-                <ShipmentConfigurationPanel />
-            ) : loading ? (
-                <div className="global-configuration-loader">
-                    <CircularProgress size={28} />
-                    <span>{pl.globalConfiguration.page.loading}</span>
-                </div>
-            ) : (
-                <>
-                    <section className="global-configuration-section">
-                        <div className="global-configuration-table-wrap">
-                            <table className="global-configuration-table">
+                <nav className="global-configuration-tabs" aria-label={pl.globalConfiguration.page.sectionsTitle}>
+                    <div className="global-configuration-tab-list">
+                        {sections.map((section) => {
+                            const sectionTranslation = pl.globalConfiguration.sections[section.key];
+                            const isActive = activeSectionKey === section.key;
+
+                            return (
+                                <button
+                                    className={`global-configuration-tab${isActive ? " global-configuration-tab-active" : ""}`}
+                                    key={section.key}
+                                    aria-pressed={isActive}
+                                    onClick={() => setActiveSectionKey(section.key)}
+                                    type="button"
+                                >
+                                    <span className="global-configuration-tab-icon" aria-hidden="true">
+                                        {sectionIcons[section.key]}
+                                    </span>
+                                    {sectionTranslation.title}
+                                </button>
+                            );
+                        })}
+                    </div>
+                </nav>
+
+                <div className="global-configuration-content">
+                    {!isDedicatedConfigurationSection(activeSection.key) && error
+                        ? <Alert severity="error">{error}</Alert>
+                        : undefined}
+                    {!isDedicatedConfigurationSection(activeSection.key) && success
+                        ? <Alert severity="success">{success}</Alert>
+                        : undefined}
+
+                    <section className="global-configuration-toolbar">
+                        <div className="global-configuration-toolbar-heading">
+                            <span className="global-configuration-section-icon" aria-hidden="true">
+                                {sectionIcons[activeSection.key]}
+                            </span>
+                            <div>
+                                <h2>{activeSectionTranslation.title}</h2>
+                                <p>{activeSectionTranslation.description}</p>
+                            </div>
+                        </div>
+                        {!isDedicatedConfigurationSection(activeSection.key) ? (
+                            <Button disabled={loading} startIcon={<Refresh />} variant="outlined" onClick={retrieveProperties}>
+                                {pl.common.refresh}
+                            </Button>
+                        ) : undefined}
+                    </section>
+
+                    {activeSection.key === "geocoding" ? (
+                        <GeocodingConfigurationPanel />
+                    ) : activeSection.key === "integrations" ? (
+                        <IntegrationsConfigurationPanel />
+                    ) : activeSection.key === "shipments" ? (
+                        <ShipmentConfigurationPanel />
+                    ) : loading ? (
+                        <div className="global-configuration-loader">
+                            <CircularProgress size={28} />
+                            <span>{pl.globalConfiguration.page.loading}</span>
+                        </div>
+                    ) : (
+                        <section className="global-configuration-section">
+                            <div className="global-configuration-table-wrap">
+                                <table className="global-configuration-table">
                                 <thead>
                                 <tr>
                                     <th>{pl.globalConfiguration.columns.name}</th>
@@ -286,11 +310,12 @@ function GlobalConfiguration() {
                                     </tr>
                                 ) : undefined}
                                 </tbody>
-                            </table>
-                        </div>
-                    </section>
-                </>
-            )}
+                                </table>
+                            </div>
+                        </section>
+                    )}
+                </div>
+            </div>
         </main>
     );
 }
