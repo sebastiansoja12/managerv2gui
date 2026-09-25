@@ -1,84 +1,776 @@
-/* Configuration workspace: provider choices are controls, not feature tiles. */
-.app-main-content .global-configuration-page :is(
-    .integration-left-rail, .integration-provider-panel-section
-) {
+/* Global configuration uses the same compact technical workspace as the rest of Manager. */
+.app-main-content .global-configuration-page {
+    box-sizing: border-box;
+    min-height: 100%;
+    padding: clamp(22px, 2.4vw, 38px) clamp(18px, 3vw, 48px) 48px !important;
+}
+
+.global-configuration-shell {
+    display: grid;
+    gap: 14px;
+    margin: 0 auto;
+    max-width: 1760px;
+    min-width: 0;
+    width: 100%;
+}
+
+.app-main-content .global-configuration-header {
+    align-items: center;
+    display: flex;
+    gap: 14px;
+    padding: 0 0 18px !important;
+}
+
+.global-configuration-title-icon {
+    align-items: center;
+    background: var(--technical-accent-soft);
+    border: 1px solid var(--technical-accent-line);
+    border-radius: 4px;
+    color: var(--primary);
+    display: flex;
+    flex: 0 0 40px;
+    height: 40px;
+    justify-content: center;
+    width: 40px;
+}
+
+.global-configuration-title-icon svg {
+    height: 21px;
+    width: 21px;
+}
+
+.global-configuration-heading {
+    min-width: 0;
+}
+
+.global-configuration-kicker {
+    align-items: center;
+    color: var(--muted-foreground) !important;
+    display: inline-flex;
+    font-family: var(--font-mono);
+    font-size: 0.66rem !important;
+    font-weight: 600 !important;
+    gap: 8px;
+    letter-spacing: 0.08em !important;
+    margin: 0 0 5px !important;
+    text-transform: uppercase;
+}
+
+.global-configuration-kicker::before {
+    background: var(--primary);
+    content: "";
+    height: 5px;
+    width: 5px;
+}
+
+.global-configuration-header h4 {
+    color: var(--foreground) !important;
+    font-family: var(--font-display) !important;
+    font-size: clamp(2rem, 3vw, 3.15rem) !important;
+    font-weight: 400 !important;
+    letter-spacing: -0.045em !important;
+    line-height: 0.98 !important;
+    margin: 0 !important;
+}
+
+.global-configuration-header p {
+    color: var(--muted-foreground) !important;
+    font-size: 0.84rem;
+    font-weight: 400;
+    line-height: 1.5;
+    margin: 8px 0 0;
+}
+
+.app-main-content .global-configuration-tabs {
     background: transparent !important;
     border: 0 !important;
-    box-shadow: none !important;
+    border-bottom: 1px solid var(--border) !important;
+    border-radius: 0 !important;
+    overflow-x: auto;
+    padding: 0 !important;
 }
 
-.app-main-content .global-configuration-page :is(h2, h3, h4, h5):not(.global-configuration-header h4) {
-    font-family: var(--font-ui) !important;
-    font-size: 1rem !important;
-    font-weight: 600 !important;
-    letter-spacing: -0.015em !important;
-    line-height: 1.4;
-}
-
-.app-main-content .global-configuration-page :is(
-    .integration-provider-menu-item, .integration-switch-row,
-    .integration-enabled-control, .geocoding-enabled-control,
-    .global-configuration-loader
-),
-:is(.integration-configuration-dialog, .geocoding-configuration-dialog) :is(
-    .integration-enabled-control, .geocoding-enabled-control
-) {
-    background: var(--surface) !important;
-    border-color: var(--border) !important;
-    border-radius: var(--radius-control);
-    color: var(--foreground) !important;
-    box-shadow: none !important;
-}
-
-.app-main-content .integration-provider-menu-item-active {
-    border-color: var(--border-strong) !important;
-    box-shadow: inset 2px 0 var(--primary) !important;
-}
-
-.app-main-content .integration-provider-menu-item:hover {
-    background: var(--surface-secondary) !important;
-}
-
-.app-main-content .global-configuration-page :is(
-    .integration-provider-panel-heading p, .integration-status-copy p,
-    .integration-provider-menu-copy small, .integration-provider-actions [data-ui="button"]
-) {
-    font-size: 0.75rem;
-    line-height: 1.5;
-}
-
-.app-main-content .integration-provider-actions {
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-}
-
-.app-main-content .integration-provider-panel {
-    grid-template-rows: auto minmax(88px, 1fr) auto auto;
-}
-
-.app-main-content :is(.integration-field-grid, .integration-checkbox-grid) {
+.global-configuration-tab-list {
     align-items: end;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+    display: flex;
+    gap: 2px;
+    min-width: max-content;
 }
 
-.app-main-content .integration-status-panel {
-    padding: 12px !important;
+.app-main-content .global-configuration-tab {
+    align-items: center;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    color: var(--muted-foreground) !important;
+    display: inline-flex;
+    font-family: var(--font-ui) !important;
+    font-size: 0.78rem !important;
+    font-weight: 600 !important;
+    gap: 8px;
+    justify-content: center;
+    min-height: 43px;
+    min-width: 132px;
+    padding: 0 14px;
+    position: relative;
 }
 
-.app-main-content .integration-switch-row {
+.app-main-content .global-configuration-tab::after {
+    background: transparent;
+    bottom: -1px;
+    content: "";
+    height: 2px;
+    left: 10px;
+    position: absolute;
+    right: 10px;
+}
+
+.app-main-content .global-configuration-tab:hover,
+.app-main-content .global-configuration-tab:focus-visible {
+    background: color-mix(in srgb, var(--foreground) 3%, transparent) !important;
+    color: var(--foreground) !important;
+}
+
+.app-main-content .global-configuration-tab.global-configuration-tab-active {
+    background: transparent !important;
+    color: var(--foreground) !important;
+}
+
+.app-main-content .global-configuration-tab.global-configuration-tab-active::after {
+    background: var(--primary);
+}
+
+.global-configuration-tab-icon {
+    align-items: center;
+    color: currentColor;
+    display: flex;
+}
+
+.global-configuration-tab-icon svg {
+    height: 16px;
+    width: 16px;
+}
+
+.global-configuration-content {
+    display: grid;
+    gap: 0;
+    min-width: 0;
+}
+
+.global-configuration-content > [data-ui="alert"] {
+    margin-bottom: 10px;
+}
+
+.app-main-content .global-configuration-toolbar {
+    align-items: center;
+    background: var(--technical-panel) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 6px 6px 0 0 !important;
+    display: flex;
+    gap: 18px;
+    justify-content: space-between;
+    min-height: 74px;
+    padding: 13px 15px !important;
+}
+
+.global-configuration-toolbar-heading {
+    align-items: center;
+    display: flex;
+    gap: 12px;
+    min-width: 0;
+}
+
+.global-configuration-section-icon {
+    align-items: center;
+    border: 1px solid var(--technical-accent-line);
+    border-radius: 4px;
+    color: var(--primary);
+    display: flex;
+    flex: 0 0 34px;
+    height: 34px;
+    justify-content: center;
+    width: 34px;
+}
+
+.global-configuration-section-icon svg {
+    height: 17px;
+    width: 17px;
+}
+
+.global-configuration-toolbar h2 {
+    color: var(--foreground) !important;
+    font-family: var(--font-ui) !important;
+    font-size: 0.92rem !important;
+    font-weight: 650 !important;
+    letter-spacing: -0.02em !important;
+    margin: 0;
+}
+
+.global-configuration-toolbar p {
+    color: var(--muted-foreground) !important;
+    font-size: 0.75rem;
+    line-height: 1.45;
+    margin: 3px 0 0;
+}
+
+.global-configuration-toolbar [data-ui="button"] {
+    border-radius: 4px !important;
+    font-size: 0.76rem !important;
+    min-height: 34px !important;
+    padding: 0 11px !important;
+}
+
+.app-main-content .global-configuration-section,
+.app-main-content .global-configuration-loader {
+    background: var(--technical-panel) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 0 0 6px 6px !important;
+    border-top: 0 !important;
+    box-shadow: none !important;
+}
+
+.global-configuration-loader {
+    color: var(--muted-foreground) !important;
+    min-height: 250px;
+}
+
+.global-configuration-table {
+    min-width: 880px;
+}
+
+.global-configuration-table th,
+.global-configuration-table td {
+    padding: 11px 12px !important;
+}
+
+.global-configuration-table th:first-child,
+.global-configuration-table td:first-child {
+    padding-left: 15px !important;
+}
+
+.global-configuration-table th:last-child,
+.global-configuration-table td:last-child {
+    padding-right: 15px !important;
+    width: 170px;
+}
+
+.global-configuration-table td {
+    font-size: 0.8rem !important;
+}
+
+.global-configuration-table [data-ui="input"] {
+    min-height: 36px !important;
+}
+
+.global-configuration-table [data-ui="button"] {
+    border-radius: 4px !important;
+    font-size: 0.76rem !important;
+    min-height: 34px !important;
+    white-space: nowrap;
+}
+
+.global-configuration-category {
+    background: transparent !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 3px !important;
+    color: var(--muted-foreground) !important;
+    font-family: var(--font-mono);
+    font-size: 0.62rem !important;
+    letter-spacing: 0.04em;
+    padding: 4px 7px !important;
+    text-transform: uppercase;
+}
+
+.global-configuration-empty {
+    color: var(--muted-foreground) !important;
+    font-size: 0.78rem !important;
+    height: 170px !important;
+}
+
+/* Shipment configuration */
+.app-main-content .global-configuration-shipment-panel {
+    gap: 12px;
+    padding: 14px !important;
+}
+
+.shipment-configuration-topbar {
+    border-bottom: 1px solid var(--border);
+    gap: 12px;
+    margin: -1px 0 0;
+    padding: 0 0 12px;
+}
+
+.global-configuration-preview-note {
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    color: var(--muted-foreground) !important;
+    font-size: 0.72rem !important;
+    padding: 0 !important;
+}
+
+.global-configuration-preview-note svg {
+    color: var(--primary);
+}
+
+.shipment-configuration-topbar [data-ui="button"] {
+    border-radius: 4px !important;
+    font-size: 0.76rem !important;
+    min-height: 34px !important;
+}
+
+.shipment-configuration-sections {
     gap: 12px;
 }
 
-.app-main-content .integration-switch-row > span {
-    overflow-wrap: anywhere;
+.app-main-content .shipment-configuration-group {
+    background: var(--card) !important;
+    border-radius: 4px !important;
+}
+
+.shipment-configuration-group > header {
+    background: var(--surface-secondary) !important;
+    border-bottom: 1px solid var(--border);
+    padding: 12px 14px !important;
+}
+
+.shipment-configuration-group > header h3 {
+    font-size: 0.86rem !important;
+    font-weight: 650 !important;
+}
+
+.shipment-configuration-group > header p {
+    font-size: 0.71rem !important;
+    margin-top: 3px !important;
+}
+
+.app-main-content .shipment-setting-row {
+    background: transparent !important;
+    border: 0 !important;
+    border-bottom: 1px solid var(--border) !important;
+    border-radius: 0 !important;
+    min-height: 78px;
+    padding: 11px 14px !important;
+}
+
+.app-main-content .shipment-setting-row:nth-child(odd) {
+    border-right: 1px solid var(--border) !important;
+}
+
+.shipment-setting-copy strong {
+    font-size: 0.78rem !important;
+    font-weight: 600 !important;
+}
+
+.shipment-setting-copy small {
+    font-size: 0.68rem !important;
+}
+
+.shipment-setting-input [data-ui="input"],
+.shipment-setting-select [data-ui="select"] {
+    border-radius: 4px !important;
+    min-height: 36px !important;
+}
+
+.shipment-tracking-rule-summary code {
+    border-radius: 3px !important;
+    font-family: var(--font-mono);
+}
+
+.shipment-tracking-rule-summary [data-ui="button"] {
+    border-radius: 4px !important;
+    min-height: 34px !important;
+}
+
+/* Geocoding */
+.app-main-content .geocoding-configuration-panel {
+    padding: 14px !important;
+}
+
+.geocoding-configuration-heading {
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 12px;
+    padding: 0 0 12px;
+}
+
+.geocoding-configuration-heading h3 {
+    font-size: 0.86rem !important;
+    font-weight: 650 !important;
+}
+
+.geocoding-configuration-heading p {
+    font-size: 0.71rem !important;
+}
+
+.geocoding-configuration-heading [data-ui="button"],
+.geocoding-configuration-empty [data-ui="button"] {
+    border-radius: 4px !important;
+    font-size: 0.76rem !important;
+    min-height: 34px !important;
+}
+
+.geocoding-provider-list {
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.geocoding-provider-list-header {
+    border: 0 !important;
+    border-bottom: 1px solid var(--border) !important;
+    border-radius: 0 !important;
+    font-family: var(--font-mono);
+    font-size: 0.64rem !important;
+    letter-spacing: 0.055em;
+    padding: 9px 11px;
+}
+
+.app-main-content .geocoding-provider-card {
+    background: transparent !important;
+    border: 0 !important;
+    border-bottom: 1px solid var(--border) !important;
+    border-radius: 0 !important;
+    min-height: 66px;
+    padding: 9px 11px;
+}
+
+.app-main-content .geocoding-provider-card:last-child {
+    border-bottom: 0 !important;
+}
+
+.app-main-content .geocoding-provider-card:hover {
+    background: var(--technical-row-hover) !important;
+}
+
+.geocoding-provider-icon {
+    background: transparent !important;
+    border: 1px solid var(--technical-accent-line);
+    border-radius: 4px !important;
+    color: var(--primary) !important;
+    height: 32px;
+    width: 32px;
+}
+
+.geocoding-provider-main h4 {
+    font-size: 0.8rem !important;
+    font-weight: 650 !important;
+}
+
+.geocoding-provider-code,
+.geocoding-provider-api,
+.geocoding-provider-credential,
+.geocoding-provider-endpoint a {
+    font-size: 0.68rem !important;
+}
+
+.geocoding-provider-code,
+.geocoding-provider-api {
+    font-family: var(--font-mono);
+}
+
+.geocoding-provider-actions [data-ui="icon-button"] {
+    border-radius: 4px !important;
+}
+
+/* Integrations */
+.app-main-content .integrations-configuration-panel {
+    padding: 14px !important;
+}
+
+.integrations-workspace {
+    gap: 12px;
+    grid-template-columns: 286px minmax(0, 1fr);
+    min-height: 560px;
+}
+
+.app-main-content .integration-left-rail {
+    background: transparent !important;
+    border: 0 !important;
+}
+
+.app-main-content .integration-provider-panel {
+    background: var(--card) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 4px !important;
+    gap: 8px;
+    padding: 10px;
+}
+
+.app-main-content .integration-provider-panel-section {
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+}
+
+.integration-provider-panel-heading h4 {
+    font-size: 0.82rem !important;
+    font-weight: 650 !important;
+}
+
+.integration-provider-panel-heading p {
+    font-size: 0.68rem !important;
+    font-weight: 400 !important;
+}
+
+.integration-provider-menu {
+    gap: 5px;
+}
+
+.integration-provider-menu-item {
+    border-radius: 4px !important;
+    gap: 10px;
+    grid-template-columns: 36px minmax(0, 1fr) 8px;
+    min-height: 64px;
+    padding: 9px;
+}
+
+.integration-provider-menu-item-active {
+    background: var(--technical-accent-soft) !important;
+    border-color: var(--technical-accent-line) !important;
+    box-shadow: inset 2px 0 var(--primary) !important;
+}
+
+.integration-provider-icon {
+    background: transparent !important;
+    border: 1px solid var(--technical-accent-line);
+    border-radius: 4px !important;
+    height: 36px;
+    width: 36px;
+}
+
+.integration-provider-icon svg {
+    height: 18px;
+    width: 18px;
+}
+
+.integration-provider-menu-copy strong {
+    font-size: 0.78rem !important;
+    font-weight: 650 !important;
+}
+
+.integration-provider-menu-copy small {
+    font-family: var(--font-mono);
+    font-size: 0.64rem !important;
+    font-weight: 500 !important;
+}
+
+.integration-provider-actions [data-ui="button"] {
+    border-radius: 4px !important;
+    font-size: 0.68rem !important;
+    min-height: 38px !important;
+}
+
+.integration-main-panel {
+    gap: 10px;
+}
+
+.app-main-content .integration-option-group {
+    background: var(--card) !important;
+    border-radius: 4px !important;
+    gap: 12px;
+    padding: 13px;
+}
+
+.integration-option-heading > svg {
+    height: 17px;
+    width: 17px;
+}
+
+.integration-option-heading h5 {
+    font-size: 0.82rem !important;
+    font-weight: 650 !important;
+}
+
+.integration-option-heading p {
+    font-size: 0.68rem !important;
+    font-weight: 400 !important;
+}
+
+.integration-option-group [data-ui="form-control-label-text"],
+.integration-switch-list .integration-switch-row > span {
+    font-size: 0.74rem !important;
+    font-weight: 500 !important;
+}
+
+.app-main-content .integration-switch-row {
+    background: var(--surface) !important;
+    border-radius: 4px !important;
+    min-height: 38px;
+}
+
+.integration-status-panel {
+    background: transparent !important;
+    border: 0 !important;
+}
+
+.integration-status-icon {
+    background: transparent !important;
+    border: 1px solid var(--technical-accent-line);
+    border-radius: 4px !important;
+}
+
+.integration-status-copy h4 {
+    font-size: 0.76rem !important;
+}
+
+.integration-status-copy p {
+    font-size: 0.66rem !important;
+    font-weight: 400 !important;
+}
+
+.integration-field-grid [data-ui="input"],
+.integration-field-grid [data-ui="select"] {
+    border-radius: 4px !important;
+    min-height: 36px !important;
+}
+
+/* Configuration dialogs */
+[data-ui="dialog"].shipment-tracking-number-dialog,
+[data-ui="dialog"].geocoding-configuration-dialog,
+[data-ui="dialog"].integration-configuration-dialog {
+    background: var(--card) !important;
+    border: 1px solid var(--border-strong) !important;
+    border-radius: 4px !important;
+    box-shadow: var(--shadow-floating) !important;
+    overflow: hidden;
+}
+
+:is(
+    .shipment-tracking-number-dialog,
+    .geocoding-configuration-dialog,
+    .integration-configuration-dialog
+) [data-ui="dialog-title"] {
+    background: var(--surface) !important;
+    border-bottom: 1px solid var(--border) !important;
+    color: var(--foreground) !important;
+    font-family: var(--font-ui) !important;
+    font-size: 1rem !important;
+    font-weight: 650 !important;
+    padding: 16px 18px !important;
+}
+
+:is(
+    .shipment-tracking-number-dialog,
+    .geocoding-configuration-dialog,
+    .integration-configuration-dialog
+) [data-ui="dialog-content"] {
+    background: var(--card) !important;
+    padding: 16px 18px 20px !important;
+}
+
+:is(
+    .shipment-tracking-number-dialog,
+    .geocoding-configuration-dialog,
+    .integration-configuration-dialog
+) [data-ui="dialog-actions"] {
+    background: var(--surface) !important;
+    border-top: 1px solid var(--border) !important;
+    gap: 8px;
+    padding: 12px 18px 14px !important;
+}
+
+:is(
+    .shipment-tracking-number-dialog,
+    .geocoding-configuration-dialog,
+    .integration-configuration-dialog
+) [data-ui="button"] {
+    border-radius: 4px !important;
+    font-size: 0.76rem !important;
+    min-height: 36px !important;
+}
+
+.shipment-tracking-number-description,
+.geocoding-dialog-description,
+.integration-dialog-description {
+    font-size: 0.78rem !important;
+}
+
+.shipment-tracking-number-fields,
+.geocoding-dialog-fields,
+.integration-dialog-fields {
+    gap: 12px;
+}
+
+.shipment-tracking-number-option,
+.geocoding-enabled-control,
+.integration-enabled-control,
+.shipment-tracking-number-preview {
+    border-radius: 4px !important;
+}
+
+.shipment-tracking-number-preview span {
+    font-family: var(--font-mono);
+    font-size: 0.64rem !important;
+}
+
+.shipment-tracking-number-preview code {
+    font-family: var(--font-mono);
+    font-size: 0.88rem !important;
 }
 
 @media (max-width: 1100px) {
-    .app-main-content .integrations-workspace {
+    .integrations-workspace {
         grid-template-columns: 1fr;
         min-height: 0;
     }
 
-    .app-main-content .integration-provider-menu {
-        grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+    .integration-provider-menu {
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
+    }
+}
+
+@media (max-width: 760px) {
+    .app-main-content .global-configuration-page {
+        padding: 18px 14px 32px !important;
+    }
+
+    .global-configuration-title-icon {
+        display: none;
+    }
+
+    .global-configuration-header h4 {
+        font-size: 2.25rem !important;
+    }
+
+    .app-main-content .global-configuration-tab {
+        min-width: auto;
+        padding: 0 12px;
+    }
+
+    .app-main-content .global-configuration-toolbar {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .global-configuration-toolbar [data-ui="button"] {
+        width: 100%;
+    }
+
+    .shipment-configuration-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .app-main-content .shipment-setting-row:nth-child(odd) {
+        border-right: 0 !important;
+    }
+
+    .geocoding-provider-list-header {
+        display: none;
+    }
+
+    .geocoding-provider-card {
+        grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .geocoding-provider-main,
+    .geocoding-provider-endpoint {
+        grid-column: 1 / -1;
+    }
+
+    .shipment-tracking-number-fields,
+    .integration-checkbox-grid,
+    .integration-field-grid,
+    .integration-main-panel {
+        grid-template-columns: 1fr;
     }
 }
