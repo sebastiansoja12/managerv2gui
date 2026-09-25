@@ -6,6 +6,7 @@ import {
     Analytics,
     AccountTree,
     ChatBubbleOutline,
+    Close,
     Dashboard,
     DevicesOther,
     ExpandMore,
@@ -15,8 +16,10 @@ import {
     LocalShipping,
     LocationOn,
     Loop,
+    NotificationsNone,
     Person,
     Radar,
+    Search,
     Settings,
     SettingsSuggest,
     ShoppingCart,
@@ -64,6 +67,103 @@ type NavbarProps = {
 const languages = Object.keys(translations) as Language[];
 const NAVIGATION_PANEL = "navigation";
 
+type NavbarTrackingSearchProps = {
+    onClose: () => void;
+    onOpenTab: (tab: AppTabDefinition) => void;
+    open: boolean;
+};
+
+export function NavbarTrackingSearch({onClose, onOpenTab, open}: NavbarTrackingSearchProps) {
+    const [trackingNumber, setTrackingNumber] = React.useState("");
+    const fieldRef = React.useRef<HTMLDivElement>(null);
+    const inputRef = React.useRef<HTMLInputElement>(null);
+
+    React.useEffect(() => {
+        if (!open) {
+            return undefined;
+        }
+
+        const animationFrame = window.requestAnimationFrame(() => inputRef.current?.focus());
+        const closeOnOutsideInteraction = (event: PointerEvent) => {
+            if (event.target instanceof Node && !fieldRef.current?.contains(event.target)) {
+                onClose();
+            }
+        };
+        const closeOnEscape = (event: KeyboardEvent) => {
+            if (event.key === "Escape") {
+                onClose();
+            }
+        };
+
+        document.addEventListener("pointerdown", closeOnOutsideInteraction);
+        document.addEventListener("keydown", closeOnEscape);
+        return () => {
+            window.cancelAnimationFrame(animationFrame);
+            document.removeEventListener("pointerdown", closeOnOutsideInteraction);
+            document.removeEventListener("keydown", closeOnEscape);
+        };
+    }, [onClose, open]);
+
+    const submitSearch = (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        const normalizedTrackingNumber = trackingNumber.trim();
+        if (!normalizedTrackingNumber) {
+            return;
+        }
+
+        onOpenTab({
+            label: pl.home.trackingLookup.detailsTabLabel.replace("{trackingNumber}", normalizedTrackingNumber),
+            path: `/shipments/tracking/${encodeURIComponent(normalizedTrackingNumber)}/edit`,
+        });
+        setTrackingNumber("");
+        onClose();
+    };
+
+    return (
+        <form
+            aria-hidden={!open}
+            aria-label={pl.home.trackingLookup.ariaLabel}
+            className={`top-nav-search-overlay${open ? " top-nav-search-overlay-open" : ""}`}
+            id="top-nav-tracking-search"
+            onSubmit={submitSearch}
+        >
+            <div className="top-nav-search-field" ref={fieldRef}>
+                <Search aria-hidden="true" fontSize="small" />
+                <input
+                    aria-label={pl.home.trackingLookup.inputLabel}
+                    disabled={!open}
+                    onChange={(event) => setTrackingNumber(event.target.value)}
+                    placeholder={pl.home.trackingLookup.placeholder}
+                    ref={inputRef}
+                    className="top-nav-tracking-input"
+                    type="search"
+                    value={trackingNumber}
+                />
+                <button
+                    aria-label={pl.home.trackingLookup.search}
+                    className="top-nav-search-submit"
+                    disabled={!open || !trackingNumber.trim()}
+                    title={pl.home.trackingLookup.search}
+                    type="submit"
+                >
+                    <Search fontSize="small" />
+                </button>
+            </div>
+            <button
+                aria-label={`${pl.common.close}: ${pl.navigation.search}`}
+                className="top-nav-search-close"
+                disabled={!open}
+                onClick={onClose}
+                onPointerDown={(event) => event.stopPropagation()}
+                title={pl.common.close}
+                type="button"
+            >
+                <Close fontSize="small" />
+            </button>
+        </form>
+    );
+}
+
 function Navbar({
     activePath,
     openTabs,
@@ -78,6 +178,7 @@ function Navbar({
 }: NavbarProps) {
     const [expandedPanel, setExpandedPanel] = React.useState<string | null>(null);
     const [profileMenuOpen, setProfileMenuOpen] = React.useState(false);
+    const [searchOpen, setSearchOpen] = React.useState(false);
     const [isScrolled, setIsScrolled] = React.useState(false);
     const navbarRef = React.useRef<HTMLElement>(null);
     const quickNavRef = React.useRef<HTMLElement>(null);
@@ -492,6 +593,37 @@ function Navbar({
             </div>
 
             <div className="top-nav-actions">
+                <div className="top-nav-search-control">
+                    <button
+                        aria-controls="top-nav-tracking-search"
+                        aria-expanded={searchOpen}
+                        aria-label={pl.navigation.search}
+                        className="top-nav-action-icon"
+                        onClick={() => {
+                            setExpandedPanel(null);
+                            setProfileMenuOpen(false);
+                            setSearchOpen(true);
+                        }}
+                        title={pl.navigation.search}
+                        type="button"
+                    >
+                        <Search fontSize="small" />
+                    </button>
+                    <NavbarTrackingSearch
+                        onClose={() => setSearchOpen(false)}
+                        onOpenTab={onOpenTab}
+                        open={searchOpen}
+                    />
+                </div>
+                <span
+                    aria-label={pl.navigation.notifications}
+                    className="top-nav-action-icon top-nav-notifications-icon"
+                    role="img"
+                    title={pl.navigation.notifications}
+                >
+                    <NotificationsNone fontSize="small" />
+                    <span aria-hidden="true" className="top-nav-notification-dot" />
+                </span>
                 <div className="top-nav-profile-control">
                     <button
                         aria-controls="top-nav-profile-panel"
