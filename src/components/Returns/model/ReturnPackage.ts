@@ -1,6 +1,18 @@
 export type ReturnStatus = "CREATED" | "PROCESSING" | "COMPLETED" | "CANCELLED";
 
-export type ReturnReasonCode = "DAMAGED" | "WRONG_ITEM" | "NO_LONGER_NEEDED";
+export const returnReasonCodes = [
+    "DAMAGED",
+    "WRONG_ITEM",
+    "NO_LONGER_NEEDED",
+    "RECIPIENT_REFUSED",
+    "RECIPIENT_UNAVAILABLE",
+    "INVALID_ADDRESS",
+    "UNCLAIMED",
+    "SENDER_REQUESTED",
+    "OTHER",
+] as const;
+
+export type ReturnReasonCode = typeof returnReasonCodes[number];
 
 export type StringValue = {
     value: string;
@@ -12,12 +24,14 @@ export interface ReturnPackageDto {
     reason: string;
     returnStatus: ReturnStatus;
     returnToken: StringValue;
+    assignedDepartmentId: StringValue;
+    returnedDepartmentId: StringValue | null;
     assignedDepartmentCode: StringValue;
     returnedDepartmentCode: StringValue;
     assignedTo: StringValue;
     processedBy: StringValue;
     reasonCode: StringValue;
-    operatorId?: number | null;
+    operatorId?: StringValue | null;
     createdAt: string;
     updatedAt: string;
 }
@@ -34,7 +48,7 @@ export interface ReturnCreateRequest {
     shipmentId: StringValue;
     reason: string;
     reasonCode: StringValue;
-    departmentCode: StringValue;
+    departmentId: StringValue;
     returnStatus: "CREATED";
 }
 
@@ -44,9 +58,11 @@ export interface ReturnTokenValidationRequest {
 }
 
 export interface ReturnTokenValidationResponse {
-    shipmentId: number | string;
     valid: boolean;
-    message: string;
 }
 
-export const returnReasonCodes: ReturnReasonCode[] = ["DAMAGED", "WRONG_ITEM", "NO_LONGER_NEEDED"];
+export interface CreatedReturnDto {
+    shipmentId: StringValue;
+    returnId: StringValue;
+    status: ReturnStatus;
+}
