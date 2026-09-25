@@ -15,6 +15,7 @@ import {
 } from "components/ui";
 import {CheckCircle, InfoOutlined, Save, Settings} from "components/ui/icons";
 import {getBackendErrorMessage} from "../../api/errorMessage";
+import {useAuthState} from "../../auth/AuthState";
 import OperatorConfigurationService from "../../hooks/OperatorConfigurationService";
 import pl from "../../i18n/translate";
 import {
@@ -24,6 +25,7 @@ import {
     ShipmentNotificationChannelApi,
     ShipmentServiceLevelApi,
     TrackingNumberDateFormatApi,
+    TrackingNumberPrefixModeApi,
     TrackingNumberSourceApi,
 } from "./model/ShipmentConfiguration";
 
@@ -50,6 +52,7 @@ type ShipmentConfigurationDraft = {
     autoAssignCourier: boolean;
     autoCloseDelivered: boolean;
     generateTrackingNumber: boolean;
+    trackingNumberPrefixMode: TrackingNumberPrefixMode;
     trackingNumberKey: string;
     trackingNumberSeparator: string;
     trackingNumberSource: string;
@@ -66,6 +69,8 @@ type ShipmentConfigurationDraft = {
     notificationChannel: string;
 };
 
+type TrackingNumberPrefixMode = "custom" | "departmentCode" | "none";
+
 type BooleanSettingKey = {
     [Key in keyof ShipmentConfigurationDraft]: ShipmentConfigurationDraft[Key] extends boolean ? Key : never;
 }[keyof ShipmentConfigurationDraft];
@@ -78,6 +83,7 @@ type SettingOption = {
 };
 
 type TrackingNumberRuleDraft = Pick<ShipmentConfigurationDraft,
+    | "trackingNumberPrefixMode"
     | "trackingNumberKey"
     | "trackingNumberSeparator"
     | "trackingNumberSource"
@@ -112,6 +118,7 @@ const defaultShipmentConfiguration: ShipmentConfigurationDraft = {
     autoAssignCourier: false,
     autoCloseDelivered: true,
     generateTrackingNumber: false,
+    trackingNumberPrefixMode: "custom",
     trackingNumberKey: "MGR",
     trackingNumberSeparator: "-",
     trackingNumberSource: "sequence",
@@ -162,6 +169,18 @@ const serviceLevelToApi: Record<string, ShipmentServiceLevelApi> = {
     express: "EXPRESS",
 };
 
+const trackingPrefixModeFromApi: Record<TrackingNumberPrefixModeApi, TrackingNumberPrefixMode> = {
+    CUSTOM: "custom",
+    DEPARTMENT_CODE: "departmentCode",
+    NONE: "none",
+};
+
+const trackingPrefixModeToApi: Record<TrackingNumberPrefixMode, TrackingNumberPrefixModeApi> = {
+    custom: "CUSTOM",
+    departmentCode: "DEPARTMENT_CODE",
+    none: "NONE",
+};
+
 const trackingSourceFromApi: Record<TrackingNumberSourceApi, string> = {
     SEQUENCE: "sequence",
     SHIPMENT_ID: "shipmentId",
@@ -199,6 +218,7 @@ const notificationChannelToApi: Record<string, ShipmentNotificationChannelApi> =
 };
 
 const getTrackingNumberRule = (configuration: ShipmentConfigurationDraft): TrackingNumberRuleDraft => ({
+    trackingNumberPrefixMode: configuration.trackingNumberPrefixMode,
     trackingNumberKey: configuration.trackingNumberKey,
     trackingNumberSeparator: configuration.trackingNumberSeparator,
     trackingNumberSource: configuration.trackingNumberSource,
@@ -227,9 +247,15 @@ const getTrackingSourcePreview = (rule: TrackingNumberRuleDraft) => {
     return "000042";
 };
 
-const buildTrackingNumberPreview = (rule: TrackingNumberRuleDraft) => {
+const getTrackingNumberPrefix = (rule: TrackingNumberRuleDraft, departmentCode: string) => {
+    if (rule.trackingNumberPrefixMode === "none") return "";
+    if (rule.trackingNumberPrefixMode === "departmentCode") return departmentCode.trim();
+    return rule.trackingNumberKey.trim();
+};
+
+const buildTrackingNumberPreview = (rule: TrackingNumberRuleDraft, departmentCode: string) => {
     const parts = [
-        rule.trackingNumberKey.trim(),
+        getTrackingNumberPrefix(rule, departmentCode),
         rule.trackingNumberIncludeDate ? getTrackingDatePreview(rule.trackingNumberDateFormat) : "",
         getTrackingSourcePreview(rule),
     ].filter(Boolean);
@@ -244,9 +270,12 @@ const readShipmentConfiguration = (): ShipmentConfigurationDraft => {
             return defaultShipmentConfiguration;
         }
 
+        const parsedConfiguration = JSON.parse(storedValue) as Partial<ShipmentConfigurationDraft>;
         return {
             ...defaultShipmentConfiguration,
-            ...JSON.parse(storedValue),
+            ...parsedConfiguration,
+            trackingNumberPrefixMode: parsedConfiguration.trackingNumberPrefixMode
+                || (parsedConfiguration.trackingNumberKey?.trim() === "" ? "none" : "custom"),
         };
     } catch {
         return defaultShipmentConfiguration;
@@ -266,62 +295,99 @@ const toApiNumber = (value: string, fallback: string) => {
     return Number(fallback);
 };
 
-const mapApiToDraft = (configuration: ShipmentConfigurationApi): ShipmentConfigurationDraft => ({
-    validateAddressData: Boolean(configuration.validationConfiguration?.validateAddressData),
-    requireRecipientPhone: Boolean(configuration.validationConfiguration?.requireRecipientPhone),
-    requireRecipientEmail: Boolean(configuration.validationConfiguration?.requireRecipientEmail),
-    preventDuplicateTracking: Boolean(configuration.validationConfiguration?.preventDuplicateTracking),
-    requireSenderReference: Boolean(configuration.validationConfiguration?.requireSenderReference),
-    validatePostalCode: Boolean(configuration.validationConfiguration?.validatePostalCode),
-    autoGenerateLabels: Boolean(configuration.labelConfiguration?.autoGenerateLabels),
-    includeReturnLabel: Boolean(configuration.labelConfiguration?.includeReturnLabel),
-    attachPackingSlip: Boolean(configuration.labelConfiguration?.attachPackingSlip),
-    labelFormat: labelFormatFromApi[configuration.labelConfiguration?.labelFormat] || defaultShipmentConfiguration.labelFormat,
-    maximumWeightKg: toTextNumber(configuration.shipmentLimits?.maxWeight, defaultShipmentConfiguration.maximumWeightKg),
-    minimumWeightKg: toTextNumber(configuration.shipmentLimits?.minWeight, defaultShipmentConfiguration.minimumWeightKg),
-    maximumLengthCm: toTextNumber(configuration.shipmentLimits?.maxLength, defaultShipmentConfiguration.maximumLengthCm),
-    maximumWidthCm: toTextNumber(configuration.shipmentLimits?.maxWidth, defaultShipmentConfiguration.maximumWidthCm),
-    maximumHeightCm: toTextNumber(configuration.shipmentLimits?.maxHeight, defaultShipmentConfiguration.maximumHeightCm),
-    maximumShipmentValue: toTextNumber(
-        configuration.shipmentLimits?.maxShipmentValue,
-        defaultShipmentConfiguration.maximumShipmentValue,
-    ),
-    allowOversized: Boolean(configuration.shipmentLimits?.allowOversized),
-    defaultStatus: shipmentStatusFromApi[configuration.workflowConfiguration?.defaultStatus]
-        || defaultShipmentConfiguration.defaultStatus,
-    defaultServiceLevel: serviceLevelFromApi[configuration.workflowConfiguration?.defaultServiceLevel]
-        || defaultShipmentConfiguration.defaultServiceLevel,
-    autoAssignCourier: Boolean(configuration.workflowConfiguration?.autoAssignCourier),
-    autoCloseDelivered: Boolean(configuration.workflowConfiguration?.autoCloseDelivered),
-    generateTrackingNumber: Boolean(configuration.workflowConfiguration?.generateTrackingNumber),
-    trackingNumberKey: configuration.trackingNumberRule?.key || defaultShipmentConfiguration.trackingNumberKey,
-    trackingNumberSeparator: configuration.trackingNumberRule?.separator
-        || defaultShipmentConfiguration.trackingNumberSeparator,
-    trackingNumberSource: trackingSourceFromApi[configuration.trackingNumberRule?.source]
-        || defaultShipmentConfiguration.trackingNumberSource,
-    trackingNumberRandomLength: toTextNumber(
-        configuration.trackingNumberRule?.randomLength,
-        defaultShipmentConfiguration.trackingNumberRandomLength,
-    ),
-    trackingNumberIncludeDate: Boolean(configuration.trackingNumberRule?.includeDate),
-    trackingNumberDateFormat: trackingDateFormatFromApi[configuration.trackingNumberRule?.dateFormat]
-        || defaultShipmentConfiguration.trackingNumberDateFormat,
-    trackingNumberUppercase: Boolean(configuration.trackingNumberRule?.uppercase),
-    cancellationWindowMinutes: toTextNumber(
-        configuration.workflowConfiguration?.cancellationWindowMinutes,
-        defaultShipmentConfiguration.cancellationWindowMinutes,
-    ),
-    pickupCutoffTime: configuration.workflowConfiguration?.pickupCutoffTime
-        || defaultShipmentConfiguration.pickupCutoffTime,
-    notifyRecipientOnCreated: Boolean(configuration.notificationConfiguration?.notifyRecipientOnCreated),
-    notifyRecipientOnDispatched: Boolean(configuration.notificationConfiguration?.notifyRecipientOnDispatched),
-    notifyRecipientOnDelivered: Boolean(configuration.notificationConfiguration?.notifyRecipientOnDelivered),
-    notifySenderOnException: Boolean(configuration.notificationConfiguration?.notifySenderOnException),
-    notificationChannel: notificationChannelFromApi[configuration.notificationConfiguration?.notificationChannel]
-        || defaultShipmentConfiguration.notificationChannel,
-});
+const mapApiToDraft = (
+    configuration: ShipmentConfigurationApi,
+    departmentCode: string,
+): ShipmentConfigurationDraft => {
+    const trackingNumberKey = configuration.trackingNumberRule?.key
+        ?? defaultShipmentConfiguration.trackingNumberKey;
+    const normalizedDepartmentCode = departmentCode.trim().toUpperCase();
+    const normalizedTrackingNumberKey = trackingNumberKey.trim().toUpperCase();
+    const trackingNumberPrefixMode: TrackingNumberPrefixMode = configuration.trackingNumberRule?.prefixMode
+        ? trackingPrefixModeFromApi[configuration.trackingNumberRule.prefixMode]
+        : !normalizedTrackingNumberKey
+            ? "none"
+            : normalizedDepartmentCode && normalizedTrackingNumberKey === normalizedDepartmentCode
+                ? "departmentCode"
+                : "custom";
 
-const mapDraftToApi = (configuration: ShipmentConfigurationDraft): ShipmentConfigurationApi => ({
+    return {
+        validateAddressData: Boolean(configuration.validationConfiguration?.validateAddressData),
+        requireRecipientPhone: Boolean(configuration.validationConfiguration?.requireRecipientPhone),
+        requireRecipientEmail: Boolean(configuration.validationConfiguration?.requireRecipientEmail),
+        preventDuplicateTracking: Boolean(configuration.validationConfiguration?.preventDuplicateTracking),
+        requireSenderReference: Boolean(configuration.validationConfiguration?.requireSenderReference),
+        validatePostalCode: Boolean(configuration.validationConfiguration?.validatePostalCode),
+        autoGenerateLabels: Boolean(configuration.labelConfiguration?.autoGenerateLabels),
+        includeReturnLabel: Boolean(configuration.labelConfiguration?.includeReturnLabel),
+        attachPackingSlip: Boolean(configuration.labelConfiguration?.attachPackingSlip),
+        labelFormat: labelFormatFromApi[configuration.labelConfiguration?.labelFormat]
+            || defaultShipmentConfiguration.labelFormat,
+        maximumWeightKg: toTextNumber(
+            configuration.shipmentLimits?.maxWeight,
+            defaultShipmentConfiguration.maximumWeightKg,
+        ),
+        minimumWeightKg: toTextNumber(
+            configuration.shipmentLimits?.minWeight,
+            defaultShipmentConfiguration.minimumWeightKg,
+        ),
+        maximumLengthCm: toTextNumber(
+            configuration.shipmentLimits?.maxLength,
+            defaultShipmentConfiguration.maximumLengthCm,
+        ),
+        maximumWidthCm: toTextNumber(
+            configuration.shipmentLimits?.maxWidth,
+            defaultShipmentConfiguration.maximumWidthCm,
+        ),
+        maximumHeightCm: toTextNumber(
+            configuration.shipmentLimits?.maxHeight,
+            defaultShipmentConfiguration.maximumHeightCm,
+        ),
+        maximumShipmentValue: toTextNumber(
+            configuration.shipmentLimits?.maxShipmentValue,
+            defaultShipmentConfiguration.maximumShipmentValue,
+        ),
+        allowOversized: Boolean(configuration.shipmentLimits?.allowOversized),
+        defaultStatus: shipmentStatusFromApi[configuration.workflowConfiguration?.defaultStatus]
+            || defaultShipmentConfiguration.defaultStatus,
+        defaultServiceLevel: serviceLevelFromApi[configuration.workflowConfiguration?.defaultServiceLevel]
+            || defaultShipmentConfiguration.defaultServiceLevel,
+        autoAssignCourier: Boolean(configuration.workflowConfiguration?.autoAssignCourier),
+        autoCloseDelivered: Boolean(configuration.workflowConfiguration?.autoCloseDelivered),
+        generateTrackingNumber: Boolean(configuration.workflowConfiguration?.generateTrackingNumber),
+        trackingNumberPrefixMode,
+        trackingNumberKey,
+        trackingNumberSeparator: configuration.trackingNumberRule?.separator
+            ?? defaultShipmentConfiguration.trackingNumberSeparator,
+        trackingNumberSource: trackingSourceFromApi[configuration.trackingNumberRule?.source]
+            || defaultShipmentConfiguration.trackingNumberSource,
+        trackingNumberRandomLength: toTextNumber(
+            configuration.trackingNumberRule?.randomLength,
+            defaultShipmentConfiguration.trackingNumberRandomLength,
+        ),
+        trackingNumberIncludeDate: Boolean(configuration.trackingNumberRule?.includeDate),
+        trackingNumberDateFormat: trackingDateFormatFromApi[configuration.trackingNumberRule?.dateFormat]
+            || defaultShipmentConfiguration.trackingNumberDateFormat,
+        trackingNumberUppercase: Boolean(configuration.trackingNumberRule?.uppercase),
+        cancellationWindowMinutes: toTextNumber(
+            configuration.workflowConfiguration?.cancellationWindowMinutes,
+            defaultShipmentConfiguration.cancellationWindowMinutes,
+        ),
+        pickupCutoffTime: configuration.workflowConfiguration?.pickupCutoffTime
+            || defaultShipmentConfiguration.pickupCutoffTime,
+        notifyRecipientOnCreated: Boolean(configuration.notificationConfiguration?.notifyRecipientOnCreated),
+        notifyRecipientOnDispatched: Boolean(configuration.notificationConfiguration?.notifyRecipientOnDispatched),
+        notifyRecipientOnDelivered: Boolean(configuration.notificationConfiguration?.notifyRecipientOnDelivered),
+        notifySenderOnException: Boolean(configuration.notificationConfiguration?.notifySenderOnException),
+        notificationChannel: notificationChannelFromApi[configuration.notificationConfiguration?.notificationChannel]
+            || defaultShipmentConfiguration.notificationChannel,
+    };
+};
+
+const mapDraftToApi = (
+    configuration: ShipmentConfigurationDraft,
+    departmentCode: string,
+): ShipmentConfigurationApi => ({
     validationConfiguration: {
         validateAddressData: configuration.validateAddressData,
         requireRecipientPhone: configuration.requireRecipientPhone,
@@ -361,7 +427,8 @@ const mapDraftToApi = (configuration: ShipmentConfigurationDraft): ShipmentConfi
         pickupCutoffTime: configuration.pickupCutoffTime,
     },
     trackingNumberRule: {
-        key: configuration.trackingNumberKey.trim(),
+        prefixMode: trackingPrefixModeToApi[configuration.trackingNumberPrefixMode],
+        key: getTrackingNumberPrefix(getTrackingNumberRule(configuration), departmentCode),
         separator: configuration.trackingNumberSeparator,
         source: trackingSourceToApi[configuration.trackingNumberSource] || "SEQUENCE",
         randomLength: toApiNumber(
@@ -382,6 +449,8 @@ const mapDraftToApi = (configuration: ShipmentConfigurationDraft): ShipmentConfi
 });
 
 export function ShipmentConfigurationPanel() {
+    const {user} = useAuthState();
+    const departmentCode = user?.departmentCode || "";
     const [configuration, setConfiguration] = useState<ShipmentConfigurationDraft>(readShipmentConfiguration);
     const [saved, setSaved] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -392,8 +461,15 @@ export function ShipmentConfigurationPanel() {
         getTrackingNumberRule(defaultShipmentConfiguration),
     );
     const shipmentConfiguration = pl.globalConfiguration.shipmentConfiguration;
-    const trackingNumberPreview = buildTrackingNumberPreview(getTrackingNumberRule(configuration));
-    const trackingNumberDraftPreview = buildTrackingNumberPreview(trackingNumberRuleDraft);
+    const trackingNumberPreview = buildTrackingNumberPreview(getTrackingNumberRule(configuration), departmentCode);
+    const trackingNumberDraftPreview = buildTrackingNumberPreview(trackingNumberRuleDraft, departmentCode);
+    const trackingNumberPrefixInvalid = (
+        trackingNumberRuleDraft.trackingNumberPrefixMode === "custom"
+        && !trackingNumberRuleDraft.trackingNumberKey.trim()
+    ) || (
+        trackingNumberRuleDraft.trackingNumberPrefixMode === "departmentCode"
+        && !departmentCode.trim()
+    );
 
     useEffect(() => {
         let active = true;
@@ -407,7 +483,7 @@ export function ShipmentConfigurationPanel() {
                     return;
                 }
 
-                const nextConfiguration = mapApiToDraft(response.data);
+                const nextConfiguration = mapApiToDraft(response.data, departmentCode);
                 setConfiguration(nextConfiguration);
                 window.localStorage.setItem(SHIPMENT_CONFIGURATION_STORAGE_KEY, JSON.stringify(nextConfiguration));
             } catch (exception) {
@@ -429,7 +505,7 @@ export function ShipmentConfigurationPanel() {
         return () => {
             active = false;
         };
-    }, [shipmentConfiguration.messages.loadError]);
+    }, [departmentCode, shipmentConfiguration.messages.loadError]);
 
     const updateConfiguration = <Key extends keyof ShipmentConfigurationDraft>(
         field: Key,
@@ -447,9 +523,9 @@ export function ShipmentConfigurationPanel() {
             setSaving(true);
             setError(null);
             const response = await OperatorConfigurationService.updateCurrentShipmentConfiguration(
-                mapDraftToApi(configuration),
+                mapDraftToApi(configuration, departmentCode),
             );
-            const nextConfiguration = mapApiToDraft(response.data);
+            const nextConfiguration = mapApiToDraft(response.data, departmentCode);
             setConfiguration(nextConfiguration);
             window.localStorage.setItem(SHIPMENT_CONFIGURATION_STORAGE_KEY, JSON.stringify(nextConfiguration));
             setSaved(true);
@@ -707,11 +783,47 @@ export function ShipmentConfigurationPanel() {
                     <div className="shipment-tracking-number-fields">
                         <TextField
                             fullWidth
-                            inputProps={{maxLength: 20}}
-                            label={shipmentConfiguration.trackingNumber.keyLabel}
-                            value={trackingNumberRuleDraft.trackingNumberKey}
-                            onChange={(event) => updateTrackingNumberRule("trackingNumberKey", event.target.value)}
-                        />
+                            label={shipmentConfiguration.trackingNumber.prefixModeLabel}
+                            select
+                            value={trackingNumberRuleDraft.trackingNumberPrefixMode}
+                            onChange={(event) => updateTrackingNumberRule(
+                                "trackingNumberPrefixMode",
+                                event.target.value as TrackingNumberPrefixMode,
+                            )}
+                        >
+                            <MenuItem value="custom">
+                                {shipmentConfiguration.trackingNumber.prefixModes.custom}
+                            </MenuItem>
+                            <MenuItem disabled={!departmentCode.trim()} value="departmentCode">
+                                {shipmentConfiguration.trackingNumber.prefixModes.departmentCode.replace(
+                                    "{code}",
+                                    departmentCode || pl.common.dash,
+                                )}
+                            </MenuItem>
+                            <MenuItem value="none">
+                                {shipmentConfiguration.trackingNumber.prefixModes.none}
+                            </MenuItem>
+                        </TextField>
+                        {trackingNumberRuleDraft.trackingNumberPrefixMode === "custom" ? (
+                            <TextField
+                                fullWidth
+                                inputProps={{maxLength: 20}}
+                                label={shipmentConfiguration.trackingNumber.keyLabel}
+                                value={trackingNumberRuleDraft.trackingNumberKey}
+                                onChange={(event) => updateTrackingNumberRule("trackingNumberKey", event.target.value)}
+                            />
+                        ) : (
+                            <TextField
+                                disabled
+                                fullWidth
+                                label={trackingNumberRuleDraft.trackingNumberPrefixMode === "departmentCode"
+                                    ? shipmentConfiguration.trackingNumber.departmentCodeLabel
+                                    : shipmentConfiguration.trackingNumber.keyLabel}
+                                value={trackingNumberRuleDraft.trackingNumberPrefixMode === "departmentCode"
+                                    ? departmentCode
+                                    : shipmentConfiguration.trackingNumber.noPrefixValue}
+                            />
+                        )}
                         <TextField
                             fullWidth
                             inputProps={{maxLength: 3}}
@@ -785,7 +897,7 @@ export function ShipmentConfigurationPanel() {
                     </Button>
                     <Button
                         className="shipment-tracking-number-save"
-                        disabled={!trackingNumberRuleDraft.trackingNumberKey.trim()}
+                        disabled={trackingNumberPrefixInvalid}
                         startIcon={<Save />}
                         variant="outlined"
                         onClick={saveTrackingNumberRule}
