@@ -229,7 +229,8 @@ function Returns({onOpenTab}: ReturnsProps) {
     }, [departmentsReloadKey, detailMode, user?.departmentCode]);
 
     useEffect(() => {
-        if (detailMode || !departmentFilter) {
+        const selectedDepartment = availableDepartments.find((department) => departmentCode(department) === departmentFilter);
+        if (detailMode || !selectedDepartment) {
             setReturnPackages([]);
             return;
         }
@@ -238,7 +239,7 @@ function Returns({onOpenTab}: ReturnsProps) {
         setListLoading(true);
         setListError(null);
 
-        ReturnService.getAllByDepartment(departmentFilter)
+        ReturnService.getAllByDepartment(String(selectedDepartment.departmentId))
             .then((packages) => {
                 if (!ignore) {
                     setReturnPackages(packages);
@@ -259,7 +260,7 @@ function Returns({onOpenTab}: ReturnsProps) {
         return () => {
             ignore = true;
         };
-    }, [departmentFilter, detailMode, listReloadKey]);
+    }, [availableDepartments, departmentFilter, detailMode, listReloadKey]);
 
     const loadReturn = async (requestedId = lookupId) => {
         const normalizedId = requestedId.trim();
@@ -320,7 +321,10 @@ function Returns({onOpenTab}: ReturnsProps) {
 
     const createReturn = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        if (!validCreateForm) {
+        const selectedDepartment = availableDepartments.find(
+            (department) => departmentCode(department) === createForm.departmentCode,
+        );
+        if (!validCreateForm || !selectedDepartment) {
             setNotice({severity: "error", message: pl.returns.messages.requiredFields});
             return;
         }
@@ -332,7 +336,7 @@ function Returns({onOpenTab}: ReturnsProps) {
                 shipmentId: {value: createForm.shipmentId.trim()},
                 reason: createForm.reason.trim(),
                 reasonCode: {value: createForm.reasonCode},
-                departmentCode: {value: createForm.departmentCode.trim().toUpperCase()},
+                departmentId: {value: String(selectedDepartment.departmentId)},
                 returnStatus: "CREATED",
             });
             setCreateDialogOpen(false);
@@ -380,9 +384,9 @@ function Returns({onOpenTab}: ReturnsProps) {
         setNotice(null);
         try {
             if (confirmation === "process") {
-                await ReturnService.process(returnPackage.shipmentId.value);
+                await ReturnService.process(returnPackage.returnPackageId.value);
             } else if (confirmation === "complete") {
-                await ReturnService.complete(returnPackage.shipmentId.value);
+                await ReturnService.complete(returnPackage.returnPackageId.value);
             } else {
                 await ReturnService.cancel(returnPackage.returnPackageId.value);
             }
@@ -391,15 +395,7 @@ function Returns({onOpenTab}: ReturnsProps) {
                 : confirmation === "complete"
                     ? pl.returns.messages.completeSuccess
                     : pl.returns.messages.cancelSuccess;
-            const updatedReturnPackage: ReturnPackageDto = {
-                ...returnPackage,
-                returnStatus: confirmation === "process"
-                    ? "PROCESSING"
-                    : confirmation === "complete"
-                        ? "COMPLETED"
-                        : "CANCELLED",
-                updatedAt: new Date().toISOString(),
-            };
+            const {data: updatedReturnPackage} = await ReturnService.get(returnPackage.returnPackageId.value);
             setConfirmation(null);
             setReturnPackages((currentReturnPackages) => currentReturnPackages.map((item) => (
                 item.returnPackageId.value === updatedReturnPackage.returnPackageId.value

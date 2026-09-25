@@ -30,7 +30,7 @@ describe("ReturnService", () => {
 
         expect(mockManagerRequest).toHaveBeenCalledWith({
             method: "GET",
-            url: "/shipments/returns/123",
+            url: "/returns/packages/123",
             params: undefined,
             headers: undefined,
         });
@@ -48,22 +48,38 @@ describe("ReturnService", () => {
                 status: 200,
             });
 
-        const returns = await ReturnService.getAllByDepartment("KT1");
+        const returns = await ReturnService.getAllByDepartment("2");
 
         expect(returns.map((item) => item.returnPackageId.value)).toEqual(["123", "124"]);
         expect(mockManagerRequest).toHaveBeenNthCalledWith(1, {
             method: "GET",
-            url: "/shipments/returns",
-            params: {departmentCode: "KT1", page: 0, size: 100},
+            url: "/returns/packages",
+            params: {departmentId: "2", page: 0, size: 100},
             headers: undefined,
         });
         expect(mockManagerRequest).toHaveBeenNthCalledWith(2, {
             method: "GET",
-            url: "/shipments/returns",
-            params: {departmentCode: "KT1", page: 1, size: 100},
+            url: "/returns/packages",
+            params: {departmentId: "2", page: 1, size: 100},
             headers: undefined,
         });
         expect(mockReturningRequest).not.toHaveBeenCalled();
+    });
+
+    it("creates a return through the return controller without a client-supplied user", async () => {
+        mockManagerRequest.mockResolvedValue({data: [], status: 201});
+
+        await ReturnService.create({
+            shipmentId: {value: "456"}, departmentId: {value: "2"},
+            reason: "Damaged parcel", reasonCode: {value: "DAMAGED"}, returnStatus: "CREATED",
+        });
+
+        expect(mockManagerRequest).toHaveBeenCalledWith({
+            method: "POST", url: "/returns/packages",
+            data: {shipmentId: {value: "456"}, departmentId: {value: "2"},
+                reason: "Damaged parcel", reasonCode: "DAMAGED"},
+            params: undefined, headers: undefined,
+        });
     });
 
     it("cancels a return through Manager", async () => {
@@ -73,7 +89,7 @@ describe("ReturnService", () => {
 
         expect(mockManagerRequest).toHaveBeenCalledWith({
             method: "DELETE",
-            url: "/shipments/returns/123",
+            url: "/returns/packages/123",
             data: undefined,
             params: undefined,
             headers: undefined,
@@ -84,11 +100,11 @@ describe("ReturnService", () => {
     it("starts return processing through Manager", async () => {
         mockManagerRequest.mockResolvedValue({data: {status: "OK"}, status: 200});
 
-        await ReturnService.process("456");
+        await ReturnService.process("123");
 
         expect(mockManagerRequest).toHaveBeenCalledWith({
             method: "PUT",
-            url: "/shipments/returns/456/process",
+            url: "/returns/packages/123/process",
             data: undefined,
             params: undefined,
             headers: undefined,
@@ -99,11 +115,11 @@ describe("ReturnService", () => {
     it("completes a return through Manager", async () => {
         mockManagerRequest.mockResolvedValue({data: {status: "OK"}, status: 200});
 
-        await ReturnService.complete("456");
+        await ReturnService.complete("123");
 
         expect(mockManagerRequest).toHaveBeenCalledWith({
             method: "PUT",
-            url: "/shipments/returns/456/complete",
+            url: "/returns/packages/123/complete",
             data: undefined,
             params: undefined,
             headers: undefined,
