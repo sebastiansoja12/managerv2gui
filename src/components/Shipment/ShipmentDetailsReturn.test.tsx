@@ -60,8 +60,8 @@ describe("ShipmentDetails return data from Manager", () => {
         renderDetails(byTracking);
         const summary = await screen.findByRole("region", {name: pl.shipments.returnSummary.title});
         expect(within(summary).getByText(pl.returns.status.PROCESSING)).toBeInTheDocument();
-        const statusControl = screen.getByRole("region", {name: pl.shipments.form.fields.shipmentStatus});
-        expect(statusControl.compareDocumentPosition(summary) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+        fireEvent.click(screen.getByRole("button", {name: pl.shipments.actions.operations}));
+        expect(screen.getByRole("menuitem", {name: pl.shipments.actions.changeStatus})).toBeInTheDocument();
         expect(lookup).toHaveBeenCalledWith(byTracking ? "MGR-10" : shipment.shipmentId.value);
         fireEvent.click(within(summary).getByRole("button", {name: pl.shipments.returnSummary.open}));
         expect(screen.getByText("Return details destination")).toBeInTheDocument();
@@ -80,6 +80,29 @@ describe("ShipmentDetails return data from Manager", () => {
         expect(screen.queryByRole("region", {name: pl.shipments.returnSummary.title})).not.toBeInTheDocument();
     });
 
+    it("keeps the return above shipment details on every detail tab", async () => {
+        const animationFrame = jest.spyOn(window, "requestAnimationFrame").mockReturnValue(0);
+        (ShipmentService.getControlCenter as jest.Mock).mockResolvedValue({
+            data: {shipment, routeLog: null, returnPackage},
+            status: 200,
+        });
+
+        renderDetails(false);
+
+        const summary = await screen.findByRole("region", {name: pl.shipments.returnSummary.title});
+        const shipmentData = screen.getByRole("heading", {name: pl.shipments.form.sections.shipmentData});
+        expect(summary.compareDocumentPosition(shipmentData) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+        expect(within(summary).getByRole("heading", {name: pl.shipments.returnSummary.title})).toBeVisible();
+
+        for (const tab of [pl.shipments.detailTabs.sender, pl.shipments.detailTabs.recipient, pl.shipments.detailTabs.overview]) {
+            fireEvent.click(screen.getByRole("button", {name: tab}));
+            expect(screen.getAllByRole("region", {name: pl.shipments.returnSummary.title})).toHaveLength(1);
+            expect(within(summary).getByRole("button", {name: pl.shipments.returnSummary.open})).toBeVisible();
+            expect(within(summary).getByText(pl.returns.status.PROCESSING)).toBeVisible();
+        }
+        animationFrame.mockRestore();
+    });
+
     it("displays the delivery pickup point code instead of its id", async () => {
         const deliveryPickupPointId = "c5afe577-8f66-464a-abaf-1d4369f0000";
         (ShipmentService.getControlCenter as jest.Mock).mockResolvedValue({
@@ -96,5 +119,32 @@ describe("ShipmentDetails return data from Manager", () => {
         expect(await screen.findByText("KS_1")).toBeInTheDocument();
         expect(PickupPointService.getById).toHaveBeenCalledWith(deliveryPickupPointId);
         expect(screen.queryByText(deliveryPickupPointId)).not.toBeInTheDocument();
+    });
+
+    it("renders the complete backend-ready workspace and keeps shipment operations in the dropdown", async () => {
+        (ShipmentService.getControlCenter as jest.Mock).mockResolvedValue({
+            data: {shipment, routeLog: null, returnPackage: null},
+            status: 200,
+        });
+
+        renderDetails(false);
+
+        expect(await screen.findByRole("heading", {name: pl.shipments.form.sections.shipmentData})).toBeInTheDocument();
+        expect(screen.getByRole("tab", {name: new RegExp(pl.shipments.dashboard.workspace.history)})).toBeInTheDocument();
+        expect(screen.getByRole("tab", {name: new RegExp(pl.shipments.dashboard.workspace.notes)})).toBeInTheDocument();
+        expect(screen.getByRole("tab", {name: new RegExp(pl.shipments.dashboard.workspace.documents)})).toBeInTheDocument();
+        expect(screen.getByRole("heading", {name: pl.shipments.dashboard.operatorNotes})).toBeInTheDocument();
+        expect(screen.getByRole("heading", {name: pl.shipments.dashboard.attachments})).toBeInTheDocument();
+
+        fireEvent.click(screen.getByRole("button", {name: pl.shipments.actions.operations}));
+        expect(screen.getByRole("menuitem", {name: pl.shipments.actions.changeStatus})).toBeInTheDocument();
+        expect(screen.getByRole("menuitem", {name: pl.shipments.actions.assignCourier})).toBeDisabled();
+        expect(screen.getByRole("menuitem", {name: pl.shipments.actions.changeDepartment})).toBeDisabled();
+        expect(screen.getByRole("menuitem", {name: pl.shipments.actions.reroute})).toBeDisabled();
+        expect(screen.getByRole("menuitem", {name: pl.shipments.actions.markProblematic})).toBeDisabled();
+
+        fireEvent.click(screen.getByRole("menuitem", {name: pl.shipments.actions.addDocument}));
+        expect(screen.getByRole("tab", {name: new RegExp(pl.shipments.dashboard.workspace.documents)})).toHaveAttribute("aria-selected", "true");
+        expect(screen.getByText(pl.shipments.dashboard.workspace.emptyDocuments)).toBeInTheDocument();
     });
 });
