@@ -364,9 +364,23 @@
 }
 
 .shipment-configuration-group > header {
+    align-items: center;
     background: color-mix(in srgb, var(--surface-secondary) 42%, var(--surface-elevated));
     border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 16px;
+    justify-content: space-between;
     padding: 16px 18px;
+}
+
+.shipment-configuration-group > header [data-ui="button"] {
+    border-color: var(--border-strong);
+    border-radius: 9px;
+    color: var(--foreground);
+    flex: 0 0 auto;
+    font-weight: 600;
+    min-height: 36px;
+    text-transform: none;
 }
 
 .shipment-configuration-group > header h3 {
@@ -401,6 +415,11 @@
 
 .shipment-setting-row:nth-child(odd) {
     border-right: 1px solid var(--border);
+}
+
+.shipment-setting-row--disabled .shipment-setting-copy,
+.shipment-setting-row--disabled .shipment-setting-input > span {
+    opacity: 0.5;
 }
 
 .shipment-setting-row:nth-last-child(-n + 2) {
@@ -532,8 +551,8 @@
     color: var(--muted-foreground);
     font-size: 0.72rem;
     font-weight: 600;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
+    letter-spacing: 0;
+    text-transform: none;
 }
 
 .shipment-tracking-number-option {
@@ -583,8 +602,8 @@
     color: var(--muted-foreground);
     font-size: 0.68rem;
     font-weight: 600;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
+    letter-spacing: 0;
+    text-transform: none;
 }
 
 .shipment-tracking-number-preview code {
@@ -730,12 +749,12 @@
     background: color-mix(in srgb, var(--surface-secondary) 55%, transparent);
     border-bottom: 1px solid var(--border);
     color: var(--muted-foreground);
-    font-family: var(--font-mono);
+    font-family: var(--font-ui);
     font-size: 0.66rem;
     font-weight: 600;
-    letter-spacing: 0.08em;
+    letter-spacing: 0;
     min-height: 36px;
-    text-transform: uppercase;
+    text-transform: none;
 }
 
 .geocoding-provider-table-head span:last-child {
@@ -1079,8 +1098,8 @@
     color: var(--muted-foreground);
     font-size: 0.72rem;
     font-weight: 600;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
+    letter-spacing: 0;
+    text-transform: none;
 }
 
 .geocoding-configuration-dialog [data-ui="form-control"] [data-ui="select"] {
@@ -1824,58 +1843,215 @@
 }
 
 .courier-policy-panel {
-    display: grid;
-    gap: 16px;
-}
-
-.courier-policy-header {
-    align-items: flex-start;
     display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    justify-content: space-between;
+    flex-direction: column;
+    gap: 16px;
+    padding: 18px 20px;
 }
 
-.courier-policy-header h3 {
-    font-size: 1rem;
-    margin: 0;
+.courier-policy-panel .courier-policy-header {
+    align-items: flex-start;
+    margin-bottom: 0;
 }
 
 .courier-policy-header p {
     color: var(--muted-foreground);
-    font-size: 0.85rem;
-    margin: 4px 0 0;
+    font-size: 14px;
+    margin: 5px 0 0;
     max-width: 720px;
 }
 
-.courier-policy-group {
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    display: grid;
-    gap: 8px;
-    margin: 0;
-    padding: 12px;
+.courier-policy-actions {
+    align-items: center;
+    display: flex;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: flex-end;
 }
 
-.courier-policy-group legend {
-    font-size: 0.85rem;
-    font-weight: 700;
-    padding: 0 4px;
+.courier-policy-groups {
+    display: grid;
+    gap: 14px;
+}
+
+.courier-policy-group {
+    background: var(--surface-secondary);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.courier-policy-group-header {
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 10px;
+    justify-content: space-between;
+    padding: 12px 16px;
+}
+
+.courier-policy-group-header h4 {
+    color: var(--foreground);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0;
+    margin: 0;
+    text-transform: none;
+}
+
+.courier-policy-group-count {
+    background: color-mix(in srgb, var(--primary) 14%, transparent);
+    border-radius: 999px;
+    color: var(--primary);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 2px 10px;
+}
+
+.courier-policy-rows {
+    list-style: none;
+    margin: 0;
+    padding: 0;
 }
 
 .courier-policy-row {
     align-items: center;
+    border-left: 3px solid transparent;
     display: grid;
-    gap: 8px 16px;
-    grid-template-columns: minmax(0, 1fr) minmax(200px, 260px);
+    gap: 10px 24px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    padding: 12px 16px 12px 13px;
+    transition: background-color 120ms ease, border-color 120ms ease;
 }
 
-.courier-policy-row > span {
-    font-size: 0.85rem;
+.courier-policy-row + .courier-policy-row {
+    border-top: 1px solid var(--border);
 }
 
-@media (max-width: 640px) {
-    .courier-policy-row {
-        grid-template-columns: 1fr;
+.courier-policy-row:hover {
+    background: color-mix(in srgb, var(--foreground) 3%, transparent);
+}
+
+.courier-policy-row.is-enforced {
+    border-left-color: var(--primary);
+}
+
+.courier-policy-row-text {
+    display: grid;
+    gap: 3px;
+    min-width: 0;
+}
+
+.courier-policy-row-label {
+    color: var(--foreground);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.courier-policy-row-description {
+    color: var(--muted-foreground);
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.courier-policy-segmented {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    display: inline-flex;
+    gap: 2px;
+    padding: 3px;
+}
+
+.courier-policy-segment {
+    cursor: pointer;
+    position: relative;
+}
+
+.courier-policy-segment input {
+    inset: 0;
+    margin: 0;
+    opacity: 0;
+    position: absolute;
+}
+
+.courier-policy-segment span {
+    border-radius: 6px;
+    color: var(--muted-foreground);
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    min-width: 76px;
+    padding: 6px 12px;
+    text-align: center;
+    transition: background-color 120ms ease, color 120ms ease;
+    white-space: nowrap;
+}
+
+.courier-policy-segment:hover span {
+    color: var(--foreground);
+}
+
+.courier-policy-segment input:checked + span {
+    background: var(--surface-elevated);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.2);
+    color: var(--foreground);
+}
+
+.courier-policy-segment-enforced_on input:checked + span {
+    background: color-mix(in srgb, var(--success) 18%, var(--surface-elevated));
+    color: var(--success);
+}
+
+.courier-policy-segment-enforced_off input:checked + span {
+    background: color-mix(in srgb, var(--warning) 18%, var(--surface-elevated));
+    color: var(--warning);
+}
+
+.courier-policy-segment input:focus-visible + span {
+    outline: 2px solid var(--primary);
+    outline-offset: 1px;
+}
+
+.courier-policy-segment input:disabled + span {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+@media (max-width: 800px) {
+    .courier-policy-panel .courier-policy-header {
+        flex-direction: column;
     }
+
+    .courier-policy-actions {
+        justify-content: flex-start;
+    }
+
+    .courier-policy-row {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .courier-policy-segmented {
+        display: flex;
+    }
+
+    .courier-policy-segment {
+        flex: 1;
+    }
+
+    .courier-policy-segment span {
+        min-width: 0;
+    }
+}
+
+.operator-settings-color-swatch {
+    background: transparent;
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
+    cursor: pointer;
+    flex: 0 0 auto;
+    height: 40px;
+    padding: 3px;
+    width: 44px;
 }
