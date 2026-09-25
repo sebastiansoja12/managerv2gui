@@ -1,6 +1,7 @@
 import BackendClient from "../api/BackendClient";
 import {
     ReturnCreateRequest,
+    CreatedReturnDto,
     ReturnPageDto,
     ReturnPackageDto,
     ReturnReasonCode,
@@ -8,26 +9,34 @@ import {
     ReturnTokenValidationResponse,
 } from "../components/Returns/model/ReturnPackage";
 import http from "../http-common";
-import returningHttp from "../http-returning";
 
 const managerClient = new BackendClient(http);
-const returningClient = new BackendClient(returningHttp);
 
 const create = (request: ReturnCreateRequest) =>
-    managerClient.put<ReturnCreateRequest, {status: "OK"}>("/shipments/returns", request);
+    managerClient.post<{
+        shipmentId: ReturnCreateRequest["shipmentId"];
+        departmentId: ReturnCreateRequest["departmentId"];
+        reason: string;
+        reasonCode: string;
+    }, CreatedReturnDto[]>("/returns/packages", {
+        shipmentId: request.shipmentId,
+        departmentId: request.departmentId,
+        reason: request.reason,
+        reasonCode: request.reasonCode.value,
+    });
 
 const get = (returnPackageId: string) =>
-    managerClient.get<ReturnPackageDto>(`/shipments/returns/${returnPackageId}`);
+    managerClient.get<ReturnPackageDto>(`/returns/packages/${returnPackageId}`);
 
-const getAllByDepartment = async (departmentCode: string): Promise<ReturnPackageDto[]> => {
+const getAllByDepartment = async (departmentId: string): Promise<ReturnPackageDto[]> => {
     const pageSize = 100;
     const returnPackages: ReturnPackageDto[] = [];
     let page = 0;
     let totalPages = 1;
 
     while (page < totalPages) {
-        const response = await managerClient.get<ReturnPageDto>("/shipments/returns", {
-            params: {departmentCode, page, size: pageSize},
+        const response = await managerClient.get<ReturnPageDto>("/returns/packages", {
+            params: {departmentId, page, size: pageSize},
         });
         returnPackages.push(...response.data.content);
         totalPages = response.data.totalPages;
@@ -38,28 +47,34 @@ const getAllByDepartment = async (departmentCode: string): Promise<ReturnPackage
 };
 
 const changeReasonCode = (returnPackageId: string, reasonCode: ReturnReasonCode) =>
-    returningClient.put<{returnPackageId: {value: string}; reasonCode: ReturnReasonCode}, void>(
-        "/returns/reason-code",
+    managerClient.put<{returnPackageId: {value: string}; reasonCode: ReturnReasonCode}, void>(
+        "/returns/packages/reason-code",
         {
             returnPackageId: {value: returnPackageId},
             reasonCode,
         },
     );
 
-const process = (shipmentId: string) =>
-    managerClient.put<undefined, {status: "OK"}>(`/shipments/returns/${shipmentId}/process`, undefined);
+const process = (returnPackageId: string) =>
+    managerClient.put<undefined, void>(`/returns/packages/${returnPackageId}/process`, undefined);
 
-const complete = (shipmentId: string) =>
-    managerClient.put<undefined, {status: "OK"}>(`/shipments/returns/${shipmentId}/complete`, undefined);
+const complete = (returnPackageId: string) =>
+    managerClient.put<undefined, void>(`/returns/packages/${returnPackageId}/complete`, undefined);
 
 const validateToken = (request: ReturnTokenValidationRequest) =>
-    returningClient.post<ReturnTokenValidationRequest, ReturnTokenValidationResponse>(
-        "/returns/token/validate",
-        request,
+    managerClient.post<{
+        shipmentId: {value: string};
+        returnToken: {value: string};
+    }, ReturnTokenValidationResponse>(
+        "/returns/packages/token/validate",
+        {
+            shipmentId: {value: request.shipmentId},
+            returnToken: {value: request.returnToken},
+        },
     );
 
 const cancel = (returnPackageId: string) =>
-    managerClient.delete<undefined, {status: "OK"}>(`/shipments/returns/${returnPackageId}`, undefined);
+    managerClient.delete<undefined, void>(`/returns/packages/${returnPackageId}`, undefined);
 
 const ReturnService = {
     cancel,
