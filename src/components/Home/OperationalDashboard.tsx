@@ -222,10 +222,19 @@ function OperationalDashboard({onOpenTab}: OperationalDashboardProps) {
         let ignore = false;
         setLoading(true);
         setDashboardError("");
+        const departmentsRequest = DepartmentService.getAll().then((response) => response.data);
         Promise.allSettled([
             loadShipments(),
-            ReturnService.getAllByDepartment(departmentCode),
-            DepartmentService.getAll().then((response) => response.data),
+            departmentsRequest.then((loadedDepartments) => {
+                const currentDepartment = loadedDepartments.find(
+                    (department) => department.departmentCode?.value === departmentCode,
+                );
+                if (!currentDepartment) {
+                    throw new Error(pl.returns.messages.departmentsLoadError);
+                }
+                return ReturnService.getAllByDepartment(String(currentDepartment.departmentId));
+            }),
+            departmentsRequest,
             DeliveryNetworkService.getCurrentNetwork().then((response) => response.data),
         ]).then(([shipmentResult, returnResult, departmentResult, relationResult]) => {
             if (ignore) {
