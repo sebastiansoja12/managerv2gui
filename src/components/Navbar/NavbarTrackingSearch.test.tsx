@@ -4,9 +4,8 @@ import {NavbarTrackingSearch} from "./Navbar";
 
 describe("NavbarTrackingSearch", () => {
     it("opens shipment details for the entered tracking number", () => {
-        const onClose = jest.fn();
         const onOpenTab = jest.fn();
-        render(<NavbarTrackingSearch onClose={onClose} onOpenTab={onOpenTab} open />);
+        render(<NavbarTrackingSearch onOpenTab={onOpenTab} />);
 
         const input = screen.getByRole("searchbox", {name: "Numer trackingowy przesyłki"});
         fireEvent.change(input, {target: {value: "  MGR/2026  "}});
@@ -16,24 +15,33 @@ describe("NavbarTrackingSearch", () => {
             label: "Szczegóły przesyłki MGR/2026",
             path: "/shipments/tracking/MGR%2F2026/edit",
         });
-        expect(onClose).toHaveBeenCalled();
+        expect(input).toHaveValue("");
     });
 
-    it("closes after a pointer interaction outside the search field", () => {
-        const onClose = jest.fn();
-        render(<NavbarTrackingSearch onClose={onClose} onOpenTab={jest.fn()} open />);
+    it("ignores an empty submission", () => {
+        const onOpenTab = jest.fn();
+        render(<NavbarTrackingSearch onOpenTab={onOpenTab} />);
 
-        fireEvent.pointerDown(document.body);
+        fireEvent.submit(screen.getByRole("form", {name: "Szybkie wyszukiwanie przesyłki"}));
 
-        expect(onClose).toHaveBeenCalledTimes(1);
+        expect(onOpenTab).not.toHaveBeenCalled();
     });
 
-    it("closes when Escape is pressed", () => {
-        const onClose = jest.fn();
-        render(<NavbarTrackingSearch onClose={onClose} onOpenTab={jest.fn()} open />);
+    it("focuses the field on Ctrl+K", () => {
+        render(<NavbarTrackingSearch onOpenTab={jest.fn()} />);
 
-        fireEvent.keyDown(document, {key: "Escape"});
+        fireEvent.keyDown(document, {key: "k", ctrlKey: true});
 
-        expect(onClose).toHaveBeenCalledTimes(1);
+        expect(screen.getByRole("searchbox", {name: "Numer trackingowy przesyłki"})).toHaveFocus();
+    });
+
+    it("clears the field when Escape is pressed", () => {
+        render(<NavbarTrackingSearch onOpenTab={jest.fn()} />);
+
+        const input = screen.getByRole("searchbox", {name: "Numer trackingowy przesyłki"});
+        fireEvent.change(input, {target: {value: "MGR"}});
+        fireEvent.keyDown(input, {key: "Escape"});
+
+        expect(input).toHaveValue("");
     });
 });
