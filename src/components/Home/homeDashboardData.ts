@@ -1,4 +1,3 @@
-import {Delivery} from "../Deliveries/model/Delivery";
 import {ShipmentDto} from "../Shipment/dto/ShipmentDto";
 
 export type DashboardPeriodDays = 7 | 14 | 30;
@@ -13,17 +12,6 @@ export type TurnoverDay = {
 export type MoneyTotal = {
     amount: number;
     currency: string;
-};
-
-export const filterShipmentsForDepartment = (
-    shipments: ShipmentDto[],
-    departmentDeliveries: Delivery[],
-) => {
-    const departmentShipmentIds = new Set(departmentDeliveries
-        .map((delivery) => delivery.shipmentId)
-        .filter((shipmentId): shipmentId is string => Boolean(shipmentId)));
-
-    return shipments.filter((shipment) => departmentShipmentIds.has(String(shipment.shipmentId?.value ?? "")));
 };
 
 const localDateKey = (date: Date) => [
