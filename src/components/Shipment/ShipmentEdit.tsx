@@ -220,8 +220,8 @@ const ShipmentEdit: React.FC = () => {
                     dangerousGood: shipment.dangerousGood || null,
                     shipmentPriority: shipment.shipmentPriority,
                     shipmentStatus: status,
-                    issuerCountryCode: shipment.originCountry || "PL",
-                    receiverCountryCode: shipment.destinationCountry || "DE",
+                    issuerCountryCode: shipment.sender.countryCode || "PL",
+                    receiverCountryCode: shipment.recipient.countryCode || "DE",
                     shipmentConfiguration: {
                         forceUpdate: false,
                         publishInReturnManager: false,

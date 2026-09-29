@@ -39,6 +39,7 @@ export interface PersonApi {
     city: string;
     postalCode: string;
     street: string;
+    countryCode?: CountryCodeDto | null;
 }
 
 export interface SupplierCodeDto {
@@ -126,8 +127,6 @@ export interface ShipmentDto {
     deliveryPickupPointId?: PickupPointIdDto | null;
     pickupMethod?: PickupMethodDto | null;
     deliveryMethod?: DeliveryMethodDto | null;
-    originCountry?: CountryCodeDto | null;
-    destinationCountry?: CountryCodeDto | null;
     shipmentStatus: ShipmentStatusDto;
     shipmentType: ShipmentTypeDto;
     shipmentRelatedId?: ShipmentIdDto | null;
