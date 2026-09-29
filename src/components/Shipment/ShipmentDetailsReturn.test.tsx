@@ -27,7 +27,7 @@ jest.mock("../../hooks/ReturnService", () => ({__esModule: true, default: new Pr
 const person = {firstName: "Jan", lastName: "Test", email: "", telephoneNumber: "", city: "", postalCode: "", street: ""};
 const shipment = {
     shipmentId: {value: "6805406359141427429"}, trackingNumber: {value: "MGR-10"},
-    sender: person, recipient: person, shipmentSize: "SMALL", shipmentPriority: "MEDIUM",
+    sender: person, recipient: person, shipmentPriority: "MEDIUM",
     destination: {value: "KT1"}, shipmentStatus: "DELIVERY", shipmentType: "PARENT",
     price: {amount: 15, currency: "PLN"}, locked: false,
 };

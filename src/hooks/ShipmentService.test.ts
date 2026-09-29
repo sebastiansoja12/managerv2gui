@@ -19,7 +19,6 @@ describe("ShipmentService", () => {
 
         await ShipmentService.search({
             senderName: "Anna",
-            shipmentSizes: ["BIG"],
             page: 0,
             size: 100,
         });
@@ -29,7 +28,6 @@ describe("ShipmentService", () => {
             url: "/shipments/read-model/search",
             data: {
                 senderName: "Anna",
-                shipmentSizes: ["BIG"],
                 page: 0,
                 size: 100,
             },

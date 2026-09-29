@@ -568,7 +568,6 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
     };
 
     const resetAdvancedFilters = () => {
-        setShipmentSizeFilter("");
         setShipmentPriorityFilter("");
         setSenderNameFilter("");
         setRecipientNameFilter("");
