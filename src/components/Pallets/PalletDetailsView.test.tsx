@@ -9,12 +9,16 @@ import ShipmentService from "../../hooks/ShipmentService";
 import pl from "../../i18n/translate";
 import PalletDetailsView from "./PalletDetailsView";
 
+jest.mock("../../hooks/AuditLogService", () => ({
+    __esModule: true,
+    default: {findByResource: () => Promise.resolve({data: {content: [], page: 0, size: 20, totalElements: 0}, status: 200})},
+}));
 jest.mock("../../hooks/PalletService", () => ({
     __esModule: true,
     palletErrorCode: () => null,
     palletErrorDetail: () => null,
     savePalletDocument: jest.fn(),
-    default: {getByTrackingNumber: jest.fn(), addShipments: jest.fn(), removeShipment: jest.fn(), setMaxWeight: jest.fn(), getHistory: jest.fn(), assignCarrier: jest.fn(), changeStatus: jest.fn(), getDocument: jest.fn(), update: jest.fn(), changeDepartments: jest.fn(), scan: jest.fn(), cancel: jest.fn()},
+    default: {getByTrackingNumber: jest.fn(), addShipments: jest.fn(), removeShipment: jest.fn(), setMaxWeight: jest.fn(), getHistory: jest.fn(), assignCarrier: jest.fn(), changeStatus: jest.fn(), getDocument: jest.fn(), update: jest.fn(), changeDepartments: jest.fn(), scan: jest.fn(), cancel: jest.fn(), revertLoading: jest.fn(), unload: jest.fn()},
 }));
 jest.mock("../../hooks/ShipmentService", () => ({__esModule: true, default: {getControlCenter: jest.fn(), getByTrackingNumber: jest.fn(), search: jest.fn()}}));
 jest.mock("../../hooks/DeliveryService", () => ({__esModule: true, default: {getByPalletId: jest.fn()}}));
@@ -218,16 +222,73 @@ describe("PalletDetailsView", () => {
         }};
         palletService.getByTrackingNumber.mockResolvedValue({status: 200, data: loaded} as never);
         palletService.changeStatus.mockResolvedValue({status: 200, data: {...loaded, palletStatus: "IN_TRANSIT"}} as never);
-        const confirm = jest.spyOn(window, "confirm").mockReturnValue(true);
         renderView();
         await screen.findByText("FTM-1");
 
         fireEvent.click(screen.getByRole("button", {name: pl.pallets.details.statusActions.dispatch}));
+        const dialog = await screen.findByRole("dialog");
+        expect(within(dialog).getByText(pl.pallets.details.statusActions.dispatchTitle)).toBeInTheDocument();
+        fireEvent.click(within(dialog).getByRole("button", {name: pl.pallets.details.statusActions.dispatch}));
 
         await waitFor(() => expect(palletService.changeStatus).toHaveBeenCalledWith("pallet-1", "IN_TRANSIT"));
         expect(await screen.findByRole("button", {name: pl.pallets.details.statusActions.markDelivered})).toBeInTheDocument();
         expect(screen.getByText(pl.pallets.carrier.locked)).toBeInTheDocument();
-        confirm.mockRestore();
+        expect(screen.getAllByRole("button", {name: pl.pallets.details.actions.edit})).toHaveLength(2);
+        screen.getAllByRole("button", {name: pl.pallets.details.actions.edit}).forEach((button) => expect(button).toBeDisabled());
+    });
+
+    it("unloads a pallet in transit", async () => {
+        const inTransit = {...pallet, palletStatus: "IN_TRANSIT", loadable: false, carrier: {
+            carrierId: "c-1", carrierName: "Trans-Pol", transportType: "OWN_FLEET", vehicleRegistrationNumber: "SK 1",
+        }};
+        palletService.getByTrackingNumber.mockResolvedValue({status: 200, data: inTransit} as never);
+        palletService.unload.mockResolvedValue({status: 200, data: {...inTransit, palletStatus: "DELIVERED"}} as never);
+        renderView();
+        await screen.findByText("FTM-1");
+
+        fireEvent.click(screen.getByRole("button", {name: pl.pallets.details.statusActions.markDelivered}));
+        const dialog = await screen.findByRole("dialog");
+        fireEvent.click(within(dialog).getByRole("button", {name: pl.pallets.details.statusActions.markDelivered}));
+
+        await waitFor(() => expect(palletService.unload).toHaveBeenCalledWith("pallet-1"));
+        expect(palletService.changeStatus).not.toHaveBeenCalled();
+    });
+
+    it("greys out carrier, edit and load actions of a loaded pallet", async () => {
+        const loaded = {...pallet, palletStatus: "LOADED", loadable: true, carrier: {
+            carrierId: "c-1", carrierName: "Trans-Pol", transportType: "OWN_FLEET", vehicleRegistrationNumber: "SK 1",
+        }};
+        palletService.getByTrackingNumber.mockResolvedValue({status: 200, data: loaded} as never);
+        renderView();
+        await screen.findAllByText("FTM-1");
+
+        const toolbar = screen.getByRole("navigation", {name: pl.pallets.details.actions.title});
+        expect(within(toolbar).getByRole("button", {name: pl.pallets.details.actions.edit})).toBeDisabled();
+        expect(within(toolbar).getByRole("button", {name: pl.pallets.details.statusActions.dispatch})).toBeEnabled();
+        expect(within(toolbar).getByRole("button", {name: pl.pallets.details.statusActions.markDelivered})).toBeDisabled();
+
+        fireEvent.click(within(toolbar).getByRole("button", {name: pl.pallets.details.statusActions.operations}));
+        expect(screen.getByRole("menuitem", {name: pl.pallets.details.load})).toBeDisabled();
+        expect(screen.getByRole("menuitem", {name: pl.pallets.details.actions.changeCarrier})).toBeDisabled();
+        expect(screen.getByRole("menuitem", {name: pl.pallets.details.statusActions.revertLoading})).toBeEnabled();
+    });
+
+    it("reverts the loading from the operations menu", async () => {
+        const loaded = {...pallet, palletStatus: "LOADED", loadable: false};
+        palletService.getByTrackingNumber.mockResolvedValue({status: 200, data: loaded} as never);
+        palletService.revertLoading.mockResolvedValue({status: 200, data: pallet} as never);
+        renderView();
+        await screen.findAllByText("FTM-1");
+
+        fireEvent.click(screen.getByRole("button", {name: pl.pallets.details.statusActions.operations}));
+        expect(screen.getByRole("menuitem", {name: pl.pallets.details.cancel})).toBeDisabled();
+        fireEvent.click(screen.getByRole("menuitem", {name: pl.pallets.details.statusActions.revertLoading}));
+        const dialog = await screen.findByRole("dialog");
+        expect(palletService.revertLoading).not.toHaveBeenCalled();
+        fireEvent.click(within(dialog).getByRole("button", {name: pl.pallets.details.statusActions.revertLoading}));
+
+        await waitFor(() => expect(palletService.revertLoading).toHaveBeenCalledWith("pallet-1"));
+        expect(await screen.findByText(pl.pallets.details.statusActions.loadingReverted)).toBeInTheDocument();
     });
 
     it("generates the transport document from the toolbar", async () => {

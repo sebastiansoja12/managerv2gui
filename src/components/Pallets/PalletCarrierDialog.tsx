@@ -1,6 +1,6 @@
 import React, {FormEvent, useEffect, useMemo, useState} from "react";
 import {createPortal} from "react-dom";
-import {Alert, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, MenuItem, TextField} from "components/ui";
+import {Alert, Button, Dialog, DialogActions, DialogContent, DialogTitle, MenuItem, TextField} from "components/ui";
 import {LocalShipping, PersonAdd} from "components/ui/icons";
 import CarrierService from "../../hooks/CarrierService";
 import PalletService from "../../hooks/PalletService";
@@ -118,7 +118,6 @@ function PalletCarrierDialog({open, pallet, onClose, onSaved}: PalletCarrierDial
             <form onSubmit={submit}>
                 <DialogTitle>{translations.dialogTitle.replace("{trackingNumber}", pallet.trackingNumber)}</DialogTitle>
                 <DialogContent>
-                    <DialogContentText>{translations.description}</DialogContentText>
                     <div className="pallet-carrier-select">
                         <TextField select disabled={saving} label={translations.carrier} size="small" value={form.carrierId} onChange={update("carrierId")}>
                             <MenuItem value="">{translations.selectCarrier}</MenuItem>
