@@ -16,7 +16,6 @@ import {
     AccessTime,
     Add,
     AttachMoney,
-    Category,
     ContentCopy,
     Edit,
     FileDownload,
@@ -47,8 +46,6 @@ import {
     ShipmentDto,
     ShipmentPriorityDto,
     ShipmentSearchRequestApi,
-    ShipmentSizeDto,
-    shipmentSizes,
     ShipmentStatusDto,
 } from "./dto/ShipmentDto";
 import pl from "../../i18n/translate";
@@ -62,7 +59,7 @@ type Notice = {
 
 type ShipmentRow = {
     id: string;
-    size: string;
+    dimensions: string;
     sender: string;
     recipient: string;
     deliveryDate: string;
@@ -120,7 +117,9 @@ const formatPrice = (shipment: ShipmentDto) => {
 
 const mapShipmentToRow = (shipment: ShipmentDto): ShipmentRow => ({
     id: `#${shipment.shipmentId.value}`,
-    size: shipmentTranslations.size[shipment.shipmentSize] || shipment.shipmentSize,
+    dimensions: shipment.dimensions
+        ? `${shipment.dimensions.length} × ${shipment.dimensions.width} × ${shipment.dimensions.height} ${shipment.dimensions.unit}`
+        : pl.common.dash,
     sender: formatPersonName(shipment.sender?.firstName, shipment.sender?.lastName, shipmentTranslations.table.fallbackSender),
     recipient: formatPersonName(shipment.recipient?.firstName, shipment.recipient?.lastName, shipmentTranslations.table.fallbackRecipient),
     deliveryDate: formatDeliveryDate(shipment.signature?.signedAt),
@@ -312,7 +311,6 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
     const [unNumberFilter, setUnNumberFilter] = useState<string>("");
     const [hazardClassFilter, setHazardClassFilter] = useState<string>("");
     const [filtersExpanded, setFiltersExpanded] = useState<boolean>(false);
-    const [shipmentSizeFilter, setShipmentSizeFilter] = useState<ShipmentSizeDto | "">("");
     const [shipmentPriorityFilter, setShipmentPriorityFilter] = useState<ShipmentPriorityDto | "">("");
     const [senderNameFilter, setSenderNameFilter] = useState<string>("");
     const [recipientNameFilter, setRecipientNameFilter] = useState<string>("");
@@ -539,7 +537,6 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
         }
 
         const criteria: ShipmentSearchRequestApi = {
-            shipmentSizes: shipmentSizeFilter ? [shipmentSizeFilter] : [],
             shipmentPriorities: shipmentPriorityFilter ? [shipmentPriorityFilter] : [],
             senderName: senderNameFilter.trim() || null,
             recipientName: recipientNameFilter.trim() || null,
@@ -924,18 +921,6 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
                     {filtersExpanded ? (
                         <section className="tm-advanced-filters" aria-label={shipmentTranslations.filters.title}>
                             <TextField
-                                label={shipmentTranslations.form.fields.size}
-                                select
-                                size="small"
-                                value={shipmentSizeFilter}
-                                onChange={(event) => setShipmentSizeFilter(event.target.value as ShipmentSizeDto | "")}
-                            >
-                                <MenuItem value="">{pl.common.all}</MenuItem>
-                                {shipmentSizes.map((size) => (
-                                    <MenuItem key={size} value={size}>{shipmentTranslations.size[size]}</MenuItem>
-                                ))}
-                            </TextField>
-                            <TextField
                                 label={shipmentTranslations.form.fields.priority}
                                 select
                                 size="small"
@@ -1090,7 +1075,7 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
                             <thead>
                             <tr>
                                 <th><span className="tm-checkbox" /> {shipmentTranslations.table.columns.id}</th>
-                                <th><Category fontSize="small" /> {shipmentTranslations.table.columns.size}</th>
+                                <th>{shipmentTranslations.summary.dimensions}</th>
                                 <th><Person fontSize="small" /> {shipmentTranslations.table.columns.sender}</th>
                                 <th><Person fontSize="small" /> {shipmentTranslations.table.columns.recipient}</th>
                                 <th><AccessTime fontSize="small" /> {shipmentTranslations.table.columns.deliveryDate}</th>
@@ -1108,7 +1093,7 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
                                 return (
                                     <tr className="tm-clickable-row" key={row.id} onClick={() => openShipmentDetails(shipment)}>
                                         <td><span className="tm-checkbox" /> {row.id}</td>
-                                        <td>{row.size}</td>
+                                        <td>{row.dimensions}</td>
                                         <td>
                                             <span className="tm-entity">
                                                 <span className="tm-logo-avatar">{avatarFor(row.sender)}</span>

@@ -338,8 +338,10 @@ const ShipmentEdit: React.FC = () => {
                                     <strong>{shipment.trackingNumber?.value || pl.common.dash}</strong>
                                 </div>
                                 <div>
-                                    <span>{pl.shipments.summary.size}</span>
-                                    <strong>{pl.shipments.size[shipment.shipmentSize]}</strong>
+                                    <span>{pl.shipments.summary.dimensions}</span>
+                                    <strong>{shipment.dimensions
+                                        ? `${shipment.dimensions.length} × ${shipment.dimensions.width} × ${shipment.dimensions.height} ${shipment.dimensions.unit}`
+                                        : pl.common.dash}</strong>
                                 </div>
                                 <div>
                                     <span>{pl.shipments.summary.destination}</span>

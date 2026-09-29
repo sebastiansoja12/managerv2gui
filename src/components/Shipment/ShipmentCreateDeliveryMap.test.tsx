@@ -54,6 +54,13 @@ const selectOption = (label: string, option: string) => {
 
 const renderForm = () => render(<MemoryRouter><ShipmentCreate /></MemoryRouter>);
 
+const fillMeasurements = () => {
+    fireEvent.change(screen.getByLabelText(pl.shipments.form.fields.length), {target: {value: "10"}});
+    fireEvent.change(screen.getByLabelText(pl.shipments.form.fields.width), {target: {value: "8"}});
+    fireEvent.change(screen.getByLabelText(pl.shipments.form.fields.height), {target: {value: "5"}});
+    fireEvent.change(screen.getByLabelText(pl.shipments.form.fields.weight), {target: {value: "1"}});
+};
+
 describe("shipment delivery map", () => {
     it("offers a map based on delivery method, independently of pickup method", () => {
         renderForm();
@@ -70,6 +77,7 @@ describe("shipment delivery map", () => {
         "loads points and reopens the %s map without changing the form",
         async (method) => {
         renderForm();
+        fillMeasurements();
         fireEvent.change(screen.getByLabelText(pl.shipments.form.fields.amount), {target: {value: "37"}});
         selectOption(pl.shipments.form.fields.deliveryMethod, pl.shipments.deliveryMethod[method]);
         const trigger = screen.getByRole("button", {name: pl.shipments.deliveryPointMap.open});
@@ -115,6 +123,7 @@ describe("shipment delivery map", () => {
 
     it("searches by address and selects a delivery point", async () => {
         renderForm();
+        fillMeasurements();
         selectOption(pl.shipments.form.fields.deliveryMethod, pl.shipments.deliveryMethod.PICKUP_POINT);
         fireEvent.click(screen.getByRole("button", {name: pl.shipments.deliveryPointMap.open}));
 
@@ -143,6 +152,8 @@ describe("shipment delivery map", () => {
         fireEvent.click(screen.getByRole("button", {name: pl.shipments.actions.create}));
         await waitFor(() => expect(ShipmentService.create).toHaveBeenCalledWith(
             expect.objectContaining({
+                dimensions: {length: 10, width: 8, height: 5, unit: "CM"},
+                weight: {value: 1, unit: "KG"},
                 deliveryPickupPointId: {value: "11f6a9b0-e529-4ff4-bf40-865d246f6138"},
             }),
         ));

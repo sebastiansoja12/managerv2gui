@@ -47,17 +47,35 @@ describe("ShipmentCreate dangerous goods", () => {
             </MemoryRouter>
         ));
 
+        fireEvent.change(screen.getByLabelText(pl.shipments.form.fields.length), {target: {value: "10"}});
+        fireEvent.change(screen.getByLabelText(pl.shipments.form.fields.width), {target: {value: "8"}});
+        fireEvent.change(screen.getByLabelText(pl.shipments.form.fields.height), {target: {value: "5"}});
+        fireEvent.change(screen.getByLabelText(pl.shipments.form.fields.weight), {target: {value: "1"}});
+
         fireEvent.click(screen.getByRole("button", {name: pl.shipments.actions.create}));
 
         await waitFor(() => expect(ShipmentService.create).toHaveBeenCalledTimes(1));
         expect(ShipmentService.create).toHaveBeenCalledWith(
             expect.objectContaining({pickupMethod: "DEPARTMENT", deliveryMethod: "COURIER"}),
         );
+        expect(ShipmentService.create).toHaveBeenCalledWith(expect.objectContaining({
+            dimensions: {length: 10, width: 8, height: 5, unit: "CM"},
+            weight: {value: 1, unit: "KG"},
+        }));
         expect(ShipmentService.create).toHaveBeenCalledWith(
             expect.not.objectContaining({dangerousGood: expect.anything()})
         );
         await waitFor(() => expect(
             screen.getByRole("button", {name: pl.shipments.actions.create})
         ).not.toBeDisabled());
+    });
+
+    it("requires positive dimensions and weight before creating a shipment", () => {
+        render(<MemoryRouter><ShipmentCreate /></MemoryRouter>);
+
+        fireEvent.click(screen.getByRole("button", {name: pl.shipments.actions.create}));
+
+        expect(screen.getByText(pl.shipments.messages.measurementsRequired)).toBeInTheDocument();
+        expect(ShipmentService.create).not.toHaveBeenCalled();
     });
 });
