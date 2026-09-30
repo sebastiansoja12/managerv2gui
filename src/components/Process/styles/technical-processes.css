@@ -298,11 +298,11 @@
 .process-details-summary dt,
 .process-communication-meta dt {
     color: var(--muted-foreground);
-    font-family: var(--font-mono);
+    font-family: var(--font-ui);
     font-size: 0.74rem;
     font-weight: 600;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
+    letter-spacing: 0;
+    text-transform: none;
 }
 
 .process-details-summary dt {
@@ -342,12 +342,12 @@
     border: 1px solid var(--technical-accent-line);
     border-radius: 4px;
     color: var(--primary);
-    font-family: var(--font-mono);
+    font-family: var(--font-ui);
     font-size: 0.7rem;
     font-weight: 600;
-    letter-spacing: 0.04em;
+    letter-spacing: 0;
     padding: 4px 7px;
-    text-transform: uppercase;
+    text-transform: none;
     white-space: nowrap;
 }
 
