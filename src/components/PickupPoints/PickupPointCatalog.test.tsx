@@ -5,6 +5,13 @@ import PickupPointService from "../../hooks/PickupPointService";
 import pl from "../../i18n/translate";
 import PickupPointCatalog from "./PickupPointCatalog";
 
+jest.mock("../../hooks/AuditLogService", () => ({
+    __esModule: true,
+    default: {findByResource: () => Promise.resolve({data: {content: [], page: 0, size: 20, totalElements: 0}, status: 200})},
+}));
+jest.mock("../../api/errorMessage", () => ({
+    getBackendErrorMessage: (_error: unknown, fallback: string) => fallback,
+}));
 jest.mock("../../hooks/DepartmentService", () => ({
     __esModule: true,
     default: {
@@ -19,6 +26,7 @@ jest.mock("../../hooks/PickupPointService", () => ({
         getById: jest.fn(),
         update: jest.fn(),
         create: jest.fn(),
+        delete: jest.fn(),
     },
 }));
 
@@ -172,4 +180,70 @@ test("updates a pickup point without sending coordinates", async () => {
     ));
     expect((PickupPointService.update as jest.Mock).mock.calls[0][1]).not.toHaveProperty("coordinates");
     expect(await screen.findByText(pl.pickupPoints.edit.success)).toBeInTheDocument();
+});
+
+test("deletes a pickup point after confirmation and removes it from the list", async () => {
+    const point = {
+        pickupPointId: {value: "11f6a9b0-e529-4ff4-bf40-865d246f6138"},
+        code: "WAW-001",
+        name: "Punkt Centrum",
+        type: "SERVICE_POINT",
+        status: "ACTIVE",
+        capabilities: ["DROP_OFF"],
+        address: null,
+        coordinates: null,
+        department: null,
+        availability: {selectable: true, reasonCodes: [], isOpenNow: true},
+        version: 0,
+    };
+    (PickupPointService.search as jest.Mock).mockResolvedValue({
+        data: {items: [point], page: 0, size: 20, totalElements: 1, totalPages: 1},
+    });
+    (PickupPointService.delete as jest.Mock).mockResolvedValue({data: undefined, status: 204});
+
+    render(<PickupPointCatalog/>);
+
+    fireEvent.click(await screen.findByRole("button", {name: `${pl.pickupPoints.delete.action}: WAW-001`}));
+    expect(screen.getByText(pl.pickupPoints.delete.message
+        .replace("{code}", "WAW-001")
+        .replace("{name}", "Punkt Centrum"))).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", {name: pl.pickupPoints.delete.confirm}));
+
+    await waitFor(() => expect(PickupPointService.delete).toHaveBeenCalledWith(point.pickupPointId.value));
+    expect(await screen.findByText(pl.pickupPoints.delete.success.replace("{code}", "WAW-001")))
+        .toBeInTheDocument();
+    expect(screen.queryByRole("button", {name: `${pl.pickupPoints.delete.action}: WAW-001`})).not.toBeInTheDocument();
+});
+
+test("keeps the pickup point and shows an error when deletion fails", async () => {
+    (PickupPointService.search as jest.Mock).mockResolvedValue({
+        data: {
+            items: [{
+                pickupPointId: {value: "point-1"},
+                code: "WAW-002",
+                name: "Punkt Dworzec",
+                type: "PARCEL_LOCKER",
+                status: "SUSPENDED",
+                capabilities: ["COLLECTION"],
+                address: null,
+                coordinates: null,
+                department: null,
+                availability: {selectable: false, reasonCodes: [], isOpenNow: null},
+                version: 0,
+            }],
+            page: 0,
+            size: 20,
+            totalElements: 1,
+            totalPages: 1,
+        },
+    });
+    (PickupPointService.delete as jest.Mock).mockRejectedValue(new Error("boom"));
+
+    render(<PickupPointCatalog/>);
+
+    fireEvent.click(await screen.findByRole("button", {name: `${pl.pickupPoints.delete.action}: WAW-002`}));
+    fireEvent.click(screen.getByRole("button", {name: pl.pickupPoints.delete.confirm}));
+
+    expect(await screen.findByText(pl.pickupPoints.delete.error)).toBeInTheDocument();
+    expect(screen.getByRole("button", {name: `${pl.pickupPoints.delete.action}: WAW-002`})).toBeInTheDocument();
 });

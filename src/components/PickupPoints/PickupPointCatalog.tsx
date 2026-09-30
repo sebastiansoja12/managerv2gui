@@ -21,9 +21,10 @@ import {
     TextField,
     Typography,
 } from "components/ui";
-import {Add, Edit, LocationOn, Refresh, Search} from "components/ui/icons";
+import {Add, Delete, Edit, LocationOn, Refresh, Search} from "components/ui/icons";
 import {getBackendErrorMessage} from "../../api/errorMessage";
 import Department from "../../class/depots/Department";
+import AuditLogTimeline from "../AuditLog/AuditLogTimeline";
 import DepartmentService from "../../hooks/DepartmentService";
 import PickupPointService from "../../hooks/PickupPointService";
 import pl from "../../i18n/translate";
@@ -118,6 +119,9 @@ const statusTone = (status: PickupPointStatus) => {
     if (status === "CLOSED") {
         return "error";
     }
+    if (status === "DELETED") {
+        return "default";
+    }
     return "default";
 };
 
@@ -142,6 +146,9 @@ function PickupPointCatalog() {
     const [editingPoint, setEditingPoint] = useState<PickupPointDetails | null>(null);
     const [loadingDetailsId, setLoadingDetailsId] = useState<string | null>(null);
     const [selectedPointId, setSelectedPointId] = useState<string | null>(null);
+    const [deletingPoint, setDeletingPoint] = useState<PickupPointSummary | null>(null);
+    const [deleteError, setDeleteError] = useState("");
+    const [deleting, setDeleting] = useState(false);
     const mapRequestIdRef = useRef(0);
 
     const load = useCallback(async (
@@ -260,6 +267,41 @@ function PickupPointCatalog() {
             setError(getBackendErrorMessage(loadError, pl.pickupPoints.edit.loadError));
         } finally {
             setLoadingDetailsId(null);
+        }
+    };
+
+    const openDeleteDialog = (point: PickupPointSummary) => {
+        setDeleteError("");
+        setDeletingPoint(point);
+    };
+
+    const deletePickupPoint = async () => {
+        if (!deletingPoint) {
+            return;
+        }
+        const pickupPointId = deletingPoint.pickupPointId.value;
+        setDeleting(true);
+        setDeleteError("");
+        try {
+            await PickupPointService.delete(pickupPointId);
+            const showsDeleted = appliedFilters.status === "DELETED";
+            setItems((current) => showsDeleted
+                ? current.map((point) => (
+                    point.pickupPointId.value === pickupPointId ? {...point, status: "DELETED"} : point))
+                : current.filter((point) => point.pickupPointId.value !== pickupPointId));
+            setMapItems((current) => current.filter((point) => point.pickupPointId.value !== pickupPointId));
+            if (!showsDeleted) {
+                setTotalElements((current) => Math.max(current - 1, 0));
+            }
+            if (selectedPointId === pickupPointId) {
+                setSelectedPointId(null);
+            }
+            setNotice(pl.pickupPoints.delete.success.replace("{code}", deletingPoint.code));
+            setDeletingPoint(null);
+        } catch (removeError) {
+            setDeleteError(getBackendErrorMessage(removeError, pl.pickupPoints.delete.error));
+        } finally {
+            setDeleting(false);
         }
     };
 
@@ -393,7 +435,7 @@ function PickupPointCatalog() {
                             value={filters.status}
                         >
                             <MenuItem value="">{pl.common.all}</MenuItem>
-                            {(["ACTIVE", "SUSPENDED", "CLOSED"] as PickupPointStatus[]).map((status) => (
+                            {(["ACTIVE", "SUSPENDED", "CLOSED", "DELETED"] as PickupPointStatus[]).map((status) => (
                                 <MenuItem key={status} value={status}>{pl.pickupPoints.status[status]}</MenuItem>
                             ))}
                         </TextField>
@@ -511,6 +553,19 @@ function PickupPointCatalog() {
                                                 >
                                                     {pl.pickupPoints.edit.action}
                                                 </Button>
+                                                <Button
+                                                    aria-label={`${pl.pickupPoints.delete.action}: ${point.code}`}
+                                                    color="error"
+                                                    disabled={point.status === "DELETED"}
+                                                    onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
+                                                        event.stopPropagation();
+                                                        openDeleteDialog(point);
+                                                    }}
+                                                    startIcon={<Delete/>}
+                                                    variant="text"
+                                                >
+                                                    {pl.pickupPoints.delete.action}
+                                                </Button>
                                             </TableCell>
                                         </TableRow>
                                     )) : (
@@ -535,6 +590,40 @@ function PickupPointCatalog() {
                     )}
                 </section>
             </div>
+            <Dialog
+                fullWidth
+                maxWidth="xs"
+                onClose={() => {
+                    if (!deleting) {
+                        setDeletingPoint(null);
+                    }
+                }}
+                open={Boolean(deletingPoint)}
+            >
+                <DialogTitle>{pl.pickupPoints.delete.title}</DialogTitle>
+                <DialogContent>
+                    {deleteError ? <Alert severity="error">{deleteError}</Alert> : null}
+                    <Typography variant="body2">
+                        {pl.pickupPoints.delete.message
+                            .replace("{code}", deletingPoint?.code || "")
+                            .replace("{name}", deletingPoint?.name || "")}
+                    </Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button disabled={deleting} onClick={() => setDeletingPoint(null)} variant="outlined">
+                        {pl.pickupPoints.delete.cancel}
+                    </Button>
+                    <Button
+                        color="error"
+                        disabled={deleting}
+                        onClick={deletePickupPoint}
+                        startIcon={deleting ? <CircularProgress size={16}/> : <Delete/>}
+                        variant="contained"
+                    >
+                        {deleting ? pl.pickupPoints.delete.deleting : pl.pickupPoints.delete.confirm}
+                    </Button>
+                </DialogActions>
+            </Dialog>
             <Dialog
                 fullWidth
                 maxWidth="sm"
@@ -676,6 +765,15 @@ function PickupPointCatalog() {
                             )}
                             label={pl.pickupPoints.create.acceptsDangerousGoods}
                         />
+                        {editingPoint ? (
+                            <section aria-label={pl.auditLog.title}>
+                                <div className="pickup-point-field-label">{pl.auditLog.title}</div>
+                                <AuditLogTimeline
+                                    resourceId={editingPoint.pickupPointId.value}
+                                    resourceType="PICKUP_POINT"
+                                />
+                            </section>
+                        ) : null}
                     </DialogContent>
                     <DialogActions>
                         <Button
