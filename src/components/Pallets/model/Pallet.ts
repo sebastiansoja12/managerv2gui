@@ -130,6 +130,8 @@ export type PalletHistoryEventTypeDto =
     | "DEPARTMENTS_CHANGED"
     | "STATUS_CHANGED"
     | "LOADED"
+    | "LOADING_REVERTED"
+    | "UNLOADED"
     | "CANCELLED"
     | "UNKNOWN";
 
