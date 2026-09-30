@@ -125,7 +125,7 @@
 .pallet-summary-item span {
     color: var(--muted-foreground);
     font-size: 0.75rem;
-    text-transform: uppercase;
+    text-transform: none;
 }
 
 .pallet-summary-item strong {
@@ -166,7 +166,7 @@
     color: var(--muted-foreground);
     font-size: 0.75rem;
     font-weight: 600;
-    text-transform: uppercase;
+    text-transform: none;
 }
 
 .pallet-table td {
@@ -305,6 +305,43 @@
     grid-template-columns: minmax(0, 1.5fr) minmax(320px, 1fr);
 }
 
+.pallet-main-grid {
+    align-items: stretch;
+    display: grid;
+    gap: 16px;
+    grid-template-columns: minmax(0, 1.6fr) minmax(320px, 1fr);
+}
+
+.pallet-panel-stack {
+    display: grid;
+    gap: 16px;
+    grid-template-rows: auto 1fr;
+    min-width: 0;
+}
+
+.pallet-main-grid .pallet-panel {
+    align-content: start;
+}
+
+.pallet-main-grid .pallet-table-wrap,
+.pallet-main-grid .route-history {
+    max-height: 560px;
+    overflow: auto;
+}
+
+.pallet-panel-section {
+    border-top: 1px solid var(--border);
+    display: grid;
+    gap: 12px;
+    padding-top: 16px;
+}
+
+.pallet-section-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0;
+}
+
 .pallet-details-column {
     display: grid;
     gap: 16px;
@@ -369,7 +406,8 @@
 }
 
 @media (max-width: 1100px) {
-    .pallet-details-grid {
+    .pallet-details-grid,
+    .pallet-main-grid {
         grid-template-columns: 1fr;
     }
 }
@@ -407,6 +445,8 @@
 }
 
 .pallet-form-grid {
+    /* A wrapped label (e.g. required "*") must not push its input below the neighbours. */
+    align-items: end;
     display: grid;
     gap: 12px;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
