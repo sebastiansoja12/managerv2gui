@@ -13,6 +13,7 @@ export const tabTitles = (): Record<string, string> => ({
     "/analytics": pl.navigation.analytics,
     "/processes": pl.navigation.processes,
     "/returns": pl.navigation.returns,
+    "/deliveries": pl.navigation.deliveries,
     "/couriers": pl.navigation.couriers,
     "/vehicles": pl.navigation.vehicles,
     "/pallets": pl.navigation.pallets,
@@ -36,6 +37,10 @@ export const normalizePath = (path: string) => path === "/shipments" ? "/shipmen
 
 export const getTabTitle = (path: string) => {
     const normalizedPath = normalizePath(path);
+    const deliveryEditMatch = normalizedPath.match(/^\/deliveries\/([^/]+)\/edit$/);
+    if (deliveryEditMatch) {
+        return `${pl.deliveries.detailsTitle} ${decodeURIComponent(deliveryEditMatch[1])}`;
+    }
     const shipmentTrackingEditMatch = normalizedPath.match(/^\/shipments\/tracking\/([^/]+)\/edit$/);
     if (shipmentTrackingEditMatch) {
         return `${pl.shipments.page.detailsTitle} ${decodeURIComponent(shipmentTrackingEditMatch[1])}`;

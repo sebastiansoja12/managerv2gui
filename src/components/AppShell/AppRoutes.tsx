@@ -3,6 +3,8 @@ import {Route, Routes} from "react-router-dom";
 import OrganizationChat from "../Chat/OrganizationChat";
 import Couriers from "../Couriers/Couriers";
 import CourierDetails from "../Couriers/CourierDetails";
+import Deliveries from "../Deliveries/Deliveries";
+import DeliveryEdit from "../Deliveries/DeliveryEdit";
 import Departments from "../Departments";
 import DevicePairing from "../Devices/DevicePairing";
 import GlobalConfiguration from "../GlobalConfiguration/GlobalConfiguration";
@@ -57,6 +59,8 @@ function AppRoutes({onOpenTab, operationalProfile = "warehouse"}: AppRoutesProps
             <Route path="processes" element={guarded("/processes", <Processes/>)}/>
             <Route path="processes/:processId" element={guarded("/processes/1", <ProcessDetails/>)}/>
             <Route path="returns" element={guarded("/returns", <Returns onOpenTab={onOpenTab}/>)}/>
+            <Route path="deliveries" element={guarded("/deliveries", <Deliveries/>)}/>
+            <Route path="deliveries/:deliveryId/edit" element={guarded("/deliveries/1/edit", <DeliveryEdit/>)}/>
             <Route path="returns/:returnId" element={guarded("/returns", <Returns onOpenTab={onOpenTab}/>)}/>
             <Route path="couriers" element={guarded("/couriers", <Couriers/>)}/>
             <Route path="couriers/:supplierCode" element={guarded("/couriers", <CourierDetails/>)}/>
