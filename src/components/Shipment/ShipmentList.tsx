@@ -14,25 +14,24 @@ import {
     Typography,
 } from "components/ui";
 import {
-    AccessTime,
     Add,
-    AttachMoney,
+    BookmarkAdd,
     FilterList,
     InfoOutlined,
-    Person,
+    Inventory2,
     Print,
     QrCode2,
     Refresh,
-    Route,
     TableView,
 } from "components/ui/icons";
 import {Link, useNavigate} from "react-router-dom";
 import Department from "../../class/depots/Department";
-import DeliveryService from "../../hooks/DeliveryService";
 import DepartmentService from "../../hooks/DepartmentService";
 import ShipmentService from "../../hooks/ShipmentService";
 import DocumentService from "../../hooks/DocumentService";
 import TrackingService from "../../hooks/TrackingService";
+import PalletService from "../../hooks/PalletService";
+import {useAuthState} from "../../auth/AuthState";
 import {ApiErrorResponse} from "../../api/ApiResult";
 import {
     ExternalTrackingResult,
@@ -40,6 +39,7 @@ import {
     TrackingProviderId,
 } from "../GlobalConfiguration/model/TrackingIntegration";
 import {
+    DepartmentIdDto,
     shipmentPriorities,
     ShipmentDto,
     ShipmentPriorityDto,
@@ -48,8 +48,18 @@ import {
 } from "./dto/ShipmentDto";
 import pl from "../../i18n/translate";
 import {AppTabDefinition} from "../AppShell/types";
-import {departmentCodeLabel} from "../Deliveries/deliveryLabels";
-import {exportShipmentExcel} from "./shipmentExcelExport";
+import {departmentCodeLabel, formatDeliveryDateTime} from "../Deliveries/deliveryLabels";
+import {exportShipmentExcel, exportShipmentsExcel} from "./shipmentExcelExport";
+import {
+    createShipmentSavedView,
+    loadShipmentSavedViews,
+    ShipmentListFilters,
+    ShipmentListStatusFilter,
+    ShipmentSavedView,
+    storeShipmentSavedViews,
+} from "./shipmentSavedViews";
+import {palletDetailsTab} from "../Pallets/palletNavigation";
+import {palletErrorMessage} from "../Pallets/palletLabels";
 import "./styles/shipments.css";
 
 type Notice = {
@@ -62,7 +72,9 @@ type ShipmentRow = {
     dimensions: string;
     sender: string;
     recipient: string;
+    createdDate: string;
     deliveryDate: string;
+    origin: string;
     price: string;
     user: string;
     destination: string;
@@ -71,27 +83,42 @@ type ShipmentRow = {
 };
 
 const shipmentTranslations = pl.shipments;
-const shipmentListCache: {
-    loaded: boolean;
-    shipments: ShipmentDto[];
-    promise: Promise<ShipmentDto[]> | null;
-} = {
-    loaded: false,
-    shipments: [],
-    promise: null,
-};
 const trackingProviderCache: {loaded: boolean; providers: TrackingProvider[]} = {
     loaded: false,
     providers: [],
 };
-const SHIPMENT_PAGE_SIZE = 100;
+const SHIPMENT_PAGE_SIZE = 25;
+
+type ShipmentPageRequest = Parameters<typeof ShipmentService.search>[0];
+let pendingShipmentPage: {key: string; promise: ReturnType<typeof ShipmentService.search>} | null = null;
+
+const searchShipmentPage = (request: ShipmentPageRequest) => {
+    const key = JSON.stringify(request);
+    if (pendingShipmentPage?.key === key) {
+        return pendingShipmentPage.promise;
+    }
+    const promise = ShipmentService.search(request).finally(() => {
+        if (pendingShipmentPage?.promise === promise) {
+            pendingShipmentPage = null;
+        }
+    });
+    pendingShipmentPage = {key, promise};
+    return promise;
+};
+const PAGE_WINDOW = 5;
+
+const visiblePageNumbers = (page: number, totalPages: number) => {
+    const count = Math.min(PAGE_WINDOW, totalPages);
+    const first = Math.max(0, Math.min(page - Math.floor(PAGE_WINDOW / 2), totalPages - count));
+    return Array.from({length: count}, (_, index) => first + index);
+};
 
 const formatPersonName = (firstName?: string, lastName?: string, fallback = "-") => {
     const fullName = `${firstName || ""} ${lastName || ""}`.trim();
     return fullName || fallback;
 };
 
-const formatDeliveryDate = (date?: string | null) => {
+const formatShipmentDate = (date?: string | null) => {
     if (!date) {
         return "-";
     }
@@ -116,14 +143,25 @@ const formatPrice = (shipment: ShipmentDto) => {
     return `${shipment.price.amount.toLocaleString(pl.common.locale)} ${shipment.price.currency}`;
 };
 
-const mapShipmentToRow = (shipment: ShipmentDto, destination: string): ShipmentRow => ({
+const deliveryDateLabel = (shipment: ShipmentDto) => {
+    if (shipment.delivery?.deliveredAt) {
+        return formatShipmentDate(shipment.delivery.deliveredAt);
+    }
+    return shipment.delivery?.plannedDeliveryAt
+        ? `${shipmentTranslations.table.planned} ${formatShipmentDate(shipment.delivery.plannedDeliveryAt)}`
+        : pl.common.dash;
+};
+
+const mapShipmentToRow = (shipment: ShipmentDto, origin: string, destination: string): ShipmentRow => ({
     id: `#${shipment.shipmentId.value}`,
     dimensions: shipment.dimensions
         ? `${shipment.dimensions.length} × ${shipment.dimensions.width} × ${shipment.dimensions.height} ${shipment.dimensions.unit}`
         : pl.common.dash,
     sender: formatPersonName(shipment.sender?.firstName, shipment.sender?.lastName, shipmentTranslations.table.fallbackSender),
     recipient: formatPersonName(shipment.recipient?.firstName, shipment.recipient?.lastName, shipmentTranslations.table.fallbackRecipient),
-    deliveryDate: formatDeliveryDate(shipment.shipmentStatus === "DELIVERY" ? shipment.updatedAt : null),
+    createdDate: formatDeliveryDateTime(shipment.createdAt),
+    deliveryDate: deliveryDateLabel(shipment),
+    origin,
     price: formatPrice(shipment),
     user: shipmentTranslations.table.unassigned,
     destination,
@@ -135,36 +173,7 @@ const statusClassName = (status: ShipmentStatusDto) => `tm-status tm-status-${st
 
 const avatarFor = (name: string) => name.trim().slice(0, 1).toUpperCase() || "?";
 
-const loadShipments = async (criteria: ShipmentSearchRequestApi = {}) => {
-    const response = await ShipmentService.search({
-        ...criteria,
-        page: 0,
-        size: SHIPMENT_PAGE_SIZE,
-    });
-    return response.data;
-};
-
-const loadInitialShipments = () => {
-    if (shipmentListCache.loaded) {
-        return Promise.resolve(shipmentListCache.shipments);
-    }
-
-    if (!shipmentListCache.promise) {
-        shipmentListCache.promise = loadShipments()
-            .then((shipments) => {
-                shipmentListCache.loaded = true;
-                shipmentListCache.shipments = shipments;
-                return shipments;
-            })
-            .finally(() => {
-                shipmentListCache.promise = null;
-            });
-    }
-
-    return shipmentListCache.promise;
-};
-
-type ShipmentStatusFilter = ShipmentStatusDto | "ALL";
+type ShipmentStatusFilter = ShipmentListStatusFilter;
 
 const DEFAULT_STATUS_FILTER: ShipmentStatusFilter = "ALL";
 
@@ -190,8 +199,12 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
     const [lockedFilter, setLockedFilter] = useState<"ALL" | "YES" | "NO">("ALL");
     const [createdFromFilter, setCreatedFromFilter] = useState<string>("");
     const [createdToFilter, setCreatedToFilter] = useState<string>("");
-    const [shipments, setShipments] = useState<ShipmentDto[]>(shipmentListCache.shipments);
-    const [readModelSearchResults, setReadModelSearchResults] = useState<ShipmentDto[] | null>(null);
+    const [shipments, setShipments] = useState<ShipmentDto[]>([]);
+    const [appliedCriteria, setAppliedCriteria] = useState<ShipmentSearchRequestApi>({});
+    const [page, setPage] = useState<number>(0);
+    const [totalPages, setTotalPages] = useState<number>(0);
+    const [totalElements, setTotalElements] = useState<number>(0);
+    const [reloadKey, setReloadKey] = useState<number>(0);
     const [notice, setNotice] = useState<Notice | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
     const [searchSource, setSearchSource] = useState<"SYSTEM" | "EXTERNAL">("SYSTEM");
@@ -203,45 +216,28 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
     const [documentLoading, setDocumentLoading] = useState<"excel" | "label" | null>(null);
     const [qrPreviewUrl, setQrPreviewUrl] = useState<string | null>(null);
     const qrPreviewRef = useRef<HTMLIFrameElement | null>(null);
+    const {user} = useAuthState();
+    const [checkedShipments, setCheckedShipments] = useState<Record<string, ShipmentDto>>({});
+    const [bulkLoading, setBulkLoading] = useState<"excel" | "pallet" | null>(null);
+    const [savedViews, setSavedViews] = useState<ShipmentSavedView[]>(() => loadShipmentSavedViews(user?.username));
+    const [saveViewOpen, setSaveViewOpen] = useState(false);
+    const [newViewName, setNewViewName] = useState("");
+    const [viewNameError, setViewNameError] = useState<string | null>(null);
 
-    const displayedShipments = readModelSearchResults || shipments;
     const [departments, setDepartments] = useState<Department[]>([]);
-    const [destinationDepartmentIds, setDestinationDepartmentIds] = useState<Record<string, string | null>>({});
-    const destinationLabel = (shipment: ShipmentDto) =>
-        departmentCodeLabel(departments, destinationDepartmentIds[String(shipment.shipmentId.value)]);
-
-    const visibleShipments = useMemo(() => {
-        return displayedShipments
-            .filter((shipment) => activeStatus === "ALL" || shipment.shipmentStatus === activeStatus)
-            .filter((shipment) => !appliedLookupId || shipment.shipmentId.value.toString() === appliedLookupId)
-            .filter((shipment) => {
-                const trackingNumber = shipment.trackingNumber?.value || "";
-                return !appliedLookupTrackingNumber || trackingNumber.toLowerCase().includes(appliedLookupTrackingNumber.toLowerCase());
-            });
-    }, [
-        activeStatus,
-        appliedLookupId,
-        appliedLookupTrackingNumber,
-        displayedShipments,
-    ]);
-
     const shipmentRows = useMemo(() => {
-        return visibleShipments.map((shipment) => mapShipmentToRow(shipment,
-            departmentCodeLabel(departments, destinationDepartmentIds[String(shipment.shipmentId.value)])));
-    }, [visibleShipments, departments, destinationDepartmentIds]);
-    const selectedShipment = visibleShipments.find((shipment) => shipment.shipmentId.value === selectedShipmentId) || null;
+        const departmentLabel = (departmentId?: DepartmentIdDto | null) =>
+            departmentCodeLabel(departments, departmentId ? String(departmentId.value) : null);
+        return shipments.map((shipment) => mapShipmentToRow(shipment,
+            departmentLabel(shipment.delivery?.originDepartmentId),
+            departmentLabel(shipment.delivery?.destinationDepartmentId)));
+    }, [shipments, departments]);
+    const selectedShipment = shipments.find((shipment) => shipment.shipmentId.value === selectedShipmentId) || null;
 
-    const statusCounts = useMemo(() => {
-        const counts = shipmentTranslations.statusTabs.reduce((result, status) => {
-            result[status] = 0;
-            return result;
-        }, {} as Record<ShipmentStatusDto, number>);
-
-        displayedShipments.forEach((shipment) => {
-            counts[shipment.shipmentStatus] += 1;
-        });
-        return counts;
-    }, [displayedShipments]);
+    const changeStatus = (status: ShipmentStatusFilter) => {
+        setActiveStatus(status);
+        setPage(0);
+    };
 
     const normalizeShipmentId = (value: string): string => {
         const trimmedValue = value.trim();
@@ -282,17 +278,11 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
             return;
         }
 
-        const shipment = displayedShipments.find((current) => current.trackingNumber?.value?.toLowerCase().includes(trackingNumber.toLowerCase()));
-        if (!shipment) {
-            setNotice({severity: "error", message: shipmentTranslations.table.localFilterNotFound});
-            return;
-        }
-
         setAppliedLookupId("");
         setAppliedLookupTrackingNumber(trackingNumber);
-        if (shipment.shipmentStatus !== activeStatus) {
-            setActiveStatus(shipment.shipmentStatus);
-        }
+        setActiveStatus(DEFAULT_STATUS_FILTER);
+        setAppliedCriteria((current) => ({...current, shipmentId: null, trackingNumber}));
+        setPage(0);
         setNotice({severity: "success", message: shipmentTranslations.table.localFilterApplied});
     };
 
@@ -305,26 +295,26 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
             return;
         }
 
-        const shipment = displayedShipments.find((current) => current.shipmentId.value === shipmentId);
-        if (!shipment) {
-            setNotice({severity: "error", message: shipmentTranslations.table.localFilterNotFound});
-            return;
-        }
-
         setAppliedLookupTrackingNumber("");
-        setAppliedLookupId(String(shipmentId));
-        if (shipment.shipmentStatus !== activeStatus) {
-            setActiveStatus(shipment.shipmentStatus);
-        }
+        setAppliedLookupId(shipmentId);
+        setActiveStatus(DEFAULT_STATUS_FILTER);
+        setAppliedCriteria((current) => ({...current, shipmentId, trackingNumber: null}));
+        setPage(0);
         setNotice({severity: "success", message: shipmentTranslations.table.localFilterApplied});
     };
 
-    const clearLocalFilters = () => {
+    const clearLookups = () => {
         setLookupId("");
         setLookupTrackingNumber("");
         setAppliedLookupId("");
         setAppliedLookupTrackingNumber("");
         setExternalResult(null);
+    };
+
+    const clearLocalFilters = () => {
+        clearLookups();
+        setAppliedCriteria((current) => ({...current, shipmentId: null, trackingNumber: null}));
+        setPage(0);
     };
 
     const priceFilterValue = (value: string): number | null => {
@@ -348,63 +338,170 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
         return `${value}T${endOfDay ? "23:59:59" : "00:00:00"}`;
     };
 
-    const applyAdvancedFilters = async () => {
-        let minPrice: number | null;
-        let maxPrice: number | null;
+    const currentFilters = (): ShipmentListFilters => ({
+        status: activeStatus,
+        priority: shipmentPriorityFilter,
+        senderName: senderNameFilter,
+        recipientName: recipientNameFilter,
+        minPrice: minPriceFilter,
+        maxPrice: maxPriceFilter,
+        currency: currencyFilter,
+        locked: lockedFilter,
+        createdFrom: createdFromFilter,
+        createdTo: createdToFilter,
+    });
 
+    const criteriaFromFilters = (filters: ShipmentListFilters): ShipmentSearchRequestApi => {
+        const minPrice = priceFilterValue(filters.minPrice);
+        const maxPrice = priceFilterValue(filters.maxPrice);
+        if (minPrice !== null && maxPrice !== null && minPrice > maxPrice) {
+            throw new Error(shipmentTranslations.filters.invalidPriceRange);
+        }
+
+        return {
+            shipmentPriorities: filters.priority ? [filters.priority] : [],
+            senderName: filters.senderName.trim() || null,
+            recipientName: filters.recipientName.trim() || null,
+            minPrice,
+            maxPrice,
+            currency: filters.currency.trim().toUpperCase() || null,
+            locked: filters.locked === "ALL" ? null : filters.locked === "YES",
+            createdFrom: dateFilterValue(filters.createdFrom),
+            createdTo: dateFilterValue(filters.createdTo, true),
+        };
+    };
+
+    const applyAdvancedFilters = () => {
+        let criteria: ShipmentSearchRequestApi;
         try {
-            minPrice = priceFilterValue(minPriceFilter);
-            maxPrice = priceFilterValue(maxPriceFilter);
-            if (minPrice !== null && maxPrice !== null && minPrice > maxPrice) {
-                throw new Error(shipmentTranslations.filters.invalidPriceRange);
-            }
+            criteria = criteriaFromFilters(currentFilters());
         } catch (error) {
             setNotice({severity: "error", message: (error as Error).message});
             return;
         }
 
-        const criteria: ShipmentSearchRequestApi = {
-            shipmentPriorities: shipmentPriorityFilter ? [shipmentPriorityFilter] : [],
-            senderName: senderNameFilter.trim() || null,
-            recipientName: recipientNameFilter.trim() || null,
-            minPrice,
-            maxPrice,
-            currency: currencyFilter.trim().toUpperCase() || null,
-            locked: lockedFilter === "ALL" ? null : lockedFilter === "YES",
-            createdFrom: dateFilterValue(createdFromFilter),
-            createdTo: dateFilterValue(createdToFilter, true),
-        };
-
-        setLoading(true);
-        try {
-            const filteredShipments = await loadShipments(criteria);
-            setReadModelSearchResults(filteredShipments);
-            clearLocalFilters();
-            setNotice({severity: "success", message: shipmentTranslations.filters.applied});
-        } catch (error) {
-            showError(error);
-        } finally {
-            setLoading(false);
-        }
+        clearLookups();
+        setAppliedCriteria(criteria);
+        setPage(0);
+        setNotice({severity: "success", message: shipmentTranslations.filters.applied});
     };
 
-    const refreshShipments = async () => {
-        if (readModelSearchResults) {
-            await applyAdvancedFilters();
+    const applySavedView = (view: ShipmentSavedView) => {
+        let criteria: ShipmentSearchRequestApi;
+        try {
+            criteria = criteriaFromFilters(view.filters);
+        } catch (error) {
+            setNotice({severity: "error", message: (error as Error).message});
             return;
         }
 
-        setLoading(true);
-        try {
-            const refreshedShipments = await loadShipments();
-            shipmentListCache.loaded = true;
-            shipmentListCache.shipments = refreshedShipments;
-            setShipments([...refreshedShipments]);
-        } catch (error) {
-            showError(error);
-        } finally {
-            setLoading(false);
+        setShipmentPriorityFilter(view.filters.priority);
+        setSenderNameFilter(view.filters.senderName);
+        setRecipientNameFilter(view.filters.recipientName);
+        setMinPriceFilter(view.filters.minPrice);
+        setMaxPriceFilter(view.filters.maxPrice);
+        setCurrencyFilter(view.filters.currency);
+        setLockedFilter(view.filters.locked);
+        setCreatedFromFilter(view.filters.createdFrom);
+        setCreatedToFilter(view.filters.createdTo);
+        clearLookups();
+        setActiveStatus(view.filters.status);
+        setAppliedCriteria(criteria);
+        setPage(0);
+        setNotice({severity: "info", message: shipmentTranslations.table.savedViews.applied.replace("{value}", view.name)});
+    };
+
+    const updateSavedViews = (views: ShipmentSavedView[]) => {
+        setSavedViews(views);
+        storeShipmentSavedViews(views, user?.username);
+    };
+
+    const openSaveViewDialog = () => {
+        setNewViewName("");
+        setViewNameError(null);
+        setSaveViewOpen(true);
+    };
+
+    const saveCurrentView = () => {
+        if (!newViewName.trim()) {
+            setViewNameError(shipmentTranslations.table.savedViews.nameRequired);
+            return;
         }
+
+        const view = createShipmentSavedView(newViewName, currentFilters());
+        updateSavedViews([...savedViews, view]);
+        setSaveViewOpen(false);
+        setNotice({severity: "success", message: shipmentTranslations.table.savedViews.saved.replace("{value}", view.name)});
+    };
+
+    const checkedShipmentList = Object.values(checkedShipments);
+    const allOnPageChecked = shipments.length > 0
+        && shipments.every((shipment) => Boolean(checkedShipments[shipment.shipmentId.value]));
+
+    const toggleShipmentChecked = (shipment: ShipmentDto) => {
+        setCheckedShipments((current) => {
+            const next = {...current};
+            if (next[shipment.shipmentId.value]) {
+                delete next[shipment.shipmentId.value];
+            } else {
+                next[shipment.shipmentId.value] = shipment;
+            }
+            return next;
+        });
+    };
+
+    const togglePageChecked = () => {
+        setCheckedShipments((current) => {
+            const next = {...current};
+            shipments.forEach((shipment) => {
+                if (allOnPageChecked) {
+                    delete next[shipment.shipmentId.value];
+                } else {
+                    next[shipment.shipmentId.value] = shipment;
+                }
+            });
+            return next;
+        });
+    };
+
+    const exportCheckedShipments = async () => {
+        setBulkLoading("excel");
+        try {
+            await exportShipmentsExcel(checkedShipmentList);
+            setNotice({
+                severity: "success",
+                message: shipmentTranslations.table.bulk.exported.replace("{count}", String(checkedShipmentList.length)),
+            });
+        } catch (error) {
+            setNotice({severity: "error", message: shipmentTranslations.messages.excelExportError});
+        } finally {
+            setBulkLoading(null);
+        }
+    };
+
+    const createPalletFromChecked = async () => {
+        setBulkLoading("pallet");
+        try {
+            const response = await PalletService.createFromShipments(checkedShipmentList.map((shipment) => shipment.shipmentId.value));
+            const trackingNumber = response.data.trackingNumber;
+            setCheckedShipments({});
+            setReloadKey((current) => current + 1);
+            setNotice({severity: "success", message: shipmentTranslations.table.bulk.palletCreated.replace("{value}", trackingNumber)});
+            const tab = palletDetailsTab(trackingNumber);
+            if (onOpenTab) {
+                onOpenTab(tab);
+            } else {
+                navigate(tab.path);
+            }
+        } catch (error) {
+            setNotice({severity: "error", message: palletErrorMessage(error, shipmentTranslations.table.bulk.palletCreateError)});
+        } finally {
+            setBulkLoading(null);
+        }
+    };
+
+    const refreshShipments = () => {
+        setReloadKey((current) => current + 1);
     };
 
     const resetAdvancedFilters = () => {
@@ -417,9 +514,14 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
         setLockedFilter("ALL");
         setCreatedFromFilter("");
         setCreatedToFilter("");
-        clearLocalFilters();
-        setReadModelSearchResults(null);
+        clearLookups();
+        setAppliedCriteria({});
+        setPage(0);
     };
+
+    useEffect(() => {
+        setSavedViews(loadShipmentSavedViews(user?.username));
+    }, [user?.username]);
 
     useEffect(() => {
         if (searchSource !== "EXTERNAL") {
@@ -536,44 +638,18 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
 
     useEffect(() => {
         let active = true;
-        const shipmentIds = displayedShipments.map((shipment) => String(shipment.shipmentId.value));
-        if (!shipmentIds.length) {
-            setDestinationDepartmentIds({});
-            return undefined;
-        }
-        DeliveryService.query(0, shipmentIds.length, {shipmentIds})
-            .then((response) => {
-                if (active) {
-                    setDestinationDepartmentIds(Object.fromEntries(response.data.items
-                        .filter((delivery) => delivery.shipmentId)
-                        .map((delivery) => [delivery.shipmentId as string, delivery.destinationDepartmentId])));
-                }
-            })
-            .catch(() => {
-                if (active) {
-                    setDestinationDepartmentIds({});
-                }
-            });
-        return () => {
-            active = false;
-        };
-    }, [displayedShipments]);
-
-    useEffect(() => {
-        let active = true;
-
-        if (shipmentListCache.loaded) {
-            setShipments([...shipmentListCache.shipments]);
-            return () => {
-                active = false;
-            };
-        }
-
         setLoading(true);
-        loadInitialShipments()
+        searchShipmentPage({
+            ...appliedCriteria,
+            shipmentStatuses: activeStatus === "ALL" ? [] : [activeStatus],
+            page,
+            size: SHIPMENT_PAGE_SIZE,
+        })
             .then((response) => {
                 if (active) {
-                    setShipments([...response]);
+                    setShipments(response.data.content);
+                    setTotalPages(response.data.totalPages);
+                    setTotalElements(response.data.totalElements);
                 }
             })
             .catch((error) => {
@@ -590,43 +666,20 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
         return () => {
             active = false;
         };
-    }, []);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [appliedCriteria, activeStatus, page, reloadKey]);
 
     return (
-        <div className="tm-page tm-page-shipment-catalog">
+        <div className="tm-page tm-page-shipment-catalog tm-page-shipment-list">
             <div className="tm-content">
-                <div className="tm-top-row">
-                    <div className="tm-page-heading">
-                        <span className="tm-heading-kicker">{pl.common.brand}</span>
-                        <Typography variant="h4">
-                            {variant === "details" ? pl.shipments.page.detailsTitle : pl.shipments.page.title}
-                        </Typography>
-                        <p>{variant === "details" ? pl.shipments.page.detailsSubtitle : pl.shipments.page.subtitle}</p>
-                    </div>
-                    <div className="tm-top-actions">
-                        <Button
-                            className="tm-refresh"
-                            disabled={loading}
-                            startIcon={<Refresh />}
-                            variant="outlined"
-                            onClick={refreshShipments}
-                        >
-                            {pl.common.refresh}
-                        </Button>
-                        <Button
-                            className="tm-add-new"
-                            startIcon={<Add />}
-                            variant="contained"
-                            onClick={() => navigate("/shipments/create")}
-                        >
-                            {shipmentTranslations.actions.create}
-                        </Button>
-                    </div>
-                </div>
-
                 <section className="tm-card tm-orders-card">
                     <div className="tm-orders-header">
-                        <Typography variant="h5">{shipmentTranslations.table.title}</Typography>
+                        <div className="tm-orders-title">
+                            <Typography variant="h5">
+                                {variant === "details" ? pl.shipments.page.detailsTitle : shipmentTranslations.table.title}
+                            </Typography>
+                            <span className="tm-orders-count">{totalElements}</span>
+                        </div>
                         <div className="tm-toolbar-actions">
                             <Button
                                 aria-expanded={filtersExpanded}
@@ -636,14 +689,30 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
                             >
                                 {shipmentTranslations.actions.filters}
                             </Button>
+                            <Button
+                                disabled={loading}
+                                startIcon={<Refresh />}
+                                variant="outlined"
+                                onClick={refreshShipments}
+                            >
+                                {pl.common.refresh}
+                            </Button>
                         </div>
+                        <Button
+                            className="tm-add-new"
+                            startIcon={<Add />}
+                            variant="contained"
+                            onClick={() => navigate("/shipments/create")}
+                        >
+                            {shipmentTranslations.actions.create}
+                        </Button>
                     </div>
 
                     <div className="tm-orders-controls">
                         <div className="tm-tabs">
                             {(["ALL", ...shipmentTranslations.statusTabs] as ShipmentStatusFilter[]).map((status) => {
                                 const label = status === "ALL" ? pl.common.all : shipmentTranslations.status[status];
-                                const count = status === "ALL" ? displayedShipments.length : statusCounts[status];
+                                const count = status === activeStatus ? totalElements : null;
                                 return (
                                     <button
                                         aria-label={label}
@@ -652,15 +721,33 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
                                         data-status={status.toLowerCase()}
                                         disabled={loading && status === activeStatus}
                                         key={status}
-                                        onClick={() => setActiveStatus(status)}
+                                        onClick={() => changeStatus(status)}
                                         title={label}
                                         type="button"
                                     >
                                         <span>{label}</span>
-                                        <strong>{count}</strong>
+                                        {count === null ? null : <strong>{count}</strong>}
                                     </button>
                                 );
                             })}
+                        </div>
+                        <div className="tm-saved-views" aria-label={shipmentTranslations.table.savedViews.label} role="group">
+                            {savedViews.map((view) => (
+                                <span className="tm-saved-view" key={view.id}>
+                                    <button type="button" onClick={() => applySavedView(view)}>{view.name}</button>
+                                    <button
+                                        aria-label={shipmentTranslations.table.savedViews.remove.replace("{value}", view.name)}
+                                        className="tm-saved-view-remove"
+                                        onClick={() => updateSavedViews(savedViews.filter((saved) => saved.id !== view.id))}
+                                        title={shipmentTranslations.table.savedViews.remove.replace("{value}", view.name)}
+                                        type="button"
+                                    >×</button>
+                                </span>
+                            ))}
+                            <button className="tm-saved-view-add" type="button" onClick={openSaveViewDialog}>
+                                <BookmarkAdd fontSize="small" />
+                                {shipmentTranslations.table.savedViews.save}
+                            </button>
                         </div>
                     </div>
 
@@ -839,26 +926,64 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
                         </section>
                     ) : undefined}
 
+                    {checkedShipmentList.length ? (
+                        <div aria-label={shipmentTranslations.table.bulk.selected.replace("{count}", String(checkedShipmentList.length))} className="tm-bulk-bar" role="region">
+                            <strong>{shipmentTranslations.table.bulk.selected.replace("{count}", String(checkedShipmentList.length))}</strong>
+                            <Button
+                                disabled={Boolean(bulkLoading)}
+                                startIcon={bulkLoading === "excel" ? <CircularProgress size={16} /> : <TableView />}
+                                variant="outlined"
+                                onClick={exportCheckedShipments}
+                            >
+                                {shipmentTranslations.table.bulk.exportExcel}
+                            </Button>
+                            <Button
+                                disabled={Boolean(bulkLoading)}
+                                startIcon={bulkLoading === "pallet" ? <CircularProgress size={16} /> : <Inventory2 />}
+                                variant="outlined"
+                                onClick={createPalletFromChecked}
+                            >
+                                {shipmentTranslations.table.bulk.createPallet}
+                            </Button>
+                            <Button disabled={Boolean(bulkLoading)} variant="text" onClick={() => setCheckedShipments({})}>
+                                {shipmentTranslations.table.bulk.clear}
+                            </Button>
+                        </div>
+                    ) : null}
+
                     <div className="tm-results-layout">
                         <div className="tm-table-wrap">
                             <table className="tm-orders-table">
                                 <thead>
                                 <tr>
-                                    <th>{shipmentTranslations.table.columns.id}</th>
+                                    <th>
+                                        <span className="tm-check-cell">
+                                            <input
+                                                aria-label={shipmentTranslations.table.bulk.selectPage}
+                                                checked={allOnPageChecked}
+                                                disabled={!shipments.length}
+                                                onChange={togglePageChecked}
+                                                type="checkbox"
+                                            />
+                                            {shipmentTranslations.table.columns.id}
+                                        </span>
+                                    </th>
                                     <th>{shipmentTranslations.summary.dimensions}</th>
-                                    <th><Person fontSize="small" /> {shipmentTranslations.table.columns.sender}</th>
-                                    <th><Person fontSize="small" /> {shipmentTranslations.table.columns.recipient}</th>
-                                    <th><AccessTime fontSize="small" /> {shipmentTranslations.table.columns.deliveryDate}</th>
-                                    <th><AttachMoney fontSize="small" /> {shipmentTranslations.table.columns.price}</th>
-                                    <th><Person fontSize="small" /> {shipmentTranslations.table.columns.user}</th>
-                                    <th className="tm-destination-heading"><Route fontSize="small" /> {shipmentTranslations.table.columns.destination}</th>
+                                    <th>{shipmentTranslations.table.columns.sender}</th>
+                                    <th>{shipmentTranslations.table.columns.recipient}</th>
+                                    <th>{shipmentTranslations.summary.createdAt}</th>
+                                    <th>{shipmentTranslations.table.columns.deliveryDate}</th>
+                                    <th>{shipmentTranslations.table.columns.price}</th>
+                                    <th>{shipmentTranslations.table.columns.user}</th>
+                                    <th>{shipmentTranslations.table.columns.origin}</th>
+                                    <th className="tm-destination-heading">{shipmentTranslations.table.columns.destination}</th>
                                     <th>{shipmentTranslations.table.columns.status}</th>
                                     <th>{shipmentTranslations.table.columns.relatedShipment}</th>
                                 </tr>
                                 </thead>
                                 <tbody>
-                                {visibleShipments.map((shipment) => {
-                                    const row = mapShipmentToRow(shipment, destinationLabel(shipment));
+                                {shipments.map((shipment, index) => {
+                                    const row = shipmentRows[index];
                                     return (
                                         <tr
                                             aria-selected={selectedShipmentId === shipment.shipmentId.value}
@@ -873,8 +998,20 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
                                             }}
                                             tabIndex={0}
                                         >
-                                            <td>{row.id}</td>
-                                            <td>{row.dimensions}</td>
+                                            <td className="tm-id-cell">
+                                                <span className="tm-check-cell">
+                                                    <input
+                                                        aria-label={shipmentTranslations.table.bulk.selectRow.replace("{value}", row.id)}
+                                                        checked={Boolean(checkedShipments[shipment.shipmentId.value])}
+                                                        onChange={() => toggleShipmentChecked(shipment)}
+                                                        onClick={(event) => event.stopPropagation()}
+                                                        onKeyDown={(event) => event.stopPropagation()}
+                                                        type="checkbox"
+                                                    />
+                                                    {row.id}
+                                                </span>
+                                            </td>
+                                            <td className="tm-muted-cell">{row.dimensions}</td>
                                             <td>
                                                 <span className="tm-entity">
                                                     <span className="tm-logo-avatar">{avatarFor(row.sender)}</span>
@@ -887,14 +1024,16 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
                                                     <span>{row.recipient}</span>
                                                 </span>
                                             </td>
+                                            <td className="tm-muted-cell">{row.createdDate}</td>
                                             <td className="tm-muted-cell">{row.deliveryDate}</td>
-                                            <td>{row.price}</td>
+                                            <td className="tm-num-cell">{row.price}</td>
                                             <td>
                                                 <span className="tm-entity">
                                                     <span className="tm-user-avatar tm-driver-avatar">{avatarFor(row.user)}</span>
                                                     <span>{row.user}</span>
                                                 </span>
                                             </td>
+                                            <td>{row.origin}</td>
                                             <td className="tm-destination-cell">{row.destination}</td>
                                             <td>
                                                 <Chip
@@ -923,7 +1062,7 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
                                 })}
                                 {!loading && shipmentRows.length === 0 ? (
                                     <tr>
-                                        <td className="tm-empty-row" colSpan={10}>{shipmentTranslations.table.empty}</td>
+                                        <td className="tm-empty-row" colSpan={12}>{shipmentTranslations.table.empty}</td>
                                     </tr>
                                 ) : undefined}
                                 </tbody>
@@ -947,17 +1086,64 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
                     </div>
 
                     <div className="tm-table-footer">
-                        <span>{shipmentTranslations.table.shown} {shipmentRows.length} {shipmentTranslations.table.of} {displayedShipments.length}</span>
-                        <div className="tm-pagination">
-                            <button type="button">‹</button>
-                            {[1, 2, 3, 4, 5].map((page) => (
-                                <button className={page === 1 ? "tm-page-active" : ""} key={page} type="button">{page}</button>
+                        <span>{shipmentTranslations.table.shown} {shipmentRows.length} {shipmentTranslations.table.of} {totalElements}</span>
+                        <nav aria-label={shipmentTranslations.table.pagination} className="tm-pagination">
+                            <button
+                                aria-label={shipmentTranslations.table.previousPage}
+                                disabled={loading || page === 0}
+                                onClick={() => setPage(page - 1)}
+                                type="button"
+                            >‹</button>
+                            {visiblePageNumbers(page, totalPages).map((pageNumber) => (
+                                <button
+                                    aria-current={pageNumber === page ? "page" : undefined}
+                                    className={pageNumber === page ? "tm-page-active" : ""}
+                                    disabled={loading}
+                                    key={pageNumber}
+                                    onClick={() => setPage(pageNumber)}
+                                    type="button"
+                                >{pageNumber + 1}</button>
                             ))}
-                            <button type="button">›</button>
-                        </div>
+                            <button
+                                aria-label={shipmentTranslations.table.nextPage}
+                                disabled={loading || page + 1 >= totalPages}
+                                onClick={() => setPage(page + 1)}
+                                type="button"
+                            >›</button>
+                        </nav>
                     </div>
                 </section>
             </div>
+
+            <Dialog fullWidth maxWidth="xs" open={saveViewOpen} onClose={() => setSaveViewOpen(false)}>
+                <DialogTitle>{shipmentTranslations.table.savedViews.dialogTitle}</DialogTitle>
+                <DialogContent>
+                    <TextField
+                        autoFocus
+                        error={Boolean(viewNameError)}
+                        fullWidth
+                        helperText={viewNameError || undefined}
+                        label={shipmentTranslations.table.savedViews.nameLabel}
+                        placeholder={shipmentTranslations.table.savedViews.namePlaceholder}
+                        size="small"
+                        value={newViewName}
+                        onChange={(event) => {
+                            setNewViewName(event.target.value);
+                            setViewNameError(null);
+                        }}
+                        onKeyDown={(event: React.KeyboardEvent<HTMLInputElement>) => {
+                            if (event.key === "Enter") {
+                                event.preventDefault();
+                                saveCurrentView();
+                            }
+                        }}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setSaveViewOpen(false)}>{pl.common.cancel}</Button>
+                    <Button variant="contained" onClick={saveCurrentView}>{shipmentTranslations.table.savedViews.save}</Button>
+                </DialogActions>
+            </Dialog>
 
             <Dialog fullWidth maxWidth="md" open={Boolean(qrPreviewUrl)} onClose={() => setQrPreviewUrl(null)}>
                 <DialogTitle>{shipmentTranslations.qrLabel.previewTitle}</DialogTitle>

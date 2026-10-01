@@ -11,6 +11,10 @@ import {OperatorCapabilitiesContext} from "../AppShell/OperatorCapabilitiesConte
 import pl from "../../i18n/translate";
 import ShipmentDetails from "./ShipmentDetails";
 
+jest.mock("../../hooks/AuditLogService", () => ({
+    __esModule: true,
+    default: {findByResource: () => Promise.resolve({data: {content: [], page: 0, size: 20, totalElements: 0}, status: 200})},
+}));
 jest.mock("../../hooks/ShipmentService", () => ({__esModule: true, default: {
     getControlCenter: jest.fn(), getControlCenterByTrackingNumber: jest.fn(),
 }}));
