@@ -91,6 +91,18 @@ export interface ShipmentDto {
     locked: boolean;
     createdAt?: string | null;
     updatedAt?: string | null;
+    delivery?: ShipmentDeliveryDto | null;
+}
+
+export interface DepartmentIdDto {
+    value: number;
+}
+
+export interface ShipmentDeliveryDto {
+    originDepartmentId: DepartmentIdDto | null;
+    destinationDepartmentId: DepartmentIdDto | null;
+    plannedDeliveryAt: string | null;
+    deliveredAt: string | null;
 }
 
 export interface ShipmentDetailsDto {
@@ -183,8 +195,17 @@ export interface ShipmentSearchRequestApi {
     locked?: boolean | null;
     createdFrom?: string | null;
     createdTo?: string | null;
+    departmentId?: DepartmentIdDto | null;
     page?: number;
     size?: number;
+}
+
+export interface ShipmentPageDto {
+    content: ShipmentDto[];
+    page: number;
+    size: number;
+    totalElements: number;
+    totalPages: number;
 }
 
 export interface ShipmentReturnRequestApi {
@@ -218,7 +239,7 @@ export type ShipmentSizeDto = "TINY" | "SMALL" | "MEDIUM" | "AVERAGE" | "BIG" | 
 
 export type CountryCodeDto = typeof countryCodes[number];
 
-export type ShipmentStatusDto = "PLANNED" | "CREATED" | "PREPARED" | "ACCEPTED" | "REROUTE" | "SENT" | "DELIVERY" | "RETURN" | "REDIRECT" | "CANCELED";
+export type ShipmentStatusDto = "PLANNED" | "CREATED" | "PREPARED" | "COLLECTED" | "ACCEPTED" | "REROUTE" | "SENT" | "DELIVERY" | "RETURN" | "REDIRECT" | "CANCELED";
 
 export type PickupMethodDto = "DEPARTMENT" | "COURIER" | "PICKUP_POINT" | "LOCKER";
 
@@ -228,7 +249,7 @@ export type ShipmentTypeDto = "PARENT" | "CHILD";
 
 export const shipmentPriorities: ShipmentPriorityDto[] = ["LOW", "MEDIUM", "HIGH", "EXPRESS"];
 
-export const shipmentStatuses: ShipmentStatusDto[] = ["PLANNED", "CREATED", "PREPARED", "ACCEPTED", "REROUTE", "SENT", "DELIVERY", "RETURN", "REDIRECT", "CANCELED"];
+export const shipmentStatuses: ShipmentStatusDto[] = ["PLANNED", "CREATED", "PREPARED", "COLLECTED", "ACCEPTED", "REROUTE", "SENT", "DELIVERY", "RETURN", "REDIRECT", "CANCELED"];
 
 export const pickupMethods: PickupMethodDto[] = ["DEPARTMENT", "COURIER", "PICKUP_POINT", "LOCKER"];
 
