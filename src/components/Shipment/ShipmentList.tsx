@@ -39,8 +39,6 @@ import {
     TrackingProviderId,
 } from "../GlobalConfiguration/model/TrackingIntegration";
 import {
-    dangerousGoodRegulationTypes,
-    dangerousGoodTransportModes,
     departmentCodeValue,
     shipmentPriorities,
     ShipmentDto,
@@ -307,9 +305,6 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
     const [appliedLookupTrackingNumber, setAppliedLookupTrackingNumber] = useState<string>("");
     const [appliedLookupId, setAppliedLookupId] = useState<string>("");
     const [activeStatus, setActiveStatus] = useState<ShipmentStatusFilter>(DEFAULT_STATUS_FILTER);
-    const [dangerousGoodsFilter, setDangerousGoodsFilter] = useState<"ALL" | "YES" | "NO">("ALL");
-    const [unNumberFilter, setUnNumberFilter] = useState<string>("");
-    const [hazardClassFilter, setHazardClassFilter] = useState<string>("");
     const [filtersExpanded, setFiltersExpanded] = useState<boolean>(false);
     const [shipmentPriorityFilter, setShipmentPriorityFilter] = useState<ShipmentPriorityDto | "">("");
     const [senderNameFilter, setSenderNameFilter] = useState<string>("");
@@ -321,8 +316,6 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
     const [lockedFilter, setLockedFilter] = useState<"ALL" | "YES" | "NO">("ALL");
     const [createdFromFilter, setCreatedFromFilter] = useState<string>("");
     const [createdToFilter, setCreatedToFilter] = useState<string>("");
-    const [regulationTypeFilter, setRegulationTypeFilter] = useState<string>("");
-    const [transportModeFilter, setTransportModeFilter] = useState<string>("");
     const [shipments, setShipments] = useState<ShipmentDto[]>(shipmentListCache.shipments);
     const [readModelSearchResults, setReadModelSearchResults] = useState<ShipmentDto[] | null>(null);
     const [notice, setNotice] = useState<Notice | null>(null);
@@ -344,21 +337,12 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
             .filter((shipment) => {
                 const trackingNumber = shipment.trackingNumber?.value || "";
                 return !appliedLookupTrackingNumber || trackingNumber.toLowerCase().includes(appliedLookupTrackingNumber.toLowerCase());
-            })
-            .filter((shipment) => dangerousGoodsFilter === "ALL"
-                || (dangerousGoodsFilter === "YES" ? Boolean(shipment.dangerousGood) : !shipment.dangerousGood))
-            .filter((shipment) => !unNumberFilter
-                || shipment.dangerousGood?.unNumber.toLowerCase().includes(unNumberFilter.trim().toLowerCase()))
-            .filter((shipment) => !hazardClassFilter
-                || shipment.dangerousGood?.hazardClass.toLowerCase().includes(hazardClassFilter.trim().toLowerCase()));
+            });
     }, [
         activeStatus,
         appliedLookupId,
         appliedLookupTrackingNumber,
-        dangerousGoodsFilter,
-        hazardClassFilter,
         displayedShipments,
-        unNumberFilter,
     ]);
 
     const shipmentRows = useMemo(() => {
@@ -547,11 +531,6 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
             locked: lockedFilter === "ALL" ? null : lockedFilter === "YES",
             createdFrom: dateFilterValue(createdFromFilter),
             createdTo: dateFilterValue(createdToFilter, true),
-            hasDangerousGoods: dangerousGoodsFilter === "ALL" ? null : dangerousGoodsFilter === "YES",
-            unNumber: unNumberFilter.trim() || null,
-            hazardClass: hazardClassFilter.trim() || null,
-            regulationType: regulationTypeFilter || null,
-            transportMode: transportModeFilter || null,
         };
 
         setLoading(true);
@@ -578,11 +557,6 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
         setLockedFilter("ALL");
         setCreatedFromFilter("");
         setCreatedToFilter("");
-        setDangerousGoodsFilter("ALL");
-        setUnNumberFilter("");
-        setHazardClassFilter("");
-        setRegulationTypeFilter("");
-        setTransportModeFilter("");
         clearLocalFilters();
         setReadModelSearchResults(null);
     };
@@ -889,29 +863,6 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
                                     : shipmentTranslations.table.filterByTracking}
                             </Button>
                         </div>
-                        <TextField
-                            label={shipmentTranslations.table.hasDangerousGoods}
-                            select
-                            size="small"
-                            value={dangerousGoodsFilter}
-                            onChange={(event) => setDangerousGoodsFilter(event.target.value as "ALL" | "YES" | "NO")}
-                        >
-                            <MenuItem value="ALL">{pl.common.all}</MenuItem>
-                            <MenuItem value="YES">{shipmentTranslations.dangerousGood.yes}</MenuItem>
-                            <MenuItem value="NO">{shipmentTranslations.dangerousGood.no}</MenuItem>
-                        </TextField>
-                        <TextField
-                            label={shipmentTranslations.form.fields.unNumber}
-                            size="small"
-                            value={unNumberFilter}
-                            onChange={(event) => setUnNumberFilter(event.target.value)}
-                        />
-                        <TextField
-                            label={shipmentTranslations.form.fields.hazardClass}
-                            size="small"
-                            value={hazardClassFilter}
-                            onChange={(event) => setHazardClassFilter(event.target.value)}
-                        />
                         <Button disabled={!appliedLookupId && !appliedLookupTrackingNumber && !externalResult} variant="text" onClick={clearLocalFilters}>
                             {shipmentTranslations.table.clearFilters}
                         </Button>
@@ -979,8 +930,8 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
                                 onChange={(event) => setLockedFilter(event.target.value as "ALL" | "YES" | "NO")}
                             >
                                 <MenuItem value="ALL">{pl.common.all}</MenuItem>
-                                <MenuItem value="YES">{shipmentTranslations.dangerousGood.yes}</MenuItem>
-                                <MenuItem value="NO">{shipmentTranslations.dangerousGood.no}</MenuItem>
+                                <MenuItem value="YES">{shipmentTranslations.filters.yes}</MenuItem>
+                                <MenuItem value="NO">{shipmentTranslations.filters.no}</MenuItem>
                             </TextField>
                             <TextField
                                 label={shipmentTranslations.filters.createdFrom}
@@ -996,32 +947,6 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
                                 value={createdToFilter}
                                 onChange={(event) => setCreatedToFilter(event.target.value)}
                             />
-                            <TextField
-                                label={shipmentTranslations.form.fields.regulationType}
-                                select
-                                size="small"
-                                value={regulationTypeFilter}
-                                onChange={(event) => setRegulationTypeFilter(event.target.value)}
-                            >
-                                <MenuItem value="">{pl.common.all}</MenuItem>
-                                {dangerousGoodRegulationTypes.map((regulationType) => (
-                                    <MenuItem key={regulationType} value={regulationType}>{regulationType}</MenuItem>
-                                ))}
-                            </TextField>
-                            <TextField
-                                label={shipmentTranslations.form.fields.transportMode}
-                                select
-                                size="small"
-                                value={transportModeFilter}
-                                onChange={(event) => setTransportModeFilter(event.target.value)}
-                            >
-                                <MenuItem value="">{pl.common.all}</MenuItem>
-                                {dangerousGoodTransportModes.map((transportMode) => (
-                                    <MenuItem key={transportMode} value={transportMode}>
-                                        {shipmentTranslations.filters.transportModes[transportMode]}
-                                    </MenuItem>
-                                ))}
-                            </TextField>
                             <div className="tm-filter-actions">
                                 <Button disabled={loading} variant="contained" onClick={applyAdvancedFilters}>
                                     {loading ? <CircularProgress size={18}/> : shipmentTranslations.filters.apply}
@@ -1082,7 +1007,6 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
                                 <th><Person fontSize="small" /> {shipmentTranslations.table.columns.user}</th>
                                 <th className="tm-destination-heading"><Route fontSize="small" /> {shipmentTranslations.table.columns.destination}</th>
                                 <th>{shipmentTranslations.table.columns.status}</th>
-                                <th>{shipmentTranslations.table.columns.dangerousGoods}</th>
                                 <th />
                             </tr>
                             </thead>
@@ -1118,19 +1042,6 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
                                             <Chip
                                                 className={statusClassName(row.status)}
                                                 label={shipmentTranslations.status[row.status]}
-                                                size="small"
-                                            />
-                                        </td>
-                                        <td>
-                                            <Chip
-                                                aria-label={shipment.dangerousGood
-                                                    ? shipmentTranslations.dangerousGood.presentAccessible
-                                                    : shipmentTranslations.dangerousGood.absentAccessible}
-                                                className={shipment.dangerousGood
-                                                    ? "shipment-dangerous-chip-active"
-                                                    : "shipment-dangerous-chip-empty"}
-                                                label={shipment.dangerousGood?.unNumber
-                                                    || shipmentTranslations.dangerousGood.emptyStatus}
                                                 size="small"
                                             />
                                         </td>
