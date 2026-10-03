@@ -64,40 +64,6 @@ export const departmentCodeValue = (departmentCode: DepartmentCodeValue): string
     return valueObjectValue(departmentCode);
 };
 
-export interface DangerousGoodApi {
-    unNumber: string;
-    properShippingName: string;
-    description: string;
-    hazardClass: string;
-    hazardDivision: string;
-    subsidiaryRisk: string;
-    packingGroup: string;
-    quantity: number;
-    quantityUnit: string;
-    packageCount: number;
-    packagingType: string;
-    limitedQuantity: boolean;
-    exceptedQuantity: boolean;
-    environmentallyHazardous: boolean;
-    marinePollutant: boolean;
-    transportCategory: string;
-    tunnelRestrictionCode: string;
-    flashPoint: number | null;
-    emergencyContact: string;
-    emergencyContact24h: string;
-    safetyDataSheetReference: string;
-    declarationDocumentReference: string;
-    regulationType: string;
-    transportMode: string;
-    flammable: boolean;
-    corrosive: boolean;
-    toxic: boolean;
-    hazardSymbols: string;
-    storageRequirements: string;
-    handlingInstructions: string;
-    countryOfOrigin: string;
-}
-
 export interface ShipmentConfigurationApi {
     forceUpdate: boolean;
     publishInReturnManager: boolean;
@@ -131,11 +97,12 @@ export interface ShipmentDto {
     shipmentType: ShipmentTypeDto;
     shipmentRelatedId?: ShipmentIdDto | null;
     shipmentPriority: ShipmentPriorityDto;
+    packagingType?: PackagingTypeDto | null;
+    serviceLevel?: ShipmentServiceLevelDto | null;
     price: MoneyApi;
     trackingNumber: TrackingNumberDto;
     locked: boolean;
     signature?: SignatureDto | null;
-    dangerousGood?: DangerousGoodApi | null;
     createdAt?: string | null;
     updatedAt?: string | null;
 }
@@ -159,10 +126,9 @@ export interface ShipmentCreateRequestApi {
     contentDescription?: string;
     declaredValue?: MoneyApi;
     price: MoneyApi;
-    dangerousGood?: DangerousGoodApi;
     shipmentPriority: ShipmentPriorityDto;
-    issuerCountryCode: string;
-    receiverCountryCode: string;
+    packagingType?: PackagingTypeDto;
+    serviceLevel?: ShipmentServiceLevelDto;
     pickupMethod: PickupMethodDto;
     deliveryMethod: DeliveryMethodDto;
     pickupPointId?: PickupPointIdDto;
@@ -183,14 +149,15 @@ export interface ShipmentCreateInitialState {
     contentDescription?: string | null;
     declaredValue?: MoneyApi | null;
     shipmentPriority: ShipmentPriorityDto;
+    packagingType?: PackagingTypeDto | null;
+    serviceLevel?: ShipmentServiceLevelDto | null;
     priceAmount: string;
     currency: string;
-    issuerCountryCode: CountryCodeDto;
-    receiverCountryCode: CountryCodeDto;
-    dangerousGood?: DangerousGoodApi | null;
     pickupMethod?: PickupMethodDto;
     deliveryMethod?: DeliveryMethodDto;
     pickupPointId?: string;
+    deliveryPickupPointId?: PickupPointIdDto | null;
+    deliveryPickupPointCode?: string | null;
 }
 
 export interface ShipmentUpdateRequestApi {
@@ -204,7 +171,6 @@ export interface ShipmentUpdateRequestApi {
     declaredValue?: MoneyApi;
     customerReference?: string;
     price: MoneyApi;
-    dangerousGood: DangerousGoodApi | null;
     shipmentPriority: ShipmentPriorityDto;
     shipmentStatus: ShipmentStatusDto;
     issuerCountryCode: string;
@@ -235,11 +201,6 @@ export interface ShipmentSearchRequestApi {
     locked?: boolean | null;
     createdFrom?: string | null;
     createdTo?: string | null;
-    hasDangerousGoods?: boolean | null;
-    unNumber?: string | null;
-    hazardClass?: string | null;
-    regulationType?: string | null;
-    transportMode?: string | null;
     page?: number;
     size?: number;
 }
@@ -279,6 +240,10 @@ export type PersonType = "SENDER" | "RECIPIENT";
 
 export type ShipmentPriorityDto = "LOW" | "MEDIUM" | "HIGH" | "EXPRESS";
 
+export type PackagingTypeDto = "ENVELOPE" | "BAG" | "BOX" | "TUBE" | "CRATE" | "OTHER";
+
+export type ShipmentServiceLevelDto = "ECONOMY" | "STANDARD" | "EXPRESS";
+
 export type ShipmentSizeDto = "TINY" | "SMALL" | "MEDIUM" | "AVERAGE" | "BIG" | "CUSTOM" | "TEST";
 
 export type CountryCodeDto = typeof countryCodes[number];
@@ -310,16 +275,6 @@ export const shipmentTypes: ShipmentTypeDto[] = ["PARENT", "CHILD"];
 export const signatureMethods: SignatureMethod[] = ["DIGITAL", "HANDWRITTEN", "BIOMETRIC", "NONE"];
 
 export const personTypes: PersonType[] = ["SENDER", "RECIPIENT"];
-
-export const packingGroups = ["", "I", "II", "III"] as const;
-
-export const dangerousGoodQuantityUnits = [
-    "MILLIGRAM", "GRAM", "KILOGRAM", "TONNE", "OUNCE", "POUND", "LITRE",
-] as const;
-
-export const dangerousGoodRegulationTypes = ["ADR", "IATA", "IMDG", "RID"] as const;
-
-export const dangerousGoodTransportModes = ["ROAD", "AIR", "SEA", "RAIL"] as const;
 
 export const countryCodes = [
     "AL", "AD", "AM", "AT", "AZ", "BY", "BE", "BA", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "FR",
