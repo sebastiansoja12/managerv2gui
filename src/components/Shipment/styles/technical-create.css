@@ -36,13 +36,13 @@
     align-items: center;
     color: var(--muted-foreground);
     display: inline-flex;
-    font-family: var(--font-mono);
+    font-family: var(--font-ui);
     font-size: 0.66rem;
     font-weight: 600;
     gap: 8px;
-    letter-spacing: 0.09em;
+    letter-spacing: 0;
     line-height: 1;
-    text-transform: uppercase;
+    text-transform: none;
     width: fit-content;
 }
 
@@ -59,8 +59,8 @@
     color: var(--foreground) !important;
     font-family: var(--font-display) !important;
     font-size: clamp(2.35rem, 3vw, 3.55rem) !important;
-    font-weight: 400 !important;
-    letter-spacing: -0.045em !important;
+    font-weight: var(--font-display-weight) !important;
+    letter-spacing: var(--font-display-tracking) !important;
     line-height: 0.95;
 }
 
