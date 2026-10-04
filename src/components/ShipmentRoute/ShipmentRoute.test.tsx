@@ -1,0 +1,143 @@
+import React from "react";
+import {act, fireEvent, render, screen} from "@testing-library/react";
+import DeliveryNetworkService from "../../hooks/DeliveryNetworkService";
+import DepartmentService from "../../hooks/DepartmentService";
+import pl from "../../i18n/translate";
+import ShipmentRoute from "./ShipmentRoute";
+
+jest.mock("../../hooks/DeliveryNetworkService", () => ({
+    __esModule: true,
+    default: {getShipmentRoute: jest.fn(), getShipmentRouteDocument: jest.fn(), saveWorkbook: jest.fn()},
+}));
+
+jest.mock("../../hooks/DepartmentService", () => ({
+    __esModule: true,
+    default: {getAll: jest.fn()},
+}));
+
+jest.mock("./ShipmentRouteMap", () => ({
+    __esModule: true,
+    default: ({stops}: {stops: Array<{routeDepartment: {departmentCode: string}}>}) => (
+        <div data-testid="shipment-route-map">
+            {stops.map((stop) => stop.routeDepartment.departmentCode).join(">")}
+        </div>
+    ),
+}));
+
+const mockedDepartmentService = DepartmentService as jest.Mocked<typeof DepartmentService>;
+const mockedDeliveryNetworkService = DeliveryNetworkService as jest.Mocked<typeof DeliveryNetworkService>;
+
+const renderShipmentRoute = async () => {
+    render(<ShipmentRoute/>);
+    await act(async () => undefined);
+};
+
+const submitTrackingNumber = (trackingNumber: string) => {
+    fireEvent.change(screen.getByLabelText(pl.shipmentRoute.form.inputLabel), {target: {value: trackingNumber}});
+    fireEvent.click(screen.getByRole("button", {name: pl.shipmentRoute.form.submit}));
+};
+
+describe("ShipmentRoute", () => {
+    beforeEach(() => {
+        mockedDeliveryNetworkService.getShipmentRoute.mockReset();
+        mockedDepartmentService.getAll.mockResolvedValue({data: []} as never);
+    });
+
+    it("shows the route through a sorting facility", async () => {
+        mockedDeliveryNetworkService.getShipmentRoute.mockResolvedValue({
+            data: {
+                shipmentId: "100",
+                trackingNumber: "TN-1",
+                departments: [
+                    {departmentId: "1", departmentCode: "KT1", departmentType: "BRANCH"},
+                    {departmentId: "2", departmentCode: "NCS", departmentType: "SORTING_FACILITY"},
+                    {departmentId: "3", departmentCode: "WA1", departmentType: "BRANCH"},
+                ],
+                distanceInKilometers: 312.4,
+            },
+            status: 200,
+        });
+        await renderShipmentRoute();
+
+        submitTrackingNumber(" TN-1 ");
+
+        expect(await screen.findByText("NCS")).toBeInTheDocument();
+        expect(mockedDeliveryNetworkService.getShipmentRoute).toHaveBeenCalledWith("TN-1");
+        expect(screen.getByText("KT1")).toBeInTheDocument();
+        expect(screen.getByText("WA1")).toBeInTheDocument();
+        expect(screen.getByText(pl.shipmentRoute.roles.origin)).toBeInTheDocument();
+        expect(screen.getByText(pl.shipmentRoute.roles.destination)).toBeInTheDocument();
+        expect(screen.getByText(pl.shipmentRoute.result.transfers.replace("{count}", "1")))
+            .toBeInTheDocument();
+        const stopCodes = Array.from(document.querySelectorAll(".shipment-route-stop-code"))
+            .map((element) => element.textContent);
+        expect(stopCodes).toEqual(["WA1", "NCS", "KT1"]);
+        expect(screen.getByTestId("shipment-route-map")).toHaveTextContent("KT1>NCS>WA1");
+    });
+
+    it("shows a direct connection", async () => {
+        mockedDeliveryNetworkService.getShipmentRoute.mockResolvedValue({
+            data: {
+                shipmentId: "100",
+                trackingNumber: "TN-1",
+                departments: [
+                    {departmentId: "1", departmentCode: "KT1", departmentType: "BRANCH"},
+                    {departmentId: "3", departmentCode: "WA1", departmentType: "BRANCH"},
+                ],
+                distanceInKilometers: null,
+            },
+            status: 200,
+        });
+        await renderShipmentRoute();
+
+        submitTrackingNumber("TN-1");
+
+        expect(await screen.findByText(pl.shipmentRoute.result.direct)).toBeInTheDocument();
+        expect(screen.getByText(pl.shipmentRoute.result.distanceUnknown)).toBeInTheDocument();
+    });
+
+    it("shows a translated message when the route is unavailable", async () => {
+        mockedDeliveryNetworkService.getShipmentRoute.mockRejectedValue({status: 422, message: "Unavailable"});
+        await renderShipmentRoute();
+
+        submitTrackingNumber("TN-1");
+
+        expect(await screen.findByText(pl.shipmentRoute.errors.routeUnavailable)).toBeInTheDocument();
+    });
+
+    it("requires a tracking number", async () => {
+        await renderShipmentRoute();
+
+        submitTrackingNumber("   ");
+
+        expect(screen.getByText(pl.shipmentRoute.form.numberRequired)).toBeInTheDocument();
+        expect(mockedDeliveryNetworkService.getShipmentRoute).not.toHaveBeenCalled();
+    });
+    it("downloads the route and handling plan PDFs generated by the backend", async () => {
+        const routeDocument = {blob: new Blob(["%PDF-"]), filename: "trasa-przesylki-TN-1.pdf"};
+        mockedDeliveryNetworkService.getShipmentRoute.mockResolvedValue({
+            data: {
+                shipmentId: "100",
+                trackingNumber: "TN-1",
+                departments: [
+                    {departmentId: "1", departmentCode: "KT1", departmentType: "BRANCH"},
+                    {departmentId: "3", departmentCode: "WA1", departmentType: "BRANCH"},
+                ],
+                distanceInKilometers: null,
+            },
+            status: 200,
+        });
+        mockedDeliveryNetworkService.getShipmentRouteDocument.mockResolvedValue(routeDocument);
+        await renderShipmentRoute();
+
+        submitTrackingNumber("TN-1");
+        fireEvent.click(await screen.findByRole("button", {name: pl.shipmentRoute.documents.route}));
+        await act(async () => undefined);
+        fireEvent.click(screen.getByRole("button", {name: pl.shipmentRoute.documents.handlingPlan}));
+        await act(async () => undefined);
+
+        expect(mockedDeliveryNetworkService.getShipmentRouteDocument).toHaveBeenNthCalledWith(1, "TN-1", "route");
+        expect(mockedDeliveryNetworkService.getShipmentRouteDocument).toHaveBeenNthCalledWith(2, "TN-1", "handling-plan");
+        expect(mockedDeliveryNetworkService.saveWorkbook).toHaveBeenCalledWith(routeDocument);
+    });
+});
