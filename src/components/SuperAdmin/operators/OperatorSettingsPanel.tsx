@@ -11,7 +11,7 @@ type OperatorSettingsPanelProps = {
 function OperatorSettingsPanel({operatorId}: OperatorSettingsPanelProps) {
     const source = useMemo<ShipmentConfigurationSource>(() => ({
         load: () => OperatorAdministrationService.getShipmentSettings(operatorId),
-        save: (configuration) => OperatorAdministrationService.updateShipmentSettings(operatorId, configuration),
+        save: (_section, configuration) => OperatorAdministrationService.updateShipmentSettings(operatorId, configuration),
     }), [operatorId]);
 
     return (
