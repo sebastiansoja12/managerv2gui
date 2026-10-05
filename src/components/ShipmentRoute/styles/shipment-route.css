@@ -1,0 +1,381 @@
+.shipment-route-page {
+    color: var(--foreground);
+    min-height: calc(100vh - 96px);
+    padding: 24px;
+    text-align: left;
+}
+
+.shipment-route-shell {
+    display: grid;
+    gap: 16px;
+    margin: 0 auto;
+    max-width: 1400px;
+}
+
+.shipment-route-header {
+    align-items: center;
+    display: flex;
+    gap: 12px;
+}
+
+.shipment-route-header p {
+    color: var(--muted-foreground);
+    margin: 4px 0 0;
+}
+
+.shipment-route-title-icon {
+    align-items: center;
+    background: var(--brand-accent-deep);
+    border-radius: var(--radius-control);
+    color: var(--brand-surface);
+    display: inline-flex;
+    flex-shrink: 0;
+    height: 44px;
+    justify-content: center;
+    width: 44px;
+}
+
+.shipment-route-panel {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-control);
+    display: grid;
+    gap: 16px;
+    min-width: 0;
+    padding: 22px;
+}
+
+.shipment-route-panel h5 {
+    font-size: 1rem;
+}
+
+.shipment-route-form {
+    align-items: end;
+    display: grid;
+    gap: 12px;
+    grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.shipment-route-form [data-ui="input"] {
+    font-family: var(--font-mono);
+}
+
+.shipment-route-hint {
+    color: var(--muted-foreground);
+    font-size: 0.875rem;
+    margin: 0;
+}
+
+.shipment-route-result {
+    align-items: start;
+    display: grid;
+    gap: 16px;
+    grid-template-columns: minmax(340px, 440px) minmax(0, 1fr);
+}
+
+.shipment-route-plan {
+    align-content: start;
+}
+
+.shipment-route-result-header {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: space-between;
+}
+
+.shipment-route-badge {
+    background: color-mix(in srgb, var(--brand-accent-deep) 14%, transparent);
+    border-radius: 999px;
+    color: var(--brand-accent-deep);
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 4px 12px;
+}
+
+.shipment-route-documents {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.shipment-route-summary {
+    display: grid;
+    gap: 8px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin: 0;
+}
+
+.shipment-route-summary div {
+    background: var(--surface-secondary);
+    border-radius: var(--radius-control);
+    min-width: 0;
+    padding: 10px 12px;
+}
+
+.shipment-route-summary dt {
+    color: var(--muted-foreground);
+    font-size: 0.72rem;
+}
+
+.shipment-route-summary dd {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    margin: 4px 0 0;
+    overflow-wrap: anywhere;
+}
+
+.shipment-route-stops {
+    display: grid;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.shipment-route-stop-card {
+    align-items: center;
+    background: var(--surface-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-control);
+    display: grid;
+    gap: 14px;
+    grid-template-columns: 44px minmax(0, 1fr);
+    padding: 12px 14px;
+}
+
+.shipment-route-stop-destination .shipment-route-stop-card {
+    background: color-mix(in srgb, #059669 10%, var(--card));
+    border-color: #059669;
+    border-width: 2px;
+}
+
+.shipment-route-stop-icon {
+    align-items: center;
+    border-radius: 50%;
+    color: #ffffff;
+    display: inline-flex;
+    font-size: 1.2rem;
+    height: 44px;
+    justify-content: center;
+    width: 44px;
+}
+
+.shipment-route-stop-origin .shipment-route-stop-icon {
+    background: #2563eb;
+}
+
+.shipment-route-stop-transfer .shipment-route-stop-icon {
+    background: #d97706;
+}
+
+.shipment-route-stop-branch-transfer .shipment-route-stop-icon {
+    background: #7c3aed;
+}
+
+.shipment-route-stop-destination .shipment-route-stop-icon {
+    background: #059669;
+}
+
+.shipment-route-stop-body {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+}
+
+.shipment-route-stop-role {
+    color: var(--muted-foreground);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+.shipment-route-stop-code {
+    font-family: var(--font-mono);
+    font-size: 1.35rem;
+    letter-spacing: 0.02em;
+    line-height: 1.2;
+}
+
+.shipment-route-stop-meta {
+    color: var(--muted-foreground);
+    font-size: 0.82rem;
+    overflow-wrap: anywhere;
+}
+
+.shipment-route-leg {
+    align-items: center;
+    display: grid;
+    gap: 12px;
+    grid-template-columns: 44px auto;
+    height: 44px;
+    padding: 0 15px;
+}
+
+.shipment-route-leg-line {
+    height: 100%;
+    justify-self: center;
+    position: relative;
+    width: 0;
+    border-left: 3px dashed var(--border);
+}
+
+.shipment-route-leg-line::before {
+    border-bottom: 8px solid var(--muted-foreground);
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    content: "";
+    left: -7.5px;
+    position: absolute;
+    top: -2px;
+}
+
+.shipment-route-leg-label {
+    color: var(--muted-foreground);
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+}
+
+.shipment-route-map-panel {
+    position: sticky;
+    top: 16px;
+}
+
+.shipment-route-map {
+    display: grid;
+    gap: 8px;
+}
+
+.shipment-route-map-canvas {
+    border-radius: var(--radius-control);
+    height: min(620px, 70vh);
+    min-height: 380px;
+    overflow: hidden;
+    width: 100%;
+}
+
+.shipment-route-map-state,
+.shipment-route-map-note {
+    color: var(--muted-foreground);
+    font-size: 0.85rem;
+    margin: 0;
+}
+
+.shipment-route-map-state {
+    align-items: center;
+    background: var(--surface-secondary);
+    border-radius: var(--radius-control);
+    display: flex;
+    justify-content: center;
+    min-height: 240px;
+    padding: 16px;
+    text-align: center;
+}
+
+.shipment-route-map-line-casing {
+    stroke: #ffffff;
+    stroke-opacity: 0.9;
+}
+
+.shipment-route-map-line {
+    stroke: #1d4ed8;
+    stroke-dasharray: 10 8;
+}
+
+.shipment-route-map-pin-wrapper {
+    background: transparent;
+    border: 0;
+}
+
+.shipment-route-map-pin {
+    border: 2px solid #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.35);
+    color: #ffffff;
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 3px 8px;
+    position: relative;
+    transform: translate(-50%, calc(-100% - 8px));
+    white-space: nowrap;
+}
+
+.shipment-route-map-pin::after {
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 8px solid transparent;
+    bottom: -9px;
+    content: "";
+    left: 50%;
+    position: absolute;
+    transform: translateX(-50%);
+}
+
+.shipment-route-map-pin-origin {
+    background: #2563eb;
+}
+
+.shipment-route-map-pin-transfer {
+    background: #d97706;
+}
+
+.shipment-route-map-pin-branch-transfer {
+    background: #7c3aed;
+}
+
+.shipment-route-map-pin-branch-transfer::after {
+    border-top-color: #7c3aed;
+}
+
+.shipment-route-map-pin-destination {
+    background: #059669;
+    font-size: 14px;
+    padding: 5px 10px;
+}
+
+.shipment-route-map-pin-origin::after {
+    border-top-color: #2563eb;
+}
+
+.shipment-route-map-pin-transfer::after {
+    border-top-color: #d97706;
+}
+
+.shipment-route-map-pin-destination::after {
+    border-top-color: #059669;
+}
+
+.shipment-route-map-popup {
+    display: grid;
+    gap: 2px;
+}
+
+.shipment-route-map-popup span:first-child {
+    color: #64748b;
+    font-size: 11px;
+    text-transform: none;
+}
+
+@media (max-width: 1100px) {
+    .shipment-route-result {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .shipment-route-map-panel {
+        position: static;
+    }
+}
+
+@media (max-width: 640px) {
+    .shipment-route-page {
+        padding: 16px;
+    }
+
+    .shipment-route-form,
+    .shipment-route-summary {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
