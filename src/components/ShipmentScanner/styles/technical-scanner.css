@@ -4,3 +4,178 @@
     letter-spacing: -0.015em !important;
     line-height: 1.4;
 }
+
+.shipment-collect-header-actions {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+/* Tablet mode: one task, large touch targets, the whole status panel changes color with the last result. */
+.app-main-content .shipment-scanner-page.shipment-scanner-page-tablet {
+    min-height: 100%;
+}
+
+.shipment-scanner-tablet {
+    --tablet-state: var(--border-strong);
+    display: grid;
+    gap: 16px;
+    margin: 0 auto;
+    max-width: 960px;
+}
+
+.shipment-scanner-tablet[data-state="success"] { --tablet-state: var(--success); }
+.shipment-scanner-tablet[data-state="warning"] { --tablet-state: var(--warning); }
+.shipment-scanner-tablet[data-state="error"] { --tablet-state: var(--danger); }
+.shipment-scanner-tablet[data-state="info"] { --tablet-state: var(--info, var(--primary)); }
+
+.shipment-scanner-tablet-toolbar {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: space-between;
+}
+
+.shipment-scanner-tablet-toolbar > div {
+    display: flex;
+    gap: 8px;
+}
+
+.shipment-scanner-tablet-title {
+    align-items: center;
+    display: inline-flex;
+    font-size: 1.1rem;
+    font-weight: 600;
+    gap: 10px;
+}
+
+.shipment-scanner-tablet-tool {
+    align-items: center;
+    background: transparent;
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    color: var(--foreground);
+    cursor: pointer;
+    display: inline-flex;
+    font: inherit;
+    font-size: 0.95rem;
+    gap: 8px;
+    min-height: 48px;
+    padding: 0 18px;
+}
+
+.shipment-scanner-tablet-tool[aria-pressed="false"] {
+    color: var(--muted-foreground);
+}
+
+.shipment-scanner-tablet-status {
+    background: color-mix(in srgb, var(--tablet-state) 16%, var(--background));
+    border: 2px solid var(--tablet-state);
+    border-radius: 20px;
+    display: grid;
+    gap: 8px;
+    min-height: 180px;
+    padding: 28px 32px;
+    place-content: center;
+    text-align: center;
+    transition: background-color 160ms ease, border-color 160ms ease;
+}
+
+.shipment-scanner-tablet-status strong {
+    color: var(--foreground);
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+}
+
+.shipment-scanner-tablet-status span {
+    color: var(--muted-foreground);
+    font-family: var(--font-mono);
+    font-size: 1.1rem;
+    overflow-wrap: anywhere;
+}
+
+.App .shipment-scanner-tablet-form input,
+.App .shipment-scanner-tablet-form input:focus {
+    border-radius: 16px !important;
+    font-family: var(--font-mono);
+    font-size: 1.5rem;
+    height: 72px;
+    padding: 0 24px;
+    text-align: center;
+    width: 100%;
+}
+
+.shipment-scanner-tablet-queue {
+    align-items: baseline;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    display: grid;
+    gap: 4px 14px;
+    grid-template-columns: auto 1fr;
+    padding: 16px 20px;
+}
+
+.shipment-scanner-tablet-queue > span {
+    color: var(--muted-foreground);
+    font-size: 1rem;
+}
+
+.shipment-scanner-tablet-queue > strong {
+    font-size: 2rem;
+    font-weight: 600;
+    justify-self: end;
+}
+
+.shipment-scanner-tablet-queue ol {
+    display: grid;
+    gap: 6px;
+    grid-column: 1 / -1;
+    list-style: none;
+    margin: 6px 0 0;
+    padding: 0;
+}
+
+.shipment-scanner-tablet-queue li {
+    border-top: 1px solid var(--border);
+    color: var(--muted-foreground);
+    display: flex;
+    font-size: 0.95rem;
+    justify-content: space-between;
+    padding-top: 6px;
+}
+
+.shipment-scanner-tablet-queue li code {
+    color: var(--foreground);
+}
+
+.shipment-scanner-tablet-actions {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: 1fr 2fr;
+}
+
+.shipment-scanner-tablet-actions button {
+    background: transparent;
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    color: var(--foreground);
+    cursor: pointer;
+    font: inherit;
+    font-size: 1.1rem;
+    font-weight: 600;
+    min-height: 64px;
+}
+
+.shipment-scanner-tablet-actions button.is-primary {
+    background: var(--foreground);
+    border-color: var(--foreground);
+    color: var(--background);
+}
+
+.shipment-scanner-tablet-actions button:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+}
