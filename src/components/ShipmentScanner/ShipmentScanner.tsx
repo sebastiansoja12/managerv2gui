@@ -1,7 +1,7 @@
 import React, {FormEvent, useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {Link} from "react-router-dom";
 import {Alert, Button, Chip, IconButton, TextField, Typography} from "components/ui";
-import {Add, DeleteOutline, QrCodeScanner, Save} from "components/ui/icons";
+import {Add, Close, DeleteOutline, QrCodeScanner, Save, TabletMode, VolumeOff, VolumeUp} from "components/ui/icons";
 import AuthService from "../../hooks/AuthService";
 import ShipmentCollectService, {CollectFaultError} from "../../hooks/ShipmentCollectService";
 import {getBackendErrorMessage} from "../../api/errorMessage";
@@ -10,6 +10,8 @@ import pl from "../../i18n/translate";
 import {useBrowserDevice} from "../Devices/useBrowserDevice";
 import {CollectResponse, PendingShipment} from "./model/ShipmentCollect";
 import {readShipmentCollectSession, saveShipmentCollectSession} from "./shipmentCollectSession";
+import {readScannerPreferences, saveScannerPreferences, ScannerPreferences} from "./scannerPreferences";
+import {playScanFeedback} from "./scanFeedbackSound";
 import "./styles/shipment-scanner.css";
 
 type FeedbackState = "added" | "duplicate" | "invalidCode" | "saving" | "saved" | "partial" | "failed" | "error";
@@ -56,6 +58,7 @@ function ShipmentScanner() {
     const [validationMessage, setValidationMessage] = useState<string | null>(null);
     const [collectResponse, setCollectResponse] = useState<CollectResponse | null>(null);
     const [sessionRestored, setSessionRestored] = useState(false);
+    const [preferences, setPreferences] = useState<ScannerPreferences>(readScannerPreferences);
 
     const translations = pl.shipmentScanner;
     const saving = feedback?.state === "saving";
@@ -90,6 +93,25 @@ function ShipmentScanner() {
         loadCurrentUser();
         focusInput();
     }, [loadCurrentUser]);
+
+    const updatePreferences = (changes: Partial<ScannerPreferences>) => {
+        setPreferences((current) => {
+            const next = {...current, ...changes};
+            saveScannerPreferences(next);
+            return next;
+        });
+        focusInput();
+    };
+
+    useEffect(() => {
+        if (!feedback || feedback.state === "saving") {
+            return;
+        }
+        const severity = feedbackSeverity[feedback.state];
+        playScanFeedback(severity === "info" ? "success" : severity, preferences.soundEnabled);
+        // Only a new scan or save result should sound, not a sound toggle.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [feedback]);
 
     useEffect(() => {
         if (userId && sessionRestored) {
@@ -210,6 +232,95 @@ function ShipmentScanner() {
         );
     };
 
+    const deviceProblem = !device
+        ? translations.validation.deviceRequired
+        : !deviceReady ? translations.validation.sessionRequired : null;
+
+    const renderTabletMode = () => (
+        <section
+            aria-label={translations.tablet.title}
+            className="shipment-scanner-tablet"
+            data-state={feedback ? feedbackSeverity[feedback.state] : "ready"}
+            onClick={(event) => {
+                if (!(event.target instanceof HTMLElement) || !event.target.closest("button, input, a")) {
+                    focusInput();
+                }
+            }}
+        >
+            <div className="shipment-scanner-tablet-toolbar">
+                <span className="shipment-scanner-tablet-title"><QrCodeScanner />{translations.tablet.title}</span>
+                <div>
+                    <button
+                        aria-pressed={preferences.soundEnabled}
+                        className="shipment-scanner-tablet-tool"
+                        onClick={() => updatePreferences({soundEnabled: !preferences.soundEnabled})}
+                        type="button"
+                    >
+                        {preferences.soundEnabled ? <VolumeUp /> : <VolumeOff />}
+                        {preferences.soundEnabled ? translations.tablet.soundOn : translations.tablet.soundOff}
+                    </button>
+                    <button
+                        className="shipment-scanner-tablet-tool"
+                        onClick={() => updatePreferences({tabletMode: false})}
+                        type="button"
+                    >
+                        <Close />
+                        {translations.tablet.exit}
+                    </button>
+                </div>
+            </div>
+
+            {deviceProblem ? <Alert severity="warning">{deviceProblem}</Alert> : null}
+
+            <div aria-live="assertive" className="shipment-scanner-tablet-status" role="status">
+                <strong>{feedback ? translations.feedback[feedback.state] : translations.tablet.ready}</strong>
+                <span>{feedback?.state === "saving"
+                    ? translations.feedback.savingDescription
+                    : feedback?.description || translations.tablet.hint}</span>
+            </div>
+
+            <form className="shipment-scanner-tablet-form" onSubmit={addShipment}>
+                <input
+                    aria-label={translations.scanCard.inputLabel}
+                    autoComplete="off"
+                    disabled={saving}
+                    placeholder={translations.scanCard.placeholder}
+                    ref={inputRef}
+                    value={inputValue}
+                    onChange={(event) => setInputValue(event.target.value)}
+                />
+            </form>
+
+            <div className="shipment-scanner-tablet-queue">
+                <span>{translations.tablet.queued}</span>
+                <strong>{pendingShipments.length}</strong>
+                <ol>
+                    {pendingShipments.slice(0, 5).map((shipment) => (
+                        <li key={shipment.trackingNumber}>
+                            <code>{shipment.trackingNumber}</code>
+                            <span>{shipment.scannedAt}</span>
+                        </li>
+                    ))}
+                </ol>
+            </div>
+
+            {validationMessage ? <Alert severity="error">{validationMessage}</Alert> : null}
+
+            <div className="shipment-scanner-tablet-actions">
+                <button disabled={saving || !pendingShipments.length} type="button" onClick={clearShipments}>
+                    {translations.pending.clear}
+                </button>
+                <button className="is-primary" disabled={saving} type="button" onClick={saveCollection}>
+                    {translations.pending.save.replace("{count}", String(pendingShipments.length))}
+                </button>
+            </div>
+        </section>
+    );
+
+    if (preferences.tabletMode) {
+        return <main className="shipment-scanner-page shipment-scanner-page-tablet">{renderTabletMode()}</main>;
+    }
+
     return (
         <main className="shipment-scanner-page">
             <div className="shipment-collect-shell">
@@ -221,10 +332,15 @@ function ShipmentScanner() {
                             <p>{translations.page.subtitle}</p>
                         </div>
                     </div>
-                    <Chip
-                        color={deviceReady ? "success" : "warning"}
-                        label={deviceReady ? translations.page.readyStatus : translations.page.deviceMissingStatus}
-                    />
+                    <div className="shipment-collect-header-actions">
+                        <Chip
+                            color={deviceReady ? "success" : "warning"}
+                            label={deviceReady ? translations.page.readyStatus : translations.page.deviceMissingStatus}
+                        />
+                        <Button startIcon={<TabletMode />} variant="outlined" onClick={() => updatePreferences({tabletMode: true})}>
+                            {translations.tablet.enter}
+                        </Button>
+                    </div>
                 </section>
 
                 <section className="shipment-collect-grid">
