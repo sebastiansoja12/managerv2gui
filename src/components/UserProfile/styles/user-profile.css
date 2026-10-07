@@ -32,12 +32,12 @@
     align-items: center;
     color: var(--muted-foreground);
     display: inline-flex;
-    font-family: var(--font-mono);
+    font-family: var(--font-ui);
     font-size: 0.66rem;
     font-weight: 600;
     gap: 7px;
-    letter-spacing: 0.075em;
-    text-transform: uppercase;
+    letter-spacing: 0;
+    text-transform: none;
 }
 
 .user-profile-kicker::before,
@@ -53,8 +53,8 @@
     color: var(--foreground);
     font-family: var(--font-display);
     font-size: clamp(2.6rem, 4vw, 3.65rem);
-    font-weight: 400;
-    letter-spacing: -0.045em;
+    font-weight: var(--font-display-weight);
+    letter-spacing: var(--font-display-tracking);
     line-height: 0.95;
     margin: 7px 0 0;
 }
@@ -131,11 +131,11 @@
 .user-profile-detail > span,
 .user-profile-api-key-label > span {
     color: var(--muted-foreground);
-    font-family: var(--font-mono);
+    font-family: var(--font-ui);
     font-size: 0.65rem;
     font-weight: 600;
-    letter-spacing: 0.055em;
-    text-transform: uppercase;
+    letter-spacing: 0;
+    text-transform: none;
 }
 
 .user-profile-detail > strong {
@@ -196,11 +196,11 @@
 
 .user-profile-full-name-form [data-ui="input-label"] {
     color: var(--muted-foreground);
-    font-family: var(--font-mono);
+    font-family: var(--font-ui);
     font-size: 0.65rem;
     font-weight: 600;
-    letter-spacing: 0.045em;
-    text-transform: uppercase;
+    letter-spacing: 0;
+    text-transform: none;
 }
 
 .user-profile-full-name-form [data-ui="input"] {
@@ -303,11 +303,11 @@
 
 .user-profile-password [data-ui="input-label"] {
     color: var(--muted-foreground);
-    font-family: var(--font-mono);
+    font-family: var(--font-ui);
     font-size: 0.65rem;
     font-weight: 600;
-    letter-spacing: 0.045em;
-    text-transform: uppercase;
+    letter-spacing: 0;
+    text-transform: none;
 }
 
 .user-profile-password [data-ui="input"] {
