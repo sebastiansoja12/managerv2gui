@@ -100,6 +100,7 @@ export const pl = {
         fullNameDialogDescription: "Zmień dane, które będą wyświetlane na Twoim koncie.",
         apiKeyHelper: "Klucz używany przez integracje działające w imieniu konta",
         apiKeyMissing: "Brak klucza API",
+        apiKeyHidden: "Klucz aktywny – wygeneruj nowy, aby go skopiować",
         permissions: "Permisje",
         noPermissions: "Brak przypisanych permisji",
         fields: {
@@ -147,6 +148,11 @@ export const pl = {
     },
     navigation: {
         warehouse: "Magazyn",
+        scanPlaceholder: "Skanuj lub wpisz tracking",
+        scanShortcut: "Skrót: Ctrl+K",
+        currentDepartment: "Twój oddział",
+        createMenu: "Utwórz",
+        palletFromShipments: "Paleta z przesyłek",
         palletScanner: "Skanuj paletę",
         palletCreate: "Utwórz paletę",
         palletsCancelled: "Anulowane palety",
@@ -163,6 +169,8 @@ export const pl = {
         shipments: "Przesyłki",
         returns: "Zwroty",
         deliveries: "Dostawy",
+        allDeliveries: "Wszystkie dostawy",
+        incompleteDeliveries: "Niepełne dostawy",
         shipmentList: "Lista przesyłek",
         shipmentCreate: "Utwórz przesyłkę",
         users: "Użytkownicy",
@@ -187,6 +195,7 @@ export const pl = {
         processes: "Procesy",
         pallets: "Palety",
         shipmentScanner: "Skanowanie przesyłek",
+        shipmentRoute: "Trasa przesyłki",
         courierDeliveries: "Przewożenie przesyłek",
         devicePairing: "Moje urządzenie",
         mySettings: "Moje ustawienia",
@@ -225,6 +234,15 @@ export const pl = {
         loading: "Ładowanie dostaw…",
         loadError: "Nie udało się pobrać dostaw.",
         empty: "Brak dostaw do wyświetlenia.",
+        incomplete: {
+            subtitle: "Dostawy przesyłek bez ustalonego oddziału doręczającego. Ustal oddział, aby dostawa mogła być realizowana.",
+            setDestination: "Ustal oddział",
+            resolveDestination: "Przelicz oddział",
+            resolved: "Ustalono oddział doręczający dostawy {id}.",
+            resolveError: "Nie udało się ustalić oddziału doręczającego. Ustal go ręcznie.",
+            listTitle: "Dostawy bez oddziału doręczającego",
+            empty: "Wszystkie dostawy mają ustalony oddział doręczający.",
+        },
         noSteps: "Ta dostawa nie ma jeszcze kroków.",
         retry: "Ponów",
         previous: "Poprzednia",
@@ -252,6 +270,7 @@ export const pl = {
         deliveredLabel: "Doręczona",
         departmentLabel: "Oddział",
         unknown: "Nieznany",
+        destinationNotDetermined: "Nie ustalono",
         filters: {
             title: "Filtry dostaw",
             text: "Szukaj",
@@ -294,7 +313,7 @@ export const pl = {
         lifecycle: {CREATED: "Utworzona", MODIFIED: "Zmieniona", CANCELED: "Anulowana", COMPLETED: "Zakończona"},
         method: {COURIER: "Kurier", PICKUP_POINT: "Punkt odbioru", LOCKER: "Automat paczkowy"},
         outcome: {IN_PROGRESS: "W toku", SUCCEEDED: "Powodzenie", FAILED: "Niepowodzenie"},
-        commentCode: {REPLACED_BY_PALLET_DELIVERY: "Zastąpiona dostawą paletową"},
+        commentCode: {REPLACED_BY_PALLET_DELIVERY: "Zastąpiona dostawą paletową", PALLET_LOADING_REVERTED: "Załadunek palety wycofany", UNLOADED_FROM_PALLET: "Rozładowana z palety"},
         details: {
             operationsTitle: "Operacje na dostawie",
             lockedHint: "Dostawa jest zakończona lub anulowana — można tylko komentować kroki.",
@@ -356,7 +375,7 @@ export const pl = {
             noRelated: "Brak powiązanych dostaw.",
             relation: {
                 SOURCE: "Dostawa pierwotna", DERIVED: "Dostawa pochodna",
-                REPLACED_BY: "Zastąpiona przez paletę", REPLACES: "Zastępuje dostawę",
+                REPLACED_BY: "Zastąpiona przez paletę", REPLACES: "Zastępuje dostawę", CONTINUES: "Kontynuuje dostawę", CONTINUED_BY: "Kontynuowana przez dostawę",
             },
             mapTitle: "Mapa trasy",
             mapUnavailable: "Brak współrzędnych punktów trasy.",
@@ -397,6 +416,7 @@ export const pl = {
             ACTIVE: "Aktywny",
             SUSPENDED: "Wstrzymany",
             CLOSED: "Zamknięty",
+            DELETED: "Usunięty",
         },
         type: {
             SERVICE_POINT: "Punkt obsługi",
@@ -435,6 +455,16 @@ export const pl = {
             success: "Punkt został zaktualizowany",
             error: "Nie udało się zaktualizować punktu",
             loadError: "Nie udało się pobrać danych punktu",
+        },
+        delete: {
+            action: "Usuń",
+            title: "Usuń punkt",
+            message: "Czy na pewno usunąć punkt {code} – {name}? Punkt zniknie z katalogu, mapy i wyboru punktów dla przesyłek. Historia i powiązane przesyłki zostaną zachowane.",
+            confirm: "Usuń punkt",
+            cancel: "Anuluj",
+            deleting: "Usuwanie...",
+            success: "Punkt {code} został usunięty",
+            error: "Nie udało się usunąć punktu",
         },
         map: {
             label: "Mapa punktów nadań i odbioru",
@@ -607,6 +637,10 @@ export const pl = {
             shipmentScanner: {
                 title: "Skanowanie przesyłek",
                 description: "Skanowanie przesyłek w magazynie oraz szybka edycja danych operacyjnych.",
+            },
+            shipmentRoute: {
+                title: "Trasa przesyłki",
+                description: "Wyznaczanie trasy przesyłki do oddziału doręczającego przez połączenia i sortownie.",
             },
             courierDeliveries: {
                 title: "Przewożenie przesyłek",
@@ -971,6 +1005,7 @@ export const pl = {
                 SHIPMENT: "Przesyłki",
                 DEPARTMENT: "Oddziały",
                 DELIVERY: "Dostawy",
+                PICKUP_POINT: "Punkty odbioru",
             },
         },
         system: {
@@ -1555,25 +1590,23 @@ export const pl = {
         generator: {
             open: "Generuj układ",
             title: "Automatyczne rozmieszczenie",
-            autoLayout: "Rozmieść automatycznie (ściany, strefy, sorter, regały i miejsca)",
-            description: "Generator na podstawie wymiarów sam rozmieści ściany, strefy przyjęć i wydań, sorter z taśmą do zrzutni, alejki oraz regały z miejscami składowania. Każde uruchomienie losuje nowy wariant.",
+            autoLayout: "Rozmieść automatycznie (przyjęcie z rampami, stanowiska, sorter, zrzutnie i rampy wyjazdowe)",
+            description: "Generator buduje przepływ paczek przez cały magazyn: w strefie przyjęcia są rampy rozładunkowe i odcinki sortera, którymi paczki wjeżdżają do hali, przy nich stanowiska pracowników przyjmujących paczki. Dalej sorter biegnie przez całą długość magazynu, a zrzutnie po obu stronach prowadzą na rampy wyjazdowe do połączonych oddziałów (np. KT1, PO1). Miejsca składowania palet nie są generowane – możesz je dorysować ręcznie.",
             replaceWarning: "Obecny plan zostanie zastąpiony w edytorze. Możesz cofnąć zmianę (Ctrl+Z) albo ją odrzucić przed zapisem.",
-            includeSorter: "Dodaj sorter (taśmę przesyłek)",
-            slotCapacity: "Pojemność miejsca (palety)",
             generate: "Generuj",
-            generated: "Wygenerowano układ: regałów {racks}, miejsc składowania {locations}. Sprawdź plan i zapisz mapę.",
-            createdWithLayout: "Mapa {name} została utworzona z automatycznym układem: regałów {racks}, miejsc {locations}.",
+            generated: "Wygenerowano układ: ramp przyjęć {inboundRamps}, stanowisk {workstations}, ramp wyjazdowych {ramps}. Sprawdź plan i zapisz mapę.",
+            createdWithLayout: "Mapa {name} została utworzona z automatycznym układem: ramp przyjęć {inboundRamps}, stanowisk {workstations}, ramp wyjazdowych {ramps}.",
+            noDirections: "Oddział nie ma jeszcze połączeń z innymi oddziałami, więc nie dodano ramp – dodaj połączenia w sieci doręczeń.",
             layoutSaveError: "Mapa została utworzona, ale nie udało się zapisać automatycznego układu.",
-            capacityInvalid: "Pojemność miejsca musi wynosić od 1 do 99.",
             occupiedBlocked: "Na mapie stoją palety. Przenieś je lub zdejmij przed wygenerowaniem nowego układu.",
             labels: {
                 hall: "Hala",
-                inbound: "Strefa przyjęć",
-                outbound: "Strefa wydań",
+                inbound: "Przyjęcie",
                 sorter: "Sorter",
                 chute: "Zrzutnia",
-                mainAisle: "Alejka główna",
-                aisle: "Alejka",
+                inboundRamp: "Rampa przyjęć",
+                infeed: "Wjazd",
+                workstation: "Stanowisko",
             },
         },
         toolbar: {
@@ -1597,7 +1630,12 @@ export const pl = {
             AISLE: "Alejka",
             ZONE: "Strefa",
             RACK: "Regał",
+            INBOUND: "Przyjęcie",
+            INBOUND_RAMP: "Rampa przyjęć",
+            WORKSTATION: "Stanowisko pracownika",
             SORTER: "Sorter (taśma)",
+            CHUTE: "Zrzutnia",
+            RAMP: "Rampa (wyjazd)",
             STORAGE_LOCATION: "Miejsce składowania",
         },
         status: {
@@ -1642,6 +1680,7 @@ export const pl = {
                 height: "Długość (m)",
                 rotation: "Obrót (°)",
                 color: "Kolor",
+                destination: "Kierunek (oddział docelowy)",
             },
             occupiedHint: "Na tym miejscu stoją palety – nie można go usunąć ani zmienić jego typu.",
             rotate90: "Obróć 90°",
@@ -1653,6 +1692,15 @@ export const pl = {
                 prefix: "Prefiks kodu",
                 generate: "Utwórz miejsca",
                 generated: "Dodano miejsca składowania: {count}.",
+            },
+            directions: {
+                title: "Kierunki oddziału",
+                description: "Każde połączenie oddziału to kierunek wyjazdu. Paczki do danego oddziału spadają ze zrzutni na rampę z jego kodem.",
+                served: "rampa ✓",
+                addRamp: "Dodaj rampę",
+                noConnections: "Oddział nie ma połączeń z innymi oddziałami. Dodaj je w sieci doręczeń, aby utworzyć rampy.",
+                notConnected: "Ten oddział nie jest już połączony z bieżącym oddziałem.",
+                destinationHint: "Paczki do tego oddziału trafią na ten element.",
             },
             saved: "Mapa została zapisana.",
             saveError: "Nie udało się zapisać mapy.",
@@ -1668,6 +1716,9 @@ export const pl = {
             duplicateCode: "Kod miejsca {value} występuje więcej niż raz.",
             outside: "Element {value} leży poza obszarem mapy.",
             capacity: "Pojemność miejsca {value} musi wynosić od 1 do 99.",
+            missingDestination: "Element {value} musi mieć wybrany kierunek (oddział docelowy).",
+            unknownDestination: "Oddział {value} nie jest połączony z tym oddziałem – zmień kierunek rampy lub zrzutni.",
+            chuteWithoutRamp: "Zrzutnia do {value} nie ma rampy dla tego kierunku.",
         },
         search: {
             label: "Szukaj palety",
@@ -1771,7 +1822,8 @@ export const pl = {
             overviewEmpty: "Brak zapisanych granic. Dodaj je w szczegółach oddziału.",
             title: "Zasięg doręczeń",
             description: "Narysuj granice obszarów obsługiwanych przez ten oddział.",
-            localDraft: "To lokalny szkic w tej przeglądarce. Nie jest wysyłany do serwera i nie wpływa na przypisywanie paczek.",
+            loading: "Wczytywanie granic…",
+            loadError: "Nie udało się pobrać granic doręczeń.",
             missingCoordinates: "Oddział nie ma współrzędnych geograficznych. Uzupełnij adres i współrzędne, aby narysować zasięg.",
             mapLabel: "Mapa zasięgu doręczeń",
             selectHint: "Wybierz obszar na mapie lub na liście, aby edytować jego granice.",
@@ -1794,11 +1846,11 @@ export const pl = {
             cancelInsert: "Anuluj dodawanie punktu",
             removeArea: "Usuń obszar",
             discard: "Odrzuć zmiany",
-            saveDraft: "Zapisz szkic",
+            save: "Zapisz granice",
             fullScreen: "Powiększ mapę",
             exitFullScreen: "Zamknij duży widok",
-            saved: "Szkic zapisano w tej przeglądarce.",
-            saveError: "Nie udało się zapisać szkicu w tej przeglądarce.",
+            saved: "Granice zapisano.",
+            saveError: "Nie udało się zapisać granic.",
             invalidShape: "Granica musi mieć co najmniej trzy punkty i nie może przecinać sama siebie.",
             automatic: "Wyznacz automatycznie dla Polski",
             automaticTitle: "Automatyczny podział Polski",
@@ -1811,16 +1863,25 @@ export const pl = {
             automaticSelected: "Wybrane oddziały: {count}",
             automaticSelectOne: "Wybierz co najmniej jeden oddział.",
             automaticDirty: "Zapisz lub odrzuć bieżące zmiany przed wyznaczeniem granic.",
-            automaticDuplicate: "Dwa wybrane oddziały mają te same współrzędne. Odznacz jeden z nich lub popraw jego lokalizację.",
             automaticGenerateError: "Nie udało się wyznaczyć granic. Sprawdź lokalizacje oddziałów.",
             automaticPreview: "Pokaż podział",
             automaticPreviewTitle: "Podgląd podziału Polski",
             automaticPreviewHint: "Granice obejmują Polskę i rozdzielają ją między wybrane oddziały. Sprawdź mapę przed zastosowaniem.",
-            automaticApply: "Zastosuj szkice dla oddziałów",
-            automaticApplied: "Zapisano lokalne szkice dla {count} oddziałów.",
-            automaticApplyError: "Nie udało się zapisać wszystkich szkiców. Poprzednie szkice przywrócono.",
+            automaticApply: "Zastosuj granice dla oddziałów",
+            automaticApplied: "Zapisano granice dla {count} oddziałów.",
+            automaticApplyError: "Nie udało się zapisać granic. Poprzednie granice pozostały bez zmian.",
             automaticCancel: "Anuluj podgląd",
             automaticBack: "Wróć do wyboru",
+            errors: {
+                INVALID_NAME: "Nazwa obszaru musi mieć od 1 do 120 znaków.",
+                INVALID_BOUNDARY: "Granica musi mieć co najmniej trzy punkty i nie może przecinać sama siebie.",
+                AREA_NOT_FOUND: "Obszar nie istnieje. Odśwież widok.",
+                DEPARTMENT_NOT_FOUND: "Oddział nie istnieje lub jest zarchiwizowany.",
+                NO_DEPARTMENTS: "Wybierz co najmniej jeden oddział.",
+                DEPARTMENT_NOT_ELIGIBLE: "Wybrany oddział musi być aktywny, leżeć w Polsce i mieć poprawne współrzędne.",
+                DUPLICATE_COORDINATES: "Dwa wybrane oddziały mają te same współrzędne. Odznacz jeden z nich lub popraw jego lokalizację.",
+                GENERATION_FAILED: "Nie udało się wyznaczyć granic. Sprawdź lokalizacje oddziałów.",
+            },
         },
         page: {
             kicker: "Manager 2.0",
@@ -1947,8 +2008,8 @@ export const pl = {
             validationError: "Połącz z sortownią następujące oddziały: {codes}.",
             validationSuccess: "Każdy aktywny oddział ma połączenie z co najmniej jedną sortownią.",
             missingCoordinates: "{count} aktywnych oddziałów nie ma współrzędnych i nie może zostać pokazanych na mapie. Relację nadal można dodać w formularzu.",
-            selectSource: "Kliknij punkt oddziału początkowego, a następnie punkt docelowy.",
-            selectTarget: "Początek: {code}. Teraz kliknij punkt oddziału docelowego.",
+            selectSource: "Kliknij oddział, aby zacząć. Potem klikaj kolejne oddziały, aby je z nim połączyć. Kliknij linię, aby zaznaczyć relację.",
+            selectTarget: "Początek: {code}. Klikaj oddziały, które chcesz połączyć z {code}. Kliknij {code} ponownie albo Esc, aby zakończyć.",
             mapEmpty: "Brak punktów do wyświetlenia",
             mapEmptyDescription: "Aktywne oddziały nie mają jeszcze współrzędnych geograficznych.",
             legendDepartment: "Oddział",
@@ -1968,6 +2029,17 @@ export const pl = {
             currentRelations: "Utworzone relacje",
             emptyRelations: "Nie utworzono jeszcze żadnej relacji.",
             removeRelation: "Usuń relację {relation}",
+            relationExists: "Relacja {relation} już istnieje.",
+            relationAdded: "Dodano relację {relation}. Zapisz zmiany, aby ją utrwalić.",
+            relationRemoved: "Usunięto relację {relation}. Zapisz zmiany, aby ją utrwalić.",
+            departmentSummary: "{code} · {city} · {type} · połączenia: {count}",
+            selectedRelation: "Zaznaczona relacja: {relation}",
+            removeSelectedRelation: "Usuń relację",
+            finishSelection: "Zakończ",
+            legendActive: "Połączenia zaznaczonego oddziału",
+            filterRelations: "Szukaj relacji po kodzie",
+            showOnMap: "Pokaż na mapie",
+            noMatchingRelations: "Brak relacji pasujących do wyszukiwania.",
             loading: "Ładowanie zapisanej sieci oddziałów...",
             loadError: "Nie udało się pobrać zapisanej sieci oddziałów.",
             saving: "Zapisywanie sieci...",
@@ -1981,6 +2053,27 @@ export const pl = {
             importing: "Importowanie...",
             importSuccess: "Oddziały zostały sprawdzone, a relacje z pliku Excel zapisane.",
             importError: "Nie udało się zaimportować oddziałów i relacji z pliku Excel.",
+        },
+        picker: {
+            placeholder: "Szukaj po kodzie, mieście lub typie",
+            noResults: "Brak oddziałów pasujących do wyszukiwania.",
+        },
+        connections: {
+            title: "Połączenia w sieci doręczeń",
+            description: "Oddziały, z którymi ten oddział ma bezpośrednie połączenie. Każde połączenie działa w obu kierunkach.",
+            count: "Połączenia: {count}",
+            loading: "Ładowanie połączeń...",
+            loadError: "Nie udało się pobrać połączeń oddziału.",
+            empty: "Ten oddział nie ma jeszcze żadnych połączeń.",
+            missingSortingFacility: "Oddział nie jest połączony z żadną sortownią. Dodaj połączenie z sortownią, aby przesyłki mogły trafić do sieci.",
+            addLabel: "Połącz z oddziałem",
+            connect: "Połącz",
+            saving: "Zapisywanie...",
+            connected: "Połączono z oddziałem {code}.",
+            disconnected: "Usunięto połączenie z oddziałem {code}.",
+            disconnect: "Usuń połączenie z {code}",
+            openDepartment: "Otwórz oddział {code}",
+            saveError: "Nie udało się zapisać połączeń oddziału.",
         },
         usersDialog: {
             title: "Użytkownicy oddziału",
@@ -2149,21 +2242,165 @@ export const pl = {
                 title: "Oddziały",
                 description: "Automatyzacja granic i połączeń oraz ograniczenia działań na oddziałach.",
             },
+            pickupPoints: {
+                title: "Punkty odbioru",
+                description: "Wartości domyślne punktów, zasady odbioru, paczkomaty, dobór punktu i statusy.",
+            },
+            sorting: {
+                title: "Sortowanie",
+                description: "Wymagane skany, obsługa błędów skanowania i przesyłek bez celu.",
+            },
+            fleet: {
+                title: "Flota",
+                description: "Przypomnienia o pojazdach, czas pracy kierowców i śledzenie GPS.",
+            },
+            communication: {
+                title: "Komunikacja",
+                description: "Nadawca wiadomości, branding oraz zasady czatu organizacji.",
+            },
+            regional: {
+                title: "Regionalne",
+                description: "Strefa czasowa, formaty, jednostki i godziny pracy operatora.",
+            },
         },
         departmentConfiguration: {
             title: "Zasady dla oddziałów",
             description: "Ustaw, jak aplikacja ma obsługiwać zasięgi, połączenia i statusy oddziałów.",
-            localNote: "Ustawienia są zapisane w tej przeglądarce. Granice pozostają lokalnymi szkicami. Opcje usuwania i archiwizowania są ukrywane tylko w tej aplikacji. Połączenie nowego oddziału jest zapisywane na serwerze.",
+            serverNote: "Ustawienia są zapisywane w konfiguracji operatora i obowiązują wszystkich użytkowników. Granice doręczeń i połączenia oddziałów są zapisywane na serwerze.",
             saving: "Zapisywanie…",
             saved: "Zapisano ustawienia. Wyznaczono zasięgi dla {areas} oddziałów i dodano {connections} połączeń.",
             saveError: "Nie udało się zastosować ustawień oddziałów.",
             automationError: "Oddział utworzono, ale automatyzacja granic lub połączenia nie powiodła się.",
             connectionSkipped: "Oddział utworzono bez automatycznego połączenia: brak aktywnego oddziału sortującego lub współrzędnych.",
             restrictedStatus: "Zmiana na ten status jest zablokowana w ustawieniach oddziałów.",
+            values: {
+                enabled: "Włączone",
+                disabled: "Wyłączone",
+            },
+            units: {
+                km: "km",
+                days: "dni",
+                percent: "%",
+                shipments: "przesyłek",
+                couriers: "kurierów",
+            },
+            validation: {
+                integer: "Podaj liczbę całkowitą.",
+                range: "Podaj wartość od {min} do {max}.",
+            },
+            options: {
+                deliveryAreaMode: {
+                    COUNTRY_PARTITION: "Podział kraju między oddziały",
+                    RADIUS: "Promień wokół oddziału",
+                },
+                uncoveredPostalCodePolicy: {
+                    WARN: "Ostrzeż",
+                    ASSIGN_NEAREST: "Przypisz do najbliższego oddziału",
+                    BLOCK: "Zablokuj",
+                },
+                workTransferOnDeactivation: {
+                    MANUAL: "Ręcznie przez kierownika",
+                    AUTOMATIC: "Automatycznie do najbliższego oddziału",
+                },
+            },
+            policies: {
+                deliveryAreaPolicy: {
+                    title: "Granice i zasięgi doręczeń",
+                    description: "Sposób wyznaczania obszarów doręczeń i obsługa kodów pocztowych bez pokrycia.",
+                    fields: {
+                        deliveryAreaMode: {
+                            label: "Sposób wyznaczania granic",
+                            hint: "Jak serwer wyznacza obszar doręczeń oddziału.",
+                        },
+                        maxDeliveryRadiusKm: {
+                            label: "Maksymalny promień zasięgu",
+                            hint: "Promień obszaru doręczeń wokół oddziału. Dotyczy trybu promienia.",
+                        },
+                        allowManualDeliveryAreaEdit: {
+                            label: "Ręczna edycja granic",
+                            hint: "Pozwala zmieniać granice ręcznie, także gdy działa automatyczne nadawanie.",
+                        },
+                        recalculateAreasOnStatusChange: {
+                            label: "Przeliczaj granice przy zmianie statusu",
+                            hint: "Po aktywacji lub dezaktywacji oddziału granice są wyznaczane ponownie.",
+                        },
+                        uncoveredPostalCodePolicy: {
+                            label: "Kod pocztowy bez pokrycia",
+                            hint: "Postępowanie, gdy żaden oddział nie obsługuje kodu pocztowego adresu.",
+                        },
+                    },
+                },
+                connectionPolicy: {
+                    title: "Połączenia i sieć",
+                    description: "Zasady automatycznego łączenia oddziałów z sortowniami.",
+                    fields: {
+                        sortingCenterConnectionCount: {
+                            label: "Liczba połączonych sortowni",
+                            hint: "Z iloma najbliższymi sortowniami łączyć nowy oddział.",
+                        },
+                        maxAutoConnectionDistanceKm: {
+                            label: "Maksymalna odległość połączenia",
+                            hint: "Sortownie dalej niż ta odległość nie są łączone automatycznie.",
+                        },
+                        requireSortingConnectionForActivation: {
+                            label: "Wymagaj połączenia do aktywacji",
+                            hint: "Oddział bez połączenia z sortownią nie może zostać aktywowany.",
+                        },
+                        bidirectionalConnectionsByDefault: {
+                            label: "Połączenia dwukierunkowe",
+                            hint: "Nowe połączenia są domyślnie tworzone w obu kierunkach.",
+                        },
+                    },
+                },
+                lifecyclePolicy: {
+                    title: "Cykl życia i statusy",
+                    description: "Zasady dezaktywacji, archiwizacji i przenoszenia pracy oddziału.",
+                    fields: {
+                        requireStatusChangeReason: {
+                            label: "Wymagaj powodu zmiany statusu",
+                            hint: "Dezaktywacja i archiwizacja wymagają podania powodu.",
+                        },
+                        blockDeactivationWithActiveWork: {
+                            label: "Blokuj dezaktywację z aktywną pracą",
+                            hint: "Nie pozwala dezaktywować oddziału z przesyłkami w obsłudze lub przypisanymi kurierami.",
+                        },
+                        workTransferOnDeactivation: {
+                            label: "Przeniesienie pracy przy dezaktywacji",
+                            hint: "Sposób przenoszenia przesyłek i kurierów do innego oddziału.",
+                        },
+                        autoArchiveInactiveAfterDays: {
+                            label: "Automatyczna archiwizacja po",
+                            hint: "Nieaktywny oddział jest archiwizowany po tylu dniach. 0 wyłącza regułę.",
+                        },
+                    },
+                },
+                capacityPolicy: {
+                    title: "Pojemność i obciążenie",
+                    description: "Domyślna przepustowość oddziałów i reakcja na przeciążenie.",
+                    fields: {
+                        defaultDailyCapacity: {
+                            label: "Domyślna dzienna pojemność",
+                            hint: "Liczba przesyłek dziennie przyjmowana dla oddziału bez własnej wartości.",
+                        },
+                        capacityWarningThresholdPercent: {
+                            label: "Próg ostrzeżenia o obciążeniu",
+                            hint: "Po przekroczeniu tego procentu pojemności pojawia się ostrzeżenie.",
+                        },
+                        redirectOverflowToNeighbour: {
+                            label: "Przekieruj nadwyżkę do sąsiada",
+                            hint: "Przesyłki ponad pojemność trafiają do najbliższego oddziału z wolnym miejscem.",
+                        },
+                        maxCouriersPerDepartment: {
+                            label: "Maksymalna liczba kurierów",
+                            hint: "Limit kurierów przypisanych do oddziału. 0 oznacza brak limitu.",
+                        },
+                    },
+                },
+            },
             settings: {
                 autoAssignDeliveryAreas: {
                     label: "Automatycznie nadawaj granice doręczeń",
-                    hint: "Po zapisaniu i po dodaniu oddziału podziel Polskę między aktywne oddziały z lokalizacją. Zastępuje ich lokalne szkice.",
+                    hint: "Po zapisaniu i po dodaniu oddziału serwer dzieli Polskę między aktywne oddziały z lokalizacją. Zastępuje ich zapisane granice.",
                 },
                 autoConnectDepartments: {
                     label: "Automatycznie łącz oddziały",
@@ -2179,6 +2416,512 @@ export const pl = {
                 },
             },
         },
+        operatorSettings: {
+            previewNote: "Zmiana konfiguracji ma wpływ na wszystkich użytkowników wewnątrz organizacji",
+            loading: "Wczytywanie konfiguracji…",
+            loadError: "Nie udało się wczytać konfiguracji.",
+            saving: "Zapisywanie…",
+            saved: "Zapisano konfigurację",
+            saveError: "Nie udało się zapisać konfiguracji.",
+            colorPicker: "wybór koloru",
+            values: {
+                enabled: "Włączone",
+                disabled: "Wyłączone",
+            },
+            units: {
+                km: "km",
+                shipments: "przesyłek",
+                characters: "znaków",
+                days: "dni",
+                hours: "godz.",
+                minutes: "min",
+                seconds: "s",
+                pallets: "palet",
+                megabytes: "MB",
+            },
+            validation: {
+                number: "Podaj liczbę.",
+                integer: "Podaj liczbę całkowitą.",
+                min: "Minimalna wartość to {min}.",
+                max: "Maksymalna wartość to {max}.",
+                email: "Podaj poprawny adres e-mail.",
+                url: "Adres musi zaczynać się od http:// lub https://.",
+                color: "Podaj kolor w formacie #RRGGBB.",
+                time: "Podaj godzinę w formacie GG:MM.",
+            },
+        },
+        pickupPointConfiguration: {
+            groups: {
+                defaultsPolicy: {
+                    title: "Wartości domyślne nowego punktu",
+                    description: "Ustawienia nadawane nowemu punktowi odbioru przy tworzeniu.",
+                },
+                collectionPolicy: {
+                    title: "Odbiór przesyłki",
+                    description: "Weryfikacja odbiorcy, kody odbioru i przypomnienia.",
+                },
+                lockerPolicy: {
+                    title: "Paczkomaty",
+                    description: "Zasady korzystania ze skrytek przez kurierów i obsługa awarii.",
+                },
+                selectionPolicy: {
+                    title: "Dobór punktu",
+                    description: "Jak system proponuje punkt odbioru dla przesyłki.",
+                },
+                capacityPolicy: {
+                    title: "Pojemność i obciążenie",
+                    description: "Domyślna pojemność punktów i reakcja na zapełnienie.",
+                },
+                lifecyclePolicy: {
+                    title: "Cykl życia i statusy",
+                    description: "Zasady zawieszania, zamykania i wznawiania punktów.",
+                },
+            },
+            fields: {
+                defaultType: {
+                    label: "Domyślny typ punktu",
+                    hint: "Typ ustawiany przy tworzeniu nowego punktu.",
+                },
+                defaultDropOffEnabled: {
+                    label: "Nadawanie przesyłek",
+                    hint: "Nowy punkt domyślnie przyjmuje nadania.",
+                },
+                defaultCollectionEnabled: {
+                    label: "Odbiór przesyłek",
+                    hint: "Nowy punkt domyślnie wydaje przesyłki odbiorcom.",
+                },
+                servicePointMaxShipmentSize: {
+                    label: "Maks. gabaryt w punkcie obsługi",
+                    hint: "Największy gabaryt domyślnie przyjmowany przez nowy punkt obsługi.",
+                },
+                parcelLockerMaxShipmentSize: {
+                    label: "Maks. gabaryt w paczkomacie",
+                    hint: "Największy gabaryt domyślnie przyjmowany przez nowy paczkomat.",
+                },
+                defaultAcceptsDangerousGoods: {
+                    label: "Towary niebezpieczne",
+                    hint: "Nowy punkt domyślnie przyjmuje towary niebezpieczne.",
+                },
+                weekdayOpeningTime: {
+                    label: "Otwarcie w dni robocze",
+                    hint: "Domyślna godzina otwarcia od poniedziałku do piątku.",
+                },
+                weekdayClosingTime: {
+                    label: "Zamknięcie w dni robocze",
+                    hint: "Domyślna godzina zamknięcia od poniedziałku do piątku.",
+                },
+                saturdayOpen: {
+                    label: "Otwarte w soboty",
+                    hint: "Nowy punkt domyślnie pracuje w soboty.",
+                },
+                saturdayOpeningTime: {
+                    label: "Otwarcie w sobotę",
+                    hint: "Domyślna godzina otwarcia w sobotę.",
+                },
+                saturdayClosingTime: {
+                    label: "Zamknięcie w sobotę",
+                    hint: "Domyślna godzina zamknięcia w sobotę.",
+                },
+                requireCoordinatesForActivation: {
+                    label: "Wymagaj lokalizacji do aktywacji",
+                    hint: "Punkt bez współrzędnych nie może zostać aktywowany.",
+                },
+                verificationMethod: {
+                    label: "Weryfikacja odbiorcy",
+                    hint: "Sposób potwierdzenia tożsamości odbiorcy przy wydaniu.",
+                },
+                pickupCodeLength: {
+                    label: "Długość kodu odbioru",
+                    hint: "Liczba znaków w kodzie odbioru.",
+                },
+                pickupCodeValidityHours: {
+                    label: "Ważność kodu odbioru",
+                    hint: "Po tym czasie kod odbioru wygasa i trzeba wygenerować nowy.",
+                },
+                maxInvalidCodeAttempts: {
+                    label: "Próby błędnego kodu",
+                    hint: "Liczba błędnych prób, po której odbiór zostaje zablokowany.",
+                },
+                allowAuthorizedPerson: {
+                    label: "Odbiór przez osobę upoważnioną",
+                    hint: "Pozwala wydać przesyłkę osobie wskazanej przez odbiorcę.",
+                },
+                reminderAfterDays: {
+                    label: "Przypomnienie o odbiorze po",
+                    hint: "Po tylu dniach odbiorca dostaje przypomnienie. 0 wyłącza przypomnienie.",
+                },
+                allowStorageExtension: {
+                    label: "Przedłużenie czasu odbioru",
+                    hint: "Odbiorca może jednorazowo przedłużyć czas oczekiwania przesyłki.",
+                },
+                storageExtensionDays: {
+                    label: "Długość przedłużenia",
+                    hint: "O ile dni można przedłużyć czas oczekiwania.",
+                },
+                courierCompartmentHoldMinutes: {
+                    label: "Zajęcie skrytki przez kuriera",
+                    hint: "Maksymalny czas, przez jaki kurier może zająć skrytkę bez nadania.",
+                },
+                compartmentReservationHours: {
+                    label: "Rezerwacja skrytki",
+                    hint: "Z jakim wyprzedzeniem skrytka jest rezerwowana dla przesyłki. 0 wyłącza rezerwację.",
+                },
+                oversizedShipmentPolicy: {
+                    label: "Przesyłka nie mieści się w skrytce",
+                    hint: "Postępowanie, gdy przesyłka jest za duża dla wolnych skrytek.",
+                },
+                suspendAfterCompartmentFailures: {
+                    label: "Zawieś paczkomat po awariach",
+                    hint: "Liczba zgłoszonych awarii skrytek, po której paczkomat jest zawieszany. 0 wyłącza regułę.",
+                },
+                maxDistanceKm: {
+                    label: "Maksymalna odległość punktu",
+                    hint: "Największa odległość punktu od adresu odbiorcy.",
+                },
+                preference: {
+                    label: "Preferowany typ punktu",
+                    hint: "Który typ punktu jest proponowany w pierwszej kolejności.",
+                },
+                alternativeCount: {
+                    label: "Liczba alternatyw",
+                    hint: "Ile innych punktów zaproponować odbiorcy.",
+                },
+                fullPointPolicy: {
+                    label: "Pełny punkt",
+                    hint: "Postępowanie, gdy wybrany punkt nie ma wolnego miejsca.",
+                },
+                sameDepartmentOnly: {
+                    label: "Tylko punkty tego samego oddziału",
+                    hint: "Proponuje wyłącznie punkty przypisane do oddziału obsługującego adres.",
+                },
+                defaultCapacity: {
+                    label: "Domyślna pojemność punktu",
+                    hint: "Liczba przesyłek, które punkt może jednocześnie przechowywać.",
+                },
+                capacityWarningThresholdPercent: {
+                    label: "Próg ostrzeżenia o zapełnieniu",
+                    hint: "Po przekroczeniu tego procentu pojemności pojawia się ostrzeżenie.",
+                },
+                blockIntakeWhenFull: {
+                    label: "Blokuj przyjmowanie przy zapełnieniu",
+                    hint: "Pełny punkt nie przyjmuje nowych przesyłek.",
+                },
+                requireStatusChangeReason: {
+                    label: "Wymagaj powodu zmiany statusu",
+                    hint: "Zawieszenie i zamknięcie punktu wymagają podania powodu.",
+                },
+                suspendedPointShipmentPolicy: {
+                    label: "Przesyłki w zawieszonym punkcie",
+                    hint: "Co dzieje się z przesyłkami czekającymi w zawieszonym punkcie.",
+                },
+                blockClosingWithPendingShipments: {
+                    label: "Blokuj zamknięcie z przesyłkami",
+                    hint: "Nie pozwala zamknąć punktu, w którym czekają przesyłki do odbioru.",
+                },
+                autoResumeSuspendedAfterDays: {
+                    label: "Automatyczne wznowienie po",
+                    hint: "Zawieszony punkt wraca do pracy po tylu dniach. 0 wyłącza regułę.",
+                },
+            },
+            options: {
+                defaultType: {
+                    SERVICE_POINT: "Punkt obsługi",
+                    PARCEL_LOCKER: "Paczkomat",
+                },
+                verificationMethod: {
+                    PICKUP_CODE: "Kod odbioru",
+                    SMS_CODE: "Kod SMS",
+                    ID_DOCUMENT: "Dokument tożsamości",
+                },
+                oversizedShipmentPolicy: {
+                    REDIRECT_TO_SERVICE_POINT: "Przekieruj do najbliższego punktu obsługi",
+                    RETURN_TO_DEPARTMENT: "Zwróć do oddziału",
+                },
+                preference: {
+                    NEAREST: "Najbliższy",
+                    PARCEL_LOCKER: "Paczkomat",
+                    SERVICE_POINT: "Punkt obsługi",
+                },
+                fullPointPolicy: {
+                    SELECT_NEXT: "Wybierz następny punkt",
+                    REJECT: "Odrzuć wybór",
+                },
+                suspendedPointShipmentPolicy: {
+                    REDIRECT: "Przekieruj do innego punktu",
+                    WAIT: "Czekaj na wznowienie",
+                    RETURN: "Zwróć do oddziału",
+                },
+                servicePointMaxShipmentSize: {
+                    TINY: "Bardzo mały",
+                    SMALL: "Mały",
+                    MEDIUM: "Średni",
+                    AVERAGE: "Duży",
+                    BIG: "Bardzo duży",
+                },
+                parcelLockerMaxShipmentSize: {
+                    TINY: "Bardzo mały",
+                    SMALL: "Mały",
+                    MEDIUM: "Średni",
+                    AVERAGE: "Duży",
+                    BIG: "Bardzo duży",
+                },
+            },
+            validation: {
+                weekdayHoursOrder: "Zamknięcie w dni robocze musi być późniejsze niż otwarcie.",
+                saturdayHoursOrder: "Zamknięcie w sobotę musi być późniejsze niż otwarcie.",
+            },
+        },
+        sortingConfiguration: {
+            groups: {
+                requiredScans: {
+                    title: "Wymagane skany",
+                    description: "Etapy obsługi w magazynie, na których przesyłka musi zostać zeskanowana.",
+                },
+                scanErrors: {
+                    title: "Błędy skanowania",
+                    description: "Reakcja terminala na powtórzony lub błędny skan.",
+                },
+                destinations: {
+                    title: "Przesyłki bez celu",
+                    description: "Postępowanie z przesyłkami bez ustalonego celu i nieprzeskanowanymi.",
+                },
+            },
+            fields: {
+                requireInboundScan: {
+                    label: "Skan przy przyjęciu",
+                    hint: "Przesyłka musi zostać zeskanowana przy przyjęciu do magazynu.",
+                },
+                requireSortScan: {
+                    label: "Skan przy sortowaniu",
+                    hint: "Przesyłka musi zostać zeskanowana przy przypisaniu do kierunku.",
+                },
+                requireOutboundScan: {
+                    label: "Skan przy wydaniu na trasę",
+                    hint: "Przesyłka musi zostać zeskanowana przy załadunku na trasę lub linehaul.",
+                },
+                requireDamagePhotoOnInbound: {
+                    label: "Zdjęcie uszkodzonej paczki",
+                    hint: "Przy przyjęciu uszkodzonej paczki terminal wymaga zdjęcia.",
+                },
+                duplicateScanPolicy: {
+                    label: "Podwójny skan",
+                    hint: "Co terminal robi, gdy ta sama przesyłka zostanie zeskanowana ponownie na tym samym etapie.",
+                },
+                scanErrorFeedback: {
+                    label: "Sygnał błędu skanu",
+                    hint: "Sposób sygnalizowania błędnego skanu na terminalu.",
+                },
+                unresolvedDestinationPolicy: {
+                    label: "Przesyłka bez ustalonego celu",
+                    hint: "Postępowanie, gdy nie da się wyznaczyć oddziału docelowego.",
+                },
+                exceptionRampCode: {
+                    label: "Kod rampy wyjaśnień",
+                    hint: "Rampa lub strefa, na którą trafiają przesyłki bez celu. Puste pole oznacza strefę wyjaśnień oddziału.",
+                },
+                missingInWarehouseAfterHours: {
+                    label: "Zagubiona w magazynie po",
+                    hint: "Czas bez skanu, po którym przesyłka jest oznaczana jako zagubiona w magazynie.",
+                },
+            },
+            options: {
+                duplicateScanPolicy: {
+                    WARN: "Ostrzeż i pozwól kontynuować",
+                    BLOCK: "Zablokuj skan",
+                    IGNORE: "Ignoruj",
+                },
+                scanErrorFeedback: {
+                    SOUND_AND_VIBRATION: "Dźwięk i wibracja",
+                    SOUND: "Dźwięk",
+                    VIBRATION: "Wibracja",
+                    NONE: "Brak",
+                },
+                unresolvedDestinationPolicy: {
+                    ROUTE_TO_EXCEPTION_RAMP: "Kieruj na rampę wyjaśnień",
+                    BLOCK: "Zablokuj dalszą obsługę",
+                },
+            },
+        },
+        fleetConfiguration: {
+            groups: {
+                vehicles: {
+                    title: "Pojazdy",
+                    description: "Przypomnienia o terminach i domyślna ładowność pojazdów.",
+                },
+                drivers: {
+                    title: "Kierowcy",
+                    description: "Limity czasu pracy i kontrola przed wyjazdem.",
+                },
+                tracking: {
+                    title: "Śledzenie",
+                    description: "Częstotliwość raportowania pozycji pojazdów.",
+                },
+            },
+            fields: {
+                vehicleInspectionReminderDays: {
+                    label: "Przypomnienie o przeglądzie",
+                    hint: "Ile dni przed terminem przeglądu technicznego wysłać przypomnienie.",
+                },
+                vehicleInsuranceReminderDays: {
+                    label: "Przypomnienie o ubezpieczeniu",
+                    hint: "Ile dni przed końcem polisy OC/AC wysłać przypomnienie.",
+                },
+                defaultVehiclePalletCapacity: {
+                    label: "Domyślna ładowność pojazdu",
+                    hint: "Liczba palet przyjmowana dla nowego pojazdu bez własnej wartości.",
+                },
+                maxDriverShiftHours: {
+                    label: "Maksymalny czas zmiany kierowcy",
+                    hint: "Górny limit czasu pracy kierowcy w ciągu jednej zmiany.",
+                },
+                requiredBreakMinutes: {
+                    label: "Wymagana przerwa",
+                    hint: "Minimalna łączna przerwa kierowcy w trakcie zmiany.",
+                },
+                requirePreTripChecklist: {
+                    label: "Kontrola pojazdu przed trasą",
+                    hint: "Kierowca musi wypełnić checklistę pojazdu przed rozpoczęciem trasy.",
+                },
+                gpsPositionIntervalSeconds: {
+                    label: "Interwał pozycji GPS",
+                    hint: "Jak często urządzenie kierowcy wysyła aktualną pozycję.",
+                },
+            },
+        },
+        communicationConfiguration: {
+            groups: {
+                email: {
+                    title: "Wiadomości e-mail",
+                    description: "Nadawca, adres zwrotny i stopka wiadomości do klientów.",
+                },
+                branding: {
+                    title: "Branding",
+                    description: "Logo i kolor akcentu w wiadomościach oraz dokumentach.",
+                },
+                chat: {
+                    title: "Czat organizacji",
+                    description: "Przechowywanie wiadomości i załączniki w czacie.",
+                },
+            },
+            fields: {
+                senderName: {
+                    label: "Nazwa nadawcy",
+                    hint: "Nazwa widoczna jako nadawca wiadomości e-mail.",
+                },
+                replyToEmail: {
+                    label: "Adres do odpowiedzi",
+                    hint: "Adres, na który trafiają odpowiedzi klientów. Puste pole wyłącza nagłówek Reply-To.",
+                },
+                emailFooter: {
+                    label: "Stopka wiadomości",
+                    hint: "Tekst dołączany na końcu każdej wiadomości e-mail.",
+                },
+                defaultCustomerLanguage: {
+                    label: "Domyślny język komunikacji",
+                    hint: "Język wiadomości do klienta, gdy nie wskazano innego.",
+                },
+                logoUrl: {
+                    label: "Adres logo",
+                    hint: "Publiczny adres obrazu logo używanego w wiadomościach.",
+                },
+                accentColor: {
+                    label: "Kolor akcentu",
+                    hint: "Kolor przycisków i nagłówków w wiadomościach.",
+                },
+                chatMessageRetentionDays: {
+                    label: "Przechowywanie wiadomości czatu",
+                    hint: "Po tylu dniach wiadomości czatu są usuwane.",
+                },
+                chatAttachmentsAllowed: {
+                    label: "Załączniki w czacie",
+                    hint: "Pozwala dołączać pliki do wiadomości czatu.",
+                },
+                chatMaxAttachmentSizeMb: {
+                    label: "Maksymalny rozmiar załącznika",
+                    hint: "Największy dopuszczalny rozmiar pojedynczego pliku.",
+                },
+            },
+            options: {
+                defaultCustomerLanguage: {
+                    PL: "Polski",
+                    EN: "Angielski",
+                    DE: "Niemiecki",
+                },
+            },
+        },
+        regionalConfiguration: {
+            groups: {
+                locale: {
+                    title: "Formaty i jednostki",
+                    description: "Strefa czasowa, format daty, waluta i jednostki miar.",
+                },
+                workingHours: {
+                    title: "Godziny pracy",
+                    description: "Domyślne godziny i dni pracy operatora.",
+                },
+            },
+            fields: {
+                timeZone: {
+                    label: "Strefa czasowa",
+                    hint: "Strefa używana do wyświetlania dat i wyznaczania terminów.",
+                },
+                dateFormat: {
+                    label: "Format daty",
+                    hint: "Sposób wyświetlania dat w aplikacji i dokumentach.",
+                },
+                currency: {
+                    label: "Waluta",
+                    hint: "Waluta kwot, np. pobrań i wartości przesyłek.",
+                },
+                weightUnit: {
+                    label: "Jednostka wagi",
+                    hint: "Jednostka wyświetlania wagi przesyłek.",
+                },
+                lengthUnit: {
+                    label: "Jednostka długości",
+                    hint: "Jednostka wyświetlania wymiarów przesyłek.",
+                },
+                workingDayStart: {
+                    label: "Początek dnia pracy",
+                    hint: "Godzina rozpoczęcia pracy operatora.",
+                },
+                workingDayEnd: {
+                    label: "Koniec dnia pracy",
+                    hint: "Godzina zakończenia pracy operatora.",
+                },
+                saturdayWorkingDay: {
+                    label: "Sobota dniem pracy",
+                    hint: "Traktuje sobotę jako dzień roboczy przy wyznaczaniu terminów.",
+                },
+                sundayWorkingDay: {
+                    label: "Niedziela dniem pracy",
+                    hint: "Traktuje niedzielę jako dzień roboczy przy wyznaczaniu terminów.",
+                },
+            },
+            options: {
+                dateFormat: {
+                    DD_MM_YYYY: "DD.MM.RRRR",
+                    YYYY_MM_DD: "RRRR-MM-DD",
+                    MM_DD_YYYY: "MM/DD/RRRR",
+                },
+                currency: {
+                    PLN: "PLN – złoty",
+                    EUR: "EUR – euro",
+                    USD: "USD – dolar amerykański",
+                    CZK: "CZK – korona czeska",
+                    GBP: "GBP – funt szterling",
+                },
+                weightUnit: {
+                    KG: "Kilogramy (kg)",
+                    LB: "Funty (lb)",
+                },
+                lengthUnit: {
+                    CM: "Centymetry (cm)",
+                    IN: "Cale (in)",
+                },
+            },
+            workingHoursOrderError: "Koniec dnia pracy musi być późniejszy niż jego początek.",
+        },
         shipmentConfiguration: {
             previewNote: "Zmiana konfiguracji ma wpływ na wszystkich użytkowników wewnątrz organizacji",
             categories: {
@@ -2187,6 +2930,11 @@ export const pl = {
                 limits: "Limity",
                 workflow: "Przepływ",
                 notifications: "Powiadomienia",
+                delivery: "Doręczenie",
+                returns: "Zwroty",
+                payments: "Płatności",
+                sla: "SLA i wyjątki",
+                dataRetention: "Retencja danych",
             },
             categoryDescriptions: {
                 validation: "Wymagane dane i kontrola jakości przed utworzeniem przesyłki.",
@@ -2194,6 +2942,11 @@ export const pl = {
                 limits: "Domyślne ograniczenia wagi i wymiarów przesyłek.",
                 workflow: "Automatyczne kroki wykonywane podczas obsługi przesyłki.",
                 notifications: "Zdarzenia, po których system informuje odbiorcę lub nadawcę.",
+                delivery: "Zasady potwierdzania doręczenia i postępowania przy nieudanej próbie.",
+                returns: "Przyjmowanie zwrotów i czas przechowywania przesyłek w punktach.",
+                payments: "Pobranie oraz wymagania dotyczące ubezpieczenia przesyłek.",
+                sla: "Docelowe czasy doręczenia i obsługa opóźnionych przesyłek.",
+                dataRetention: "Jak długo system przechowuje dane odbiorców i dokumentację doręczeń.",
             },
             fields: {
                 validateAddressData: {
@@ -2308,6 +3061,102 @@ export const pl = {
                     label: "Domyślny kanał powiadomień",
                     hint: "Kanał używany, gdy odbiorca nie określił własnych preferencji.",
                 },
+                requireDeliveryToken: {
+                    label: "Wymagaj kodu doręczenia",
+                    hint: "Kurier musi potwierdzić doręczenie kodem otrzymanym przez odbiorcę.",
+                },
+                proofOfDelivery: {
+                    label: "Potwierdzenie doręczenia (POD)",
+                    hint: "Dowód wymagany od kuriera przy wydaniu przesyłki.",
+                },
+                maxDeliveryAttempts: {
+                    label: "Maksymalna liczba prób doręczenia",
+                    hint: "Po wyczerpaniu prób przesyłka trafia do dalszej obsługi.",
+                },
+                allowNeighbourDelivery: {
+                    label: "Doręczenie do sąsiada",
+                    hint: "Pozwala wydać przesyłkę sąsiadowi pod nieobecność odbiorcy.",
+                },
+                allowSafePlaceDelivery: {
+                    label: "Doręczenie w bezpieczne miejsce",
+                    hint: "Pozwala pozostawić przesyłkę we wskazanym przez odbiorcę miejscu.",
+                },
+                redirectToPickupPointAfterFailure: {
+                    label: "Przekierowanie do punktu odbioru",
+                    hint: "Po nieudanej próbie przesyłka trafia do najbliższego punktu odbioru.",
+                },
+                allowReturns: {
+                    label: "Przyjmuj zwroty",
+                    hint: "Umożliwia rejestrowanie zwrotów przesyłek.",
+                },
+                returnWindowDays: {
+                    label: "Okno na zwrot",
+                    hint: "Liczba dni od doręczenia, w których można zgłosić zwrot.",
+                },
+                autoReturnAfterFailedDelivery: {
+                    label: "Automatyczny zwrot po nieudanym doręczeniu",
+                    hint: "Odsyła przesyłkę do nadawcy po wyczerpaniu prób doręczenia.",
+                },
+                pickupPointStorageDays: {
+                    label: "Czas przechowywania w punkcie",
+                    hint: "Liczba dni oczekiwania w punkcie odbioru przed zwrotem.",
+                },
+                requireReturnReason: {
+                    label: "Wymagaj powodu zwrotu",
+                    hint: "Powód zwrotu staje się polem obowiązkowym.",
+                },
+                allowCashOnDelivery: {
+                    label: "Przesyłki za pobraniem",
+                    hint: "Pozwala tworzyć przesyłki z pobraniem kwoty od odbiorcy.",
+                },
+                maxCashOnDeliveryAmount: {
+                    label: "Maksymalna kwota pobrania",
+                    hint: "Górny limit kwoty pobrania dla pojedynczej przesyłki.",
+                },
+                cashOnDeliveryPaymentMethod: {
+                    label: "Forma płatności pobrania",
+                    hint: "Sposoby, w jakie odbiorca może uregulować pobranie.",
+                },
+                requireInsuranceAboveValue: {
+                    label: "Obowiązkowe ubezpieczenie powyżej wartości",
+                    hint: "Przesyłki o wyższej wartości wymagają ubezpieczenia. 0 wyłącza regułę.",
+                },
+                economySlaHours: {
+                    label: "SLA usługi ekonomicznej",
+                    hint: "Docelowy czas doręczenia przesyłki ekonomicznej.",
+                },
+                standardSlaHours: {
+                    label: "SLA usługi standardowej",
+                    hint: "Docelowy czas doręczenia przesyłki standardowej.",
+                },
+                expressSlaHours: {
+                    label: "SLA usługi ekspresowej",
+                    hint: "Docelowy czas doręczenia przesyłki ekspresowej.",
+                },
+                flagDelayedAfterHours: {
+                    label: "Oznaczaj jako opóźnioną po",
+                    hint: "Czas bez nowego skanu, po którym przesyłka jest oznaczana jako opóźniona.",
+                },
+                requireExceptionNote: {
+                    label: "Wymagaj notatki przy wyjątku",
+                    hint: "Status wyjątku można ustawić tylko z opisem.",
+                },
+                escalateDelaysToDepartmentManager: {
+                    label: "Eskaluj opóźnienia do kierownika oddziału",
+                    hint: "Informuje kierownika oddziału o opóźnionych przesyłkach.",
+                },
+                anonymizeRecipientDataAfterDays: {
+                    label: "Anonimizacja danych odbiorcy",
+                    hint: "Liczba dni od zamknięcia przesyłki, po których dane odbiorcy są anonimizowane.",
+                },
+                archiveClosedShipmentsAfterDays: {
+                    label: "Archiwizacja zamkniętych przesyłek",
+                    hint: "Liczba dni od zamknięcia, po których przesyłka trafia do archiwum.",
+                },
+                deliveryPhotoRetentionDays: {
+                    label: "Przechowywanie zdjęć doręczenia",
+                    hint: "Liczba dni przechowywania zdjęć potwierdzających doręczenie.",
+                },
             },
             values: {
                 enabled: "Włączone",
@@ -2326,6 +3175,22 @@ export const pl = {
                 economy: "Ekonomiczna",
                 standard: "Standardowa",
                 express: "Ekspresowa",
+            },
+            proofOfDeliveryOptions: {
+                none: "Brak",
+                signature: "Podpis",
+                photo: "Zdjęcie",
+                signatureAndPhoto: "Podpis i zdjęcie",
+            },
+            cashOnDeliveryPaymentMethodOptions: {
+                cash: "Gotówka",
+                card: "Karta",
+                both: "Gotówka lub karta",
+            },
+            units: {
+                days: "dni",
+                hours: "godz.",
+                currency: "PLN",
             },
             notificationChannels: {
                 sms: "SMS",
@@ -2576,6 +3441,14 @@ export const pl = {
                     ENFORCED_ON: "Wymuszone: włączone",
                     ENFORCED_OFF: "Wymuszone: wyłączone",
                 },
+                modesShort: {
+                    SUPPLIER: "Kurier",
+                    ENFORCED_ON: "Włączone",
+                    ENFORCED_OFF: "Wyłączone",
+                },
+                enforcedSummary: "Wymuszone {count} z {total}",
+                groupEnforced: "{count} wymuszonych",
+                modeLabel: "Kto decyduje o ustawieniu",
             },
             messages: {
                 loading: "Ładowanie konfiguracji kuriera...",
@@ -2852,7 +3725,63 @@ export const pl = {
             returnDisabledDescription: "Obsługa zwrotów jest wyłączona w konfiguracji tego operatora.",
         },
     },
+    shipmentRoute: {
+        page: {
+            title: "Trasa przesyłki",
+            subtitle: "Sprawdź, przez które sortownie przesyłka trafi z oddziału nadającego do oddziału doręczającego.",
+        },
+        form: {
+            inputLabel: "Numer przesyłki",
+            placeholder: "Wpisz lub zeskanuj numer przesyłki",
+            submit: "Wyznacz trasę",
+            numberRequired: "Podaj numer przesyłki.",
+        },
+        hint: "Trasa korzysta wyłącznie z połączeń sieci doręczeń. Najpierw wybierane jest połączenie bezpośrednie, potem najkrótsza droga przez sortownie. Zwykły oddział jest punktem przeładunkowym tylko wtedy, gdy sortowniami nie da się dotrzeć dalej.",
+        result: {
+            title: "Trasa do oddziału doręczającego",
+            trackingNumber: "Numer przesyłki",
+            legs: "Liczba odcinków",
+            distance: "Dystans w linii prostej",
+            distanceValue: "{distance} km",
+            distanceUnknown: "Brak współrzędnych oddziałów",
+            direct: "Połączenie bezpośrednie",
+            transfers: "Przeładunki: {count}",
+            localDelivery: "Oddział nadający doręcza przesyłkę",
+            legUnknown: "Brak współrzędnych",
+        },
+        roles: {
+            origin: "Oddział nadający",
+            transfer: "Przeładunek",
+            destination: "Oddział doręczający",
+        },
+        map: {
+            title: "Mapa trasy",
+            empty: "Brak współrzędnych oddziałów na trasie — nie można wyświetlić mapy.",
+            missingCoordinates: "Bez współrzędnych, pominięte na mapie: {codes}",
+        },
+        documents: {
+            route: "Trasa (PDF)",
+            handlingPlan: "Plan przeładunków (PDF)",
+            downloading: "Przygotowywanie PDF...",
+        },
+        errors: {
+            notFound: "Nie znaleziono przesyłki ani jej doręczenia.",
+            routeUnavailable: "Nie można wyznaczyć trasy. Przesyłka nie trafiła jeszcze do oddziału nadającego, nie ustalono dla niej oddziału doręczającego albo w sieci doręczeń brakuje połączenia z oddziałem doręczającym.",
+            generic: "Nie udało się wyznaczyć trasy przesyłki.",
+            documentError: "Nie udało się wygenerować dokumentu PDF.",
+        },
+    },
     shipmentScanner: {
+        tablet: {
+            title: "Tryb tabletu",
+            enter: "Tryb tabletu",
+            exit: "Zakończ",
+            soundOn: "Dźwięk wł.",
+            soundOff: "Dźwięk wył.",
+            ready: "Gotowy do skanowania",
+            hint: "Zeskanuj kod. Dotknij ekranu, jeśli kursor zniknie z pola.",
+            queued: "W kolejce",
+        },
         page: {
             title: "Odbiór przesyłek od klienta",
             subtitle: "Skanuj przesyłki odbierane od klienta. Lista jest trzymana w pamięci, a po zapisie trafia do systemu jako jeden odbiór.",
@@ -3512,7 +4441,7 @@ export const pl = {
             filterById: "Filtruj po ID",
             filterByTracking: "Filtruj po tracking",
             clearFilters: "Wyczyść",
-            localFilterApplied: "Tabela została przefiltrowana lokalnie",
+            localFilterApplied: "Zastosowano filtr przesyłek",
             localFilterNotFound: "Nie znaleziono przesyłki w zapisanej tabeli",
             invalidShipmentId: "Podaj poprawny identyfikator przesyłki",
             shown: "Pokazano",
@@ -3523,8 +4452,35 @@ export const pl = {
             fallbackRecipient: "Odbiorca",
             unassigned: "Nieprzypisany",
             selectedActions: "Działania dla przesyłki",
+            bulk: {
+                selectRow: "Zaznacz przesyłkę {value}",
+                selectPage: "Zaznacz wszystkie na stronie",
+                selected: "Zaznaczono: {count}",
+                exportExcel: "Eksportuj do Excela",
+                createPallet: "Utwórz paletę",
+                clear: "Wyczyść zaznaczenie",
+                exported: "Wyeksportowano {count} przesyłek",
+                palletCreated: "Utworzono paletę {value}",
+                palletCreateError: "Nie udało się utworzyć palety z zaznaczonych przesyłek",
+            },
+            savedViews: {
+                label: "Zapisane widoki",
+                save: "Zapisz widok",
+                dialogTitle: "Zapisz bieżący widok",
+                nameLabel: "Nazwa widoku",
+                namePlaceholder: "Np. Przygotowane z tego tygodnia",
+                nameRequired: "Podaj nazwę widoku",
+                remove: "Usuń widok {value}",
+                saved: "Zapisano widok {value}",
+                applied: "Zastosowano widok {value}",
+            },
             selectShipment: "Wybierz przesyłkę z tabeli",
+            planned: "plan.",
+            pagination: "Stronicowanie",
+            previousPage: "Poprzednia strona",
+            nextPage: "Następna strona",
             columns: {
+                origin: "Oddział nadania",
                 id: "ID",
                 size: "Rozmiar",
                 sender: "Nadawca",
@@ -3758,6 +4714,7 @@ export const pl = {
                 PLANNED: "Przesyłka zaplanowana",
                 CREATED: "Przesyłka utworzona",
                 PREPARED: "Przesyłka przygotowana",
+                COLLECTED: "Przesyłka odebrana przez kuriera",
                 ACCEPTED: "Przesyłka przyjęta",
                 REROUTE: "Zmieniono trasę przesyłki",
                 SENT: "Przesyłka wysłana",
@@ -3809,6 +4766,7 @@ export const pl = {
             PLANNED: "Planowana",
             CREATED: "Utworzona",
             PREPARED: "Przygotowana",
+            COLLECTED: "Odebrana przez kuriera",
             ACCEPTED: "Przyjęta",
             REROUTE: "Zmodyfikowana",
             SENT: "Wysłana",
@@ -3864,6 +4822,7 @@ export const pl = {
             "PLANNED",
             "CREATED",
             "PREPARED",
+            "COLLECTED",
             "ACCEPTED",
             "SENT",
             "DELIVERY",
@@ -3918,10 +4877,6 @@ export const pl = {
             trackingNumber: "Numer palety",
             status: "Status",
             shipments: "Przesyłki",
-            grossWeight: "Waga brutto",
-            loadable: "Gotowa do załadunku",
-            loadableYes: "Tak",
-            loadableNo: "Nie",
             modified: "Ostatnia zmiana",
         },
         scanner: {
@@ -4131,7 +5086,14 @@ export const pl = {
             statusActions: {
                 dispatch: "Wyślij w trasę",
                 markDelivered: "Potwierdź dostarczenie",
-                carrierRequired: "Przypisz przewoźnika, zanim paleta wyjedzie w trasę.",
+                carrierRequired: "Paleta nie ma przewoźnika. Wycofaj załadunek, przypisz przewoźnika i załaduj ją ponownie.",
+                operations: "Operacje",
+                revertLoading: "Wycofaj i załaduj ponownie",
+                confirmRevertLoading: "Wycofać załadunek palety {trackingNumber}? Przesyłki wrócą do statusu domyślnego, a dostawa palety zostanie anulowana.",
+                loadingReverted: "Załadunek został wycofany. Możesz zmienić zawartość palety i załadować ją ponownie.",
+                dispatchTitle: "Wysłać paletę w trasę?",
+                deliveredTitle: "Potwierdzić dostarczenie palety?",
+                revertLoadingTitle: "Wycofać załadunek palety?",
                 confirmDispatch: "Oznaczyć paletę {trackingNumber} jako wysłaną w trasę?",
                 confirmDelivered: "Potwierdzić dostarczenie palety {trackingNumber}?",
                 dispatched: "Paleta wyjechała w trasę.",
@@ -4198,7 +5160,6 @@ export const pl = {
         carrier: {
             title: "Przewoźnik",
             dialogTitle: "Przewoźnik palety {trackingNumber}",
-            description: "Wybierz przewoźnika z katalogu DriverHub oraz kierowcę i pojazd, którymi paleta pojedzie.",
             none: "Nie przypisano przewoźnika.",
             carrier: "Przewoźnik",
             selectCarrier: "Wybierz przewoźnika",
@@ -4219,7 +5180,7 @@ export const pl = {
             assign: "Przypisz przewoźnika",
             change: "Zmień przewoźnika",
             saved: "Zapisano przewoźnika palety.",
-            locked: "Przewoźnika nie można zmienić po wyjeździe palety w trasę.",
+            locked: "Przewoźnika nie można zmienić po załadowaniu palety.",
             carrierRequired: "Wybierz przewoźnika.",
             vehicleRequired: "Podaj numer rejestracyjny pojazdu albo wybierz pojazd.",
             loadError: "Nie udało się pobrać listy przewoźników.",
@@ -4314,6 +5275,8 @@ export const pl = {
                 PALLET_UPDATED: "Zmieniono dane palety",
                 STATUS_CHANGED: "Zmieniono status",
                 LOADED: "Załadowano paletę",
+                LOADING_REVERTED: "Wycofano załadunek",
+                UNLOADED: "Rozładowano",
                 CANCELLED: "Anulowano paletę",
                 UNKNOWN: "Zdarzenie palety",
             },
@@ -4469,6 +5432,133 @@ export const pl = {
             carrierRequired: "Wybierz przewoźnika.",
             nameRequired: "Podaj imię i nazwisko.",
             error: "Nie udało się dodać kierowcy.",
+        },
+    },
+    auditLog: {
+        title: "Historia zmian",
+        loading: "Ładowanie historii zmian...",
+        empty: "Brak zarejestrowanych zmian.",
+        loadError: "Nie udało się pobrać historii zmian.",
+        retry: "Spróbuj ponownie",
+        loadMore: "Pokaż więcej ({count})",
+        previousValue: "Było",
+        currentValue: "Jest",
+        systemActor: "System",
+        yes: "Tak",
+        no: "Nie",
+        changes: "Zmienione pola",
+        removed: "usunięto",
+        actions: {
+            UNKNOWN: "Zmiana",
+            SHIPMENT: {
+                CREATED: "Utworzono przesyłkę",
+                SENDER_CHANGED: "Zmieniono nadawcę",
+                RECIPIENT_CHANGED: "Zmieniono odbiorcę",
+                REROUTED: "Przekierowano przesyłkę",
+                TYPE_CHANGED: "Zmieniono typ przesyłki",
+                STATUS_CHANGED: "Zmieniono status",
+                CANCELED: "Anulowano przesyłkę",
+                LOCKED: "Zablokowano przesyłkę",
+                SENT: "Wysłano przesyłkę",
+                COLLECTED: "Odebrano przesyłkę",
+                DELIVERED: "Doręczono przesyłkę",
+                REDIRECTED: "Zawrócono do nadawcy",
+                RETURNED: "Zarejestrowano zwrot",
+                RETURN_COMPLETED: "Zakończono zwrot",
+                NOTE_ADDED: "Dodano notatkę",
+                DOCUMENT_ADDED: "Dodano dokument",
+            },
+            PICKUP_POINT: {
+                CREATED: "Utworzono punkt odbioru",
+                UPDATED: "Zmieniono dane punktu",
+                SUSPENDED: "Zawieszono punkt",
+                RESUMED: "Wznowiono punkt",
+                CLOSED: "Zamknięto punkt",
+            },
+            PALLET: {
+                LOADED: "Załadowano paletę",
+                LOADING_REVERTED: "Cofnięto załadunek",
+                UNLOADED: "Rozładowano paletę",
+            },
+            DELIVERY_NETWORK: {
+                CONNECTIONS_CHANGED: "Zmieniono połączenia sieci",
+            },
+            DELIVERY: {
+                CREATED: "Utworzono doręczenie",
+                MODIFIED: "Zmieniono doręczenie",
+                ATTEMPT_RECORDED: "Zarejestrowano próbę doręczenia",
+                COMPLETED: "Zakończono doręczenie",
+                CANCELED: "Anulowano doręczenie",
+            },
+        },
+        fields: {
+            sender: "Nadawca",
+            recipient: "Odbiorca",
+            firstName: "Imię",
+            lastName: "Nazwisko",
+            email: "E-mail",
+            telephoneNumber: "Telefon",
+            street: "Ulica",
+            postalCode: "Kod pocztowy",
+            city: "Miasto",
+            countryCode: "Kraj",
+            shipmentStatus: "Status",
+            shipmentType: "Typ przesyłki",
+            shipmentRelatedId: "Przesyłka powiązana",
+            price: "Cena",
+            locked: "Zablokowana",
+            signatureRequired: "Wymagany podpis",
+            shipmentPriority: "Priorytet",
+            cancellationReason: "Powód anulowania",
+            dimensions: "Wymiary",
+            weight: "Waga",
+            customerReference: "Referencja klienta",
+            contentDescription: "Zawartość",
+            declaredValue: "Wartość deklarowana",
+            serviceLevel: "Poziom usługi",
+            packagingType: "Opakowanie",
+            "note.internal": "Notatka wewnętrzna",
+            "document.filename": "Plik",
+            code: "Kod",
+            name: "Nazwa",
+            type: "Typ",
+            status: "Status",
+            capabilities: "Możliwości",
+            address: "Adres",
+            buildingNumber: "Numer budynku",
+            unitNumber: "Numer lokalu",
+            coordinates: "Współrzędne",
+            latitude: "Szerokość",
+            longitude: "Długość",
+            departmentId: "Oddział",
+            contact: "Kontakt",
+            accessInstructions: "Instrukcje dojścia",
+            openingSchedule: "Godziny otwarcia",
+            servicePolicy: "Zasady obsługi",
+            allowedShipmentSizes: "Dozwolone gabaryty",
+            acceptsDangerousGoods: "Towary niebezpieczne",
+            externalReference: "Referencja zewnętrzna",
+            networkCode: "Sieć",
+            pointCode: "Kod punktu",
+            statusReason: "Powód statusu",
+            trackingNumber: "Numer palety",
+            shipmentIds: "Przesyłki",
+            originDepartmentId: "Oddział nadania",
+            destinationDepartmentId: "Oddział docelowy",
+            unloadedShipmentIds: "Rozładowane przesyłki",
+            missingShipmentIds: "Brakujące przesyłki",
+            unloadDepartmentId: "Oddział rozładunku",
+            connection: "Połączenie oddziałów",
+            supplierId: "Przewoźnik",
+            vehicleId: "Pojazd",
+            deliveryStatus: "Status doręczenia",
+            pickupMethod: "Sposób nadania",
+            method: "Sposób doręczenia",
+            pickupPointId: "Punkt nadania",
+            deliveryPickupPointId: "Punkt doręczenia",
+            instructions: "Instrukcje",
+            plannedAt: "Planowany termin",
+            deliveredAt: "Doręczono",
         },
     },
 };

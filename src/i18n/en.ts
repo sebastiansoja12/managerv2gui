@@ -102,6 +102,7 @@ export const en: typeof pl = {
         fullNameDialogDescription: "Change the details displayed on your account.",
         apiKeyHelper: "Key used by integrations acting on behalf of the account",
         apiKeyMissing: "No API key",
+        apiKeyHidden: "Key active – regenerate it to copy",
         permissions: "Permissions",
         noPermissions: "No assigned permissions",
         fields: {
@@ -150,6 +151,11 @@ export const en: typeof pl = {
     navigation: {
         ...pl.navigation,
         warehouse: "Warehouse",
+        scanPlaceholder: "Scan or type tracking",
+        scanShortcut: "Shortcut: Ctrl+K",
+        currentDepartment: "Your department",
+        createMenu: "Create",
+        palletFromShipments: "Pallet from shipments",
         palletScanner: "Scan pallet",
         palletCreate: "Create pallet",
         palletsCancelled: "Cancelled pallets",
@@ -166,6 +172,8 @@ export const en: typeof pl = {
         shipments: "Shipments",
         returns: "Returns",
         deliveries: "Deliveries",
+        allDeliveries: "All deliveries",
+        incompleteDeliveries: "Incomplete deliveries",
         shipmentList: "Shipment list",
         shipmentCreate: "Create shipment",
         users: "Users",
@@ -190,6 +198,7 @@ export const en: typeof pl = {
         processes: "Processes",
         pallets: "Pallets",
         shipmentScanner: "Shipment scanning",
+        shipmentRoute: "Shipment route",
         courierDeliveries: "Shipment delivery",
         devicePairing: "My device",
         mySettings: "My settings",
@@ -228,6 +237,15 @@ export const en: typeof pl = {
         loading: "Loading deliveries…",
         loadError: "Could not load deliveries.",
         empty: "No deliveries to display.",
+        incomplete: {
+            subtitle: "Shipment deliveries without a delivery department. Set the department so the delivery can proceed.",
+            setDestination: "Set department",
+            resolveDestination: "Recalculate department",
+            resolved: "Delivery department of delivery {id} has been determined.",
+            resolveError: "The delivery department could not be determined. Set it manually.",
+            listTitle: "Deliveries without a delivery department",
+            empty: "All deliveries have a delivery department.",
+        },
         noSteps: "This delivery has no steps yet.",
         retry: "Retry",
         previous: "Previous",
@@ -255,6 +273,7 @@ export const en: typeof pl = {
         deliveredLabel: "Delivered",
         departmentLabel: "Department",
         unknown: "Unknown",
+        destinationNotDetermined: "Not determined",
         filters: {
             title: "Delivery filters",
             text: "Search",
@@ -291,7 +310,7 @@ export const en: typeof pl = {
         lifecycle: {CREATED: "Created", MODIFIED: "Modified", CANCELED: "Canceled", COMPLETED: "Completed"},
         method: {COURIER: "Courier", PICKUP_POINT: "Pickup point", LOCKER: "Parcel locker"},
         outcome: {IN_PROGRESS: "In progress", SUCCEEDED: "Succeeded", FAILED: "Failed"},
-        commentCode: {REPLACED_BY_PALLET_DELIVERY: "Replaced by pallet delivery"},
+        commentCode: {REPLACED_BY_PALLET_DELIVERY: "Replaced by pallet delivery", PALLET_LOADING_REVERTED: "Pallet loading reverted", UNLOADED_FROM_PALLET: "Unloaded from pallet"},
         details: {
             operationsTitle: "Delivery operations",
             lockedHint: "The delivery is completed or canceled — only step comments can be changed.",
@@ -353,7 +372,7 @@ export const en: typeof pl = {
             noRelated: "No related deliveries.",
             relation: {
                 SOURCE: "Original delivery", DERIVED: "Derived delivery",
-                REPLACED_BY: "Replaced by pallet", REPLACES: "Replaces delivery",
+                REPLACED_BY: "Replaced by pallet", REPLACES: "Replaces delivery", CONTINUES: "Continues delivery", CONTINUED_BY: "Continued by delivery",
             },
             mapTitle: "Route map",
             mapUnavailable: "Route points have no coordinates.",
@@ -394,6 +413,7 @@ export const en: typeof pl = {
             ACTIVE: "Active",
             SUSPENDED: "Suspended",
             CLOSED: "Closed",
+            DELETED: "Deleted",
         },
         type: {
             SERVICE_POINT: "Service point",
@@ -432,6 +452,16 @@ export const en: typeof pl = {
             success: "The point has been updated",
             error: "Could not update the point",
             loadError: "Could not load point details",
+        },
+        delete: {
+            action: "Delete",
+            title: "Delete pickup point",
+            message: "Delete pickup point {code} – {name}? It will disappear from the catalog, map and shipment point selection. Its history and related shipments are kept.",
+            confirm: "Delete point",
+            cancel: "Cancel",
+            deleting: "Deleting...",
+            success: "Pickup point {code} was deleted",
+            error: "Could not delete the pickup point",
         },
         map: {
             label: "Drop-off and pickup points map",
@@ -604,6 +634,10 @@ export const en: typeof pl = {
             shipmentScanner: {
                 title: "Shipment scanning",
                 description: "Scan shipments in the warehouse and quickly edit operational data.",
+            },
+            shipmentRoute: {
+                title: "Shipment route",
+                description: "Find the route of a shipment to its delivery department through connections and sorting facilities.",
             },
             courierDeliveries: {
                 title: "Shipment delivery",
@@ -968,6 +1002,7 @@ export const en: typeof pl = {
                 SHIPMENT: "Shipments",
                 DEPARTMENT: "Departments",
                 DELIVERY: "Deliveries",
+                PICKUP_POINT: "Pickup points",
             },
         },
         system: {
@@ -1552,25 +1587,23 @@ export const en: typeof pl = {
         generator: {
             open: "Generate layout",
             title: "Automatic layout",
-            autoLayout: "Lay out automatically (walls, zones, sorter, racks and locations)",
-            description: "Based on the dimensions the generator places walls, inbound and outbound zones, a sorter with conveyor chutes, aisles and racks with storage locations. Every run produces a new random variant.",
+            autoLayout: "Lay out automatically (inbound with ramps, workstations, sorter, chutes and outbound ramps)",
+            description: "The generator builds the parcel flow through the whole warehouse: the inbound zone has unloading ramps and sorter infeeds that bring parcels into the hall, with workstations where staff receive the parcels. The sorter then runs along the entire warehouse and chutes on both sides lead to outbound ramps for the connected departments (e.g. KT1, PO1). Pallet storage locations are not generated – you can draw them manually.",
             replaceWarning: "The current plan will be replaced in the editor. You can undo it (Ctrl+Z) or discard it before saving.",
-            includeSorter: "Add a sorter (parcel conveyor)",
-            slotCapacity: "Location capacity (pallets)",
             generate: "Generate",
-            generated: "Layout generated: {racks} racks, {locations} storage locations. Review the plan and save the map.",
-            createdWithLayout: "Map {name} has been created with an automatic layout: {racks} racks, {locations} locations.",
+            generated: "Layout generated: {inboundRamps} inbound ramps, {workstations} workstations, {ramps} outbound ramps. Review the plan and save the map.",
+            createdWithLayout: "Map {name} has been created with an automatic layout: {inboundRamps} inbound ramps, {workstations} workstations, {ramps} outbound ramps.",
+            noDirections: "The department has no connections to other departments yet, so no ramps were added – add connections in the delivery network.",
             layoutSaveError: "The map has been created but the automatic layout could not be saved.",
-            capacityInvalid: "Location capacity must be between 1 and 99.",
             occupiedBlocked: "Pallets stand on the map. Move or remove them before generating a new layout.",
             labels: {
                 hall: "Hall",
-                inbound: "Inbound zone",
-                outbound: "Outbound zone",
+                inbound: "Inbound",
                 sorter: "Sorter",
                 chute: "Chute",
-                mainAisle: "Main aisle",
-                aisle: "Aisle",
+                inboundRamp: "Inbound ramp",
+                infeed: "Infeed",
+                workstation: "Workstation",
             },
         },
         toolbar: {
@@ -1594,7 +1627,12 @@ export const en: typeof pl = {
             AISLE: "Aisle",
             ZONE: "Zone",
             RACK: "Rack",
+            INBOUND: "Inbound",
+            INBOUND_RAMP: "Inbound ramp",
+            WORKSTATION: "Workstation",
             SORTER: "Sorter (conveyor)",
+            CHUTE: "Chute",
+            RAMP: "Ramp (outbound)",
             STORAGE_LOCATION: "Storage location",
         },
         status: {
@@ -1639,6 +1677,7 @@ export const en: typeof pl = {
                 height: "Length (m)",
                 rotation: "Rotation (°)",
                 color: "Colour",
+                destination: "Direction (destination department)",
             },
             occupiedHint: "Pallets stand on this location – it cannot be deleted or change its type.",
             rotate90: "Rotate 90°",
@@ -1650,6 +1689,15 @@ export const en: typeof pl = {
                 prefix: "Code prefix",
                 generate: "Create locations",
                 generated: "Storage locations added: {count}.",
+            },
+            directions: {
+                title: "Department directions",
+                description: "Every department connection is an outbound direction. Parcels for that department drop from the chute onto the ramp with its code.",
+                served: "ramp ✓",
+                addRamp: "Add ramp",
+                noConnections: "The department has no connections to other departments. Add them in the delivery network to create ramps.",
+                notConnected: "This department is no longer connected with the current department.",
+                destinationHint: "Parcels for this department are routed to this element.",
             },
             saved: "The map has been saved.",
             saveError: "Could not save the map.",
@@ -1665,6 +1713,9 @@ export const en: typeof pl = {
             duplicateCode: "Location code {value} is used more than once.",
             outside: "Element {value} lies outside the map area.",
             capacity: "Capacity of location {value} must be between 1 and 99.",
+            missingDestination: "Element {value} needs a direction (destination department).",
+            unknownDestination: "Department {value} is not connected with this department – change the ramp or chute direction.",
+            chuteWithoutRamp: "The chute to {value} has no ramp for that direction.",
         },
         search: {
             label: "Find pallet",
@@ -1769,7 +1820,8 @@ export const en: typeof pl = {
             overviewEmpty: "No boundaries saved. Add them in department details.",
             title: "Delivery area",
             description: "Draw the areas served by this department.",
-            localDraft: "This draft is stored only in this browser. It is not sent to the server and does not affect parcel assignment.",
+            loading: "Loading boundaries…",
+            loadError: "Could not load delivery boundaries.",
             missingCoordinates: "This department has no geographic coordinates. Add its address and coordinates to draw an area.",
             mapLabel: "Delivery area map",
             selectHint: "Select an area on the map or in the list to edit its boundary.",
@@ -1792,11 +1844,11 @@ export const en: typeof pl = {
             cancelInsert: "Cancel adding point",
             removeArea: "Remove area",
             discard: "Discard changes",
-            saveDraft: "Save draft",
+            save: "Save boundaries",
             fullScreen: "Expand map",
             exitFullScreen: "Close large view",
-            saved: "Draft saved in this browser.",
-            saveError: "Could not save the draft in this browser.",
+            saved: "Boundaries saved.",
+            saveError: "Could not save boundaries.",
             invalidShape: "The boundary needs at least three points and must not intersect itself.",
             automatic: "Generate boundaries for Poland",
             automaticTitle: "Automatic division of Poland",
@@ -1809,16 +1861,25 @@ export const en: typeof pl = {
             automaticSelected: "Selected departments: {count}",
             automaticSelectOne: "Select at least one department.",
             automaticDirty: "Save or discard your current changes before generating boundaries.",
-            automaticDuplicate: "Two selected departments have identical coordinates. Deselect one or correct its location.",
             automaticGenerateError: "Could not generate boundaries. Check department locations.",
             automaticPreview: "Preview division",
             automaticPreviewTitle: "Preview of Poland's division",
             automaticPreviewHint: "The boundaries cover Poland and divide it among selected departments. Check the map before applying.",
-            automaticApply: "Apply drafts to departments",
-            automaticApplied: "Saved local drafts for {count} departments.",
-            automaticApplyError: "Could not save all drafts. Previous drafts were restored.",
+            automaticApply: "Apply boundaries to departments",
+            automaticApplied: "Saved boundaries for {count} departments.",
+            automaticApplyError: "Could not save boundaries. Previous boundaries were kept.",
             automaticCancel: "Cancel preview",
             automaticBack: "Back to selection",
+            errors: {
+                INVALID_NAME: "Area name must have 1 to 120 characters.",
+                INVALID_BOUNDARY: "A boundary needs at least three points and must not cross itself.",
+                AREA_NOT_FOUND: "The area does not exist. Refresh the view.",
+                DEPARTMENT_NOT_FOUND: "The department does not exist or is archived.",
+                NO_DEPARTMENTS: "Select at least one department.",
+                DEPARTMENT_NOT_ELIGIBLE: "The selected department must be active, located in Poland and have valid coordinates.",
+                DUPLICATE_COORDINATES: "Two selected departments have identical coordinates. Deselect one or correct its location.",
+                GENERATION_FAILED: "Could not calculate boundaries. Check department locations.",
+            },
         },
         page: {
             kicker: "Manager 2.0",
@@ -1945,8 +2006,8 @@ export const en: typeof pl = {
             validationError: "Connect the following departments to a sorting facility: {codes}.",
             validationSuccess: "Every active department is connected to at least one sorting facility.",
             missingCoordinates: "{count} active departments have no coordinates and cannot be shown on the map. You can still add their relations with the form.",
-            selectSource: "Click the source department point and then the target department point.",
-            selectTarget: "Source: {code}. Now click the target department point.",
+            selectSource: "Click a department to start. Then click other departments to connect them with it. Click a line to select a relation.",
+            selectTarget: "Start: {code}. Click the departments you want to connect with {code}. Click {code} again or press Esc to finish.",
             mapEmpty: "No points to display",
             mapEmptyDescription: "The active departments do not have geographic coordinates yet.",
             legendDepartment: "Department",
@@ -1966,6 +2027,17 @@ export const en: typeof pl = {
             currentRelations: "Created relations",
             emptyRelations: "No relations have been created yet.",
             removeRelation: "Remove relation {relation}",
+            relationExists: "Relation {relation} already exists.",
+            relationAdded: "Relation {relation} added. Save changes to keep it.",
+            relationRemoved: "Relation {relation} removed. Save changes to keep it.",
+            departmentSummary: "{code} · {city} · {type} · connections: {count}",
+            selectedRelation: "Selected relation: {relation}",
+            removeSelectedRelation: "Remove relation",
+            finishSelection: "Finish",
+            legendActive: "Connections of the selected department",
+            filterRelations: "Search relations by code",
+            showOnMap: "Show on map",
+            noMatchingRelations: "No relations match the search.",
             loading: "Loading the saved department network...",
             loadError: "Could not load the saved department network.",
             saving: "Saving network...",
@@ -1979,6 +2051,27 @@ export const en: typeof pl = {
             importing: "Importing...",
             importSuccess: "Departments were validated and relations from the Excel file were saved.",
             importError: "Could not import departments and relations from the Excel file.",
+        },
+        picker: {
+            placeholder: "Search by code, city or type",
+            noResults: "No departments match the search.",
+        },
+        connections: {
+            title: "Delivery network connections",
+            description: "Departments directly connected with this department. Every connection works in both directions.",
+            count: "Connections: {count}",
+            loading: "Loading connections...",
+            loadError: "Could not load department connections.",
+            empty: "This department has no connections yet.",
+            missingSortingFacility: "The department is not connected with any sorting facility. Add a sorting facility connection so shipments can enter the network.",
+            addLabel: "Connect with department",
+            connect: "Connect",
+            saving: "Saving...",
+            connected: "Connected with department {code}.",
+            disconnected: "Connection with department {code} removed.",
+            disconnect: "Remove connection with {code}",
+            openDepartment: "Open department {code}",
+            saveError: "Could not save department connections.",
         },
         usersDialog: {
             title: "Department users",
@@ -2147,21 +2240,165 @@ export const en: typeof pl = {
                 title: "Departments",
                 description: "Automatic delivery areas and connections, plus department action restrictions.",
             },
+            pickupPoints: {
+                title: "Pickup points",
+                description: "Defaults for new points, collection rules, parcel lockers, point selection and statuses.",
+            },
+            sorting: {
+                title: "Sorting",
+                description: "Required scans, handling of scan errors and shipments without a destination.",
+            },
+            fleet: {
+                title: "Fleet",
+                description: "Vehicle reminders, driver working time and GPS tracking.",
+            },
+            communication: {
+                title: "Communication",
+                description: "Message sender, branding and organization chat rules.",
+            },
+            regional: {
+                title: "Regional",
+                description: "Time zone, formats, units and operator working hours.",
+            },
         },
         departmentConfiguration: {
             title: "Department rules",
             description: "Choose how the app handles delivery areas, connections and department statuses.",
-            localNote: "Settings are stored in this browser. Areas remain local drafts. Delete and archive options are hidden only in this app. New department connections are saved on the server.",
+            serverNote: "Settings are stored in the operator configuration and apply to all users. Delivery boundaries and department connections are saved on the server.",
             saving: "Saving…",
             saved: "Settings saved. Areas assigned to {areas} departments and {connections} connections added.",
             saveError: "Could not apply department settings.",
             automationError: "The department was created, but automatic boundaries or connection failed.",
             connectionSkipped: "The department was created without an automatic connection: an active sorting facility or coordinates are missing.",
             restrictedStatus: "This status change is blocked by department settings.",
+            values: {
+                enabled: "Enabled",
+                disabled: "Disabled",
+            },
+            units: {
+                km: "km",
+                days: "days",
+                percent: "%",
+                shipments: "shipments",
+                couriers: "couriers",
+            },
+            validation: {
+                integer: "Enter a whole number.",
+                range: "Enter a value from {min} to {max}.",
+            },
+            options: {
+                deliveryAreaMode: {
+                    COUNTRY_PARTITION: "Split the country between departments",
+                    RADIUS: "Radius around the department",
+                },
+                uncoveredPostalCodePolicy: {
+                    WARN: "Warn",
+                    ASSIGN_NEAREST: "Assign to the nearest department",
+                    BLOCK: "Block",
+                },
+                workTransferOnDeactivation: {
+                    MANUAL: "Manually by a manager",
+                    AUTOMATIC: "Automatically to the nearest department",
+                },
+            },
+            policies: {
+                deliveryAreaPolicy: {
+                    title: "Delivery areas",
+                    description: "How delivery areas are calculated and how uncovered postal codes are handled.",
+                    fields: {
+                        deliveryAreaMode: {
+                            label: "Area calculation method",
+                            hint: "How the server calculates a department's delivery area.",
+                        },
+                        maxDeliveryRadiusKm: {
+                            label: "Maximum delivery radius",
+                            hint: "Radius of the delivery area around the department. Applies to radius mode.",
+                        },
+                        allowManualDeliveryAreaEdit: {
+                            label: "Manual area editing",
+                            hint: "Allows editing areas manually, even when automatic assignment is on.",
+                        },
+                        recalculateAreasOnStatusChange: {
+                            label: "Recalculate areas on status change",
+                            hint: "Areas are recalculated after a department is activated or deactivated.",
+                        },
+                        uncoveredPostalCodePolicy: {
+                            label: "Uncovered postal code",
+                            hint: "What happens when no department serves the address postal code.",
+                        },
+                    },
+                },
+                connectionPolicy: {
+                    title: "Connections and network",
+                    description: "Rules for automatically connecting departments to sorting centers.",
+                    fields: {
+                        sortingCenterConnectionCount: {
+                            label: "Connected sorting centers",
+                            hint: "How many nearest sorting centers a new department is connected to.",
+                        },
+                        maxAutoConnectionDistanceKm: {
+                            label: "Maximum connection distance",
+                            hint: "Sorting centers farther than this are not connected automatically.",
+                        },
+                        requireSortingConnectionForActivation: {
+                            label: "Require connection for activation",
+                            hint: "A department without a sorting center connection cannot be activated.",
+                        },
+                        bidirectionalConnectionsByDefault: {
+                            label: "Bidirectional connections",
+                            hint: "New connections are created in both directions by default.",
+                        },
+                    },
+                },
+                lifecyclePolicy: {
+                    title: "Lifecycle and statuses",
+                    description: "Rules for deactivating, archiving and transferring a department's work.",
+                    fields: {
+                        requireStatusChangeReason: {
+                            label: "Require status change reason",
+                            hint: "Deactivation and archiving require a reason.",
+                        },
+                        blockDeactivationWithActiveWork: {
+                            label: "Block deactivation with active work",
+                            hint: "Prevents deactivating a department with shipments in progress or assigned couriers.",
+                        },
+                        workTransferOnDeactivation: {
+                            label: "Work transfer on deactivation",
+                            hint: "How shipments and couriers are moved to another department.",
+                        },
+                        autoArchiveInactiveAfterDays: {
+                            label: "Auto archive after",
+                            hint: "An inactive department is archived after this many days. 0 disables the rule.",
+                        },
+                    },
+                },
+                capacityPolicy: {
+                    title: "Capacity and load",
+                    description: "Default department throughput and overload handling.",
+                    fields: {
+                        defaultDailyCapacity: {
+                            label: "Default daily capacity",
+                            hint: "Shipments per day used for a department without its own value.",
+                        },
+                        capacityWarningThresholdPercent: {
+                            label: "Load warning threshold",
+                            hint: "A warning appears after this percentage of capacity is exceeded.",
+                        },
+                        redirectOverflowToNeighbour: {
+                            label: "Redirect overflow to neighbour",
+                            hint: "Shipments above capacity go to the nearest department with free capacity.",
+                        },
+                        maxCouriersPerDepartment: {
+                            label: "Maximum couriers",
+                            hint: "Limit of couriers assigned to a department. 0 means no limit.",
+                        },
+                    },
+                },
+            },
             settings: {
                 autoAssignDeliveryAreas: {
                     label: "Assign delivery boundaries automatically",
-                    hint: "On save and after adding a department, divide Poland among active departments with locations. Replaces their local drafts.",
+                    hint: "On save and after adding a department, the server divides Poland among active departments with locations. Replaces their saved boundaries.",
                 },
                 autoConnectDepartments: {
                     label: "Connect departments automatically",
@@ -2177,6 +2414,512 @@ export const en: typeof pl = {
                 },
             },
         },
+        operatorSettings: {
+            previewNote: "Configuration changes affect all users in the organization",
+            loading: "Loading configuration…",
+            loadError: "Could not load the configuration.",
+            saving: "Saving…",
+            saved: "Configuration saved",
+            saveError: "Could not save the configuration.",
+            colorPicker: "color picker",
+            values: {
+                enabled: "Enabled",
+                disabled: "Disabled",
+            },
+            units: {
+                km: "km",
+                shipments: "shipments",
+                characters: "characters",
+                days: "days",
+                hours: "h",
+                minutes: "min",
+                seconds: "s",
+                pallets: "pallets",
+                megabytes: "MB",
+            },
+            validation: {
+                number: "Enter a number.",
+                integer: "Enter a whole number.",
+                min: "Minimum value is {min}.",
+                max: "Maximum value is {max}.",
+                email: "Enter a valid email address.",
+                url: "The address must start with http:// or https://.",
+                color: "Enter a color in #RRGGBB format.",
+                time: "Enter a time in HH:MM format.",
+            },
+        },
+        pickupPointConfiguration: {
+            groups: {
+                defaultsPolicy: {
+                    title: "New point defaults",
+                    description: "Settings applied to a new pickup point when it is created.",
+                },
+                collectionPolicy: {
+                    title: "Shipment collection",
+                    description: "Recipient verification, pickup codes and reminders.",
+                },
+                lockerPolicy: {
+                    title: "Parcel lockers",
+                    description: "Rules for couriers using compartments and handling failures.",
+                },
+                selectionPolicy: {
+                    title: "Point selection",
+                    description: "How the system suggests a pickup point for a shipment.",
+                },
+                capacityPolicy: {
+                    title: "Capacity and load",
+                    description: "Default point capacity and handling of full points.",
+                },
+                lifecyclePolicy: {
+                    title: "Lifecycle and statuses",
+                    description: "Rules for suspending, closing and resuming points.",
+                },
+            },
+            fields: {
+                defaultType: {
+                    label: "Default point type",
+                    hint: "Type set when a new point is created.",
+                },
+                defaultDropOffEnabled: {
+                    label: "Shipment drop-off",
+                    hint: "A new point accepts drop-offs by default.",
+                },
+                defaultCollectionEnabled: {
+                    label: "Shipment collection",
+                    hint: "A new point hands shipments to recipients by default.",
+                },
+                servicePointMaxShipmentSize: {
+                    label: "Max size at service point",
+                    hint: "Largest size a new service point accepts by default.",
+                },
+                parcelLockerMaxShipmentSize: {
+                    label: "Max size at parcel locker",
+                    hint: "Largest size a new parcel locker accepts by default.",
+                },
+                defaultAcceptsDangerousGoods: {
+                    label: "Dangerous goods",
+                    hint: "A new point accepts dangerous goods by default.",
+                },
+                weekdayOpeningTime: {
+                    label: "Weekday opening",
+                    hint: "Default opening time Monday to Friday.",
+                },
+                weekdayClosingTime: {
+                    label: "Weekday closing",
+                    hint: "Default closing time Monday to Friday.",
+                },
+                saturdayOpen: {
+                    label: "Open on Saturdays",
+                    hint: "A new point works on Saturdays by default.",
+                },
+                saturdayOpeningTime: {
+                    label: "Saturday opening",
+                    hint: "Default opening time on Saturday.",
+                },
+                saturdayClosingTime: {
+                    label: "Saturday closing",
+                    hint: "Default closing time on Saturday.",
+                },
+                requireCoordinatesForActivation: {
+                    label: "Require location for activation",
+                    hint: "A point without coordinates cannot be activated.",
+                },
+                verificationMethod: {
+                    label: "Recipient verification",
+                    hint: "How the recipient's identity is confirmed at handover.",
+                },
+                pickupCodeLength: {
+                    label: "Pickup code length",
+                    hint: "Number of characters in the pickup code.",
+                },
+                pickupCodeValidityHours: {
+                    label: "Pickup code validity",
+                    hint: "After this time the pickup code expires and a new one is needed.",
+                },
+                maxInvalidCodeAttempts: {
+                    label: "Invalid code attempts",
+                    hint: "Number of failed attempts after which collection is blocked.",
+                },
+                allowAuthorizedPerson: {
+                    label: "Collection by authorized person",
+                    hint: "Allows handing the shipment to a person named by the recipient.",
+                },
+                reminderAfterDays: {
+                    label: "Collection reminder after",
+                    hint: "The recipient gets a reminder after this many days. 0 disables it.",
+                },
+                allowStorageExtension: {
+                    label: "Storage extension",
+                    hint: "The recipient can extend the waiting time once.",
+                },
+                storageExtensionDays: {
+                    label: "Extension length",
+                    hint: "How many days the waiting time can be extended by.",
+                },
+                courierCompartmentHoldMinutes: {
+                    label: "Courier compartment hold",
+                    hint: "Maximum time a courier can hold a compartment without a drop-off.",
+                },
+                compartmentReservationHours: {
+                    label: "Compartment reservation",
+                    hint: "How far in advance a compartment is reserved for a shipment. 0 disables reservations.",
+                },
+                oversizedShipmentPolicy: {
+                    label: "Shipment does not fit",
+                    hint: "What happens when a shipment is too large for free compartments.",
+                },
+                suspendAfterCompartmentFailures: {
+                    label: "Suspend locker after failures",
+                    hint: "Number of reported compartment failures after which the locker is suspended. 0 disables the rule.",
+                },
+                maxDistanceKm: {
+                    label: "Maximum point distance",
+                    hint: "Largest distance between the point and the recipient address.",
+                },
+                preference: {
+                    label: "Preferred point type",
+                    hint: "Which point type is suggested first.",
+                },
+                alternativeCount: {
+                    label: "Number of alternatives",
+                    hint: "How many other points to suggest to the recipient.",
+                },
+                fullPointPolicy: {
+                    label: "Full point",
+                    hint: "What happens when the selected point has no free space.",
+                },
+                sameDepartmentOnly: {
+                    label: "Same department only",
+                    hint: "Suggests only points assigned to the department serving the address.",
+                },
+                defaultCapacity: {
+                    label: "Default point capacity",
+                    hint: "Number of shipments a point can hold at once.",
+                },
+                capacityWarningThresholdPercent: {
+                    label: "Fill warning threshold",
+                    hint: "A warning appears after this percentage of capacity is exceeded.",
+                },
+                blockIntakeWhenFull: {
+                    label: "Block intake when full",
+                    hint: "A full point does not accept new shipments.",
+                },
+                requireStatusChangeReason: {
+                    label: "Require status change reason",
+                    hint: "Suspending and closing a point require a reason.",
+                },
+                suspendedPointShipmentPolicy: {
+                    label: "Shipments at a suspended point",
+                    hint: "What happens to shipments waiting at a suspended point.",
+                },
+                blockClosingWithPendingShipments: {
+                    label: "Block closing with shipments",
+                    hint: "Prevents closing a point with shipments waiting for collection.",
+                },
+                autoResumeSuspendedAfterDays: {
+                    label: "Auto resume after",
+                    hint: "A suspended point resumes after this many days. 0 disables the rule.",
+                },
+            },
+            options: {
+                defaultType: {
+                    SERVICE_POINT: "Service point",
+                    PARCEL_LOCKER: "Parcel locker",
+                },
+                verificationMethod: {
+                    PICKUP_CODE: "Pickup code",
+                    SMS_CODE: "SMS code",
+                    ID_DOCUMENT: "Identity document",
+                },
+                oversizedShipmentPolicy: {
+                    REDIRECT_TO_SERVICE_POINT: "Redirect to the nearest service point",
+                    RETURN_TO_DEPARTMENT: "Return to department",
+                },
+                preference: {
+                    NEAREST: "Nearest",
+                    PARCEL_LOCKER: "Parcel locker",
+                    SERVICE_POINT: "Service point",
+                },
+                fullPointPolicy: {
+                    SELECT_NEXT: "Select the next point",
+                    REJECT: "Reject the selection",
+                },
+                suspendedPointShipmentPolicy: {
+                    REDIRECT: "Redirect to another point",
+                    WAIT: "Wait for resumption",
+                    RETURN: "Return to department",
+                },
+                servicePointMaxShipmentSize: {
+                    TINY: "Tiny",
+                    SMALL: "Small",
+                    MEDIUM: "Medium",
+                    AVERAGE: "Large",
+                    BIG: "Extra large",
+                },
+                parcelLockerMaxShipmentSize: {
+                    TINY: "Tiny",
+                    SMALL: "Small",
+                    MEDIUM: "Medium",
+                    AVERAGE: "Large",
+                    BIG: "Extra large",
+                },
+            },
+            validation: {
+                weekdayHoursOrder: "Weekday closing must be later than opening.",
+                saturdayHoursOrder: "Saturday closing must be later than opening.",
+            },
+        },
+        sortingConfiguration: {
+            groups: {
+                requiredScans: {
+                    title: "Required scans",
+                    description: "Warehouse handling steps at which the shipment must be scanned.",
+                },
+                scanErrors: {
+                    title: "Scan errors",
+                    description: "How the terminal reacts to a repeated or invalid scan.",
+                },
+                destinations: {
+                    title: "Shipments without a destination",
+                    description: "Handling of shipments without a resolved destination and unscanned shipments.",
+                },
+            },
+            fields: {
+                requireInboundScan: {
+                    label: "Inbound scan",
+                    hint: "The shipment must be scanned when received at the warehouse.",
+                },
+                requireSortScan: {
+                    label: "Sort scan",
+                    hint: "The shipment must be scanned when assigned to a direction.",
+                },
+                requireOutboundScan: {
+                    label: "Outbound scan",
+                    hint: "The shipment must be scanned when loaded for a route or linehaul.",
+                },
+                requireDamagePhotoOnInbound: {
+                    label: "Damaged parcel photo",
+                    hint: "The terminal requires a photo when a damaged parcel is received.",
+                },
+                duplicateScanPolicy: {
+                    label: "Duplicate scan",
+                    hint: "What the terminal does when the same shipment is scanned again at the same step.",
+                },
+                scanErrorFeedback: {
+                    label: "Scan error signal",
+                    hint: "How an invalid scan is signalled on the terminal.",
+                },
+                unresolvedDestinationPolicy: {
+                    label: "Shipment without a destination",
+                    hint: "What happens when the destination department cannot be resolved.",
+                },
+                exceptionRampCode: {
+                    label: "Exception ramp code",
+                    hint: "Ramp or area for shipments without a destination. Leave empty to use the department's exception area.",
+                },
+                missingInWarehouseAfterHours: {
+                    label: "Missing in warehouse after",
+                    hint: "Time without a scan after which the shipment is marked as missing in the warehouse.",
+                },
+            },
+            options: {
+                duplicateScanPolicy: {
+                    WARN: "Warn and allow",
+                    BLOCK: "Block the scan",
+                    IGNORE: "Ignore",
+                },
+                scanErrorFeedback: {
+                    SOUND_AND_VIBRATION: "Sound and vibration",
+                    SOUND: "Sound",
+                    VIBRATION: "Vibration",
+                    NONE: "None",
+                },
+                unresolvedDestinationPolicy: {
+                    ROUTE_TO_EXCEPTION_RAMP: "Route to exception ramp",
+                    BLOCK: "Block further handling",
+                },
+            },
+        },
+        fleetConfiguration: {
+            groups: {
+                vehicles: {
+                    title: "Vehicles",
+                    description: "Deadline reminders and default vehicle capacity.",
+                },
+                drivers: {
+                    title: "Drivers",
+                    description: "Working time limits and pre-trip checks.",
+                },
+                tracking: {
+                    title: "Tracking",
+                    description: "How often vehicle positions are reported.",
+                },
+            },
+            fields: {
+                vehicleInspectionReminderDays: {
+                    label: "Inspection reminder",
+                    hint: "How many days before the technical inspection to send a reminder.",
+                },
+                vehicleInsuranceReminderDays: {
+                    label: "Insurance reminder",
+                    hint: "How many days before the policy expires to send a reminder.",
+                },
+                defaultVehiclePalletCapacity: {
+                    label: "Default vehicle capacity",
+                    hint: "Pallet count used for a new vehicle without its own value.",
+                },
+                maxDriverShiftHours: {
+                    label: "Maximum driver shift",
+                    hint: "Upper limit of a driver's working time in one shift.",
+                },
+                requiredBreakMinutes: {
+                    label: "Required break",
+                    hint: "Minimum total break for a driver during a shift.",
+                },
+                requirePreTripChecklist: {
+                    label: "Pre-trip vehicle check",
+                    hint: "The driver must complete a vehicle checklist before starting a route.",
+                },
+                gpsPositionIntervalSeconds: {
+                    label: "GPS position interval",
+                    hint: "How often the driver's device sends its current position.",
+                },
+            },
+        },
+        communicationConfiguration: {
+            groups: {
+                email: {
+                    title: "Email messages",
+                    description: "Sender, reply address and footer of customer messages.",
+                },
+                branding: {
+                    title: "Branding",
+                    description: "Logo and accent color in messages and documents.",
+                },
+                chat: {
+                    title: "Organization chat",
+                    description: "Message retention and attachments in chat.",
+                },
+            },
+            fields: {
+                senderName: {
+                    label: "Sender name",
+                    hint: "Name shown as the sender of email messages.",
+                },
+                replyToEmail: {
+                    label: "Reply-to address",
+                    hint: "Address that receives customer replies. Leave empty to skip the Reply-To header.",
+                },
+                emailFooter: {
+                    label: "Message footer",
+                    hint: "Text appended to the end of every email message.",
+                },
+                defaultCustomerLanguage: {
+                    label: "Default communication language",
+                    hint: "Language of customer messages when no other is specified.",
+                },
+                logoUrl: {
+                    label: "Logo URL",
+                    hint: "Public address of the logo image used in messages.",
+                },
+                accentColor: {
+                    label: "Accent color",
+                    hint: "Color of buttons and headings in messages.",
+                },
+                chatMessageRetentionDays: {
+                    label: "Chat message retention",
+                    hint: "Chat messages are deleted after this many days.",
+                },
+                chatAttachmentsAllowed: {
+                    label: "Chat attachments",
+                    hint: "Allows attaching files to chat messages.",
+                },
+                chatMaxAttachmentSizeMb: {
+                    label: "Maximum attachment size",
+                    hint: "Largest allowed size of a single file.",
+                },
+            },
+            options: {
+                defaultCustomerLanguage: {
+                    PL: "Polish",
+                    EN: "English",
+                    DE: "German",
+                },
+            },
+        },
+        regionalConfiguration: {
+            groups: {
+                locale: {
+                    title: "Formats and units",
+                    description: "Time zone, date format, currency and measurement units.",
+                },
+                workingHours: {
+                    title: "Working hours",
+                    description: "Default operator working hours and days.",
+                },
+            },
+            fields: {
+                timeZone: {
+                    label: "Time zone",
+                    hint: "Zone used to display dates and calculate deadlines.",
+                },
+                dateFormat: {
+                    label: "Date format",
+                    hint: "How dates are shown in the app and documents.",
+                },
+                currency: {
+                    label: "Currency",
+                    hint: "Currency of amounts such as cash on delivery and shipment value.",
+                },
+                weightUnit: {
+                    label: "Weight unit",
+                    hint: "Unit used to display shipment weight.",
+                },
+                lengthUnit: {
+                    label: "Length unit",
+                    hint: "Unit used to display shipment dimensions.",
+                },
+                workingDayStart: {
+                    label: "Working day start",
+                    hint: "Time the operator's working day starts.",
+                },
+                workingDayEnd: {
+                    label: "Working day end",
+                    hint: "Time the operator's working day ends.",
+                },
+                saturdayWorkingDay: {
+                    label: "Saturday is a working day",
+                    hint: "Treats Saturday as a working day when calculating deadlines.",
+                },
+                sundayWorkingDay: {
+                    label: "Sunday is a working day",
+                    hint: "Treats Sunday as a working day when calculating deadlines.",
+                },
+            },
+            options: {
+                dateFormat: {
+                    DD_MM_YYYY: "DD.MM.YYYY",
+                    YYYY_MM_DD: "YYYY-MM-DD",
+                    MM_DD_YYYY: "MM/DD/YYYY",
+                },
+                currency: {
+                    PLN: "PLN – Polish zloty",
+                    EUR: "EUR – Euro",
+                    USD: "USD – US dollar",
+                    CZK: "CZK – Czech koruna",
+                    GBP: "GBP – Pound sterling",
+                },
+                weightUnit: {
+                    KG: "Kilograms (kg)",
+                    LB: "Pounds (lb)",
+                },
+                lengthUnit: {
+                    CM: "Centimeters (cm)",
+                    IN: "Inches (in)",
+                },
+            },
+            workingHoursOrderError: "The working day must end after it starts.",
+        },
         shipmentConfiguration: {
             previewNote: "Configuration is loaded and saved for the current operator.",
             categories: {
@@ -2185,6 +2928,11 @@ export const en: typeof pl = {
                 limits: "Limits",
                 workflow: "Workflow",
                 notifications: "Notifications",
+                delivery: "Delivery",
+                returns: "Returns",
+                payments: "Payments",
+                sla: "SLA and exceptions",
+                dataRetention: "Data retention",
             },
             categoryDescriptions: {
                 validation: "Required data and quality checks before a shipment is created.",
@@ -2192,6 +2940,11 @@ export const en: typeof pl = {
                 limits: "Default shipment weight and dimension restrictions.",
                 workflow: "Automated steps performed while a shipment is processed.",
                 notifications: "Events that trigger messages to recipients or senders.",
+                delivery: "Proof of delivery rules and handling of failed delivery attempts.",
+                returns: "Return acceptance and how long shipments wait at pickup points.",
+                payments: "Cash on delivery and shipment insurance requirements.",
+                sla: "Target delivery times and handling of delayed shipments.",
+                dataRetention: "How long the system keeps recipient data and delivery records.",
             },
             fields: {
                 validateAddressData: {
@@ -2306,6 +3059,102 @@ export const en: typeof pl = {
                     label: "Default notification channel",
                     hint: "Channel used when the recipient has not provided a preference.",
                 },
+                requireDeliveryToken: {
+                    label: "Require delivery code",
+                    hint: "The courier must confirm delivery with a code sent to the recipient.",
+                },
+                proofOfDelivery: {
+                    label: "Proof of delivery (POD)",
+                    hint: "Evidence the courier must collect when handing over the shipment.",
+                },
+                maxDeliveryAttempts: {
+                    label: "Maximum delivery attempts",
+                    hint: "After the last attempt the shipment moves to further handling.",
+                },
+                allowNeighbourDelivery: {
+                    label: "Deliver to neighbour",
+                    hint: "Allows handing the shipment to a neighbour when the recipient is absent.",
+                },
+                allowSafePlaceDelivery: {
+                    label: "Deliver to safe place",
+                    hint: "Allows leaving the shipment at a place chosen by the recipient.",
+                },
+                redirectToPickupPointAfterFailure: {
+                    label: "Redirect to pickup point",
+                    hint: "After a failed attempt the shipment goes to the nearest pickup point.",
+                },
+                allowReturns: {
+                    label: "Accept returns",
+                    hint: "Allows registering shipment returns.",
+                },
+                returnWindowDays: {
+                    label: "Return window",
+                    hint: "Number of days after delivery during which a return can be requested.",
+                },
+                autoReturnAfterFailedDelivery: {
+                    label: "Auto return after failed delivery",
+                    hint: "Sends the shipment back to the sender once delivery attempts run out.",
+                },
+                pickupPointStorageDays: {
+                    label: "Pickup point storage time",
+                    hint: "Number of days a shipment waits at a pickup point before return.",
+                },
+                requireReturnReason: {
+                    label: "Require return reason",
+                    hint: "The return reason becomes a required field.",
+                },
+                allowCashOnDelivery: {
+                    label: "Cash on delivery",
+                    hint: "Allows creating shipments with an amount collected from the recipient.",
+                },
+                maxCashOnDeliveryAmount: {
+                    label: "Maximum COD amount",
+                    hint: "Upper limit of the collected amount for a single shipment.",
+                },
+                cashOnDeliveryPaymentMethod: {
+                    label: "COD payment method",
+                    hint: "How the recipient can pay the collected amount.",
+                },
+                requireInsuranceAboveValue: {
+                    label: "Mandatory insurance above value",
+                    hint: "Shipments above this value require insurance. 0 disables the rule.",
+                },
+                economySlaHours: {
+                    label: "Economy service SLA",
+                    hint: "Target delivery time for economy shipments.",
+                },
+                standardSlaHours: {
+                    label: "Standard service SLA",
+                    hint: "Target delivery time for standard shipments.",
+                },
+                expressSlaHours: {
+                    label: "Express service SLA",
+                    hint: "Target delivery time for express shipments.",
+                },
+                flagDelayedAfterHours: {
+                    label: "Flag as delayed after",
+                    hint: "Time without a new scan after which the shipment is flagged as delayed.",
+                },
+                requireExceptionNote: {
+                    label: "Require note on exception",
+                    hint: "An exception status can be set only with a description.",
+                },
+                escalateDelaysToDepartmentManager: {
+                    label: "Escalate delays to department manager",
+                    hint: "Notifies the department manager about delayed shipments.",
+                },
+                anonymizeRecipientDataAfterDays: {
+                    label: "Anonymize recipient data",
+                    hint: "Days after closing a shipment after which recipient data is anonymized.",
+                },
+                archiveClosedShipmentsAfterDays: {
+                    label: "Archive closed shipments",
+                    hint: "Days after closing after which the shipment is archived.",
+                },
+                deliveryPhotoRetentionDays: {
+                    label: "Delivery photo retention",
+                    hint: "Number of days delivery confirmation photos are kept.",
+                },
             },
             values: {
                 enabled: "Enabled",
@@ -2324,6 +3173,22 @@ export const en: typeof pl = {
                 economy: "Economy",
                 standard: "Standard",
                 express: "Express",
+            },
+            proofOfDeliveryOptions: {
+                none: "None",
+                signature: "Signature",
+                photo: "Photo",
+                signatureAndPhoto: "Signature and photo",
+            },
+            cashOnDeliveryPaymentMethodOptions: {
+                cash: "Cash",
+                card: "Card",
+                both: "Cash or card",
+            },
+            units: {
+                days: "days",
+                hours: "h",
+                currency: "PLN",
             },
             notificationChannels: {
                 sms: "SMS",
@@ -2574,6 +3439,14 @@ export const en: typeof pl = {
                     ENFORCED_ON: "Enforced: on",
                     ENFORCED_OFF: "Enforced: off",
                 },
+                modesShort: {
+                    SUPPLIER: "Courier",
+                    ENFORCED_ON: "On",
+                    ENFORCED_OFF: "Off",
+                },
+                enforcedSummary: "{count} of {total} enforced",
+                groupEnforced: "{count} enforced",
+                modeLabel: "Who decides about the setting",
             },
             messages: {
                 loading: "Loading courier configuration...",
@@ -2850,7 +3723,63 @@ export const en: typeof pl = {
             returnDisabledDescription: "Returns are disabled in this operator's configuration.",
         },
     },
+    shipmentRoute: {
+        page: {
+            title: "Shipment route",
+            subtitle: "Check which sorting facilities the shipment passes from the origin department to the delivery department.",
+        },
+        form: {
+            inputLabel: "Tracking number",
+            placeholder: "Enter or scan a tracking number",
+            submit: "Find route",
+            numberRequired: "Enter a tracking number.",
+        },
+        hint: "The route uses delivery network connections only. A direct connection is preferred, then the shortest route through sorting facilities. A regular department is used as a transfer point only when sorting facilities cannot get the shipment further.",
+        result: {
+            title: "Route to the delivery department",
+            trackingNumber: "Tracking number",
+            legs: "Legs",
+            distance: "Straight-line distance",
+            distanceValue: "{distance} km",
+            distanceUnknown: "Department coordinates missing",
+            direct: "Direct connection",
+            transfers: "Transfers: {count}",
+            localDelivery: "The origin department delivers the shipment",
+            legUnknown: "No coordinates",
+        },
+        roles: {
+            origin: "Origin department",
+            transfer: "Transfer",
+            destination: "Delivery department",
+        },
+        map: {
+            title: "Route map",
+            empty: "Route departments have no coordinates, so the map cannot be shown.",
+            missingCoordinates: "Without coordinates, skipped on the map: {codes}",
+        },
+        documents: {
+            route: "Route (PDF)",
+            handlingPlan: "Handling plan (PDF)",
+            downloading: "Preparing PDF...",
+        },
+        errors: {
+            notFound: "The shipment or its delivery was not found.",
+            routeUnavailable: "The route cannot be determined. The shipment has not reached an origin department yet, has no delivery department determined, or the delivery network has no connection to the delivery department.",
+            generic: "Could not determine the shipment route.",
+            documentError: "Could not generate the PDF document.",
+        },
+    },
     shipmentScanner: {
+        tablet: {
+            title: "Tablet mode",
+            enter: "Tablet mode",
+            exit: "Exit",
+            soundOn: "Sound on",
+            soundOff: "Sound off",
+            ready: "Ready to scan",
+            hint: "Scan a code. Tap the screen if the field loses focus.",
+            queued: "Queued",
+        },
         page: {
             title: "Collect shipments from client",
             subtitle: "Scan shipments collected from a client. The list is kept in memory and is sent to the system as one collection when you save it.",
@@ -3511,7 +4440,7 @@ export const en: typeof pl = {
             filterById: "Filter by ID",
             filterByTracking: "Filter by tracking",
             clearFilters: "Clear",
-            localFilterApplied: "The table has been filtered locally",
+            localFilterApplied: "Shipment filter applied",
             localFilterNotFound: "Shipment not found in the saved table",
             invalidShipmentId: "Enter a valid shipment identifier",
             shown: "Shown",
@@ -3522,8 +4451,35 @@ export const en: typeof pl = {
             fallbackRecipient: "Recipient",
             unassigned: "Unassigned",
             selectedActions: "Shipment actions",
+            bulk: {
+                selectRow: "Select shipment {value}",
+                selectPage: "Select all on this page",
+                selected: "Selected: {count}",
+                exportExcel: "Export to Excel",
+                createPallet: "Create pallet",
+                clear: "Clear selection",
+                exported: "Exported {count} shipments",
+                palletCreated: "Created pallet {value}",
+                palletCreateError: "Couldn't create a pallet from the selected shipments",
+            },
+            savedViews: {
+                label: "Saved views",
+                save: "Save view",
+                dialogTitle: "Save current view",
+                nameLabel: "View name",
+                namePlaceholder: "Prepared this week",
+                nameRequired: "Enter a view name",
+                remove: "Remove view {value}",
+                saved: "Saved view {value}",
+                applied: "Applied view {value}",
+            },
             selectShipment: "Select a shipment from the table",
+            planned: "planned",
+            pagination: "Pagination",
+            previousPage: "Previous page",
+            nextPage: "Next page",
             columns: {
+                origin: "Origin department",
                 id: "ID",
                 size: "Size",
                 sender: "Sender",
@@ -3757,6 +4713,7 @@ export const en: typeof pl = {
                 PLANNED: "Shipment planned",
                 CREATED: "Shipment created",
                 PREPARED: "Shipment prepared",
+                COLLECTED: "Shipment collected by courier",
                 ACCEPTED: "Shipment accepted",
                 REROUTE: "Shipment route changed",
                 SENT: "Shipment sent",
@@ -3808,6 +4765,7 @@ export const en: typeof pl = {
             PLANNED: "Planned",
             CREATED: "Created",
             PREPARED: "Prepared",
+            COLLECTED: "Collected by courier",
             ACCEPTED: "Accepted",
             REROUTE: "Rerouting",
             SENT: "Sent",
@@ -3906,10 +4864,6 @@ export const en: typeof pl = {
             trackingNumber: "Pallet number",
             status: "Status",
             shipments: "Shipments",
-            grossWeight: "Gross weight",
-            loadable: "Ready for loading",
-            loadableYes: "Yes",
-            loadableNo: "No",
             modified: "Last change",
         },
         scanner: {
@@ -4119,7 +5073,14 @@ export const en: typeof pl = {
             statusActions: {
                 dispatch: "Dispatch",
                 markDelivered: "Confirm delivery",
-                carrierRequired: "Assign a carrier before the pallet departs.",
+                carrierRequired: "The pallet has no carrier. Revert the loading, assign a carrier and load it again.",
+                operations: "Operations",
+                revertLoading: "Revert and reload",
+                confirmRevertLoading: "Revert the loading of pallet {trackingNumber}? Shipments return to the default status and the pallet delivery is cancelled.",
+                loadingReverted: "The loading has been reverted. You can change the pallet content and load it again.",
+                dispatchTitle: "Dispatch the pallet?",
+                deliveredTitle: "Confirm pallet delivery?",
+                revertLoadingTitle: "Revert the pallet loading?",
                 confirmDispatch: "Mark pallet {trackingNumber} as dispatched?",
                 confirmDelivered: "Confirm delivery of pallet {trackingNumber}?",
                 dispatched: "Pallet dispatched.",
@@ -4186,7 +5147,6 @@ export const en: typeof pl = {
         carrier: {
             title: "Carrier",
             dialogTitle: "Carrier of pallet {trackingNumber}",
-            description: "Pick a carrier from the DriverHub catalogue and the driver and vehicle transporting the pallet.",
             none: "No carrier assigned.",
             carrier: "Carrier",
             selectCarrier: "Select carrier",
@@ -4207,7 +5167,7 @@ export const en: typeof pl = {
             assign: "Assign carrier",
             change: "Change carrier",
             saved: "Pallet carrier saved.",
-            locked: "The carrier cannot be changed after the pallet has departed.",
+            locked: "The carrier cannot be changed after the pallet has been loaded.",
             carrierRequired: "Select a carrier.",
             vehicleRequired: "Enter the vehicle registration or pick a vehicle.",
             loadError: "Could not load carriers.",
@@ -4302,6 +5262,8 @@ export const en: typeof pl = {
                 PALLET_UPDATED: "Pallet data changed",
                 STATUS_CHANGED: "Status changed",
                 LOADED: "Pallet loaded",
+                LOADING_REVERTED: "Loading reverted",
+                UNLOADED: "Unloaded",
                 CANCELLED: "Pallet cancelled",
                 UNKNOWN: "Pallet event",
             },
@@ -4457,6 +5419,133 @@ export const en: typeof pl = {
             carrierRequired: "Select a carrier.",
             nameRequired: "Enter first and last name.",
             error: "Could not add the driver.",
+        },
+    },
+    auditLog: {
+        title: "Change history",
+        loading: "Loading change history...",
+        empty: "No changes recorded.",
+        loadError: "Could not load the change history.",
+        retry: "Try again",
+        loadMore: "Show more ({count})",
+        previousValue: "Before",
+        currentValue: "After",
+        systemActor: "System",
+        yes: "Yes",
+        no: "No",
+        changes: "Changed fields",
+        removed: "removed",
+        actions: {
+            UNKNOWN: "Change",
+            SHIPMENT: {
+                CREATED: "Shipment created",
+                SENDER_CHANGED: "Sender changed",
+                RECIPIENT_CHANGED: "Recipient changed",
+                REROUTED: "Shipment rerouted",
+                TYPE_CHANGED: "Shipment type changed",
+                STATUS_CHANGED: "Status changed",
+                CANCELED: "Shipment canceled",
+                LOCKED: "Shipment locked",
+                SENT: "Shipment sent",
+                COLLECTED: "Shipment collected",
+                DELIVERED: "Shipment delivered",
+                REDIRECTED: "Redirected to sender",
+                RETURNED: "Return registered",
+                RETURN_COMPLETED: "Return completed",
+                NOTE_ADDED: "Note added",
+                DOCUMENT_ADDED: "Document added",
+            },
+            PICKUP_POINT: {
+                CREATED: "Pickup point created",
+                UPDATED: "Pickup point details changed",
+                SUSPENDED: "Pickup point suspended",
+                RESUMED: "Pickup point resumed",
+                CLOSED: "Pickup point closed",
+            },
+            PALLET: {
+                LOADED: "Pallet loaded",
+                LOADING_REVERTED: "Loading reverted",
+                UNLOADED: "Pallet unloaded",
+            },
+            DELIVERY_NETWORK: {
+                CONNECTIONS_CHANGED: "Network connections changed",
+            },
+            DELIVERY: {
+                CREATED: "Delivery created",
+                MODIFIED: "Delivery changed",
+                ATTEMPT_RECORDED: "Delivery attempt recorded",
+                COMPLETED: "Delivery completed",
+                CANCELED: "Delivery canceled",
+            },
+        },
+        fields: {
+            sender: "Sender",
+            recipient: "Recipient",
+            firstName: "First name",
+            lastName: "Last name",
+            email: "E-mail",
+            telephoneNumber: "Phone",
+            street: "Street",
+            postalCode: "Postal code",
+            city: "City",
+            countryCode: "Country",
+            shipmentStatus: "Status",
+            shipmentType: "Shipment type",
+            shipmentRelatedId: "Related shipment",
+            price: "Price",
+            locked: "Locked",
+            signatureRequired: "Signature required",
+            shipmentPriority: "Priority",
+            cancellationReason: "Cancellation reason",
+            dimensions: "Dimensions",
+            weight: "Weight",
+            customerReference: "Customer reference",
+            contentDescription: "Contents",
+            declaredValue: "Declared value",
+            serviceLevel: "Service level",
+            packagingType: "Packaging",
+            "note.internal": "Internal note",
+            "document.filename": "File",
+            code: "Code",
+            name: "Name",
+            type: "Type",
+            status: "Status",
+            capabilities: "Capabilities",
+            address: "Address",
+            buildingNumber: "Building number",
+            unitNumber: "Unit number",
+            coordinates: "Coordinates",
+            latitude: "Latitude",
+            longitude: "Longitude",
+            departmentId: "Department",
+            contact: "Contact",
+            accessInstructions: "Access instructions",
+            openingSchedule: "Opening hours",
+            servicePolicy: "Service policy",
+            allowedShipmentSizes: "Allowed sizes",
+            acceptsDangerousGoods: "Dangerous goods",
+            externalReference: "External reference",
+            networkCode: "Network",
+            pointCode: "Point code",
+            statusReason: "Status reason",
+            trackingNumber: "Pallet number",
+            shipmentIds: "Shipments",
+            originDepartmentId: "Origin department",
+            destinationDepartmentId: "Destination department",
+            unloadedShipmentIds: "Unloaded shipments",
+            missingShipmentIds: "Missing shipments",
+            unloadDepartmentId: "Unloading department",
+            connection: "Department connection",
+            supplierId: "Carrier",
+            vehicleId: "Vehicle",
+            deliveryStatus: "Delivery status",
+            pickupMethod: "Pickup method",
+            method: "Delivery method",
+            pickupPointId: "Pickup point",
+            deliveryPickupPointId: "Delivery point",
+            instructions: "Instructions",
+            plannedAt: "Planned at",
+            deliveredAt: "Delivered at",
         },
     },
 };

@@ -101,6 +101,7 @@ export const de: typeof pl = {
         fullNameDialogDescription: "Ändere die Daten, die in deinem Konto angezeigt werden.",
         apiKeyHelper: "Schlüssel für Integrationen, die im Namen des Kontos arbeiten",
         apiKeyMissing: "Kein API-Schlüssel",
+        apiKeyHidden: "Schlüssel aktiv – neu generieren, um ihn zu kopieren",
         permissions: "Berechtigungen",
         noPermissions: "Keine Berechtigungen zugewiesen",
         fields: {
@@ -148,6 +149,11 @@ export const de: typeof pl = {
     },
     navigation: {
         warehouse: "Lager",
+        scanPlaceholder: "Scannen oder Tracking eingeben",
+        scanShortcut: "Tastenkürzel: Strg+K",
+        currentDepartment: "Ihre Niederlassung",
+        createMenu: "Erstellen",
+        palletFromShipments: "Palette aus Sendungen",
         palletScanner: "Palette scannen",
         palletCreate: "Palette anlegen",
         palletsCancelled: "Stornierte Paletten",
@@ -164,6 +170,8 @@ export const de: typeof pl = {
         shipments: "Sendungen",
         returns: "Retouren",
         deliveries: "Zustellungen",
+        allDeliveries: "Alle Zustellungen",
+        incompleteDeliveries: "Unvollständige Zustellungen",
         shipmentList: "Sendungsliste",
         shipmentCreate: "Sendung erstellen",
         users: "Benutzer",
@@ -188,6 +196,7 @@ export const de: typeof pl = {
         processes: "Prozesse",
         pallets: "Paletten",
         shipmentScanner: "Sendungen scannen",
+        shipmentRoute: "Sendungsroute",
         courierDeliveries: "Sendungen transportieren",
         devicePairing: "Mein Gerät",
         mySettings: "Meine Einstellungen",
@@ -226,6 +235,15 @@ export const de: typeof pl = {
         loading: "Zustellungen werden geladen…",
         loadError: "Zustellungen konnten nicht geladen werden.",
         empty: "Keine Zustellungen vorhanden.",
+        incomplete: {
+            subtitle: "Sendungszustellungen ohne Zustellniederlassung. Legen Sie die Niederlassung fest, damit die Zustellung erfolgen kann.",
+            setDestination: "Niederlassung festlegen",
+            resolveDestination: "Niederlassung neu ermitteln",
+            resolved: "Die Zustellniederlassung der Zustellung {id} wurde ermittelt.",
+            resolveError: "Die Zustellniederlassung konnte nicht ermittelt werden. Legen Sie sie manuell fest.",
+            listTitle: "Zustellungen ohne Zustellniederlassung",
+            empty: "Alle Zustellungen haben eine Zustellniederlassung.",
+        },
         noSteps: "Diese Zustellung hat noch keine Schritte.",
         retry: "Erneut versuchen",
         previous: "Zurück",
@@ -253,6 +271,7 @@ export const de: typeof pl = {
         deliveredLabel: "Zugestellt",
         departmentLabel: "Niederlassung",
         unknown: "Unbekannt",
+        destinationNotDetermined: "Nicht ermittelt",
         filters: {
             title: "Zustellfilter",
             text: "Suchen",
@@ -289,7 +308,7 @@ export const de: typeof pl = {
         lifecycle: {CREATED: "Erstellt", MODIFIED: "Geändert", CANCELED: "Storniert", COMPLETED: "Abgeschlossen"},
         method: {COURIER: "Kurier", PICKUP_POINT: "Abholpunkt", LOCKER: "Paketautomat"},
         outcome: {IN_PROGRESS: "In Bearbeitung", SUCCEEDED: "Erfolgreich", FAILED: "Fehlgeschlagen"},
-        commentCode: {REPLACED_BY_PALLET_DELIVERY: "Durch Palettenzustellung ersetzt"},
+        commentCode: {REPLACED_BY_PALLET_DELIVERY: "Durch Palettenzustellung ersetzt", PALLET_LOADING_REVERTED: "Palettenverladung rückgängig gemacht", UNLOADED_FROM_PALLET: "Von Palette entladen"},
         details: {
             operationsTitle: "Zustellvorgänge",
             lockedHint: "Die Zustellung ist abgeschlossen oder storniert — nur Schrittkommentare sind möglich.",
@@ -351,7 +370,7 @@ export const de: typeof pl = {
             noRelated: "Keine verknüpften Zustellungen.",
             relation: {
                 SOURCE: "Ursprüngliche Zustellung", DERIVED: "Abgeleitete Zustellung",
-                REPLACED_BY: "Durch Palette ersetzt", REPLACES: "Ersetzt Zustellung",
+                REPLACED_BY: "Durch Palette ersetzt", REPLACES: "Ersetzt Zustellung", CONTINUES: "Setzt Zustellung fort", CONTINUED_BY: "Fortgesetzt durch Zustellung",
             },
             mapTitle: "Routenkarte",
             mapUnavailable: "Für die Routenpunkte fehlen Koordinaten.",
@@ -392,6 +411,7 @@ export const de: typeof pl = {
             ACTIVE: "Aktiv",
             SUSPENDED: "Ausgesetzt",
             CLOSED: "Geschlossen",
+            DELETED: "Gelöscht",
         },
         type: {
             SERVICE_POINT: "Servicestelle",
@@ -430,6 +450,16 @@ export const de: typeof pl = {
             success: "Der Punkt wurde aktualisiert",
             error: "Der Punkt konnte nicht aktualisiert werden",
             loadError: "Die Punktdetails konnten nicht geladen werden",
+        },
+        delete: {
+            action: "Löschen",
+            title: "Abholstelle löschen",
+            message: "Abholstelle {code} – {name} löschen? Sie verschwindet aus Katalog, Karte und Stellenauswahl für Sendungen. Verlauf und zugehörige Sendungen bleiben erhalten.",
+            confirm: "Stelle löschen",
+            cancel: "Abbrechen",
+            deleting: "Wird gelöscht...",
+            success: "Abholstelle {code} wurde gelöscht",
+            error: "Die Abholstelle konnte nicht gelöscht werden",
         },
         map: {
             label: "Karte der Abgabe- und Abholpunkte",
@@ -602,6 +632,10 @@ export const de: typeof pl = {
             shipmentScanner: {
                 title: "Sendungen scannen",
                 description: "Sendungen im Lager scannen und operative Daten schnell bearbeiten.",
+            },
+            shipmentRoute: {
+                title: "Sendungsroute",
+                description: "Route einer Sendung zur Zustellniederlassung über Verbindungen und Sortieranlagen ermitteln.",
             },
             courierDeliveries: {
                 title: "Sendungen transportieren",
@@ -966,6 +1000,7 @@ export const de: typeof pl = {
                 SHIPMENT: "Sendungen",
                 DEPARTMENT: "Niederlassungen",
                 DELIVERY: "Zustellungen",
+                PICKUP_POINT: "Abholpunkte",
             },
         },
         system: {
@@ -1550,25 +1585,23 @@ export const de: typeof pl = {
         generator: {
             open: "Layout generieren",
             title: "Automatische Anordnung",
-            autoLayout: "Automatisch anordnen (Wände, Zonen, Sorter, Regale und Stellplätze)",
-            description: "Anhand der Maße platziert der Generator Wände, Wareneingangs- und Warenausgangszonen, einen Sorter mit Förderband zu den Rutschen, Gänge sowie Regale mit Stellplätzen. Jeder Lauf erzeugt eine neue Zufallsvariante.",
+            autoLayout: "Automatisch anordnen (Wareneingang mit Rampen, Arbeitsplätze, Sorter, Rutschen und Ausgangsrampen)",
+            description: "Der Generator baut den Paketfluss durch das ganze Lager auf: Im Wareneingang liegen Entladerampen und Sorter-Zuführungen, über die die Pakete in die Halle kommen, daneben Arbeitsplätze, an denen Mitarbeiter die Pakete annehmen. Danach läuft der Sorter über die gesamte Hallenlänge, und Rutschen auf beiden Seiten führen zu den Ausgangsrampen der verbundenen Niederlassungen (z. B. KT1, PO1). Palettenstellplätze werden nicht generiert – Sie können sie manuell zeichnen.",
             replaceWarning: "Der aktuelle Plan wird im Editor ersetzt. Sie können dies rückgängig machen (Strg+Z) oder vor dem Speichern verwerfen.",
-            includeSorter: "Sorter hinzufügen (Paketförderband)",
-            slotCapacity: "Stellplatzkapazität (Paletten)",
             generate: "Generieren",
-            generated: "Layout generiert: {racks} Regale, {locations} Stellplätze. Plan prüfen und speichern.",
-            createdWithLayout: "Plan {name} wurde mit automatischem Layout erstellt: {racks} Regale, {locations} Stellplätze.",
+            generated: "Layout generiert: {inboundRamps} Eingangsrampen, {workstations} Arbeitsplätze, {ramps} Ausgangsrampen. Plan prüfen und speichern.",
+            createdWithLayout: "Plan {name} wurde mit automatischem Layout erstellt: {inboundRamps} Eingangsrampen, {workstations} Arbeitsplätze, {ramps} Ausgangsrampen.",
+            noDirections: "Die Niederlassung hat noch keine Verbindungen zu anderen Niederlassungen, daher wurden keine Rampen angelegt – Verbindungen im Zustellnetz hinzufügen.",
             layoutSaveError: "Der Plan wurde erstellt, das automatische Layout konnte jedoch nicht gespeichert werden.",
-            capacityInvalid: "Die Stellplatzkapazität muss zwischen 1 und 99 liegen.",
             occupiedBlocked: "Auf dem Plan stehen Paletten. Vor dem Generieren umlagern oder entfernen.",
             labels: {
                 hall: "Halle",
                 inbound: "Wareneingang",
-                outbound: "Warenausgang",
                 sorter: "Sorter",
                 chute: "Rutsche",
-                mainAisle: "Hauptgang",
-                aisle: "Gang",
+                inboundRamp: "Eingangsrampe",
+                infeed: "Zuführung",
+                workstation: "Arbeitsplatz",
             },
         },
         toolbar: {
@@ -1592,7 +1625,12 @@ export const de: typeof pl = {
             AISLE: "Gang",
             ZONE: "Zone",
             RACK: "Regal",
+            INBOUND: "Wareneingang",
+            INBOUND_RAMP: "Eingangsrampe",
+            WORKSTATION: "Arbeitsplatz",
             SORTER: "Sorter (Förderband)",
+            CHUTE: "Rutsche",
+            RAMP: "Rampe (Ausgang)",
             STORAGE_LOCATION: "Stellplatz",
         },
         status: {
@@ -1637,6 +1675,7 @@ export const de: typeof pl = {
                 height: "Länge (m)",
                 rotation: "Drehung (°)",
                 color: "Farbe",
+                destination: "Richtung (Zielniederlassung)",
             },
             occupiedHint: "Auf diesem Stellplatz stehen Paletten – er kann weder gelöscht noch im Typ geändert werden.",
             rotate90: "90° drehen",
@@ -1648,6 +1687,15 @@ export const de: typeof pl = {
                 prefix: "Code-Präfix",
                 generate: "Stellplätze erstellen",
                 generated: "Hinzugefügte Stellplätze: {count}.",
+            },
+            directions: {
+                title: "Richtungen der Niederlassung",
+                description: "Jede Verbindung der Niederlassung ist eine Ausgangsrichtung. Pakete für diese Niederlassung rutschen auf die Rampe mit ihrem Code.",
+                served: "Rampe ✓",
+                addRamp: "Rampe hinzufügen",
+                noConnections: "Die Niederlassung hat keine Verbindungen zu anderen Niederlassungen. Fügen Sie sie im Zustellnetz hinzu, um Rampen anzulegen.",
+                notConnected: "Diese Niederlassung ist nicht mehr mit der aktuellen Niederlassung verbunden.",
+                destinationHint: "Pakete für diese Niederlassung werden zu diesem Element geleitet.",
             },
             saved: "Der Plan wurde gespeichert.",
             saveError: "Der Plan konnte nicht gespeichert werden.",
@@ -1663,6 +1711,9 @@ export const de: typeof pl = {
             duplicateCode: "Stellplatzcode {value} wird mehrfach verwendet.",
             outside: "Element {value} liegt außerhalb des Plans.",
             capacity: "Die Kapazität von Stellplatz {value} muss zwischen 1 und 99 liegen.",
+            missingDestination: "Element {value} benötigt eine Richtung (Zielniederlassung).",
+            unknownDestination: "Niederlassung {value} ist nicht mit dieser Niederlassung verbunden – Richtung der Rampe oder Rutsche ändern.",
+            chuteWithoutRamp: "Die Rutsche nach {value} hat keine Rampe für diese Richtung.",
         },
         search: {
             label: "Palette suchen",
@@ -1766,7 +1817,8 @@ export const de: typeof pl = {
             overviewEmpty: "Keine Grenzen gespeichert. Fügen Sie sie in den Niederlassungsdetails hinzu.",
             title: "Zustellgebiet",
             description: "Zeichnen Sie die von dieser Niederlassung bedienten Gebiete.",
-            localDraft: "Dieser Entwurf wird nur in diesem Browser gespeichert. Er wird nicht an den Server gesendet und beeinflusst die Paketzuordnung nicht.",
+            loading: "Grenzen werden geladen…",
+            loadError: "Zustellgrenzen konnten nicht geladen werden.",
             missingCoordinates: "Für diese Niederlassung fehlen geografische Koordinaten. Ergänzen Sie Adresse und Koordinaten, um ein Gebiet zu zeichnen.",
             mapLabel: "Karte des Zustellgebiets",
             selectHint: "Wählen Sie ein Gebiet auf der Karte oder in der Liste aus, um seine Grenze zu bearbeiten.",
@@ -1789,11 +1841,11 @@ export const de: typeof pl = {
             cancelInsert: "Punkt hinzufügen abbrechen",
             removeArea: "Gebiet entfernen",
             discard: "Änderungen verwerfen",
-            saveDraft: "Entwurf speichern",
+            save: "Grenzen speichern",
             fullScreen: "Karte vergrößern",
             exitFullScreen: "Große Ansicht schließen",
-            saved: "Entwurf in diesem Browser gespeichert.",
-            saveError: "Der Entwurf konnte in diesem Browser nicht gespeichert werden.",
+            saved: "Grenzen gespeichert.",
+            saveError: "Grenzen konnten nicht gespeichert werden.",
             invalidShape: "Die Grenze benötigt mindestens drei Punkte und darf sich nicht selbst schneiden.",
             automatic: "Grenzen für Polen automatisch bestimmen",
             automaticTitle: "Automatische Aufteilung Polens",
@@ -1806,16 +1858,25 @@ export const de: typeof pl = {
             automaticSelected: "Ausgewählte Niederlassungen: {count}",
             automaticSelectOne: "Wählen Sie mindestens eine Niederlassung aus.",
             automaticDirty: "Speichern oder verwerfen Sie die aktuellen Änderungen, bevor Sie Grenzen erzeugen.",
-            automaticDuplicate: "Zwei ausgewählte Niederlassungen haben dieselben Koordinaten. Wählen Sie eine ab oder korrigieren Sie ihren Standort.",
             automaticGenerateError: "Grenzen konnten nicht erzeugt werden. Prüfen Sie die Standorte der Niederlassungen.",
             automaticPreview: "Aufteilung ansehen",
             automaticPreviewTitle: "Vorschau der Aufteilung Polens",
             automaticPreviewHint: "Die Grenzen decken Polen ab und teilen es unter den ausgewählten Niederlassungen auf. Prüfen Sie die Karte vor der Übernahme.",
-            automaticApply: "Entwürfe für Niederlassungen übernehmen",
-            automaticApplied: "Lokale Entwürfe für {count} Niederlassungen gespeichert.",
-            automaticApplyError: "Nicht alle Entwürfe konnten gespeichert werden. Vorherige Entwürfe wurden wiederhergestellt.",
+            automaticApply: "Grenzen für Niederlassungen übernehmen",
+            automaticApplied: "Grenzen für {count} Niederlassungen gespeichert.",
+            automaticApplyError: "Grenzen konnten nicht gespeichert werden. Die bisherigen Grenzen bleiben erhalten.",
             automaticCancel: "Vorschau abbrechen",
             automaticBack: "Zurück zur Auswahl",
+            errors: {
+                INVALID_NAME: "Der Gebietsname muss 1 bis 120 Zeichen haben.",
+                INVALID_BOUNDARY: "Eine Grenze benötigt mindestens drei Punkte und darf sich nicht selbst schneiden.",
+                AREA_NOT_FOUND: "Das Gebiet existiert nicht. Aktualisieren Sie die Ansicht.",
+                DEPARTMENT_NOT_FOUND: "Die Niederlassung existiert nicht oder ist archiviert.",
+                NO_DEPARTMENTS: "Wählen Sie mindestens eine Niederlassung aus.",
+                DEPARTMENT_NOT_ELIGIBLE: "Die gewählte Niederlassung muss aktiv sein, in Polen liegen und gültige Koordinaten haben.",
+                DUPLICATE_COORDINATES: "Zwei ausgewählte Niederlassungen haben dieselben Koordinaten. Wählen Sie eine ab oder korrigieren Sie ihren Standort.",
+                GENERATION_FAILED: "Grenzen konnten nicht berechnet werden. Prüfen Sie die Standorte der Niederlassungen.",
+            },
         },
         page: {
             kicker: "Manager 2.0",
@@ -1942,8 +2003,8 @@ export const de: typeof pl = {
             validationError: "Verbinde folgende Niederlassungen mit einer Sortieranlage: {codes}.",
             validationSuccess: "Jede aktive Niederlassung ist mit mindestens einer Sortieranlage verbunden.",
             missingCoordinates: "{count} aktive Niederlassungen haben keine Koordinaten und können nicht auf der Karte angezeigt werden. Beziehungen können weiterhin über das Formular erstellt werden.",
-            selectSource: "Klicke auf den Punkt der Startniederlassung und danach auf den Punkt der Zielniederlassung.",
-            selectTarget: "Start: {code}. Klicke jetzt auf den Punkt der Zielniederlassung.",
+            selectSource: "Klicken Sie auf eine Niederlassung, um zu beginnen. Klicken Sie dann weitere Niederlassungen an, um sie damit zu verbinden. Klicken Sie auf eine Linie, um eine Relation auszuwählen.",
+            selectTarget: "Start: {code}. Klicken Sie die Niederlassungen an, die mit {code} verbunden werden sollen. Klicken Sie erneut auf {code} oder drücken Sie Esc zum Beenden.",
             mapEmpty: "Keine Punkte zum Anzeigen",
             mapEmptyDescription: "Die aktiven Niederlassungen haben noch keine geografischen Koordinaten.",
             legendDepartment: "Niederlassung",
@@ -1963,6 +2024,17 @@ export const de: typeof pl = {
             currentRelations: "Erstellte Beziehungen",
             emptyRelations: "Es wurden noch keine Beziehungen erstellt.",
             removeRelation: "Beziehung {relation} entfernen",
+            relationExists: "Die Relation {relation} existiert bereits.",
+            relationAdded: "Relation {relation} hinzugefügt. Speichern Sie die Änderungen, um sie zu übernehmen.",
+            relationRemoved: "Relation {relation} entfernt. Speichern Sie die Änderungen, um sie zu übernehmen.",
+            departmentSummary: "{code} · {city} · {type} · Verbindungen: {count}",
+            selectedRelation: "Ausgewählte Relation: {relation}",
+            removeSelectedRelation: "Relation entfernen",
+            finishSelection: "Beenden",
+            legendActive: "Verbindungen der ausgewählten Niederlassung",
+            filterRelations: "Relationen nach Code suchen",
+            showOnMap: "Auf der Karte zeigen",
+            noMatchingRelations: "Keine Relationen entsprechen der Suche.",
             loading: "Gespeichertes Niederlassungsnetz wird geladen...",
             loadError: "Das gespeicherte Niederlassungsnetz konnte nicht geladen werden.",
             saving: "Netz wird gespeichert...",
@@ -1976,6 +2048,27 @@ export const de: typeof pl = {
             importing: "Wird importiert...",
             importSuccess: "Niederlassungen wurden geprüft und Beziehungen aus der Excel-Datei gespeichert.",
             importError: "Niederlassungen und Beziehungen aus der Excel-Datei konnten nicht importiert werden.",
+        },
+        picker: {
+            placeholder: "Nach Code, Ort oder Typ suchen",
+            noResults: "Keine Niederlassungen entsprechen der Suche.",
+        },
+        connections: {
+            title: "Verbindungen im Zustellnetz",
+            description: "Niederlassungen, mit denen diese Niederlassung direkt verbunden ist. Jede Verbindung gilt in beide Richtungen.",
+            count: "Verbindungen: {count}",
+            loading: "Verbindungen werden geladen...",
+            loadError: "Die Verbindungen der Niederlassung konnten nicht geladen werden.",
+            empty: "Diese Niederlassung hat noch keine Verbindungen.",
+            missingSortingFacility: "Die Niederlassung ist mit keiner Sortieranlage verbunden. Fügen Sie eine Verbindung zu einer Sortieranlage hinzu, damit Sendungen ins Netz gelangen.",
+            addLabel: "Mit Niederlassung verbinden",
+            connect: "Verbinden",
+            saving: "Wird gespeichert...",
+            connected: "Mit Niederlassung {code} verbunden.",
+            disconnected: "Verbindung mit Niederlassung {code} entfernt.",
+            disconnect: "Verbindung mit {code} entfernen",
+            openDepartment: "Niederlassung {code} öffnen",
+            saveError: "Die Verbindungen der Niederlassung konnten nicht gespeichert werden.",
         },
         usersDialog: {
             title: "Benutzer der Niederlassung",
@@ -2144,21 +2237,165 @@ export const de: typeof pl = {
                 title: "Niederlassungen",
                 description: "Automatische Zustellgebiete und Verbindungen sowie Einschränkungen für Niederlassungen.",
             },
+            pickupPoints: {
+                title: "Abholstellen",
+                description: "Standardwerte für neue Stellen, Abholregeln, Paketstationen, Stellenauswahl und Status.",
+            },
+            sorting: {
+                title: "Sortierung",
+                description: "Pflichtscans, Umgang mit Scanfehlern und Sendungen ohne Ziel.",
+            },
+            fleet: {
+                title: "Flotte",
+                description: "Fahrzeugerinnerungen, Arbeitszeit der Fahrer und GPS-Ortung.",
+            },
+            communication: {
+                title: "Kommunikation",
+                description: "Absender, Branding und Regeln für den Organisationschat.",
+            },
+            regional: {
+                title: "Regional",
+                description: "Zeitzone, Formate, Einheiten und Arbeitszeiten des Betreibers.",
+            },
         },
         departmentConfiguration: {
             title: "Regeln für Niederlassungen",
             description: "Legen Sie fest, wie die App Zustellgebiete, Verbindungen und Status behandelt.",
-            localNote: "Die Einstellungen werden in diesem Browser gespeichert. Gebiete bleiben lokale Entwürfe. Optionen zum Löschen und Archivieren werden nur in dieser App ausgeblendet. Verbindungen neuer Niederlassungen werden auf dem Server gespeichert.",
+            serverNote: "Die Einstellungen werden in der Betreiberkonfiguration gespeichert und gelten für alle Benutzer. Zustellgrenzen und Verbindungen werden auf dem Server gespeichert.",
             saving: "Speichern…",
             saved: "Einstellungen gespeichert. Gebiete für {areas} Niederlassungen zugeordnet und {connections} Verbindungen hinzugefügt.",
             saveError: "Niederlassungseinstellungen konnten nicht übernommen werden.",
             automationError: "Die Niederlassung wurde erstellt, aber die automatische Gebiets- oder Verbindungszuordnung ist fehlgeschlagen.",
             connectionSkipped: "Die Niederlassung wurde ohne automatische Verbindung erstellt: Ein aktives Sortierzentrum oder Koordinaten fehlen.",
             restrictedStatus: "Diese Statusänderung ist durch die Niederlassungseinstellungen gesperrt.",
+            values: {
+                enabled: "Aktiviert",
+                disabled: "Deaktiviert",
+            },
+            units: {
+                km: "km",
+                days: "Tage",
+                percent: "%",
+                shipments: "Sendungen",
+                couriers: "Kuriere",
+            },
+            validation: {
+                integer: "Geben Sie eine ganze Zahl ein.",
+                range: "Geben Sie einen Wert von {min} bis {max} ein.",
+            },
+            options: {
+                deliveryAreaMode: {
+                    COUNTRY_PARTITION: "Land zwischen Filialen aufteilen",
+                    RADIUS: "Radius um die Filiale",
+                },
+                uncoveredPostalCodePolicy: {
+                    WARN: "Warnen",
+                    ASSIGN_NEAREST: "Der nächsten Filiale zuweisen",
+                    BLOCK: "Blockieren",
+                },
+                workTransferOnDeactivation: {
+                    MANUAL: "Manuell durch die Leitung",
+                    AUTOMATIC: "Automatisch an die nächste Filiale",
+                },
+            },
+            policies: {
+                deliveryAreaPolicy: {
+                    title: "Zustellgebiete",
+                    description: "Wie Zustellgebiete berechnet und nicht abgedeckte Postleitzahlen behandelt werden.",
+                    fields: {
+                        deliveryAreaMode: {
+                            label: "Berechnungsart der Gebiete",
+                            hint: "Wie der Server das Zustellgebiet einer Filiale berechnet.",
+                        },
+                        maxDeliveryRadiusKm: {
+                            label: "Maximaler Zustellradius",
+                            hint: "Radius des Zustellgebiets um die Filiale. Gilt für den Radiusmodus.",
+                        },
+                        allowManualDeliveryAreaEdit: {
+                            label: "Manuelle Gebietsbearbeitung",
+                            hint: "Erlaubt manuelle Änderungen der Gebiete, auch bei automatischer Zuweisung.",
+                        },
+                        recalculateAreasOnStatusChange: {
+                            label: "Gebiete bei Statuswechsel neu berechnen",
+                            hint: "Nach Aktivierung oder Deaktivierung einer Filiale werden die Gebiete neu berechnet.",
+                        },
+                        uncoveredPostalCodePolicy: {
+                            label: "Nicht abgedeckte Postleitzahl",
+                            hint: "Vorgehen, wenn keine Filiale die Postleitzahl der Adresse bedient.",
+                        },
+                    },
+                },
+                connectionPolicy: {
+                    title: "Verbindungen und Netz",
+                    description: "Regeln für die automatische Verbindung von Filialen mit Sortierzentren.",
+                    fields: {
+                        sortingCenterConnectionCount: {
+                            label: "Anzahl verbundener Sortierzentren",
+                            hint: "Mit wie vielen nächstgelegenen Sortierzentren eine neue Filiale verbunden wird.",
+                        },
+                        maxAutoConnectionDistanceKm: {
+                            label: "Maximale Verbindungsentfernung",
+                            hint: "Weiter entfernte Sortierzentren werden nicht automatisch verbunden.",
+                        },
+                        requireSortingConnectionForActivation: {
+                            label: "Verbindung für Aktivierung erforderlich",
+                            hint: "Eine Filiale ohne Verbindung zu einem Sortierzentrum kann nicht aktiviert werden.",
+                        },
+                        bidirectionalConnectionsByDefault: {
+                            label: "Bidirektionale Verbindungen",
+                            hint: "Neue Verbindungen werden standardmäßig in beide Richtungen angelegt.",
+                        },
+                    },
+                },
+                lifecyclePolicy: {
+                    title: "Lebenszyklus und Status",
+                    description: "Regeln für Deaktivierung, Archivierung und Übergabe der Arbeit einer Filiale.",
+                    fields: {
+                        requireStatusChangeReason: {
+                            label: "Grund für Statuswechsel erforderlich",
+                            hint: "Deaktivierung und Archivierung erfordern eine Begründung.",
+                        },
+                        blockDeactivationWithActiveWork: {
+                            label: "Deaktivierung bei aktiver Arbeit blockieren",
+                            hint: "Verhindert die Deaktivierung einer Filiale mit laufenden Sendungen oder zugewiesenen Kurieren.",
+                        },
+                        workTransferOnDeactivation: {
+                            label: "Übergabe bei Deaktivierung",
+                            hint: "Wie Sendungen und Kuriere an eine andere Filiale übergeben werden.",
+                        },
+                        autoArchiveInactiveAfterDays: {
+                            label: "Automatisch archivieren nach",
+                            hint: "Eine inaktive Filiale wird nach dieser Anzahl von Tagen archiviert. 0 deaktiviert die Regel.",
+                        },
+                    },
+                },
+                capacityPolicy: {
+                    title: "Kapazität und Auslastung",
+                    description: "Standarddurchsatz der Filialen und Umgang mit Überlastung.",
+                    fields: {
+                        defaultDailyCapacity: {
+                            label: "Standard-Tageskapazität",
+                            hint: "Sendungen pro Tag für eine Filiale ohne eigenen Wert.",
+                        },
+                        capacityWarningThresholdPercent: {
+                            label: "Warnschwelle Auslastung",
+                            hint: "Ab diesem Prozentsatz der Kapazität erscheint eine Warnung.",
+                        },
+                        redirectOverflowToNeighbour: {
+                            label: "Überlauf an Nachbarn umleiten",
+                            hint: "Sendungen über der Kapazität gehen an die nächste Filiale mit freier Kapazität.",
+                        },
+                        maxCouriersPerDepartment: {
+                            label: "Maximale Anzahl Kuriere",
+                            hint: "Limit der einer Filiale zugewiesenen Kuriere. 0 bedeutet kein Limit.",
+                        },
+                    },
+                },
+            },
             settings: {
                 autoAssignDeliveryAreas: {
                     label: "Zustellgrenzen automatisch zuweisen",
-                    hint: "Beim Speichern und nach dem Hinzufügen einer Niederlassung Polen unter aktiven Niederlassungen mit Standort aufteilen. Ersetzt deren lokale Entwürfe.",
+                    hint: "Beim Speichern und nach dem Hinzufügen einer Niederlassung teilt der Server Polen unter aktiven Niederlassungen mit Standort auf. Ersetzt deren gespeicherte Grenzen.",
                 },
                 autoConnectDepartments: {
                     label: "Niederlassungen automatisch verbinden",
@@ -2174,6 +2411,512 @@ export const de: typeof pl = {
                 },
             },
         },
+        operatorSettings: {
+            previewNote: "Konfigurationsänderungen gelten für alle Benutzer der Organisation",
+            loading: "Konfiguration wird geladen…",
+            loadError: "Die Konfiguration konnte nicht geladen werden.",
+            saving: "Wird gespeichert…",
+            saved: "Konfiguration gespeichert",
+            saveError: "Die Konfiguration konnte nicht gespeichert werden.",
+            colorPicker: "Farbauswahl",
+            values: {
+                enabled: "Aktiviert",
+                disabled: "Deaktiviert",
+            },
+            units: {
+                km: "km",
+                shipments: "Sendungen",
+                characters: "Zeichen",
+                days: "Tage",
+                hours: "Std.",
+                minutes: "Min.",
+                seconds: "s",
+                pallets: "Paletten",
+                megabytes: "MB",
+            },
+            validation: {
+                number: "Geben Sie eine Zahl ein.",
+                integer: "Geben Sie eine ganze Zahl ein.",
+                min: "Der Mindestwert ist {min}.",
+                max: "Der Höchstwert ist {max}.",
+                email: "Geben Sie eine gültige E-Mail-Adresse ein.",
+                url: "Die Adresse muss mit http:// oder https:// beginnen.",
+                color: "Geben Sie eine Farbe im Format #RRGGBB ein.",
+                time: "Geben Sie eine Uhrzeit im Format HH:MM ein.",
+            },
+        },
+        pickupPointConfiguration: {
+            groups: {
+                defaultsPolicy: {
+                    title: "Standardwerte für neue Stellen",
+                    description: "Einstellungen, die eine neue Abholstelle beim Anlegen erhält.",
+                },
+                collectionPolicy: {
+                    title: "Abholung",
+                    description: "Empfängerprüfung, Abholcodes und Erinnerungen.",
+                },
+                lockerPolicy: {
+                    title: "Paketstationen",
+                    description: "Regeln für die Fachnutzung durch Kuriere und den Umgang mit Störungen.",
+                },
+                selectionPolicy: {
+                    title: "Stellenauswahl",
+                    description: "Wie das System eine Abholstelle für eine Sendung vorschlägt.",
+                },
+                capacityPolicy: {
+                    title: "Kapazität und Auslastung",
+                    description: "Standardkapazität der Stellen und Umgang mit vollen Stellen.",
+                },
+                lifecyclePolicy: {
+                    title: "Lebenszyklus und Status",
+                    description: "Regeln zum Aussetzen, Schließen und Wiederaufnehmen von Stellen.",
+                },
+            },
+            fields: {
+                defaultType: {
+                    label: "Standardtyp der Stelle",
+                    hint: "Typ, der beim Anlegen einer neuen Stelle gesetzt wird.",
+                },
+                defaultDropOffEnabled: {
+                    label: "Sendungsannahme",
+                    hint: "Eine neue Stelle nimmt standardmäßig Sendungen an.",
+                },
+                defaultCollectionEnabled: {
+                    label: "Sendungsausgabe",
+                    hint: "Eine neue Stelle gibt standardmäßig Sendungen an Empfänger aus.",
+                },
+                servicePointMaxShipmentSize: {
+                    label: "Max. Größe im Servicepunkt",
+                    hint: "Größte Sendungsgröße, die ein neuer Servicepunkt standardmäßig annimmt.",
+                },
+                parcelLockerMaxShipmentSize: {
+                    label: "Max. Größe in der Paketstation",
+                    hint: "Größte Sendungsgröße, die eine neue Paketstation standardmäßig annimmt.",
+                },
+                defaultAcceptsDangerousGoods: {
+                    label: "Gefahrgut",
+                    hint: "Eine neue Stelle nimmt standardmäßig Gefahrgut an.",
+                },
+                weekdayOpeningTime: {
+                    label: "Öffnung an Werktagen",
+                    hint: "Standardöffnungszeit von Montag bis Freitag.",
+                },
+                weekdayClosingTime: {
+                    label: "Schließung an Werktagen",
+                    hint: "Standardschließzeit von Montag bis Freitag.",
+                },
+                saturdayOpen: {
+                    label: "Samstags geöffnet",
+                    hint: "Eine neue Stelle arbeitet standardmäßig samstags.",
+                },
+                saturdayOpeningTime: {
+                    label: "Öffnung am Samstag",
+                    hint: "Standardöffnungszeit am Samstag.",
+                },
+                saturdayClosingTime: {
+                    label: "Schließung am Samstag",
+                    hint: "Standardschließzeit am Samstag.",
+                },
+                requireCoordinatesForActivation: {
+                    label: "Standort für Aktivierung erforderlich",
+                    hint: "Eine Stelle ohne Koordinaten kann nicht aktiviert werden.",
+                },
+                verificationMethod: {
+                    label: "Empfängerprüfung",
+                    hint: "Wie die Identität des Empfängers bei der Ausgabe bestätigt wird.",
+                },
+                pickupCodeLength: {
+                    label: "Länge des Abholcodes",
+                    hint: "Anzahl der Zeichen im Abholcode.",
+                },
+                pickupCodeValidityHours: {
+                    label: "Gültigkeit des Abholcodes",
+                    hint: "Nach dieser Zeit läuft der Abholcode ab und ein neuer wird benötigt.",
+                },
+                maxInvalidCodeAttempts: {
+                    label: "Fehlversuche mit Code",
+                    hint: "Anzahl der Fehlversuche, nach denen die Abholung gesperrt wird.",
+                },
+                allowAuthorizedPerson: {
+                    label: "Abholung durch Bevollmächtigte",
+                    hint: "Erlaubt die Ausgabe an eine vom Empfänger benannte Person.",
+                },
+                reminderAfterDays: {
+                    label: "Abholerinnerung nach",
+                    hint: "Der Empfänger erhält nach dieser Anzahl von Tagen eine Erinnerung. 0 deaktiviert sie.",
+                },
+                allowStorageExtension: {
+                    label: "Verlängerung der Lagerzeit",
+                    hint: "Der Empfänger kann die Wartezeit einmalig verlängern.",
+                },
+                storageExtensionDays: {
+                    label: "Dauer der Verlängerung",
+                    hint: "Um wie viele Tage die Wartezeit verlängert werden kann.",
+                },
+                courierCompartmentHoldMinutes: {
+                    label: "Fachbelegung durch Kurier",
+                    hint: "Maximale Zeit, die ein Kurier ein Fach ohne Einlage belegen darf.",
+                },
+                compartmentReservationHours: {
+                    label: "Fachreservierung",
+                    hint: "Wie lange im Voraus ein Fach für eine Sendung reserviert wird. 0 deaktiviert Reservierungen.",
+                },
+                oversizedShipmentPolicy: {
+                    label: "Sendung passt nicht ins Fach",
+                    hint: "Vorgehen, wenn eine Sendung für freie Fächer zu groß ist.",
+                },
+                suspendAfterCompartmentFailures: {
+                    label: "Station nach Störungen aussetzen",
+                    hint: "Anzahl gemeldeter Fachstörungen, nach denen die Station ausgesetzt wird. 0 deaktiviert die Regel.",
+                },
+                maxDistanceKm: {
+                    label: "Maximale Entfernung der Stelle",
+                    hint: "Größte Entfernung zwischen Stelle und Empfängeradresse.",
+                },
+                preference: {
+                    label: "Bevorzugter Stellentyp",
+                    hint: "Welcher Stellentyp zuerst vorgeschlagen wird.",
+                },
+                alternativeCount: {
+                    label: "Anzahl Alternativen",
+                    hint: "Wie viele weitere Stellen dem Empfänger vorgeschlagen werden.",
+                },
+                fullPointPolicy: {
+                    label: "Volle Stelle",
+                    hint: "Vorgehen, wenn die gewählte Stelle keinen freien Platz hat.",
+                },
+                sameDepartmentOnly: {
+                    label: "Nur Stellen derselben Filiale",
+                    hint: "Schlägt nur Stellen der Filiale vor, die die Adresse bedient.",
+                },
+                defaultCapacity: {
+                    label: "Standardkapazität der Stelle",
+                    hint: "Anzahl der Sendungen, die eine Stelle gleichzeitig lagern kann.",
+                },
+                capacityWarningThresholdPercent: {
+                    label: "Warnschwelle Füllstand",
+                    hint: "Ab diesem Prozentsatz der Kapazität erscheint eine Warnung.",
+                },
+                blockIntakeWhenFull: {
+                    label: "Annahme bei voller Stelle sperren",
+                    hint: "Eine volle Stelle nimmt keine neuen Sendungen an.",
+                },
+                requireStatusChangeReason: {
+                    label: "Grund für Statuswechsel erforderlich",
+                    hint: "Aussetzen und Schließen einer Stelle erfordern eine Begründung.",
+                },
+                suspendedPointShipmentPolicy: {
+                    label: "Sendungen in ausgesetzter Stelle",
+                    hint: "Was mit wartenden Sendungen in einer ausgesetzten Stelle geschieht.",
+                },
+                blockClosingWithPendingShipments: {
+                    label: "Schließen mit Sendungen sperren",
+                    hint: "Verhindert das Schließen einer Stelle mit wartenden Sendungen.",
+                },
+                autoResumeSuspendedAfterDays: {
+                    label: "Automatisch fortsetzen nach",
+                    hint: "Eine ausgesetzte Stelle arbeitet nach dieser Anzahl von Tagen wieder. 0 deaktiviert die Regel.",
+                },
+            },
+            options: {
+                defaultType: {
+                    SERVICE_POINT: "Servicepunkt",
+                    PARCEL_LOCKER: "Paketstation",
+                },
+                verificationMethod: {
+                    PICKUP_CODE: "Abholcode",
+                    SMS_CODE: "SMS-Code",
+                    ID_DOCUMENT: "Ausweisdokument",
+                },
+                oversizedShipmentPolicy: {
+                    REDIRECT_TO_SERVICE_POINT: "Zum nächsten Servicepunkt umleiten",
+                    RETURN_TO_DEPARTMENT: "An die Filiale zurücksenden",
+                },
+                preference: {
+                    NEAREST: "Nächstgelegene",
+                    PARCEL_LOCKER: "Paketstation",
+                    SERVICE_POINT: "Servicepunkt",
+                },
+                fullPointPolicy: {
+                    SELECT_NEXT: "Nächste Stelle wählen",
+                    REJECT: "Auswahl ablehnen",
+                },
+                suspendedPointShipmentPolicy: {
+                    REDIRECT: "An andere Stelle umleiten",
+                    WAIT: "Auf Wiederaufnahme warten",
+                    RETURN: "An die Filiale zurücksenden",
+                },
+                servicePointMaxShipmentSize: {
+                    TINY: "Sehr klein",
+                    SMALL: "Klein",
+                    MEDIUM: "Mittel",
+                    AVERAGE: "Groß",
+                    BIG: "Sehr groß",
+                },
+                parcelLockerMaxShipmentSize: {
+                    TINY: "Sehr klein",
+                    SMALL: "Klein",
+                    MEDIUM: "Mittel",
+                    AVERAGE: "Groß",
+                    BIG: "Sehr groß",
+                },
+            },
+            validation: {
+                weekdayHoursOrder: "Die Schließzeit an Werktagen muss nach der Öffnungszeit liegen.",
+                saturdayHoursOrder: "Die Schließzeit am Samstag muss nach der Öffnungszeit liegen.",
+            },
+        },
+        sortingConfiguration: {
+            groups: {
+                requiredScans: {
+                    title: "Pflichtscans",
+                    description: "Lagerschritte, bei denen die Sendung gescannt werden muss.",
+                },
+                scanErrors: {
+                    title: "Scanfehler",
+                    description: "Reaktion des Terminals auf einen wiederholten oder fehlerhaften Scan.",
+                },
+                destinations: {
+                    title: "Sendungen ohne Ziel",
+                    description: "Umgang mit Sendungen ohne ermitteltes Ziel und nicht gescannten Sendungen.",
+                },
+            },
+            fields: {
+                requireInboundScan: {
+                    label: "Eingangsscan",
+                    hint: "Die Sendung muss bei der Annahme im Lager gescannt werden.",
+                },
+                requireSortScan: {
+                    label: "Sortierscan",
+                    hint: "Die Sendung muss bei der Zuordnung zu einer Richtung gescannt werden.",
+                },
+                requireOutboundScan: {
+                    label: "Ausgangsscan",
+                    hint: "Die Sendung muss beim Verladen auf eine Tour oder einen Linehaul gescannt werden.",
+                },
+                requireDamagePhotoOnInbound: {
+                    label: "Foto beschädigter Pakete",
+                    hint: "Bei der Annahme eines beschädigten Pakets verlangt das Terminal ein Foto.",
+                },
+                duplicateScanPolicy: {
+                    label: "Doppelter Scan",
+                    hint: "Was das Terminal tut, wenn dieselbe Sendung im selben Schritt erneut gescannt wird.",
+                },
+                scanErrorFeedback: {
+                    label: "Signal bei Scanfehler",
+                    hint: "Wie ein fehlerhafter Scan am Terminal signalisiert wird.",
+                },
+                unresolvedDestinationPolicy: {
+                    label: "Sendung ohne Ziel",
+                    hint: "Vorgehen, wenn die Zielfiliale nicht ermittelt werden kann.",
+                },
+                exceptionRampCode: {
+                    label: "Code der Klärungsrampe",
+                    hint: "Rampe oder Bereich für Sendungen ohne Ziel. Leer lassen, um den Klärungsbereich der Filiale zu verwenden.",
+                },
+                missingInWarehouseAfterHours: {
+                    label: "Im Lager vermisst nach",
+                    hint: "Zeit ohne Scan, nach der die Sendung als im Lager vermisst markiert wird.",
+                },
+            },
+            options: {
+                duplicateScanPolicy: {
+                    WARN: "Warnen und fortfahren",
+                    BLOCK: "Scan blockieren",
+                    IGNORE: "Ignorieren",
+                },
+                scanErrorFeedback: {
+                    SOUND_AND_VIBRATION: "Ton und Vibration",
+                    SOUND: "Ton",
+                    VIBRATION: "Vibration",
+                    NONE: "Keins",
+                },
+                unresolvedDestinationPolicy: {
+                    ROUTE_TO_EXCEPTION_RAMP: "Zur Klärungsrampe leiten",
+                    BLOCK: "Weitere Bearbeitung blockieren",
+                },
+            },
+        },
+        fleetConfiguration: {
+            groups: {
+                vehicles: {
+                    title: "Fahrzeuge",
+                    description: "Terminerinnerungen und Standardkapazität der Fahrzeuge.",
+                },
+                drivers: {
+                    title: "Fahrer",
+                    description: "Arbeitszeitgrenzen und Kontrolle vor Fahrtantritt.",
+                },
+                tracking: {
+                    title: "Ortung",
+                    description: "Wie oft Fahrzeugpositionen gemeldet werden.",
+                },
+            },
+            fields: {
+                vehicleInspectionReminderDays: {
+                    label: "Erinnerung an Hauptuntersuchung",
+                    hint: "Wie viele Tage vor der Hauptuntersuchung erinnert wird.",
+                },
+                vehicleInsuranceReminderDays: {
+                    label: "Erinnerung an Versicherung",
+                    hint: "Wie viele Tage vor Ablauf der Police erinnert wird.",
+                },
+                defaultVehiclePalletCapacity: {
+                    label: "Standardkapazität des Fahrzeugs",
+                    hint: "Palettenanzahl für ein neues Fahrzeug ohne eigenen Wert.",
+                },
+                maxDriverShiftHours: {
+                    label: "Maximale Schichtdauer",
+                    hint: "Obergrenze der Arbeitszeit eines Fahrers pro Schicht.",
+                },
+                requiredBreakMinutes: {
+                    label: "Vorgeschriebene Pause",
+                    hint: "Mindestpause eines Fahrers während der Schicht.",
+                },
+                requirePreTripChecklist: {
+                    label: "Fahrzeugkontrolle vor der Tour",
+                    hint: "Der Fahrer muss vor Tourbeginn eine Fahrzeug-Checkliste ausfüllen.",
+                },
+                gpsPositionIntervalSeconds: {
+                    label: "GPS-Positionsintervall",
+                    hint: "Wie oft das Gerät des Fahrers seine aktuelle Position sendet.",
+                },
+            },
+        },
+        communicationConfiguration: {
+            groups: {
+                email: {
+                    title: "E-Mail-Nachrichten",
+                    description: "Absender, Antwortadresse und Fußzeile von Kundennachrichten.",
+                },
+                branding: {
+                    title: "Branding",
+                    description: "Logo und Akzentfarbe in Nachrichten und Dokumenten.",
+                },
+                chat: {
+                    title: "Organisationschat",
+                    description: "Aufbewahrung von Nachrichten und Anhänge im Chat.",
+                },
+            },
+            fields: {
+                senderName: {
+                    label: "Absendername",
+                    hint: "Name, der als Absender von E-Mails angezeigt wird.",
+                },
+                replyToEmail: {
+                    label: "Antwortadresse",
+                    hint: "Adresse für Antworten von Kunden. Leer lassen, um keinen Reply-To-Header zu setzen.",
+                },
+                emailFooter: {
+                    label: "Fußzeile",
+                    hint: "Text, der jeder E-Mail angehängt wird.",
+                },
+                defaultCustomerLanguage: {
+                    label: "Standardsprache der Kommunikation",
+                    hint: "Sprache der Kundennachrichten, wenn keine andere angegeben ist.",
+                },
+                logoUrl: {
+                    label: "Logo-URL",
+                    hint: "Öffentliche Adresse des Logos in Nachrichten.",
+                },
+                accentColor: {
+                    label: "Akzentfarbe",
+                    hint: "Farbe von Schaltflächen und Überschriften in Nachrichten.",
+                },
+                chatMessageRetentionDays: {
+                    label: "Aufbewahrung von Chatnachrichten",
+                    hint: "Chatnachrichten werden nach dieser Anzahl von Tagen gelöscht.",
+                },
+                chatAttachmentsAllowed: {
+                    label: "Anhänge im Chat",
+                    hint: "Erlaubt das Anhängen von Dateien an Chatnachrichten.",
+                },
+                chatMaxAttachmentSizeMb: {
+                    label: "Maximale Anhangsgröße",
+                    hint: "Größte zulässige Größe einer einzelnen Datei.",
+                },
+            },
+            options: {
+                defaultCustomerLanguage: {
+                    PL: "Polnisch",
+                    EN: "Englisch",
+                    DE: "Deutsch",
+                },
+            },
+        },
+        regionalConfiguration: {
+            groups: {
+                locale: {
+                    title: "Formate und Einheiten",
+                    description: "Zeitzone, Datumsformat, Währung und Maßeinheiten.",
+                },
+                workingHours: {
+                    title: "Arbeitszeiten",
+                    description: "Standardarbeitszeiten und -tage des Betreibers.",
+                },
+            },
+            fields: {
+                timeZone: {
+                    label: "Zeitzone",
+                    hint: "Zone für die Anzeige von Daten und die Berechnung von Fristen.",
+                },
+                dateFormat: {
+                    label: "Datumsformat",
+                    hint: "Darstellung von Daten in der App und in Dokumenten.",
+                },
+                currency: {
+                    label: "Währung",
+                    hint: "Währung von Beträgen wie Nachnahme und Sendungswert.",
+                },
+                weightUnit: {
+                    label: "Gewichtseinheit",
+                    hint: "Einheit für die Anzeige des Sendungsgewichts.",
+                },
+                lengthUnit: {
+                    label: "Längeneinheit",
+                    hint: "Einheit für die Anzeige der Sendungsmaße.",
+                },
+                workingDayStart: {
+                    label: "Beginn des Arbeitstags",
+                    hint: "Uhrzeit, zu der der Arbeitstag beginnt.",
+                },
+                workingDayEnd: {
+                    label: "Ende des Arbeitstags",
+                    hint: "Uhrzeit, zu der der Arbeitstag endet.",
+                },
+                saturdayWorkingDay: {
+                    label: "Samstag ist Arbeitstag",
+                    hint: "Behandelt Samstag bei der Fristberechnung als Arbeitstag.",
+                },
+                sundayWorkingDay: {
+                    label: "Sonntag ist Arbeitstag",
+                    hint: "Behandelt Sonntag bei der Fristberechnung als Arbeitstag.",
+                },
+            },
+            options: {
+                dateFormat: {
+                    DD_MM_YYYY: "TT.MM.JJJJ",
+                    YYYY_MM_DD: "JJJJ-MM-TT",
+                    MM_DD_YYYY: "MM/TT/JJJJ",
+                },
+                currency: {
+                    PLN: "PLN – Polnischer Złoty",
+                    EUR: "EUR – Euro",
+                    USD: "USD – US-Dollar",
+                    CZK: "CZK – Tschechische Krone",
+                    GBP: "GBP – Pfund Sterling",
+                },
+                weightUnit: {
+                    KG: "Kilogramm (kg)",
+                    LB: "Pfund (lb)",
+                },
+                lengthUnit: {
+                    CM: "Zentimeter (cm)",
+                    IN: "Zoll (in)",
+                },
+            },
+            workingHoursOrderError: "Der Arbeitstag muss nach seinem Beginn enden.",
+        },
         shipmentConfiguration: {
             previewNote: "Die Konfiguration wird für den aktuellen Operator geladen und gespeichert.",
             categories: {
@@ -2182,6 +2925,11 @@ export const de: typeof pl = {
                 limits: "Grenzwerte",
                 workflow: "Ablauf",
                 notifications: "Benachrichtigungen",
+                delivery: "Zustellung",
+                returns: "Retouren",
+                payments: "Zahlungen",
+                sla: "SLA und Ausnahmen",
+                dataRetention: "Datenaufbewahrung",
             },
             categoryDescriptions: {
                 validation: "Pflichtangaben und Qualitätsprüfungen vor dem Erstellen einer Sendung.",
@@ -2189,6 +2937,11 @@ export const de: typeof pl = {
                 limits: "Standardgrenzen für Gewicht und Abmessungen von Sendungen.",
                 workflow: "Automatisierte Schritte während der Sendungsbearbeitung.",
                 notifications: "Ereignisse, bei denen Empfänger oder Absender informiert werden.",
+                delivery: "Regeln für den Zustellnachweis und den Umgang mit fehlgeschlagenen Zustellversuchen.",
+                returns: "Annahme von Retouren und Lagerdauer in Abholstellen.",
+                payments: "Nachnahme und Versicherungsanforderungen für Sendungen.",
+                sla: "Zielzustellzeiten und Umgang mit verspäteten Sendungen.",
+                dataRetention: "Wie lange das System Empfängerdaten und Zustellnachweise speichert.",
             },
             fields: {
                 validateAddressData: {
@@ -2303,6 +3056,102 @@ export const de: typeof pl = {
                     label: "Standardkanal für Benachrichtigungen",
                     hint: "Kanal, wenn der Empfänger keine eigene Präferenz angegeben hat.",
                 },
+                requireDeliveryToken: {
+                    label: "Zustellcode erforderlich",
+                    hint: "Der Kurier muss die Zustellung mit einem Code des Empfängers bestätigen.",
+                },
+                proofOfDelivery: {
+                    label: "Zustellnachweis (POD)",
+                    hint: "Nachweis, den der Kurier bei der Übergabe erfassen muss.",
+                },
+                maxDeliveryAttempts: {
+                    label: "Maximale Zustellversuche",
+                    hint: "Nach dem letzten Versuch wird die Sendung weiterbearbeitet.",
+                },
+                allowNeighbourDelivery: {
+                    label: "Zustellung an Nachbarn",
+                    hint: "Erlaubt die Übergabe an einen Nachbarn bei Abwesenheit des Empfängers.",
+                },
+                allowSafePlaceDelivery: {
+                    label: "Zustellung an Ablageort",
+                    hint: "Erlaubt das Ablegen der Sendung an einem vom Empfänger gewählten Ort.",
+                },
+                redirectToPickupPointAfterFailure: {
+                    label: "Umleitung zur Abholstelle",
+                    hint: "Nach einem fehlgeschlagenen Versuch geht die Sendung zur nächsten Abholstelle.",
+                },
+                allowReturns: {
+                    label: "Retouren annehmen",
+                    hint: "Ermöglicht die Erfassung von Retouren.",
+                },
+                returnWindowDays: {
+                    label: "Rückgabefrist",
+                    hint: "Anzahl der Tage nach Zustellung, in denen eine Retoure angemeldet werden kann.",
+                },
+                autoReturnAfterFailedDelivery: {
+                    label: "Automatische Retoure nach Fehlzustellung",
+                    hint: "Sendet die Sendung nach allen Zustellversuchen an den Absender zurück.",
+                },
+                pickupPointStorageDays: {
+                    label: "Lagerdauer in der Abholstelle",
+                    hint: "Anzahl der Tage, die eine Sendung vor der Retoure in der Abholstelle wartet.",
+                },
+                requireReturnReason: {
+                    label: "Retourengrund erforderlich",
+                    hint: "Der Retourengrund wird zum Pflichtfeld.",
+                },
+                allowCashOnDelivery: {
+                    label: "Nachnahme",
+                    hint: "Erlaubt Sendungen, bei denen ein Betrag beim Empfänger kassiert wird.",
+                },
+                maxCashOnDeliveryAmount: {
+                    label: "Maximaler Nachnahmebetrag",
+                    hint: "Obergrenze des Nachnahmebetrags pro Sendung.",
+                },
+                cashOnDeliveryPaymentMethod: {
+                    label: "Zahlungsart Nachnahme",
+                    hint: "Wie der Empfänger den Nachnahmebetrag bezahlen kann.",
+                },
+                requireInsuranceAboveValue: {
+                    label: "Pflichtversicherung ab Warenwert",
+                    hint: "Sendungen über diesem Wert müssen versichert werden. 0 deaktiviert die Regel.",
+                },
+                economySlaHours: {
+                    label: "SLA Economy",
+                    hint: "Zielzustellzeit für Economy-Sendungen.",
+                },
+                standardSlaHours: {
+                    label: "SLA Standard",
+                    hint: "Zielzustellzeit für Standard-Sendungen.",
+                },
+                expressSlaHours: {
+                    label: "SLA Express",
+                    hint: "Zielzustellzeit für Express-Sendungen.",
+                },
+                flagDelayedAfterHours: {
+                    label: "Als verspätet markieren nach",
+                    hint: "Zeit ohne neuen Scan, nach der die Sendung als verspätet markiert wird.",
+                },
+                requireExceptionNote: {
+                    label: "Notiz bei Ausnahme erforderlich",
+                    hint: "Ein Ausnahmestatus kann nur mit Beschreibung gesetzt werden.",
+                },
+                escalateDelaysToDepartmentManager: {
+                    label: "Verspätungen an Filialleitung eskalieren",
+                    hint: "Informiert die Filialleitung über verspätete Sendungen.",
+                },
+                anonymizeRecipientDataAfterDays: {
+                    label: "Empfängerdaten anonymisieren",
+                    hint: "Tage nach Abschluss der Sendung, nach denen Empfängerdaten anonymisiert werden.",
+                },
+                archiveClosedShipmentsAfterDays: {
+                    label: "Abgeschlossene Sendungen archivieren",
+                    hint: "Tage nach Abschluss, nach denen die Sendung archiviert wird.",
+                },
+                deliveryPhotoRetentionDays: {
+                    label: "Aufbewahrung von Zustellfotos",
+                    hint: "Anzahl der Tage, die Fotos zum Zustellnachweis gespeichert werden.",
+                },
             },
             values: {
                 enabled: "Aktiviert",
@@ -2321,6 +3170,22 @@ export const de: typeof pl = {
                 economy: "Economy",
                 standard: "Standard",
                 express: "Express",
+            },
+            proofOfDeliveryOptions: {
+                none: "Keiner",
+                signature: "Unterschrift",
+                photo: "Foto",
+                signatureAndPhoto: "Unterschrift und Foto",
+            },
+            cashOnDeliveryPaymentMethodOptions: {
+                cash: "Bar",
+                card: "Karte",
+                both: "Bar oder Karte",
+            },
+            units: {
+                days: "Tage",
+                hours: "Std.",
+                currency: "PLN",
             },
             notificationChannels: {
                 sms: "SMS",
@@ -2571,6 +3436,14 @@ export const de: typeof pl = {
                     ENFORCED_ON: "Vorgegeben: an",
                     ENFORCED_OFF: "Vorgegeben: aus",
                 },
+                modesShort: {
+                    SUPPLIER: "Kurier",
+                    ENFORCED_ON: "An",
+                    ENFORCED_OFF: "Aus",
+                },
+                enforcedSummary: "{count} von {total} vorgegeben",
+                groupEnforced: "{count} vorgegeben",
+                modeLabel: "Wer über die Einstellung entscheidet",
             },
             messages: {
                 loading: "Kurierkonfiguration wird geladen...",
@@ -2847,7 +3720,63 @@ export const de: typeof pl = {
             returnDisabledDescription: "Retouren sind in der Konfiguration dieses Betreibers deaktiviert.",
         },
     },
+    shipmentRoute: {
+        page: {
+            title: "Sendungsroute",
+            subtitle: "Prüfen Sie, über welche Sortieranlagen die Sendung von der Abgangs- zur Zustellniederlassung gelangt.",
+        },
+        form: {
+            inputLabel: "Sendungsnummer",
+            placeholder: "Sendungsnummer eingeben oder scannen",
+            submit: "Route ermitteln",
+            numberRequired: "Geben Sie eine Sendungsnummer ein.",
+        },
+        hint: "Die Route nutzt ausschließlich Verbindungen des Zustellnetzes. Eine Direktverbindung hat Vorrang, danach der kürzeste Weg über Sortieranlagen. Eine reguläre Niederlassung dient nur dann als Umschlagpunkt, wenn Sortieranlagen die Sendung nicht weiterbringen.",
+        result: {
+            title: "Route zur Zustellniederlassung",
+            trackingNumber: "Sendungsnummer",
+            legs: "Abschnitte",
+            distance: "Luftlinie",
+            distanceValue: "{distance} km",
+            distanceUnknown: "Koordinaten der Niederlassungen fehlen",
+            direct: "Direktverbindung",
+            transfers: "Umschläge: {count}",
+            localDelivery: "Die Abgangsniederlassung stellt die Sendung zu",
+            legUnknown: "Keine Koordinaten",
+        },
+        roles: {
+            origin: "Abgangsniederlassung",
+            transfer: "Umschlag",
+            destination: "Zustellniederlassung",
+        },
+        map: {
+            title: "Routenkarte",
+            empty: "Die Niederlassungen der Route haben keine Koordinaten, daher kann die Karte nicht angezeigt werden.",
+            missingCoordinates: "Ohne Koordinaten, auf der Karte ausgelassen: {codes}",
+        },
+        documents: {
+            route: "Route (PDF)",
+            handlingPlan: "Umschlagplan (PDF)",
+            downloading: "PDF wird erstellt...",
+        },
+        errors: {
+            notFound: "Die Sendung oder ihre Zustellung wurde nicht gefunden.",
+            routeUnavailable: "Die Route kann nicht ermittelt werden. Die Sendung hat noch keine Abgangsniederlassung erreicht, für sie wurde keine Zustellniederlassung ermittelt oder im Zustellnetz fehlt eine Verbindung zur Zustellniederlassung.",
+            generic: "Die Sendungsroute konnte nicht ermittelt werden.",
+            documentError: "Das PDF-Dokument konnte nicht erstellt werden.",
+        },
+    },
     shipmentScanner: {
+        tablet: {
+            title: "Tablet-Modus",
+            enter: "Tablet-Modus",
+            exit: "Beenden",
+            soundOn: "Ton an",
+            soundOff: "Ton aus",
+            ready: "Bereit zum Scannen",
+            hint: "Code scannen. Tippen Sie auf den Bildschirm, wenn das Feld den Fokus verliert.",
+            queued: "In der Warteschlange",
+        },
         page: {
             title: "Sendungsabholung beim Kunden",
             subtitle: "Scannen Sie beim Kunden abgeholte Sendungen. Die Liste bleibt im Speicher und wird beim Speichern als eine Abholung an das System gesendet.",
@@ -3507,7 +4436,7 @@ export const de: typeof pl = {
             filterById: "Nach ID filtern",
             filterByTracking: "Nach Tracking filtern",
             clearFilters: "Zurücksetzen",
-            localFilterApplied: "Tabelle wurde lokal gefiltert",
+            localFilterApplied: "Sendungsfilter angewendet",
             localFilterNotFound: "Sendung wurde in der gespeicherten Tabelle nicht gefunden",
             invalidShipmentId: "Gib eine gültige Sendungskennung ein",
             shown: "Angezeigt",
@@ -3518,8 +4447,35 @@ export const de: typeof pl = {
             fallbackRecipient: "Empfänger",
             unassigned: "Nicht zugewiesen",
             selectedActions: "Sendungsaktionen",
+            bulk: {
+                selectRow: "Sendung {value} auswählen",
+                selectPage: "Alle auf dieser Seite auswählen",
+                selected: "Ausgewählt: {count}",
+                exportExcel: "Nach Excel exportieren",
+                createPallet: "Palette erstellen",
+                clear: "Auswahl aufheben",
+                exported: "{count} Sendungen exportiert",
+                palletCreated: "Palette {value} erstellt",
+                palletCreateError: "Aus den ausgewählten Sendungen konnte keine Palette erstellt werden",
+            },
+            savedViews: {
+                label: "Gespeicherte Ansichten",
+                save: "Ansicht speichern",
+                dialogTitle: "Aktuelle Ansicht speichern",
+                nameLabel: "Name der Ansicht",
+                namePlaceholder: "Vorbereitet diese Woche",
+                nameRequired: "Geben Sie einen Namen ein",
+                remove: "Ansicht {value} entfernen",
+                saved: "Ansicht {value} gespeichert",
+                applied: "Ansicht {value} angewendet",
+            },
             selectShipment: "Sendung aus der Tabelle wählen",
+            planned: "geplant",
+            pagination: "Seitennavigation",
+            previousPage: "Vorherige Seite",
+            nextPage: "Nächste Seite",
             columns: {
+                origin: "Abgangsniederlassung",
                 id: "ID",
                 size: "Größe",
                 sender: "Absender",
@@ -3753,6 +4709,7 @@ export const de: typeof pl = {
                 PLANNED: "Sendung geplant",
                 CREATED: "Sendung erstellt",
                 PREPARED: "Sendung vorbereitet",
+                COLLECTED: "Sendung vom Kurier abgeholt",
                 ACCEPTED: "Sendung angenommen",
                 REROUTE: "Sendungsroute geändert",
                 SENT: "Sendung versendet",
@@ -3804,6 +4761,7 @@ export const de: typeof pl = {
             PLANNED: "Geplant",
             CREATED: "Erstellt",
             PREPARED: "Vorbereitet",
+            COLLECTED: "Vom Kurier abgeholt",
             ACCEPTED: "Angenommen",
             REROUTE: "Routenänderung läuft",
             SENT: "Versendet",
@@ -3859,6 +4817,7 @@ export const de: typeof pl = {
             "PLANNED",
             "CREATED",
             "PREPARED",
+            "COLLECTED",
             "ACCEPTED",
             "SENT",
             "DELIVERY",
@@ -3913,10 +4872,6 @@ export const de: typeof pl = {
             trackingNumber: "Palettennummer",
             status: "Status",
             shipments: "Sendungen",
-            grossWeight: "Bruttogewicht",
-            loadable: "Bereit zur Verladung",
-            loadableYes: "Ja",
-            loadableNo: "Nein",
             modified: "Letzte Änderung",
         },
         scanner: {
@@ -4126,7 +5081,14 @@ export const de: typeof pl = {
             statusActions: {
                 dispatch: "Abfahrt melden",
                 markDelivered: "Zustellung bestätigen",
-                carrierRequired: "Weisen Sie einen Frachtführer zu, bevor die Palette abfährt.",
+                carrierRequired: "Die Palette hat keinen Frachtführer. Machen Sie die Verladung rückgängig, weisen Sie einen Frachtführer zu und verladen Sie sie erneut.",
+                operations: "Vorgänge",
+                revertLoading: "Rückgängig machen und neu verladen",
+                confirmRevertLoading: "Verladung der Palette {trackingNumber} rückgängig machen? Die Sendungen erhalten wieder den Standardstatus und die Palettenzustellung wird storniert.",
+                loadingReverted: "Die Verladung wurde rückgängig gemacht. Sie können den Inhalt ändern und die Palette erneut verladen.",
+                dispatchTitle: "Palette abfahren lassen?",
+                deliveredTitle: "Zustellung der Palette bestätigen?",
+                revertLoadingTitle: "Verladung der Palette rückgängig machen?",
                 confirmDispatch: "Palette {trackingNumber} als abgefahren markieren?",
                 confirmDelivered: "Zustellung der Palette {trackingNumber} bestätigen?",
                 dispatched: "Palette ist abgefahren.",
@@ -4193,7 +5155,6 @@ export const de: typeof pl = {
         carrier: {
             title: "Carrier",
             dialogTitle: "Carrier of pallet {trackingNumber}",
-            description: "Pick a carrier from the DriverHub catalogue and the driver and vehicle transporting the pallet.",
             none: "No carrier assigned.",
             carrier: "Carrier",
             selectCarrier: "Select carrier",
@@ -4214,7 +5175,7 @@ export const de: typeof pl = {
             assign: "Assign carrier",
             change: "Change carrier",
             saved: "Pallet carrier saved.",
-            locked: "The carrier cannot be changed after the pallet has departed.",
+            locked: "Der Frachtführer kann nach dem Verladen der Palette nicht geändert werden.",
             carrierRequired: "Select a carrier.",
             vehicleRequired: "Enter the vehicle registration or pick a vehicle.",
             loadError: "Could not load carriers.",
@@ -4309,6 +5270,8 @@ export const de: typeof pl = {
                 PALLET_UPDATED: "Palettendaten geändert",
                 STATUS_CHANGED: "Status geändert",
                 LOADED: "Palette verladen",
+                LOADING_REVERTED: "Verladung rückgängig gemacht",
+                UNLOADED: "Entladen",
                 CANCELLED: "Palette storniert",
                 UNKNOWN: "Palettenereignis",
             },
@@ -4464,6 +5427,133 @@ export const de: typeof pl = {
             carrierRequired: "Frachtführer wählen.",
             nameRequired: "Vor- und Nachnamen eingeben.",
             error: "Fahrer konnte nicht hinzugefügt werden.",
+        },
+    },
+    auditLog: {
+        title: "Änderungsverlauf",
+        loading: "Änderungsverlauf wird geladen...",
+        empty: "Keine Änderungen erfasst.",
+        loadError: "Der Änderungsverlauf konnte nicht geladen werden.",
+        retry: "Erneut versuchen",
+        loadMore: "Mehr anzeigen ({count})",
+        previousValue: "Vorher",
+        currentValue: "Nachher",
+        systemActor: "System",
+        yes: "Ja",
+        no: "Nein",
+        changes: "Geänderte Felder",
+        removed: "entfernt",
+        actions: {
+            UNKNOWN: "Änderung",
+            SHIPMENT: {
+                CREATED: "Sendung erstellt",
+                SENDER_CHANGED: "Absender geändert",
+                RECIPIENT_CHANGED: "Empfänger geändert",
+                REROUTED: "Sendung umgeleitet",
+                TYPE_CHANGED: "Sendungstyp geändert",
+                STATUS_CHANGED: "Status geändert",
+                CANCELED: "Sendung storniert",
+                LOCKED: "Sendung gesperrt",
+                SENT: "Sendung versendet",
+                COLLECTED: "Sendung abgeholt",
+                DELIVERED: "Sendung zugestellt",
+                REDIRECTED: "An Absender zurückgeleitet",
+                RETURNED: "Retoure erfasst",
+                RETURN_COMPLETED: "Retoure abgeschlossen",
+                NOTE_ADDED: "Notiz hinzugefügt",
+                DOCUMENT_ADDED: "Dokument hinzugefügt",
+            },
+            PICKUP_POINT: {
+                CREATED: "Abholpunkt erstellt",
+                UPDATED: "Abholpunktdaten geändert",
+                SUSPENDED: "Abholpunkt pausiert",
+                RESUMED: "Abholpunkt fortgesetzt",
+                CLOSED: "Abholpunkt geschlossen",
+            },
+            PALLET: {
+                LOADED: "Palette verladen",
+                LOADING_REVERTED: "Verladung zurückgenommen",
+                UNLOADED: "Palette entladen",
+            },
+            DELIVERY_NETWORK: {
+                CONNECTIONS_CHANGED: "Netzverbindungen geändert",
+            },
+            DELIVERY: {
+                CREATED: "Zustellung erstellt",
+                MODIFIED: "Zustellung geändert",
+                ATTEMPT_RECORDED: "Zustellversuch erfasst",
+                COMPLETED: "Zustellung abgeschlossen",
+                CANCELED: "Zustellung storniert",
+            },
+        },
+        fields: {
+            sender: "Absender",
+            recipient: "Empfänger",
+            firstName: "Vorname",
+            lastName: "Nachname",
+            email: "E-Mail",
+            telephoneNumber: "Telefon",
+            street: "Straße",
+            postalCode: "Postleitzahl",
+            city: "Ort",
+            countryCode: "Land",
+            shipmentStatus: "Status",
+            shipmentType: "Sendungstyp",
+            shipmentRelatedId: "Verknüpfte Sendung",
+            price: "Preis",
+            locked: "Gesperrt",
+            signatureRequired: "Unterschrift erforderlich",
+            shipmentPriority: "Priorität",
+            cancellationReason: "Stornierungsgrund",
+            dimensions: "Maße",
+            weight: "Gewicht",
+            customerReference: "Kundenreferenz",
+            contentDescription: "Inhalt",
+            declaredValue: "Deklarierter Wert",
+            serviceLevel: "Servicelevel",
+            packagingType: "Verpackung",
+            "note.internal": "Interne Notiz",
+            "document.filename": "Datei",
+            code: "Code",
+            name: "Name",
+            type: "Typ",
+            status: "Status",
+            capabilities: "Funktionen",
+            address: "Adresse",
+            buildingNumber: "Hausnummer",
+            unitNumber: "Wohnungsnummer",
+            coordinates: "Koordinaten",
+            latitude: "Breite",
+            longitude: "Länge",
+            departmentId: "Niederlassung",
+            contact: "Kontakt",
+            accessInstructions: "Zugangshinweise",
+            openingSchedule: "Öffnungszeiten",
+            servicePolicy: "Serviceregeln",
+            allowedShipmentSizes: "Erlaubte Größen",
+            acceptsDangerousGoods: "Gefahrgut",
+            externalReference: "Externe Referenz",
+            networkCode: "Netz",
+            pointCode: "Punktcode",
+            statusReason: "Statusgrund",
+            trackingNumber: "Palettennummer",
+            shipmentIds: "Sendungen",
+            originDepartmentId: "Abgangsniederlassung",
+            destinationDepartmentId: "Zielniederlassung",
+            unloadedShipmentIds: "Entladene Sendungen",
+            missingShipmentIds: "Fehlende Sendungen",
+            unloadDepartmentId: "Entladeniederlassung",
+            connection: "Niederlassungsverbindung",
+            supplierId: "Frachtführer",
+            vehicleId: "Fahrzeug",
+            deliveryStatus: "Zustellstatus",
+            pickupMethod: "Abholart",
+            method: "Zustellart",
+            pickupPointId: "Abholpunkt",
+            deliveryPickupPointId: "Zustellpunkt",
+            instructions: "Hinweise",
+            plannedAt: "Geplant am",
+            deliveredAt: "Zugestellt am",
         },
     },
 };
