@@ -60,6 +60,10 @@ const changeStatus = async (
     );
 };
 
+const deletePickupPoint = async (pickupPointId: string): Promise<ApiResult<void>> => {
+    return client.delete<undefined, void>(`/pickup-points/${encodeURIComponent(pickupPointId)}`, undefined);
+};
+
 const PickupPointService = {
     search,
     findEligible,
@@ -67,6 +71,7 @@ const PickupPointService = {
     create,
     update,
     changeStatus,
+    delete: deletePickupPoint,
 };
 
 export default PickupPointService;
