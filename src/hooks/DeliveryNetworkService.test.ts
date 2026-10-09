@@ -117,4 +117,50 @@ describe("DeliveryNetworkService", () => {
         expect(request.data).toBeInstanceOf(FormData);
         expect(request.data.get("file")).toBe(file);
     });
+    it("loads the shipment delivery route by tracking number", async () => {
+        mockManagerRequest.mockResolvedValue({
+            data: {
+                shipmentId: 7037389207610229001,
+                trackingNumber: "TN 1/2",
+                departments: [
+                    {departmentId: {value: "1"}, departmentCode: "KT1", departmentType: "BRANCH"},
+                    {departmentId: {value: "2"}, departmentCode: "NCS", departmentType: "SORTING_FACILITY"},
+                ],
+                distanceInKilometers: null,
+            },
+            status: 200,
+        });
+
+        const response = await DeliveryNetworkService.getShipmentRoute("TN 1/2");
+
+        expect(response.data.departments).toEqual([
+            {departmentId: "1", departmentCode: "KT1", departmentType: "BRANCH"},
+            {departmentId: "2", departmentCode: "NCS", departmentType: "SORTING_FACILITY"},
+        ]);
+        expect(response.data.distanceInKilometers).toBeNull();
+        expect(mockManagerRequest).toHaveBeenCalledWith({
+            method: "GET",
+            url: "/delivery-networks/current/shipment-routes/TN%201%2F2",
+            params: undefined,
+            headers: undefined,
+        });
+    });
+    it("downloads the shipment handling plan PDF with the backend file name", async () => {
+        const pdf = new Blob(["%PDF-"], {type: "application/pdf"});
+        mockManagerRequest.mockResolvedValue({
+            data: pdf,
+            status: 200,
+            headers: {"content-disposition": 'attachment; filename="plan-przeladunkow-TN-1.pdf"'},
+        });
+
+        const document = await DeliveryNetworkService.getShipmentRouteDocument("TN-1", "handling-plan");
+
+        expect(document).toEqual({blob: pdf, filename: "plan-przeladunkow-TN-1.pdf"});
+        expect(mockManagerRequest).toHaveBeenCalledWith({
+            method: "GET",
+            url: "/delivery-networks/current/shipment-routes/TN-1/documents/handling-plan",
+            params: {language: "pl"},
+            responseType: "blob",
+        });
+    });
 });

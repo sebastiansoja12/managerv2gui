@@ -4,12 +4,16 @@ import {
     DepartmentRelation,
     canonicalDepartmentRelation,
 } from "../components/Departments/model/DepartmentRelation";
+import {ShipmentRoute} from "../components/ShipmentRoute/model/ShipmentRoute";
 import http from "../http-common";
+import {getLanguage} from "../i18n/languageStore";
 
 export type DeliveryNetworkWorkbook = {
     blob: Blob;
     filename: string;
 };
+
+export type ShipmentRouteDocumentKind = "route" | "handling-plan";
 
 type DepartmentIdApi = {
     value: string;
@@ -24,13 +28,26 @@ type DeliveryNetworkApi = {
     connections: DepartmentConnectionApi[];
 };
 
+type DeliveryRouteDepartmentApi = {
+    departmentId: DepartmentIdApi;
+    departmentCode: string;
+    departmentType: string;
+};
+
+type ShipmentDeliveryRouteApi = {
+    shipmentId: string;
+    trackingNumber: string;
+    departments: DeliveryRouteDepartmentApi[];
+    distanceInKilometers: number | null;
+};
+
 const client = new BackendClient(http);
 
 const DEFAULT_WORKBOOK_FILENAME = "delivery-network.xlsx";
 
-const filenameFromDisposition = (contentDisposition?: string) => {
+const filenameFromDisposition = (contentDisposition?: string, fallbackFilename = DEFAULT_WORKBOOK_FILENAME) => {
     if (!contentDisposition) {
-        return DEFAULT_WORKBOOK_FILENAME;
+        return fallbackFilename;
     }
 
     const encodedFilename = contentDisposition.match(/filename\*=UTF-8''([^;]+)/i)?.[1];
@@ -43,7 +60,7 @@ const filenameFromDisposition = (contentDisposition?: string) => {
     }
 
     return contentDisposition.match(/filename\s*=\s*"?([^";]+)"?/i)?.[1]?.trim()
-        || DEFAULT_WORKBOOK_FILENAME;
+        || fallbackFilename;
 };
 
 export const mapDeliveryNetworkFromApi = (deliveryNetwork: DeliveryNetworkApi): DepartmentRelation[] => (
@@ -127,12 +144,54 @@ const importCurrentNetwork = async (file: File): Promise<ApiResult<DepartmentRel
     };
 };
 
+export const mapShipmentRouteFromApi = (shipmentRoute: ShipmentDeliveryRouteApi): ShipmentRoute => ({
+    shipmentId: String(shipmentRoute.shipmentId),
+    trackingNumber: shipmentRoute.trackingNumber,
+    departments: shipmentRoute.departments.map((department) => ({
+        departmentId: String(department.departmentId.value),
+        departmentCode: department.departmentCode,
+        departmentType: department.departmentType,
+    })),
+    distanceInKilometers: shipmentRoute.distanceInKilometers ?? null,
+});
+
+const getShipmentRoute = async (trackingNumber: string): Promise<ApiResult<ShipmentRoute>> => {
+    const response = await client.get<ShipmentDeliveryRouteApi>(
+        `/delivery-networks/current/shipment-routes/${encodeURIComponent(trackingNumber)}`,
+    );
+    return {
+        data: mapShipmentRouteFromApi(response.data),
+        status: response.status,
+    };
+};
+
+const getShipmentRouteDocument = async (
+    trackingNumber: string,
+    documentKind: ShipmentRouteDocumentKind,
+): Promise<DeliveryNetworkWorkbook> => {
+    const response = await http.request<Blob>({
+        method: "GET",
+        url: `/delivery-networks/current/shipment-routes/${encodeURIComponent(trackingNumber)}/documents/${documentKind}`,
+        params: {language: getLanguage()},
+        responseType: "blob",
+    });
+    return {
+        blob: response.data,
+        filename: filenameFromDisposition(
+            response.headers["content-disposition"],
+            `${documentKind}-${trackingNumber}.pdf`,
+        ),
+    };
+};
+
 const DeliveryNetworkService = {
     getCurrentNetwork,
     replaceCurrentNetwork,
     exportCurrentNetwork,
     importCurrentNetwork,
     saveWorkbook,
+    getShipmentRoute,
+    getShipmentRouteDocument,
 };
 
 export default DeliveryNetworkService;

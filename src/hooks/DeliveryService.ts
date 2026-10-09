@@ -64,6 +64,9 @@ const unassignSupplier = (deliveryId: string) =>
 const changeRoute = (deliveryId: string, request: DeliveryRouteRequest) =>
     client.put<DeliveryRouteRequest, Delivery>(`${deliveryPath(deliveryId)}/route`, request);
 
+const resolveDestination = (deliveryId: string) =>
+    client.post<Record<string, never>, Delivery>(`${deliveryPath(deliveryId)}/destination/resolve`, {});
+
 const changeConditions = (deliveryId: string, request: DeliveryConditionsRequest) =>
     client.put<DeliveryConditionsRequest, Delivery>(`${deliveryPath(deliveryId)}/conditions`, request);
 
@@ -101,6 +104,7 @@ const DeliveryService = {
     assignSupplier,
     unassignSupplier,
     changeRoute,
+    resolveDestination,
     changeConditions,
     registerAttempt,
     complete,
