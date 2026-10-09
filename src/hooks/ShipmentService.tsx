@@ -8,6 +8,7 @@ import {
     ShipmentDetailsDto,
     ShipmentDeliveryRequestApiDto,
     ShipmentDto,
+    ShipmentPageDto,
     ShipmentResponseInformation,
     ShipmentReturnRequestApi,
     ShipmentSearchRequestApi,
@@ -26,7 +27,7 @@ const create = (data: ShipmentCreateRequestApi) => {
 };
 
 const search = (data: ShipmentSearchRequestApi) => {
-    return client.post<ShipmentSearchRequestApi, ShipmentDto[]>("/shipments/read-model/search", data);
+    return client.post<ShipmentSearchRequestApi, ShipmentPageDto>("/shipments/read-model/search", data);
 };
 
 const get = async (shipmentId: string) => {
@@ -43,7 +44,7 @@ const get = async (shipmentId: string) => {
             page: 0,
             size: 1,
         });
-        const shipment = response.data[0];
+        const shipment = response.data.content[0];
         if (!shipment) {
             throw error;
         }
