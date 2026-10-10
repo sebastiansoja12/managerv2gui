@@ -9,11 +9,11 @@
 .super-admin-app :is(.super-admin-kicker, dt),
 [data-ui="input-label"] {
     color: var(--muted-foreground) !important;
-    font-family: var(--font-mono) !important;
+    font-family: var(--font-ui) !important;
     font-size: 0.68rem !important;
     font-weight: 600 !important;
-    letter-spacing: 0.075em !important;
-    text-transform: uppercase;
+    letter-spacing: 0 !important;
+    text-transform: none;
 }
 
 .app-main-content :is(p, small, dd),
