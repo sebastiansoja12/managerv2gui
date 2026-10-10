@@ -2,6 +2,7 @@ import axios from "axios";
 
 type ErrorPayload = {
     message?: unknown;
+    detail?: unknown;
     error?: unknown;
     details?: unknown;
     errors?: unknown;
@@ -23,6 +24,7 @@ const stringifyValue = (value: unknown): string => {
     if (typeof value === "object") {
         const record = value as ErrorPayload;
         return stringifyValue(record.message)
+            || stringifyValue(record.detail)
             || stringifyValue(record.error)
             || stringifyValue(record.errors)
             || stringifyValue(record.details);
