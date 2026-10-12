@@ -18,6 +18,7 @@ export type CurrentUserDto = {
     email: string;
     role: string;
     departmentCode: string;
+    homeDepartmentCode?: string | null;
     language: string;
     hasApiKey: boolean;
     apiKey?: string | null;
