@@ -43,6 +43,7 @@ import {
 import {OrganizationChatDockProvider} from "../Chat/ChatDockContext";
 import OrganizationChatDock from "../Chat/OrganizationChatDock";
 import {useOperatorCapabilities} from "./OperatorCapabilitiesContext";
+import UserOnboardingFlow from "../Onboarding/UserOnboardingFlow";
 
 const homeTab = (): AppTabDefinition => ({
     label: pl.navigation.home,
@@ -320,6 +321,7 @@ function AppShell() {
             ))}
             <AppFooter />
             <OrganizationChatDock />
+            <UserOnboardingFlow onOpenTab={openTab} />
             <Dialog
                 className="operational-profile-dialog"
                 open={Boolean(pendingOperationalProfile)}
