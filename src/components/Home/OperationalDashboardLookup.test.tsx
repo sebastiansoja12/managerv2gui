@@ -2,6 +2,7 @@ import React from "react";
 import {fireEvent, render, screen} from "@testing-library/react";
 import {MemoryRouter} from "react-router-dom";
 import pl from "../../i18n/translate";
+import {OperatorCapabilitiesContext} from "../AppShell/OperatorCapabilitiesContext";
 import OperationalDashboard from "./OperationalDashboard";
 
 test("opens shipment details from the operational dashboard using the selected lookup criterion", async () => {
@@ -24,4 +25,17 @@ test("opens shipment details from the operational dashboard using the selected l
         label: "Szczegóły przesyłki #123",
         path: "/shipments/123/edit",
     });
+});
+
+test("hides return dashboard sections when the operator cannot use returns", () => {
+    render(
+        <OperatorCapabilitiesContext.Provider value={{returnsStatus: "unavailable"}}>
+            <MemoryRouter>
+                <OperationalDashboard />
+            </MemoryRouter>
+        </OperatorCapabilitiesContext.Provider>,
+    );
+
+    expect(screen.queryByText(pl.home.dashboard.metrics.returns)).not.toBeInTheDocument();
+    expect(screen.queryByText(pl.home.dashboard.returns.title)).not.toBeInTheDocument();
 });

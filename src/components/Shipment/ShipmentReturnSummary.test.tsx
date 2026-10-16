@@ -2,6 +2,7 @@ import React from "react";
 import {fireEvent, render, screen} from "@testing-library/react";
 import {MemoryRouter, Route, Routes, useLocation} from "react-router-dom";
 import pl from "../../i18n/translate";
+import {OperatorCapabilitiesContext} from "../AppShell/OperatorCapabilitiesContext";
 import {ReturnPackageDto} from "../Returns/model/ReturnPackage";
 import ShipmentReturnSummary from "./ShipmentReturnSummary";
 
@@ -11,13 +12,15 @@ const returnPackage = {
     returnStatus: "CREATED",
 } as ReturnPackageDto;
 const Destination = () => <div>{useLocation().pathname}</div>;
-const view = (value: ReturnPackageDto | null = returnPackage) => (
-    <MemoryRouter>
-        <Routes>
-            <Route path="/" element={<ShipmentReturnSummary returnPackage={value} />} />
-            <Route path="/returns/:returnId" element={<Destination />} />
-        </Routes>
-    </MemoryRouter>
+const view = (value: ReturnPackageDto | null = returnPackage, returnsAvailable = true) => (
+    <OperatorCapabilitiesContext.Provider value={{returnsStatus: returnsAvailable ? "available" : "unavailable"}}>
+        <MemoryRouter>
+            <Routes>
+                <Route path="/" element={<ShipmentReturnSummary returnPackage={value} />} />
+                <Route path="/returns/:returnId" element={<Destination />} />
+            </Routes>
+        </MemoryRouter>
+    </OperatorCapabilitiesContext.Provider>
 );
 
 describe("ShipmentReturnSummary", () => {
@@ -40,5 +43,12 @@ describe("ShipmentReturnSummary", () => {
         expect(screen.getByText(pl.returns.status.COMPLETED)).toBeInTheDocument();
         rerender(view(null));
         expect(container).toBeEmptyDOMElement();
+    });
+
+    it("hides the action to open the returns module when returns are unavailable", () => {
+        render(view(returnPackage, false));
+
+        expect(screen.getByText(pl.returns.status.CREATED)).toBeInTheDocument();
+        expect(screen.queryByRole("button", {name: pl.shipments.returnSummary.open})).not.toBeInTheDocument();
     });
 });
