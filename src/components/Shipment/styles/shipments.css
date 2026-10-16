@@ -1640,6 +1640,45 @@
     width: 100%;
 }
 
+.tm-results-layout {
+    align-items: start;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 220px;
+    min-width: 0;
+}
+
+.tm-results-layout .tm-table-wrap {
+    min-width: 0;
+}
+
+.tm-selection-actions {
+    border-left: 1px solid var(--brand-border);
+    border-top: 1px solid var(--brand-border);
+    display: grid;
+    gap: 12px;
+    padding: 18px;
+}
+
+.tm-selection-actions > strong {
+    font-size: 0.9rem;
+}
+
+.tm-selection-id {
+    color: var(--brand-muted);
+    font-size: 0.78rem;
+    overflow-wrap: anywhere;
+}
+
+.tm-selection-actions [data-ui="button"] {
+    justify-content: flex-start;
+    min-height: 40px;
+    text-transform: none;
+}
+
+.tm-selection-actions [data-ui="button"]:disabled {
+    opacity: 0.48;
+}
+
 .tm-orders-table {
     border-collapse: collapse;
     min-width: 1760px;
@@ -1827,6 +1866,44 @@
 
 .tm-clickable-row:hover td {
     background: var(--brand-accent-wash);
+}
+
+.tm-clickable-row[aria-selected="true"] td {
+    background: var(--brand-accent-soft);
+}
+
+.tm-clickable-row:focus-visible {
+    outline: 2px solid var(--brand-accent);
+    outline-offset: -2px;
+}
+
+.tm-related-shipment-link {
+    color: var(--brand-accent-strong);
+    font-weight: 800;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+@media (max-width: 900px) {
+    .tm-results-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .tm-selection-actions {
+        border-left: 0;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .tm-selection-actions > strong,
+    .tm-selection-id {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 600px) {
+    .tm-selection-actions {
+        grid-template-columns: minmax(0, 1fr);
+    }
 }
 
 .tm-actions-cell {
@@ -4328,6 +4405,11 @@
     grid-row: 2;
 }
 
+.shipment-dashboard-delivery {
+    grid-column: 1 / 10;
+    grid-row: 3;
+}
+
 .shipment-dashboard-bottom-tools {
     grid-column: 1 / 10;
     grid-row: 4;
@@ -4611,10 +4693,61 @@
     color: var(--brand-muted);
     display: flex;
     font-size: 0.78rem;
+    gap: 10px;
     justify-content: center;
     min-height: 250px;
     padding: 24px;
     text-align: center;
+}
+
+.shipment-content-list {
+    max-height: 340px;
+    overflow-y: auto;
+}
+
+.shipment-content-item {
+    border-bottom: 1px solid var(--brand-border);
+    padding: 14px 18px;
+}
+
+.shipment-content-item:last-child {
+    border-bottom: 0;
+}
+
+.shipment-content-item p {
+    color: var(--brand-ink);
+    font-size: 0.78rem;
+    margin: 9px 0 0;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+}
+
+.shipment-content-meta {
+    align-items: center;
+    color: var(--brand-muted);
+    display: flex;
+    flex-wrap: wrap;
+    font-size: 0.68rem;
+    gap: 8px 14px;
+}
+
+.shipment-content-document {
+    align-items: center;
+    display: flex;
+    gap: 16px;
+    justify-content: space-between;
+}
+
+.shipment-content-document > div {
+    min-width: 0;
+}
+
+.shipment-content-document strong {
+    color: var(--brand-ink);
+    display: block;
+    font-size: 0.78rem;
+    margin-bottom: 6px;
+    overflow-wrap: anywhere;
 }
 
 .shipment-workspace-related {
@@ -4647,6 +4780,216 @@
     display: grid;
     gap: 14px;
     grid-template-columns: minmax(0, 1.15fr) minmax(300px, 0.85fr);
+}
+
+.shipment-delivery-state {
+    align-items: center;
+    color: var(--brand-muted);
+    display: flex;
+    gap: 10px;
+    min-height: 72px;
+    padding: 12px 0;
+}
+
+.shipment-delivery-content {
+    padding: 12px 16px 16px;
+}
+
+.shipment-delivery-error {
+    color: var(--brand-danger, #f87171);
+    justify-content: space-between;
+}
+
+.shipment-delivery-facts {
+    display: grid;
+    gap: 14px 20px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    min-width: 0;
+    padding: 0 0 16px;
+}
+
+.shipment-delivery-facts > div {
+    display: grid;
+    gap: 5px;
+    min-width: 0;
+}
+
+.shipment-delivery-facts span {
+    color: var(--brand-muted);
+    font-size: 0.62rem;
+    font-weight: 850;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+}
+
+.shipment-delivery-facts strong {
+    color: var(--brand-ink);
+    font-size: 0.76rem;
+    overflow-wrap: anywhere;
+}
+
+.shipment-delivery-latest-step {
+    background: color-mix(in srgb, var(--brand-surface-warm) 52%, var(--brand-surface));
+    border: 1px solid var(--brand-border);
+    border-radius: 7px;
+    color: var(--brand-muted);
+    display: grid;
+    gap: 10px;
+    padding: 12px;
+}
+
+.shipment-delivery-step-heading {
+    align-items: baseline;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    justify-content: space-between;
+}
+
+.shipment-delivery-step-heading strong {
+    color: var(--brand-ink);
+    font-size: 0.78rem;
+}
+
+.shipment-delivery-step-heading span,
+.shipment-delivery-step-summary > span {
+    font-size: 0.68rem;
+}
+
+.shipment-delivery-step-summary {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.shipment-delivery-step-facts {
+    display: grid;
+    gap: 10px 18px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.shipment-delivery-step-facts > div {
+    display: grid;
+    gap: 4px;
+    min-width: 0;
+}
+
+.shipment-delivery-step-facts span {
+    color: var(--brand-muted);
+    font-size: 0.6rem;
+    font-weight: 850;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+}
+
+.shipment-delivery-step-facts strong {
+    color: var(--brand-ink);
+    font-size: 0.72rem;
+    overflow-wrap: anywhere;
+}
+
+.shipment-delivery-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: flex-end;
+    padding-top: 14px;
+}
+
+.shipment-delivery-history-title {
+    align-items: center;
+    color: var(--brand-ink);
+    display: flex;
+    gap: 10px;
+}
+
+.shipment-delivery-history-title svg {
+    color: var(--brand-accent);
+}
+
+.shipment-delivery-history-content {
+    display: grid;
+    gap: 12px;
+    max-height: min(68vh, 680px);
+    overflow-y: auto;
+}
+
+.shipment-delivery-history-item {
+    background: color-mix(in srgb, var(--brand-surface-warm) 52%, var(--brand-surface));
+    border: 1px solid var(--brand-border);
+    border-radius: 7px;
+    display: grid;
+    gap: 12px;
+    padding: 14px;
+}
+
+.shipment-delivery-history-item > header {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    justify-content: space-between;
+}
+
+.shipment-delivery-history-item-heading {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.shipment-delivery-history-item-heading strong {
+    color: var(--brand-ink);
+    font-size: 0.8rem;
+}
+
+.shipment-delivery-history-item-heading > span,
+.shipment-delivery-history-item time {
+    color: var(--brand-muted);
+    font-size: 0.72rem;
+}
+
+.shipment-delivery-history-facts {
+    display: grid;
+    gap: 12px 18px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.shipment-delivery-history-facts > div {
+    display: grid;
+    gap: 4px;
+    min-width: 0;
+}
+
+.shipment-delivery-history-facts span {
+    color: var(--brand-muted);
+    font-size: 0.6rem;
+    font-weight: 850;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+}
+
+.shipment-delivery-history-facts strong {
+    color: var(--brand-ink);
+    font-size: 0.74rem;
+    overflow-wrap: anywhere;
+}
+
+.shipment-delivery-history-item p {
+    color: var(--brand-muted);
+    font-size: 0.74rem;
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.shipment-delivery-history-item p strong {
+    color: var(--brand-ink);
+}
+
+.shipment-delivery-history-empty {
+    color: var(--brand-muted);
+    padding: 18px 0;
 }
 
 .shipment-operator-notes,
@@ -4696,6 +5039,29 @@
     line-height: 1.45;
     margin: 12px 0 0;
     padding: 12px;
+}
+
+.shipment-attachment-list {
+    list-style: none;
+    margin: 12px 0 0;
+    padding: 0;
+}
+
+.shipment-attachment-list li {
+    align-items: center;
+    border-top: 1px solid var(--brand-border);
+    display: flex;
+    font-size: 0.72rem;
+    gap: 10px;
+    justify-content: space-between;
+    min-width: 0;
+    padding: 7px 0;
+}
+
+.shipment-attachment-list li span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .shipment-operation-danger {
@@ -4970,6 +5336,11 @@
         grid-row: 2;
     }
 
+    .shipment-dashboard-delivery {
+        grid-column: 1 / -1;
+        grid-row: 3;
+    }
+
     .shipment-dashboard-bottom-tools {
         grid-column: 1 / -1;
         grid-row: 4;
@@ -5014,12 +5385,25 @@
         grid-row: 3;
     }
 
+    .shipment-dashboard-delivery {
+        grid-column: 1;
+        grid-row: 4;
+    }
+
     .shipment-dashboard-bottom-tools {
         grid-column: 1;
         grid-row: 5;
     }
 
     .shipment-dashboard-facts {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .shipment-delivery-facts {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .shipment-delivery-history-facts {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
@@ -5063,8 +5447,15 @@
 
 @media (max-width: 520px) {
     .shipment-dashboard-facts,
-    .shipment-dashboard-metrics {
+    .shipment-dashboard-metrics,
+    .shipment-delivery-facts,
+    .shipment-delivery-step-facts,
+    .shipment-delivery-history-facts {
         grid-template-columns: 1fr;
+    }
+
+    .shipment-delivery-actions [data-ui="button"] {
+        flex: 1 1 100%;
     }
 
     .shipment-dashboard-facts > div,
