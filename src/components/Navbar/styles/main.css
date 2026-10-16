@@ -792,8 +792,8 @@
     .app-tab-dock { flex: 1 1 auto; }
     .app-tab { max-width: 142px; min-width: 70px; }
     .app-tab-select { font-size: 0.72rem; min-height: 29px; padding-left: 8px; }
-    .app-close-tabs-button { font-size: 0; padding: 0; width: 27px; }
-    .app-close-tabs-button::after { content: "×"; font-size: 1.1rem; }
+    .app-close-tabs-button { padding: 0; width: 34px; }
+    .app-close-tabs-button span:last-child { display: none; }
     .top-nav-options-panel,
     .top-nav-profile-panel { inline-size: calc(100vw - 48px); }
     .top-nav-options-grid { grid-template-columns: 1fr; }

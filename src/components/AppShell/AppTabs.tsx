@@ -6,7 +6,6 @@ import {AppTabDefinition} from "./types";
 type AppTabsProps = {
     activePath: string;
     openTabs: AppTabDefinition[];
-    onCloseAllTabs: () => void;
     onCloseTab: (path: string) => void;
     onSelectTab: (path: string) => void;
 };
@@ -51,7 +50,7 @@ export const getVisibleTabIndexes = (
     return indexes;
 };
 
-function AppTabs({activePath, openTabs, onCloseAllTabs, onCloseTab, onSelectTab}: AppTabsProps) {
+function AppTabs({activePath, openTabs, onCloseTab, onSelectTab}: AppTabsProps) {
     const tabStripRef = React.useRef<HTMLElement>(null);
     const tabDockRef = React.useRef<HTMLDivElement>(null);
     const tabMeasureRef = React.useRef<HTMLDivElement>(null);
@@ -226,11 +225,6 @@ function AppTabs({activePath, openTabs, onCloseAllTabs, onCloseTab, onSelectTab}
                             role="group"
                         >
                             {hiddenTabs.map((tab) => renderTab(tab, true))}
-                            {openTabs.length > 1 ? (
-                                <button className="app-tabs-close-all" onClick={onCloseAllTabs} type="button">
-                                    {pl.app.tabs.closeAll}
-                                </button>
-                            ) : null}
                         </div>
                     ) : null}
                 </div>

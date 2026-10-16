@@ -36,7 +36,6 @@ describe("getVisibleTabIndexes", () => {
         render(
             <AppTabs
                 activePath="/"
-                onCloseAllTabs={jest.fn()}
                 onCloseTab={jest.fn()}
                 onSelectTab={onSelectTab}
                 openTabs={[
