@@ -14,6 +14,10 @@
     max-width: 1680px;
 }
 
+.app-main-content .tm-page-shipment-catalog .tm-content {
+    max-width: none;
+}
+
 .app-main-content .tm-top-row {
     align-items: end;
     border-bottom: 1px solid var(--border);
@@ -471,6 +475,40 @@
     border-top: 1px solid var(--border);
 }
 
+.app-main-content .tm-results-layout .tm-orders-table {
+    min-width: 1680px;
+    table-layout: auto;
+}
+
+.app-main-content .tm-results-layout .tm-orders-table th,
+.app-main-content .tm-results-layout .tm-orders-table td {
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+    width: auto;
+}
+
+.app-main-content .tm-results-layout .tm-orders-table th:first-child,
+.app-main-content .tm-results-layout .tm-orders-table td:first-child,
+.app-main-content .tm-results-layout .tm-orders-table th:last-child,
+.app-main-content .tm-results-layout .tm-orders-table td:last-child {
+    white-space: nowrap;
+}
+
+.app-main-content .tm-results-layout .tm-entity span:last-child {
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+}
+
+.app-main-content .tm-results-layout .tm-selection-actions {
+    border-color: var(--border);
+}
+
+.app-main-content .tm-results-layout .tm-clickable-row[aria-selected="true"] td {
+    background: var(--technical-accent-soft) !important;
+}
+
 .app-main-content .tm-orders-table th,
 .app-main-content .tm-orders-table td {
     border-color: var(--border) !important;
@@ -587,4 +625,3 @@
         min-width: 100%;
     }
 }
-
