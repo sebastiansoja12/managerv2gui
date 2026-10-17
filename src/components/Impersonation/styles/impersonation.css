@@ -1,0 +1,236 @@
+.impersonation-banner {
+    align-items: center;
+    background: color-mix(in srgb, #c026d3 16%, var(--background));
+    border-bottom: 1px solid color-mix(in srgb, #c026d3 55%, var(--border));
+    color: var(--foreground);
+    display: flex;
+    gap: 12px;
+    padding: 8px 16px;
+    position: sticky;
+    top: 0;
+    z-index: 1300;
+}
+
+.impersonation-banner > svg {
+    color: color-mix(in srgb, #c026d3 70%, var(--foreground));
+    flex: 0 0 auto;
+}
+
+.impersonation-banner > div {
+    display: flex;
+    flex: 1;
+    flex-wrap: wrap;
+    gap: 4px 10px;
+    min-width: 0;
+}
+
+.impersonation-banner strong {
+    font-size: 0.84rem;
+}
+
+.impersonation-banner span {
+    color: var(--muted-foreground);
+    font-size: 0.8rem;
+}
+
+.impersonation-banner button {
+    background: color-mix(in srgb, #c026d3 22%, transparent);
+    border: 1px solid color-mix(in srgb, #c026d3 60%, var(--border));
+    border-radius: 6px;
+    color: var(--foreground);
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 6px 12px;
+    white-space: nowrap;
+}
+
+.impersonation-banner button:disabled {
+    cursor: wait;
+    opacity: 0.6;
+}
+
+.impersonation-consent-banner {
+    align-items: flex-start;
+    background: color-mix(in srgb, var(--warning, #d97706) 14%, var(--background));
+    border-bottom: 1px solid color-mix(in srgb, var(--warning, #d97706) 55%, var(--border));
+    color: var(--foreground);
+    display: flex;
+    gap: 12px;
+    padding: 8px 16px;
+    position: sticky;
+    top: 0;
+    z-index: 1299;
+}
+
+.impersonation-consent-banner > svg {
+    color: color-mix(in srgb, var(--warning, #d97706) 75%, var(--foreground));
+    flex: 0 0 auto;
+    margin-top: 2px;
+}
+
+.impersonation-consent-banner-body {
+    display: grid;
+    flex: 1;
+    gap: 6px;
+    min-width: 0;
+}
+
+.impersonation-consent-item {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    justify-content: space-between;
+}
+
+.impersonation-consent-item.is-compact {
+    align-items: stretch;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    flex-direction: column;
+    padding: 10px;
+}
+
+.impersonation-consent-copy {
+    display: grid;
+    flex: 1 1 320px;
+    gap: 2px;
+    min-width: 0;
+}
+
+.impersonation-consent-copy strong {
+    font-size: 0.84rem;
+}
+
+.impersonation-consent-copy span,
+.impersonation-consent-copy small,
+.impersonation-consent-more {
+    color: var(--muted-foreground);
+    font-size: 0.8rem;
+}
+
+.impersonation-consent-copy .impersonation-consent-reason {
+    color: var(--foreground);
+    font-style: italic;
+}
+
+.impersonation-consent-copy .impersonation-consent-error {
+    color: var(--danger);
+    font-weight: 600;
+}
+
+.impersonation-consent-actions {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.impersonation-consent-duration {
+    align-items: center;
+    display: inline-flex;
+    font-size: 0.78rem;
+    gap: 6px;
+}
+
+.impersonation-consent-duration span {
+    color: var(--muted-foreground);
+}
+
+.impersonation-consent-duration select,
+.impersonation-consent-actions button {
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--foreground);
+    font: inherit;
+    font-size: 0.8rem;
+    padding: 5px 10px;
+}
+
+.impersonation-consent-duration select {
+    background: var(--card);
+}
+
+.impersonation-consent-actions button {
+    background: var(--card);
+    cursor: pointer;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.impersonation-consent-actions .impersonation-consent-approve {
+    background: color-mix(in srgb, var(--success, #16a34a) 20%, var(--card));
+    border-color: color-mix(in srgb, var(--success, #16a34a) 60%, var(--border));
+}
+
+.impersonation-consent-actions .impersonation-consent-reject {
+    border-color: color-mix(in srgb, var(--danger) 55%, var(--border));
+}
+
+.impersonation-consent-actions button:disabled,
+.impersonation-consent-duration select:disabled {
+    cursor: wait;
+    opacity: 0.6;
+}
+
+.top-nav-notifications-control {
+    align-items: center;
+    display: flex;
+    position: relative;
+}
+
+.top-nav-notifications-control > .top-nav-action-icon {
+    border-left-color: transparent;
+    margin-left: 0;
+    padding-left: 0;
+    width: 42px;
+}
+
+.top-nav-notification-count {
+    align-items: center;
+    background: var(--danger);
+    border: 2px solid var(--background);
+    border-radius: 999px;
+    color: #fff;
+    display: inline-flex;
+    font-size: 0.62rem;
+    font-weight: 800;
+    height: 17px;
+    justify-content: center;
+    line-height: 1;
+    min-width: 17px;
+    padding: 0 3px;
+    position: absolute;
+    right: 4px;
+    top: 4px;
+}
+
+.top-nav-notifications-popover {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: 0 14px 32px color-mix(in srgb, #000 22%, transparent);
+    color: var(--card-foreground);
+    display: grid;
+    gap: 8px;
+    max-height: min(70vh, 520px);
+    overflow-y: auto;
+    padding: 12px;
+    position: absolute;
+    right: 0;
+    top: calc(100% + 8px);
+    width: min(380px, calc(100vw - 32px));
+    z-index: 95;
+}
+
+.top-nav-notifications-title {
+    font-size: 0.86rem;
+}
+
+.top-nav-notifications-empty {
+    color: var(--muted-foreground);
+    font-size: 0.8rem;
+    margin: 0;
+}
