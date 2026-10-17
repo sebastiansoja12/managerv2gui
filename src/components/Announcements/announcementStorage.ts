@@ -3,75 +3,72 @@ import http from "../../http-common";
 const ANNOUNCEMENT_UPDATED_EVENT = "manager:announcement-updated";
 const ANNOUNCEMENT_DISMISSED_SESSION_KEY = "manager:announcement-dismissed";
 
-export type GlobalAnnouncement = {
+export type AnnouncementSeverity = "INFO" | "WARNING" | "CRITICAL";
+
+export type VisibleAnnouncement = {
     id: number;
+    title?: string | null;
     message: string;
-    createdAt?: string;
+    severity: AnnouncementSeverity | string;
+    validFrom?: string | null;
+    validTo?: string | null;
     updatedAt?: string;
 };
 
-let announcementCache: GlobalAnnouncement | null | undefined;
-let announcementRequest: Promise<GlobalAnnouncement | null> | null = null;
-
 const dismissedAnnouncementKey = (userKey: string | number) => `${ANNOUNCEMENT_DISMISSED_SESSION_KEY}:${userKey}`;
 
-const notifyAnnouncementUpdated = () => {
-    window.dispatchEvent(new CustomEvent(ANNOUNCEMENT_UPDATED_EVENT));
-};
-
-export const readDismissedAnnouncementId = (userKey: string | number): number | null => {
-    const value = window.sessionStorage.getItem(dismissedAnnouncementKey(userKey));
-    if (!value) {
+const readStorage = (key: string) => {
+    try {
+        return window.sessionStorage.getItem(key);
+    } catch {
         return null;
     }
-
-    const id = Number(value);
-    return Number.isFinite(id) ? id : null;
 };
 
-export const dismissGlobalAnnouncement = (id: number, userKey: string | number): void => {
-    window.sessionStorage.setItem(dismissedAnnouncementKey(userKey), String(id));
+const writeStorage = (key: string, value: string) => {
+    try {
+        window.sessionStorage.setItem(key, value);
+    } catch {
+        // Dismissal is a per-session convenience only.
+    }
+};
+
+export const isDismissible = (announcement: VisibleAnnouncement) => announcement.severity !== "CRITICAL";
+
+export const readDismissedAnnouncementIds = (userKey: string | number): number[] => {
+    const value = readStorage(dismissedAnnouncementKey(userKey));
+    if (!value) {
+        return [];
+    }
+    return value.split(",").map(Number).filter(Number.isFinite);
+};
+
+export const dismissAnnouncement = (id: number, userKey: string | number): void => {
+    const ids = new Set(readDismissedAnnouncementIds(userKey));
+    ids.add(id);
+    writeStorage(dismissedAnnouncementKey(userKey), Array.from(ids).join(","));
 };
 
 export const clearAnnouncementDismissal = (): void => {
-    for (let index = window.sessionStorage.length - 1; index >= 0; index -= 1) {
-        const key = window.sessionStorage.key(index);
-        if (key?.startsWith(`${ANNOUNCEMENT_DISMISSED_SESSION_KEY}:`)) {
-            window.sessionStorage.removeItem(key);
+    try {
+        for (let index = window.sessionStorage.length - 1; index >= 0; index -= 1) {
+            const key = window.sessionStorage.key(index);
+            if (key?.startsWith(`${ANNOUNCEMENT_DISMISSED_SESSION_KEY}:`)) {
+                window.sessionStorage.removeItem(key);
+            }
         }
+    } catch {
+        // Nothing to clear when storage is unavailable.
     }
 };
 
-export const readGlobalAnnouncement = async (): Promise<GlobalAnnouncement | null> => {
-    if (announcementCache !== undefined) {
-        return announcementCache;
-    }
-
-    if (announcementRequest) {
-        return announcementRequest;
-    }
-
-    announcementRequest = http.get<GlobalAnnouncement>("/announcements/active", {
-        validateStatus: (status) => status === 200 || status === 204,
-    }).then((response) => {
-        announcementCache = response.status === 204 || !response.data ? null : response.data;
-        return announcementCache;
-    }).finally(() => {
-        announcementRequest = null;
-    });
-
-    return announcementRequest;
+export const notifyAnnouncementsUpdated = () => {
+    window.dispatchEvent(new CustomEvent(ANNOUNCEMENT_UPDATED_EVENT));
 };
 
-export const saveGlobalAnnouncement = async (message: string): Promise<GlobalAnnouncement> => {
-    const response = await http.put<GlobalAnnouncement>("/announcements/active", {message});
-    announcementCache = response.data;
-    notifyAnnouncementUpdated();
-    return response.data;
-};
+export const ANNOUNCEMENTS_UPDATED_EVENT = ANNOUNCEMENT_UPDATED_EVENT;
 
-export const clearGlobalAnnouncement = async (): Promise<void> => {
-    await http.delete("/announcements/active");
-    announcementCache = null;
-    notifyAnnouncementUpdated();
+export const readVisibleAnnouncements = async (): Promise<VisibleAnnouncement[]> => {
+    const response = await http.get<VisibleAnnouncement[]>("/announcements/current");
+    return Array.isArray(response.data) ? response.data : [];
 };
