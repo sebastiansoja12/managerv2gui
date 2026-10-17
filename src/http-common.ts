@@ -1,6 +1,7 @@
 import axios from "axios";
 import JSONBig from "json-bigint";
 import {configureAuthenticatedClient} from "./auth/configureAuthenticatedClient";
+import {isMaintenanceResponse, reportMaintenance} from "./components/Maintenance/maintenanceStore";
 
 const jsonBig = JSONBig({storeAsString: true});
 
@@ -50,6 +51,14 @@ const http = axios.create({
     },
     transformResponse: [parseJsonWithBigIntegers],
     withCredentials: true,
+});
+
+http.interceptors.response.use(undefined, (error) => {
+    const response = error?.response;
+    if (isMaintenanceResponse(response?.status, response?.data)) {
+        reportMaintenance((response.data as {message?: string | null}).message);
+    }
+    return Promise.reject(error);
 });
 
 export default configureAuthenticatedClient(http);
