@@ -5,6 +5,8 @@ import {initializeAuthSession} from "../../auth/AuthSession";
 import {useAuthState} from "../../auth/AuthState";
 import Navbar from "../Navbar/Navbar";
 import AnnouncementBanner from "../Announcements/AnnouncementBanner";
+import ImpersonationBanner from "../Impersonation/ImpersonationBanner";
+import ImpersonationConsentBanner from "../Impersonation/ImpersonationConsentBanner";
 import AppRoutes from "./AppRoutes";
 import {getTabTitle, normalizePath} from "./tabConfig";
 import {AppTabDefinition} from "./types";
@@ -267,6 +269,8 @@ function AppShell() {
 
     return (
         <OrganizationChatDockProvider>
+            <ImpersonationBanner />
+            <ImpersonationConsentBanner />
             <AnnouncementBanner />
             <Navbar
                 activePath={activePath}
