@@ -12,13 +12,14 @@ import Department from "../../../class/depots/Department";
 import {User} from "../../Users/model/User";
 import SuperAdminLayout from "../layout/SuperAdminLayout";
 import {getCapabilityLabels} from "./capabilityLabels";
+import ImpersonationDialog from "./ImpersonationDialog";
 import OperatorDirectoryDialog from "./OperatorDirectoryDialog";
 import OperatorEditor from "./OperatorEditor";
 import OperatorList from "./OperatorList";
 import OperatorMetrics from "./OperatorMetrics";
 import OperatorWorkspace from "./OperatorWorkspace";
 import OperatorUserDialog from "./OperatorUserDialog";
-import {getOperatorIdValue, toCreateRequest, toUpdateRequest} from "./operatorPanelUtils";
+import {getOperatorIdValue, toCreateRequest, toUpdateRequest, withCapability} from "./operatorPanelUtils";
 
 function SuperAdminOperatorsPage() {
     const [operators, setOperators] = useState<Operator[]>([]);
@@ -35,6 +36,7 @@ function SuperAdminOperatorsPage() {
     const [directoryCouriers, setDirectoryCouriers] = useState<CourierDto[]>([]);
     const [directoryLoading, setDirectoryLoading] = useState(false);
     const [userDialogOpen, setUserDialogOpen] = useState(false);
+    const [impersonationDialogOpen, setImpersonationDialogOpen] = useState(false);
     const [directoryDialogMode, setDirectoryDialogMode] = useState<"department" | "courier" | null>(null);
     const capabilityLabels = getCapabilityLabels();
 
@@ -93,6 +95,7 @@ function SuperAdminOperatorsPage() {
             setDirectoryDepartments(departments);
             setDirectoryCouriers(couriers);
         }).catch(() => {
+            setError(pl.superAdmin.workspace.loadError);
             setDirectoryUsers([]);
             setDirectoryDepartments([]);
             setDirectoryCouriers([]);
@@ -156,24 +159,45 @@ function SuperAdminOperatorsPage() {
     };
 
     const toggleCapability = (key: keyof ShippingCapabilities) => {
-        setDraft((currentDraft) => {
-            const nextValue = !currentDraft.configuration.shippingCapabilities[key];
-            const nextCapabilities = {
-                ...currentDraft.configuration.shippingCapabilities,
-                [key]: nextValue,
-            };
+        setDraft((currentDraft) => withCapability(currentDraft, key, !currentDraft.configuration.shippingCapabilities[key]));
+    };
 
-            return {
-                ...currentDraft,
-                supportsLockers: key === "supportsParcelLockers" ? nextValue : currentDraft.supportsLockers,
-                supportsInternationalShipping: key === "supportsInternationalShipping" ? nextValue : currentDraft.supportsInternationalShipping,
-                supportsCashOnDelivery: key === "supportsCashOnDelivery" ? nextValue : currentDraft.supportsCashOnDelivery,
-                configuration: {
-                    ...currentDraft.configuration,
-                    shippingCapabilities: nextCapabilities,
-                },
-            };
-        });
+    const replaceOperator = (savedOperator: Operator) => {
+        const operatorId = getOperatorIdValue(savedOperator);
+        setOperators((currentOperators) => currentOperators.map((currentOperator) => (
+            getOperatorIdValue(currentOperator) === operatorId ? savedOperator : currentOperator
+        )));
+        if (operatorId === selectedOperatorId) {
+            setDraft((currentDraft) => ({
+                ...operatorToDraft(savedOperator),
+                ...toUpdateRequest(currentDraft),
+                configuration: savedOperator.configuration || currentDraft.configuration,
+                status: savedOperator.status,
+            }));
+        }
+    };
+
+    const resetDraft = () => {
+        if (selectedOperator) {
+            setDraft(operatorToDraft(selectedOperator));
+        }
+        setError("");
+    };
+
+    const changeOperatorStatus = async (status: "ACTIVE" | "INACTIVE") => {
+        if (!selectedOperator) {
+            return;
+        }
+        const operatorId = getOperatorIdValue(selectedOperator);
+        const response = await OperatorService.update(operatorId, toUpdateRequest({
+            ...operatorToDraft(selectedOperator),
+            status,
+        }));
+        const savedOperator = response.data;
+        setOperators((currentOperators) => currentOperators.map((currentOperator) => (
+            getOperatorIdValue(currentOperator) === operatorId ? savedOperator : currentOperator
+        )));
+        setDraft((currentDraft) => ({...currentDraft, status: savedOperator.status}));
     };
 
     const toggleStatus = () => {
@@ -216,7 +240,7 @@ function SuperAdminOperatorsPage() {
     };
 
     return (
-        <SuperAdminLayout error={error} onCreate={startCreate}>
+        <SuperAdminLayout error={error} onCreate={startCreate} onOperatorSaved={replaceOperator} operators={operators}>
             <OperatorMetrics
                 activeOperators={activeOperators}
                 enabledFeatures={enabledFeatures}
@@ -245,9 +269,15 @@ function SuperAdminOperatorsPage() {
                         onAddCourier={() => setDirectoryDialogMode("courier")}
                         onAddDepartment={() => setDirectoryDialogMode("department")}
                         onAddUser={() => setUserDialogOpen(true)}
+                        onChangeStatus={changeOperatorStatus}
+                        onDataErased={refreshDirectory}
+                        onImpersonate={() => setImpersonationDialogOpen(true)}
                         onRefresh={refreshDirectory}
+                        onResetDraft={resetDraft}
                         onSaveConfiguration={saveDraft}
                         onToggleCapability={toggleCapability}
+                        onUpdateDraft={updateDraft}
+                        saveError={error}
                         operator={selectedOperator}
                         saving={saving}
                         users={directoryUsers}
@@ -286,8 +316,9 @@ function SuperAdminOperatorsPage() {
 
             {!createMode && selectedOperator ? (
                 <>
-                    <OperatorUserDialog onClose={() => setUserDialogOpen(false)} onCreated={refreshDirectory} open={userDialogOpen} operatorId={selectedOperatorId} operatorName={selectedOperator.companyName} />
-                    <OperatorDirectoryDialog mode={directoryDialogMode} onClose={() => setDirectoryDialogMode(null)} onCreated={refreshDirectory} operatorId={selectedOperatorId} operatorName={selectedOperator.companyName} />
+                    <OperatorUserDialog departments={directoryDepartments} onClose={() => setUserDialogOpen(false)} onCreated={refreshDirectory} open={userDialogOpen} operatorId={selectedOperatorId} operatorName={selectedOperator.companyName} />
+                    <ImpersonationDialog onClose={() => setImpersonationDialogOpen(false)} open={impersonationDialogOpen} operatorId={selectedOperatorId} operatorName={selectedOperator.companyName} />
+                    <OperatorDirectoryDialog departments={directoryDepartments} mode={directoryDialogMode} onClose={() => setDirectoryDialogMode(null)} onCreated={refreshDirectory} operatorId={selectedOperatorId} operatorName={selectedOperator.companyName} />
                 </>
             ) : null}
         </SuperAdminLayout>

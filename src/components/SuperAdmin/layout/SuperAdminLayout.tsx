@@ -2,89 +2,37 @@ import React from "react";
 import {
     Add,
     Business,
-    CheckCircle,
-    Close,
+    History,
     LockOpen,
     NotificationsNone,
-    Save,
     SettingsSuggest,
     Shield,
 } from "components/ui/icons";
-import {logoutAuthSession} from "../../../auth/AuthSession";
 import pl from "../../../i18n/translate";
-import {clearAnnouncementDismissal, clearGlobalAnnouncement, readGlobalAnnouncement, saveGlobalAnnouncement} from "../../Announcements/announcementStorage";
+import PlatformOwnersPanel from "../accounts/PlatformOwnersPanel";
+import PlatformAuditPanel from "../audit/PlatformAuditPanel";
+import SystemPanel from "../system/SystemPanel";
+import {Operator} from "../../Operators/model/Operator";
+import {logoutPlatformOwner} from "../auth/PlatformOwnerSession";
+import {clearAnnouncementDismissal} from "../../Announcements/announcementStorage";
+import AnnouncementsPanel from "../announcements/AnnouncementsPanel";
 
-type SuperAdminArea = "operators" | "features" | "access" | "announcements";
+type SuperAdminArea = "operators" | "features" | "access" | "audit" | "announcements";
 
 type SuperAdminLayoutProps = {
     children: React.ReactNode;
     error?: string;
     onCreate: () => void;
+    operators?: Operator[];
+    onOperatorSaved?: (operator: Operator) => void;
 };
 
-function SuperAdminLayout({children, error, onCreate}: SuperAdminLayoutProps) {
+function SuperAdminLayout({children, error, onCreate, operators, onOperatorSaved}: SuperAdminLayoutProps) {
     const [activeArea, setActiveArea] = React.useState<SuperAdminArea>("operators");
-    const [announcement, setAnnouncement] = React.useState("");
-    const [announcementSaved, setAnnouncementSaved] = React.useState(false);
-    const [announcementSaving, setAnnouncementSaving] = React.useState(false);
-    const [announcementError, setAnnouncementError] = React.useState("");
-
-    React.useEffect(() => {
-        let mounted = true;
-        void readGlobalAnnouncement()
-            .then((currentAnnouncement) => {
-                if (mounted) {
-                    setAnnouncement(currentAnnouncement?.message || "");
-                }
-            })
-            .catch(() => {
-                if (mounted) {
-                    setAnnouncementError(pl.superAdmin.announcements.loadError);
-                }
-            });
-
-        return () => {
-            mounted = false;
-        };
-    }, []);
-
-    const publishAnnouncement = async (event: React.FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-        if (!announcement.trim()) {
-            return;
-        }
-
-        setAnnouncementSaving(true);
-        setAnnouncementSaved(false);
-        setAnnouncementError("");
-        try {
-            await saveGlobalAnnouncement(announcement);
-            setAnnouncementSaved(true);
-        } catch {
-            setAnnouncementError(pl.superAdmin.announcements.saveError);
-        } finally {
-            setAnnouncementSaving(false);
-        }
-    };
-
-    const removeAnnouncement = async () => {
-        setAnnouncementSaving(true);
-        setAnnouncementError("");
-        try {
-            await clearGlobalAnnouncement();
-            setAnnouncement("");
-            setAnnouncementSaved(false);
-        } catch {
-            setAnnouncementError(pl.superAdmin.announcements.clearError);
-        } finally {
-            setAnnouncementSaving(false);
-        }
-    };
-
     const logout = async () => {
         clearAnnouncementDismissal();
         try {
-            await logoutAuthSession();
+            await logoutPlatformOwner();
         } finally {
             window.location.assign("/super-admin/login");
         }
@@ -110,6 +58,10 @@ function SuperAdminLayout({children, error, onCreate}: SuperAdminLayoutProps) {
                     <button className={`super-admin-nav-item${activeArea === "access" ? " super-admin-nav-item-active" : ""}`} onClick={() => setActiveArea("access")} type="button">
                         <LockOpen fontSize="small"/>
                         <span>{pl.superAdmin.nav.access}</span>
+                    </button>
+                    <button className={`super-admin-nav-item${activeArea === "audit" ? " super-admin-nav-item-active" : ""}`} onClick={() => setActiveArea("audit")} type="button">
+                        <History fontSize="small"/>
+                        <span>{pl.superAdmin.nav.audit}</span>
                     </button>
                     <button className={`super-admin-nav-item${activeArea === "announcements" ? " super-admin-nav-item-active" : ""}`} onClick={() => setActiveArea("announcements")} type="button">
                         <NotificationsNone fontSize="small"/>
@@ -138,25 +90,10 @@ function SuperAdminLayout({children, error, onCreate}: SuperAdminLayoutProps) {
 
                 {activeArea === "operators" ? children : (
                     <section className="super-admin-module-panel">
-                        {activeArea === "features" ? (
-                            <>
-                                <div className="super-admin-module-heading"><span className="super-admin-kicker">{pl.superAdmin.layout.kicker}</span><h2>{pl.superAdmin.modules.features.title}</h2><p>{pl.superAdmin.modules.features.subtitle}</p></div>
-                                <div className="super-admin-module-grid">{pl.superAdmin.modules.features.items.map((item) => <article className="super-admin-module-card" key={item.name}><span className="super-admin-module-card-icon"><SettingsSuggest fontSize="small"/></span><strong>{item.name}</strong><p>{item.description}</p><span className="super-admin-module-state"><CheckCircle fontSize="small"/>{pl.superAdmin.workspace.enabled}</span></article>)}</div>
-                            </>
-                        ) : null}
-                        {activeArea === "access" ? (
-                            <>
-                                <div className="super-admin-module-heading"><span className="super-admin-kicker">{pl.superAdmin.layout.kicker}</span><h2>{pl.superAdmin.modules.access.title}</h2><p>{pl.superAdmin.modules.access.subtitle}</p></div>
-                                <div className="super-admin-access-grid">{pl.superAdmin.modules.access.items.map((item) => <article className="super-admin-access-card" key={item.name}><LockOpen fontSize="small"/><div><strong>{item.name}</strong><p>{item.description}</p></div><span>{item.state}</span></article>)}</div>
-                            </>
-                        ) : null}
-                        {activeArea === "announcements" ? (
-                            <form className="super-admin-announcement-panel" onSubmit={publishAnnouncement}>
-                                <div className="super-admin-module-heading"><span className="super-admin-kicker">{pl.superAdmin.layout.kicker}</span><h2>{pl.superAdmin.announcements.title}</h2><p>{pl.superAdmin.announcements.subtitle}</p></div>
-                                <label><span>{pl.superAdmin.announcements.fieldLabel}</span><textarea value={announcement} onChange={(event) => { setAnnouncement(event.target.value); setAnnouncementSaved(false); setAnnouncementError(""); }} placeholder={pl.superAdmin.announcements.placeholder} rows={5}/></label>
-                                <div className="super-admin-announcement-footer"><span>{announcementError ? announcementError : announcementSaved ? <><CheckCircle fontSize="small" />{pl.superAdmin.announcements.saved}</> : pl.superAdmin.announcements.visibility}</span><div><button className="super-admin-secondary-button" disabled={announcementSaving} onClick={removeAnnouncement} type="button"><Close fontSize="small" />{pl.superAdmin.announcements.clear}</button><button className="super-admin-primary-button" disabled={announcementSaving || !announcement.trim()} type="submit"><Save fontSize="small" />{pl.superAdmin.announcements.save}</button></div></div>
-                            </form>
-                        ) : null}
+                        {activeArea === "features" ? <SystemPanel onOperatorSaved={onOperatorSaved} operators={operators}/> : null}
+                        {activeArea === "access" ? <PlatformOwnersPanel/> : null}
+                        {activeArea === "audit" ? <PlatformAuditPanel/> : null}
+                        {activeArea === "announcements" ? <AnnouncementsPanel operators={operators}/> : null}
                     </section>
                 )}
             </section>
