@@ -1,74 +1,36 @@
-import React, {FormEvent, useEffect, useMemo, useRef, useState} from "react";
-import {
-    AccessTime,
-    CheckCircleOutline,
-    DocumentScanner,
-    ErrorOutline,
-    Inventory2Outlined,
-    Loop,
-    QrCodeScanner,
-    SettingsOutlined,
-    WarningAmberOutlined,
-} from "components/ui/icons";
+import React, {FormEvent, useCallback, useEffect, useMemo, useRef, useState} from "react";
+import {Link} from "react-router-dom";
+import {Alert, Button, Chip, IconButton, MenuItem, TextField, Typography} from "components/ui";
+import {Add, DeleteOutline, QrCodeScanner, Save} from "components/ui/icons";
+import AuthService from "../../hooks/AuthService";
+import DeviceService from "../../hooks/DeviceService";
+import ShipmentCollectService, {CollectFaultError} from "../../hooks/ShipmentCollectService";
+import {getBackendErrorMessage} from "../../api/errorMessage";
+import {CurrentUserDto} from "../../auth/UserProfileDto";
 import pl from "../../i18n/translate";
+import {DeviceDto} from "../Devices/dto/DeviceDto";
+import {readDevicePairKey, removeDevicePairKey, saveDevicePairKey} from "../Devices/devicePairKeyStore";
+import {CollectResponse, PendingShipment} from "./model/ShipmentCollect";
+import {readShipmentCollectSession, saveShipmentCollectSession} from "./shipmentCollectSession";
 import "./styles/shipment-scanner.css";
 
-type ScanStatus = "ready" | "loading" | "success" | "error" | "duplicate";
+type FeedbackState = "added" | "duplicate" | "invalidCode" | "saving" | "saved" | "partial" | "failed" | "error";
 
-type MockShipment = {
-    code: string;
-    recipient: string;
-    destination: string;
-    shipmentStatus: string;
+type Feedback = {
+    state: FeedbackState;
+    description?: string;
 };
 
-type ScanRecord = {
-    code: string;
-    destination: string;
-    message: string;
-    recipient?: string;
-    scannedAt: string;
-    status: Exclude<ScanStatus, "ready" | "loading">;
+const feedbackSeverity: Record<FeedbackState, "success" | "warning" | "error" | "info"> = {
+    added: "success",
+    saved: "success",
+    duplicate: "warning",
+    partial: "warning",
+    invalidCode: "error",
+    failed: "error",
+    error: "error",
+    saving: "info",
 };
-
-const mockShipments: Record<string, MockShipment> = {
-    "FTM-2026-001284": {
-        code: "FTM-2026-001284",
-        recipient: "Jan Kowalski",
-        destination: "Warszawa",
-        shipmentStatus: "accepted",
-    },
-    "FTM-2026-001283": {
-        code: "FTM-2026-001283",
-        recipient: "Katarzyna Nowak",
-        destination: "Krakow",
-        shipmentStatus: "accepted",
-    },
-    "FTM-2026-001281": {
-        code: "FTM-2026-001281",
-        recipient: "Adam Zielinski",
-        destination: "Gdansk",
-        shipmentStatus: "accepted",
-    },
-    "FTM-2026-001280": {
-        code: "FTM-2026-001280",
-        recipient: "Marta Wisniewska",
-        destination: "Poznan",
-        shipmentStatus: "accepted",
-    },
-};
-
-const initialRecords: ScanRecord[] = [
-    {code: "FTM-2026-001284", destination: "Warszawa", message: "success", recipient: "Jan Kowalski", scannedAt: "14:32:08", status: "success"},
-    {code: "FTM-2026-001283", destination: "Krakow", message: "success", recipient: "Katarzyna Nowak", scannedAt: "14:31:54", status: "success"},
-    {code: "FTM-2026-001282", destination: "alreadyScanned", message: "duplicate", scannedAt: "14:31:41", status: "duplicate"},
-    {code: "FTM-2026-001281", destination: "Gdansk", message: "success", recipient: "Adam Zielinski", scannedAt: "14:31:12", status: "success"},
-    {code: "BAD-CODE", destination: "invalidCode", message: "invalidCode", scannedAt: "14:30:58", status: "error"},
-];
-
-const initiallyScannedCodes = new Set(initialRecords
-    .filter((record) => record.status === "success")
-    .map((record) => record.code));
 
 const formatScanTime = () => new Date().toLocaleTimeString(pl.common.locale, {
     hour: "2-digit",
@@ -76,333 +38,420 @@ const formatScanTime = () => new Date().toLocaleTimeString(pl.common.locale, {
     second: "2-digit",
 });
 
-const normalizeCode = (value: string) => value.trim().toUpperCase();
+export const normalizeTrackingNumber = (value: string) => value.trim();
 
-const isInvalidCode = (code: string) => !code || code.length < 6 || !/^[A-Z0-9-]+$/.test(code);
+const deviceKey = (device: DeviceDto, index: number) => device.deviceId?.value || String(index);
 
-const fallbackShipment = (code: string): MockShipment => {
-    const destinations = ["Wroclaw", "Lodz", "Szczecin", "Lublin", "Katowice"];
-    const recipients = ["Piotr Mazur", "Anna Wozniak", "Tomasz Lewandowski", "Ewa Kaminska", "Michal Dabrowski"];
-    const index = Math.abs(code.split("").reduce((sum, character) => sum + character.charCodeAt(0), 0)) % destinations.length;
+const isPairKeyFault = (message: string) => /pair key/i.test(message);
 
-    return {
-        code,
-        recipient: recipients[index],
-        destination: destinations[index],
-        shipmentStatus: "accepted",
-    };
+const resolveSavedState = (collectResponse: CollectResponse): FeedbackState => {
+    if (collectResponse.success) {
+        return "saved";
+    }
+    return collectResponse.details.some((detail) => detail.success) ? "partial" : "failed";
 };
 
 function ShipmentScanner() {
     const inputRef = useRef<HTMLInputElement>(null);
-    const feedbackTimerRef = useRef<number>();
-    const processingTimerRef = useRef<number>();
     const [inputValue, setInputValue] = useState("");
-    const [scanState, setScanState] = useState<ScanStatus>("ready");
-    const [lastRecord, setLastRecord] = useState<ScanRecord>();
-    const [recentRecords, setRecentRecords] = useState<ScanRecord[]>(initialRecords);
-    const [sessionCount, setSessionCount] = useState(24);
-    const [scannedCodes, setScannedCodes] = useState<Set<string>>(initiallyScannedCodes);
+    const [feedback, setFeedback] = useState<Feedback | null>(null);
+    const [pendingShipments, setPendingShipments] = useState<PendingShipment[]>([]);
+    const [devices, setDevices] = useState<DeviceDto[]>([]);
+    const [devicesLoading, setDevicesLoading] = useState(true);
+    const [devicesError, setDevicesError] = useState<string | null>(null);
+    const [currentUser, setCurrentUser] = useState<CurrentUserDto | null>(null);
+    const [selectedDeviceKey, setSelectedDeviceKey] = useState("");
+    const [pairKey, setPairKey] = useState("");
+    const [validationMessage, setValidationMessage] = useState<string | null>(null);
+    const [collectResponse, setCollectResponse] = useState<CollectResponse | null>(null);
+    const [sessionRestored, setSessionRestored] = useState(false);
 
-    const scannerTranslations = pl.shipmentScanner;
+    const translations = pl.shipmentScanner;
+    const saving = feedback?.state === "saving";
 
-    const successfulRecords = useMemo(
-        () => recentRecords.filter((record) => record.status === "success").length,
-        [recentRecords],
+    const selectedDevice = useMemo(
+        () => devices.find((device, index) => deviceKey(device, index) === selectedDeviceKey),
+        [devices, selectedDeviceKey],
+    );
+
+    const userId = currentUser ? String(currentUser.userId.value) : null;
+    const selectedDeviceId = selectedDevice?.deviceId?.value || null;
+    const pairKeySaved = Boolean(userId && selectedDeviceId && pairKey && readDevicePairKey(userId, selectedDeviceId) === pairKey.trim());
+
+    const collectedCount = useMemo(
+        () => collectResponse?.details.filter((detail) => detail.success).length || 0,
+        [collectResponse],
     );
 
     const focusInput = () => {
         window.setTimeout(() => inputRef.current?.focus(), 0);
     };
 
+    const loadDevices = useCallback(async () => {
+        setDevicesLoading(true);
+        setDevicesError(null);
+        try {
+            const [profileResponse, devicesResponse] = await Promise.all([
+                AuthService.me(),
+                DeviceService.currentUserDevices(),
+            ]);
+            const loadedDevices = devicesResponse.data;
+            const session = readShipmentCollectSession(profileResponse.data.userId.value);
+            const restoredDeviceKey = loadedDevices.some((device, index) => deviceKey(device, index) === session.selectedDeviceKey)
+                ? session.selectedDeviceKey
+                : loadedDevices.length === 1 ? deviceKey(loadedDevices[0], 0) : "";
+            setCurrentUser(profileResponse.data);
+            setDevices(loadedDevices);
+            setSelectedDeviceKey(restoredDeviceKey);
+            setPendingShipments(session.pendingShipments);
+            setSessionRestored(true);
+        } catch (error) {
+            setDevicesError(getBackendErrorMessage(error, translations.device.loadError));
+        } finally {
+            setDevicesLoading(false);
+        }
+    }, [translations.device.loadError]);
+
     useEffect(() => {
+        loadDevices();
+        focusInput();
+    }, [loadDevices]);
+
+    useEffect(() => {
+        if (userId && sessionRestored) {
+            saveShipmentCollectSession(userId, {pendingShipments, selectedDeviceKey});
+        }
+    }, [userId, sessionRestored, pendingShipments, selectedDeviceKey]);
+
+    useEffect(() => {
+        setPairKey(userId && selectedDeviceId ? readDevicePairKey(userId, selectedDeviceId) : "");
+    }, [userId, selectedDeviceId]);
+
+    const changePairKey = (value: string) => {
+        setPairKey(value);
+        if (userId && selectedDeviceId) {
+            saveDevicePairKey(userId, selectedDeviceId, value);
+        }
+    };
+
+    const forgetPairKey = () => {
+        if (userId && selectedDeviceId) {
+            removeDevicePairKey(userId, selectedDeviceId);
+        }
+        setPairKey("");
+    };
+
+    const addShipment = (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        if (saving) {
+            return;
+        }
+
+        const trackingNumber = normalizeTrackingNumber(inputValue);
+        setInputValue("");
+        setValidationMessage(null);
         focusInput();
 
-        return () => {
-            if (feedbackTimerRef.current) {
-                window.clearTimeout(feedbackTimerRef.current);
+        if (!trackingNumber) {
+            setFeedback({state: "invalidCode"});
+            return;
+        }
+
+        if (pendingShipments.some((shipment) => shipment.trackingNumber === trackingNumber)) {
+            setFeedback({state: "duplicate", description: trackingNumber});
+            return;
+        }
+
+        setPendingShipments((currentShipments) => [
+            {trackingNumber, scannedAt: formatScanTime()},
+            ...currentShipments,
+        ]);
+        setFeedback({state: "added", description: trackingNumber});
+    };
+
+    const removeShipment = (trackingNumber: string) => {
+        setPendingShipments((currentShipments) => currentShipments
+            .filter((shipment) => shipment.trackingNumber !== trackingNumber));
+        focusInput();
+    };
+
+    const clearShipments = () => {
+        setPendingShipments([]);
+        setFeedback(null);
+        focusInput();
+    };
+
+    const validateBeforeSave = (): string | null => {
+        if (!pendingShipments.length) {
+            return translations.validation.emptyList;
+        }
+        if (!selectedDevice) {
+            return translations.validation.deviceRequired;
+        }
+        if (!pairKey.trim()) {
+            return translations.validation.pairKeyRequired;
+        }
+        return null;
+    };
+
+    const saveCollection = async () => {
+        if (saving) {
+            return;
+        }
+
+        const validationError = validateBeforeSave();
+        setValidationMessage(validationError);
+        if (validationError || !selectedDevice) {
+            return;
+        }
+
+        setFeedback({state: "saving"});
+        try {
+            const response = await ShipmentCollectService.collect({
+                deviceInformation: {
+                    version: selectedDevice.version?.value || "",
+                    deviceId: selectedDevice.deviceId?.value || "",
+                    responsibleUser: selectedDevice.username?.value || currentUser?.username || "",
+                    departmentCode: selectedDevice.depotCode?.value || currentUser?.departmentCode || "",
+                    pairKey: pairKey.trim(),
+                    deviceUserType: "SUPPLIER",
+                    deviceType: selectedDevice.deviceType || "SCANNER",
+                },
+                trackingNumbers: [...pendingShipments].reverse().map((shipment) => shipment.trackingNumber),
+            });
+            setCollectResponse(response);
+            setPendingShipments([]);
+            setFeedback({state: resolveSavedState(response), description: response.processId});
+        } catch (error) {
+            const message = error instanceof CollectFaultError
+                ? error.message
+                : getBackendErrorMessage(error, translations.feedback.error);
+            if (isPairKeyFault(message)) {
+                forgetPairKey();
             }
-            if (processingTimerRef.current) {
-                window.clearTimeout(processingTimerRef.current);
-            }
-        };
-    }, []);
-
-    const clearFeedbackLater = () => {
-        if (feedbackTimerRef.current) {
-            window.clearTimeout(feedbackTimerRef.current);
-        }
-
-        feedbackTimerRef.current = window.setTimeout(() => {
-            setScanState("ready");
-            setLastRecord(undefined);
+            setFeedback({state: "error", description: message});
+        } finally {
             focusInput();
-        }, 2800);
+        }
     };
 
-    const pushRecord = (record: ScanRecord) => {
-        setRecentRecords((currentRecords) => [record, ...currentRecords].slice(0, 8));
-        setLastRecord(record);
+    const feedbackMessage = (currentFeedback: Feedback) => {
+        const description = currentFeedback.state === "saving"
+            ? translations.feedback.savingDescription
+            : currentFeedback.description;
+        return (
+            <>
+                <strong>{translations.feedback[currentFeedback.state]}</strong>
+                {description ? <span className="shipment-collect-feedback-detail">{description}</span> : null}
+            </>
+        );
     };
-
-    const registerScanResult = (code: string) => {
-        const scannedAt = formatScanTime();
-
-        if (isInvalidCode(code)) {
-            const record: ScanRecord = {
-                code: code || scannerTranslations.fallbackCode,
-                destination: "invalidCode",
-                message: "invalidCode",
-                scannedAt,
-                status: "error",
-            };
-            setScanState("error");
-            pushRecord(record);
-            clearFeedbackLater();
-            return;
-        }
-
-        if (code.includes("404") || code.includes("NOTFOUND")) {
-            const record: ScanRecord = {
-                code,
-                destination: "notFound",
-                message: "notFound",
-                scannedAt,
-                status: "error",
-            };
-            setScanState("error");
-            pushRecord(record);
-            clearFeedbackLater();
-            return;
-        }
-
-        if (code.includes("ERR") || code.includes("500")) {
-            const record: ScanRecord = {
-                code,
-                destination: "cannotRegister",
-                message: "cannotRegister",
-                scannedAt,
-                status: "error",
-            };
-            setScanState("error");
-            pushRecord(record);
-            clearFeedbackLater();
-            return;
-        }
-
-        if (scannedCodes.has(code)) {
-            const record: ScanRecord = {
-                code,
-                destination: "alreadyScanned",
-                message: "duplicate",
-                scannedAt,
-                status: "duplicate",
-            };
-            setScanState("duplicate");
-            pushRecord(record);
-            clearFeedbackLater();
-            return;
-        }
-
-        const shipment = mockShipments[code] || fallbackShipment(code);
-        const record: ScanRecord = {
-            code: shipment.code,
-            destination: shipment.destination,
-            message: "success",
-            recipient: shipment.recipient,
-            scannedAt,
-            status: "success",
-        };
-
-        setScannedCodes((currentCodes) => new Set(currentCodes).add(code));
-        setSessionCount((currentCount) => currentCount + 1);
-        setScanState("success");
-        pushRecord(record);
-        clearFeedbackLater();
-    };
-
-    const submitScan = (event?: FormEvent<HTMLFormElement>) => {
-        event?.preventDefault();
-        if (scanState === "loading") {
-            return;
-        }
-
-        const code = normalizeCode(inputValue);
-        setInputValue("");
-        setLastRecord(undefined);
-        setScanState("loading");
-
-        if (processingTimerRef.current) {
-            window.clearTimeout(processingTimerRef.current);
-        }
-
-        processingTimerRef.current = window.setTimeout(() => {
-            registerScanResult(code);
-            focusInput();
-        }, 520);
-    };
-
-    const feedbackIcon = () => {
-        if (scanState === "loading") {
-            return <Loop />;
-        }
-        if (scanState === "success") {
-            return <CheckCircleOutline />;
-        }
-        if (scanState === "duplicate") {
-            return <WarningAmberOutlined />;
-        }
-        if (scanState === "error") {
-            return <ErrorOutline />;
-        }
-        return <QrCodeScanner />;
-    };
-
-    const feedbackTitle = () => {
-        if (scanState === "loading") {
-            return scannerTranslations.feedback.loading;
-        }
-        if (!lastRecord) {
-            return scannerTranslations.feedback.readyTitle;
-        }
-        return scannerTranslations.feedback[lastRecord.message as keyof typeof scannerTranslations.feedback] || scannerTranslations.feedback.cannotRegister;
-    };
-
-    const feedbackDescription = () => {
-        if (scanState === "loading") {
-            return scannerTranslations.feedback.loadingDescription;
-        }
-        if (!lastRecord) {
-            return scannerTranslations.feedback.readyDescription;
-        }
-        return lastRecord.code;
-    };
-
-    const recordMessage = (record: ScanRecord) => scannerTranslations.feedback[record.message as keyof typeof scannerTranslations.feedback]
-        || record.destination;
-
-    const recordDestination = (record: ScanRecord) => scannerTranslations.recordDestinations[record.destination as keyof typeof scannerTranslations.recordDestinations]
-        || record.destination;
 
     return (
-        <main className="shipment-scanner-page" onClick={focusInput}>
-            <section className="shipment-scanner-header">
-                <div className="shipment-scanner-heading">
-                    <span className="shipment-scanner-kicker">
-                        <SettingsOutlined fontSize="small" />
-                        {scannerTranslations.page.kicker}
-                    </span>
-                    <h1>{scannerTranslations.page.title}</h1>
-                    <p>{scannerTranslations.page.subtitle}</p>
-                </div>
-                <div className="shipment-scanner-status">
-                    <span />
-                    {scannerTranslations.page.readyStatus}
-                </div>
-            </section>
-
-            <section className="shipment-scanner-layout">
-                <div className="shipment-scanner-main-card">
-                    <div className="shipment-scanner-card-icon">
-                        <QrCodeScanner />
+        <main className="shipment-scanner-page">
+            <div className="shipment-collect-shell">
+                <section className="shipment-scanner-header shipment-collect-header">
+                    <div className="shipment-collect-title">
+                        <span className="shipment-collect-title-icon"><QrCodeScanner /></span>
+                        <div>
+                            <Typography variant="h4">{translations.page.title}</Typography>
+                            <p>{translations.page.subtitle}</p>
+                        </div>
                     </div>
-                    <div className="shipment-scanner-card-copy">
-                        <h2>{scannerTranslations.scanCard.title}</h2>
-                        <p>{scannerTranslations.scanCard.description}</p>
-                    </div>
+                    <Chip
+                        color={selectedDevice ? "success" : "warning"}
+                        label={selectedDevice ? translations.page.readyStatus : translations.page.deviceMissingStatus}
+                    />
+                </section>
 
-                    <form className="shipment-scanner-form" onSubmit={submitScan}>
-                        <div className="shipment-scanner-input-shell">
-                            <DocumentScanner />
-                            <input
-                                aria-label={scannerTranslations.scanCard.inputLabel}
-                                disabled={scanState === "loading"}
-                                placeholder={scannerTranslations.scanCard.placeholder}
-                                ref={inputRef}
-                                type="text"
+                <section className="shipment-collect-grid">
+                    <div className="shipment-collect-panel">
+                        <div className="shipment-collect-panel-header">
+                            <div>
+                                <Typography variant="h5">{translations.scanCard.title}</Typography>
+                                <p>{translations.scanCard.description}</p>
+                            </div>
+                        </div>
+
+                        <form className="shipment-collect-scan-form" onSubmit={addShipment}>
+                            <TextField
+                                autoComplete="off"
+                                disabled={saving}
+                                inputProps={{ref: inputRef}}
+                                label={translations.scanCard.inputLabel}
+                                placeholder={translations.scanCard.placeholder}
+                                size="small"
                                 value={inputValue}
-                                onChange={(event) => setInputValue(event.target.value)}
-                                onBlur={focusInput}
+                                onChange={(event: React.ChangeEvent<HTMLInputElement>) => setInputValue(event.target.value)}
                             />
-                        </div>
-                        <button disabled={scanState === "loading"} type="submit">
-                            {scanState === "loading" ? scannerTranslations.scanCard.processing : scannerTranslations.scanCard.submit}
-                        </button>
-                    </form>
+                            <Button disabled={saving} startIcon={<Add />} type="submit" variant="outlined">
+                                {translations.scanCard.submit}
+                            </Button>
+                        </form>
 
-                    <div className={`shipment-scanner-feedback shipment-scanner-feedback-${scanState}`}>
-                        <span className="shipment-scanner-feedback-icon">{feedbackIcon()}</span>
-                        <div>
-                            <strong>{feedbackTitle()}</strong>
-                            <span>{feedbackDescription()}</span>
+                        {feedback ? (
+                            <Alert className="shipment-collect-feedback" severity={feedbackSeverity[feedback.state]}>
+                                {feedbackMessage(feedback)}
+                            </Alert>
+                        ) : (
+                            <p className="shipment-collect-hint">{translations.feedback.readyDescription}</p>
+                        )}
+
+                        <div className="shipment-collect-section-header">
+                            <Typography variant="h5">{translations.pending.title}</Typography>
+                            <span>{translations.pending.count.replace("{count}", String(pendingShipments.length))}</span>
+                        </div>
+
+                        <div className="shipment-collect-table-wrap">
+                            <table className="shipment-collect-table">
+                                <thead>
+                                    <tr>
+                                        <th>{translations.pending.columns.trackingNumber}</th>
+                                        <th>{translations.pending.columns.scannedAt}</th>
+                                        <th aria-label={translations.pending.columns.actions} />
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {pendingShipments.length ? pendingShipments.map((shipment) => (
+                                        <tr key={shipment.trackingNumber}>
+                                            <td className="shipment-collect-code">{shipment.trackingNumber}</td>
+                                            <td>{shipment.scannedAt}</td>
+                                            <td className="shipment-collect-actions-cell">
+                                                <IconButton
+                                                    aria-label={translations.pending.remove.replace("{trackingNumber}", shipment.trackingNumber)}
+                                                    disabled={saving}
+                                                    size="small"
+                                                    title={translations.pending.remove.replace("{trackingNumber}", shipment.trackingNumber)}
+                                                    onClick={() => removeShipment(shipment.trackingNumber)}
+                                                >
+                                                    <DeleteOutline fontSize="small" />
+                                                </IconButton>
+                                            </td>
+                                        </tr>
+                                    )) : (
+                                        <tr>
+                                            <td className="shipment-collect-empty" colSpan={3}>{translations.pending.empty}</td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {validationMessage ? <Alert severity="error">{validationMessage}</Alert> : null}
+
+                        <div className="shipment-collect-actions">
+                            <Button disabled={saving || !pendingShipments.length} variant="outlined" onClick={clearShipments}>
+                                {translations.pending.clear}
+                            </Button>
+                            <Button disabled={saving} startIcon={<Save />} variant="contained" onClick={saveCollection}>
+                                {translations.pending.save.replace("{count}", String(pendingShipments.length))}
+                            </Button>
                         </div>
                     </div>
 
-                    {lastRecord?.status === "success" ? (
-                        <dl className="shipment-scanner-result-grid">
-                            <div>
-                                <dt>{scannerTranslations.result.recipient}</dt>
-                                <dd>{lastRecord.recipient}</dd>
-                            </div>
-                            <div>
-                                <dt>{scannerTranslations.result.destination}</dt>
-                                <dd>{recordDestination(lastRecord)}</dd>
-                            </div>
-                            <div>
-                                <dt>{scannerTranslations.result.status}</dt>
-                                <dd>{scannerTranslations.result.accepted}</dd>
-                            </div>
-                            <div>
-                                <dt>{scannerTranslations.result.time}</dt>
-                                <dd>{lastRecord.scannedAt}</dd>
-                            </div>
-                        </dl>
-                    ) : null}
-                </div>
-
-                <aside className="shipment-scanner-side">
-                    <div className="shipment-scanner-side-header">
-                        <div>
-                            <span>{scannerTranslations.recent.kicker}</span>
-                            <h2>{scannerTranslations.recent.title}</h2>
-                        </div>
-                        <strong>{scannerTranslations.recent.count.replace("{count}", String(sessionCount))}</strong>
-                    </div>
-
-                    <div className="shipment-scanner-mini-stats">
-                        <div>
-                            <Inventory2Outlined fontSize="small" />
-                            <span>{scannerTranslations.recent.visibleSuccess}</span>
-                            <strong>{successfulRecords}</strong>
-                        </div>
-                        <div>
-                            <AccessTime fontSize="small" />
-                            <span>{scannerTranslations.recent.lastScan}</span>
-                            <strong>{recentRecords[0]?.scannedAt || pl.common.dash}</strong>
-                        </div>
-                    </div>
-
-                    <ol className="shipment-scanner-recent-list">
-                        {recentRecords.map((record, index) => (
-                            <li className={`shipment-scanner-record shipment-scanner-record-${record.status}`} key={`${record.code}-${record.scannedAt}-${index}`}>
-                                <span className="shipment-scanner-record-icon">
-                                    {record.status === "success" ? <CheckCircleOutline /> : record.status === "duplicate" ? <WarningAmberOutlined /> : <ErrorOutline />}
-                                </span>
+                    <div className="shipment-collect-side">
+                        <div className="shipment-collect-panel">
+                            <div className="shipment-collect-panel-header">
                                 <div>
-                                    <strong>{record.code}</strong>
-                                    <span>{record.status === "success" ? recordDestination(record) : recordMessage(record)}</span>
+                                    <Typography variant="h5">{translations.device.title}</Typography>
+                                    <p>{translations.device.description}</p>
                                 </div>
-                                <time>{record.scannedAt}</time>
-                            </li>
-                        ))}
-                    </ol>
+                            </div>
 
-                    <div className="shipment-scanner-help">
-                        <strong>{scannerTranslations.help.title}</strong>
-                        <span>{scannerTranslations.help.description}</span>
+                            {devicesLoading ? <p className="shipment-collect-hint">{translations.device.loading}</p> : null}
+                            {devicesError ? <Alert severity="error">{devicesError}</Alert> : null}
+                            {!devicesLoading && !devicesError && !devices.length ? (
+                                <p className="shipment-collect-hint">
+                                    {translations.device.empty}{" "}
+                                    <Link to="/device-pairing">{translations.device.pairingLink}</Link>
+                                </p>
+                            ) : null}
+
+                            {devices.length ? (
+                                <div className="shipment-collect-form">
+                                    <TextField
+                                        select
+                                        disabled={saving}
+                                        label={translations.device.deviceLabel}
+                                        size="small"
+                                        value={selectedDeviceKey}
+                                        onChange={(event: React.ChangeEvent<HTMLSelectElement>) => setSelectedDeviceKey(event.target.value)}
+                                    >
+                                        <MenuItem value="">{translations.device.devicePlaceholder}</MenuItem>
+                                        {devices.map((device, index) => (
+                                            <MenuItem key={deviceKey(device, index)} value={deviceKey(device, index)}>
+                                                {[device.deviceType, device.deviceId?.value].filter(Boolean).join(" · ")}
+                                            </MenuItem>
+                                        ))}
+                                    </TextField>
+                                    <TextField
+                                        autoComplete="off"
+                                        disabled={saving || !selectedDevice}
+                                        helperText={pairKeySaved ? translations.device.pairKeySaved : translations.device.pairKeyHint}
+                                        label={translations.device.pairKeyLabel}
+                                        size="small"
+                                        type="password"
+                                        value={pairKey}
+                                        onChange={(event: React.ChangeEvent<HTMLInputElement>) => changePairKey(event.target.value)}
+                                    />
+                                    <div className="shipment-collect-device-links">
+                                        <Link className="shipment-collect-link" to="/device-pairing">{translations.device.pairingLink}</Link>
+                                        {pairKeySaved ? (
+                                            <Button disabled={saving} variant="text" onClick={forgetPairKey}>
+                                                {translations.device.forgetPairKey}
+                                            </Button>
+                                        ) : null}
+                                    </div>
+                                </div>
+                            ) : null}
+                        </div>
+
+                        <div className="shipment-collect-panel">
+                            <div className="shipment-collect-panel-header">
+                                <div>
+                                    <Typography variant="h5">{translations.result.title}</Typography>
+                                    <p>{collectResponse
+                                        ? translations.result.summary
+                                            .replace("{collected}", String(collectedCount))
+                                            .replace("{total}", String(collectResponse.details.length))
+                                        : translations.result.empty}</p>
+                                </div>
+                            </div>
+
+                            {collectResponse ? (
+                                <>
+                                    <div className="shipment-collect-process">
+                                        <span>{translations.result.processId}</span>
+                                        <code>{collectResponse.processId}</code>
+                                        <Link className="shipment-collect-link" to={`/processes/${collectResponse.processId}`}>
+                                            {translations.result.openProcess}
+                                        </Link>
+                                    </div>
+                                    <ul className="shipment-collect-results">
+                                        {collectResponse.details.map((detail, index) => (
+                                            <li key={`${detail.trackingNumber}-${index}`}>
+                                                <div>
+                                                    <span className="shipment-collect-code">{detail.trackingNumber || pl.common.dash}</span>
+                                                    {detail.success ? null : (
+                                                        <span className="shipment-collect-error">
+                                                            {detail.errorMessage || translations.result.unknownError}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <Chip
+                                                    color={detail.success ? "success" : "error"}
+                                                    label={detail.success ? translations.result.collected : translations.result.rejected}
+                                                    size="small"
+                                                />
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </>
+                            ) : null}
+                        </div>
                     </div>
-                </aside>
-            </section>
+                </section>
+            </div>
         </main>
     );
 }
