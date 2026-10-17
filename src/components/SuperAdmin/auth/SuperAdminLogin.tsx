@@ -2,11 +2,9 @@ import React, {useState} from "react";
 import {AdminPanelSettings, Shield} from "components/ui/icons";
 import {Alert} from "components/ui";
 import {Navigate, useNavigate} from "react-router-dom";
-import {authenticateCurrentUser} from "../../../auth/AuthSession";
-import {useAuthState} from "../../../auth/AuthState";
-import SuperAdminAuthService from "../../../hooks/SuperAdminAuthService";
 import pl from "../../../i18n/translate";
 import {LoginRequest} from "../../LoginPage/model/LoginRequest";
+import {loginPlatformOwner, usePlatformOwnerSession} from "./PlatformOwnerSession";
 
 function SuperAdminLogin() {
     const navigate = useNavigate();
@@ -14,23 +12,20 @@ function SuperAdminLogin() {
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
-    const authState = useAuthState();
+    const platformOwnerSession = usePlatformOwnerSession();
 
     const login = () => {
         const request: LoginRequest = {username, password};
         setLoading(true);
         setError("");
 
-        SuperAdminAuthService.login(request)
-            .then(async () => {
-                await authenticateCurrentUser();
-                navigate("/super-admin/operators", {replace: true});
-            })
+        loginPlatformOwner(request)
+            .then(() => navigate("/super-admin/operators", {replace: true}))
             .catch(() => setError(pl.superAdmin.login.error))
             .finally(() => setLoading(false));
     };
 
-    if (authState.status === "authenticated") {
+    if (platformOwnerSession.status === "authenticated") {
         return <Navigate to="/super-admin/operators" replace/>;
     }
 

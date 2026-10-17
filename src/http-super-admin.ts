@@ -1,6 +1,7 @@
 import axios from "axios";
 import JSONBig from "json-bigint";
 import {configureAuthenticatedClient} from "./auth/configureAuthenticatedClient";
+import {setPlatformOwnerUnauthenticated} from "./components/SuperAdmin/auth/PlatformOwnerSession";
 
 const jsonBig = JSONBig({storeAsString: true});
 
@@ -25,4 +26,7 @@ const http = axios.create({
     withCredentials: true,
 });
 
-export default configureAuthenticatedClient(http);
+export default configureAuthenticatedClient(http, {
+    refreshPath: "/platform/auth/refresh",
+    onUnauthenticated: () => setPlatformOwnerUnauthenticated(),
+});
