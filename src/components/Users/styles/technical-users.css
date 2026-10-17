@@ -318,7 +318,8 @@
     text-transform: uppercase;
 }
 
-.users-page .users-role-admin {
+.users-page .users-role-admin,
+.users-page .users-role-superadmin {
     border-color: color-mix(in srgb, var(--danger) 36%, var(--border)) !important;
     color: var(--danger) !important;
 }

@@ -2,6 +2,7 @@ import React, {FormEvent, useEffect, useState} from "react";
 import {Alert, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle} from "components/ui";
 import pl from "../../i18n/translate";
 import {permissionDefinitions, User, UserPermission} from "./model/User";
+import {isAdministrator} from "./model/UserRoleAccess";
 
 type UserPermissionsDialogProps = {
     open: boolean;
@@ -40,7 +41,7 @@ function UserPermissionsDialog({open, saving, error, user, onClose, onSave}: Use
                     {error ? <Alert severity="error" sx={{mb: 2}}>{error}</Alert> : null}
                     <div className="users-permissions-grid">
                         {permissionDefinitions.map((permission) => {
-                            const adminPermissionDisabled = permission.key.startsWith("ROLE_ADMIN_") && user?.role !== "ADMIN";
+                            const adminPermissionDisabled = permission.key.startsWith("ROLE_ADMIN_") && !isAdministrator(user?.role);
                             const permissionSelected = selected.includes(permission.key);
                             return (
                                 <label

@@ -44,6 +44,7 @@ import pl from "../i18n/translate";
 import DepartmentRelationsMap, {getDepartmentsMissingSortingRelation} from "./Departments/DepartmentRelationsMap";
 import {DepartmentRelation, departmentRelationPairKey} from "./Departments/model/DepartmentRelation";
 import {User} from "./Users/model/User";
+import {canManageUsers, isAdministrator} from "./Users/model/UserRoleAccess";
 import "./Departments/styles/departments.css";
 
 const DEPARTMENT_TYPES = [
@@ -166,8 +167,8 @@ const Departments: React.FC = () => {
     } | null>(null);
     const createTranslations = pl.departments.create;
     const editTranslations = pl.departments.edit;
-    const canViewArchivedDepartments = currentUser?.role === "ADMIN";
-    const canArchiveDepartments = canViewArchivedDepartments || currentUser?.role === "MANAGER";
+    const canViewArchivedDepartments = isAdministrator(currentUser?.role);
+    const canArchiveDepartments = canManageUsers(currentUser?.role);
 
     const cityCount = useMemo(
         () => new Set(departments.map((department) => department.address?.city).filter(Boolean)).size,

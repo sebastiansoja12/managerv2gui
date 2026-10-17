@@ -19,13 +19,14 @@ type UserCreateDialogProps = {
     departments: Array<{code: string; label: string}>;
     departmentsLoading: boolean;
     open: boolean;
+    roles: UserRole[];
     saving: boolean;
     error?: string;
     onClose: () => void;
     onSave: (request: CreateUserRequest) => void;
 };
 
-function UserCreateDialog({departments, departmentsLoading, open, saving, error, onClose, onSave}: UserCreateDialogProps) {
+function UserCreateDialog({departments, departmentsLoading, open, roles, saving, error, onClose, onSave}: UserCreateDialogProps) {
     const [request, setRequest] = useState<CreateUserRequest>(emptyRequest());
 
     useEffect(() => {
@@ -93,7 +94,7 @@ function UserCreateDialog({departments, departmentsLoading, open, saving, error,
                         ))}
                     </TextField>
                     <TextField label={pl.usersManagement.fields.role} select value={request.role} onChange={(event) => updateField("role", event.target.value as UserRole)}>
-                        {Object.entries(pl.usersManagement.roles).map(([role, label]) => <MenuItem key={role} value={role}>{label}</MenuItem>)}
+                        {roles.map((role) => <MenuItem key={role} value={role}>{pl.usersManagement.roles[role]}</MenuItem>)}
                     </TextField>
                     <TextField label={pl.usersManagement.fields.language} select value={request.language} onChange={(event) => updateField("language", event.target.value)}>
                         {Object.entries(pl.usersManagement.languages).map(([language, label]) => <MenuItem key={language} value={language}>{label}</MenuItem>)}

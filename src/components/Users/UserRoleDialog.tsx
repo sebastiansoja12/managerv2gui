@@ -5,6 +5,7 @@ import {User, UserRole} from "./model/User";
 
 type UserRoleDialogProps = {
     open: boolean;
+    roles: UserRole[];
     saving: boolean;
     error?: string;
     user?: User;
@@ -12,7 +13,7 @@ type UserRoleDialogProps = {
     onSave: (role: UserRole) => void;
 };
 
-function UserRoleDialog({open, saving, error, user, onClose, onSave}: UserRoleDialogProps) {
+function UserRoleDialog({open, roles, saving, error, user, onClose, onSave}: UserRoleDialogProps) {
     const [role, setRole] = useState<UserRole>("USER");
 
     useEffect(() => {
@@ -42,8 +43,8 @@ function UserRoleDialog({open, saving, error, user, onClose, onSave}: UserRoleDi
                         select
                         value={role}
                     >
-                        {Object.entries(pl.usersManagement.roles).map(([value, label]) => (
-                            <MenuItem key={value} value={value}>{label}</MenuItem>
+                        {roles.map((value) => (
+                            <MenuItem key={value} value={value}>{pl.usersManagement.roles[value]}</MenuItem>
                         ))}
                     </TextField>
                 </DialogContent>
