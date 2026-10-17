@@ -1,5 +1,7 @@
 import React, {FormEvent, useEffect, useState} from "react";
 import {Alert, Dialog, DialogActions, DialogContent, DialogTitle, Select} from "components/ui";
+import {getBackendErrorMessage} from "../../../api/errorMessage";
+import Department from "../../../class/depots/Department";
 import pl from "../../../i18n/translate";
 import OperatorUserService from "../../../hooks/OperatorUserService";
 import {
@@ -12,21 +14,29 @@ type OperatorUserDialogProps = {
     open: boolean;
     operatorId: string;
     operatorName: string;
+    departments?: Department[];
     onClose: () => void;
     onCreated: () => void;
 };
 
-function OperatorUserDialog({open, operatorId, operatorName, onClose, onCreated}: OperatorUserDialogProps) {
+const departmentCodeValue = (department: Department) => department.departmentCode?.value || "";
+
+const noDepartments: Department[] = [];
+
+function OperatorUserDialog({open, operatorId, operatorName, departments = noDepartments, onClose, onCreated}: OperatorUserDialogProps) {
     const [request, setRequest] = useState<CreateOperatorUserRequest>(createEmptyOperatorUserRequest());
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState("");
 
     useEffect(() => {
         if (open) {
-            setRequest(createEmptyOperatorUserRequest());
+            setRequest({
+                ...createEmptyOperatorUserRequest(),
+                departmentCode: departments[0] ? departmentCodeValue(departments[0]) : "",
+            });
             setError("");
         }
-    }, [open, operatorId]);
+    }, [open, operatorId, departments]);
 
     const updateRequest = <K extends keyof CreateOperatorUserRequest>(
         key: K,
@@ -45,7 +55,7 @@ function OperatorUserDialog({open, operatorId, operatorName, onClose, onCreated}
                 onCreated();
                 onClose();
             })
-            .catch(() => setError(pl.superAdmin.userDialog.saveError))
+            .catch((requestError) => setError(getBackendErrorMessage(requestError, pl.superAdmin.userDialog.saveError)))
             .finally(() => setSaving(false));
     };
 
@@ -66,6 +76,7 @@ function OperatorUserDialog({open, operatorId, operatorName, onClose, onCreated}
                     </p>
 
                     {error ? <Alert severity="error" sx={{mb: 2}}>{error}</Alert> : null}
+                    {!departments.length ? <Alert severity="warning" sx={{mb: 2}}>{pl.superAdmin.workspace.departmentEmpty}</Alert> : null}
 
                     <div className="super-admin-form-grid">
                         <label>
@@ -115,11 +126,18 @@ function OperatorUserDialog({open, operatorId, operatorName, onClose, onCreated}
                         </label>
                         <label>
                             <span>{pl.superAdmin.userDialog.fields.departmentCode}</span>
-                            <input
-                                required
+                            <Select
+                                aria-label={pl.superAdmin.userDialog.fields.departmentCode}
+                                disabled={!departments.length}
                                 value={request.departmentCode}
                                 onChange={(event) => updateRequest("departmentCode", event.target.value)}
-                            />
+                            >
+                                {departments.map((department) => (
+                                    <option key={departmentCodeValue(department)} value={departmentCodeValue(department)}>
+                                        {departmentCodeValue(department)} · {department.address?.city || pl.common.dash}
+                                    </option>
+                                ))}
+                            </Select>
                         </label>
                         <label>
                             <span>{pl.superAdmin.userDialog.fields.role}</span>

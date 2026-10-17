@@ -1,4 +1,4 @@
-export type OperatorUserRole = "USER" | "MANAGER" | "ADMIN" | "SUPPLIER";
+export type OperatorUserRole = "USER" | "MANAGER" | "ADMIN" | "SUPERADMIN" | "SUPPLIER";
 
 export type CreateOperatorUserRequest = {
     firstName: string;
