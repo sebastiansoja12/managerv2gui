@@ -5,7 +5,10 @@ import {
     AdminPanelSettings,
     Analytics,
     AccountTree,
+    ArchiveOutlined,
+    Block,
     ChatBubbleOutline,
+    ChevronRight,
     Close,
     Dashboard,
     DevicesOther,
@@ -17,6 +20,7 @@ import {
     LocationOn,
     Loop,
     Person,
+    QrCodeScanner,
     Radar,
     Search,
     Settings,
@@ -24,6 +28,8 @@ import {
     ShoppingCart,
     SupportAgent,
     TaskAlt,
+    ViewList,
+    Warehouse,
     WarehouseRounded,
 } from "components/ui/icons";
 import {isPathAllowedForProfile, isReturnPath, operationalProfiles, OperationalProfile} from "../../config/operationalProfile";
@@ -41,16 +47,37 @@ import {Language, translations} from "../../i18n";
 import {clearStoredTabs} from "../AppShell/tabStorage";
 import {AppTheme, useAppTheme} from "../../theme/ThemeProvider";
 import {useOperatorCapabilities} from "../AppShell/OperatorCapabilitiesContext";
+import PalletCreateDialog from "../Pallets/PalletCreateDialog";
 
 type NavbarItem = AppTabDefinition & {
     icon: React.ElementType;
+    onSelect?: () => void;
+};
+
+type NavbarGroup = {
+    key: string;
+    label: string;
+    icon: React.ElementType;
+    items: NavbarItem[];
 };
 
 type NavbarMenu = {
     label: string;
     icon: React.ElementType;
     items: NavbarItem[];
+    groups?: NavbarGroup[];
 };
+
+const SHIPMENTS_GROUP = "shipments";
+const PALLETS_GROUP = "pallets";
+const TRANSPORT_GROUP = "transport";
+
+const menuItems = (menu: NavbarMenu): NavbarItem[] => [
+    ...menu.items,
+    ...(menu.groups || []).flatMap((group) => group.items),
+];
+
+const submenuId = (groupKey: string) => `top-nav-submenu-${groupKey}`;
 
 type NavbarProps = {
     activePath: string;
@@ -178,6 +205,8 @@ function Navbar({
     operationalProfile,
 }: NavbarProps) {
     const [expandedPanel, setExpandedPanel] = React.useState<string | null>(null);
+    const [activeGroupKey, setActiveGroupKey] = React.useState<string | null>(null);
+    const [palletCreateOpen, setPalletCreateOpen] = React.useState(false);
     const [profileMenuOpen, setProfileMenuOpen] = React.useState(false);
     const [searchOpen, setSearchOpen] = React.useState(false);
     const [isScrolled, setIsScrolled] = React.useState(false);
@@ -206,16 +235,54 @@ function Navbar({
     ];
     const menus: NavbarMenu[] = [
         {
-            label: pl.navigation.shipments,
-            icon: ShoppingCart,
-            items: [
-                {label: pl.home.tiles.shipmentDetails.title, path: '/shipment-details', icon: LocalShipping},
-                {label: pl.navigation.shipmentList, path: '/shipments/list', icon: ShoppingCart},
-                {label: pl.navigation.returns, path: '/returns', icon: Loop},
-                {label: pl.navigation.deliveries, path: '/deliveries', icon: LocalShipping},
-                {label: pl.navigation.shipmentCreate, path: '/shipments/create', icon: LocalShipping},
-                {label: pl.navigation.shipmentScanner, path: '/shipment-scanner', icon: WarehouseRounded},
-                {label: pl.navigation.courierDeliveries, path: '/courier-deliveries', icon: LocalShipping},
+            label: pl.navigation.warehouse,
+            icon: Warehouse,
+            items: [],
+            groups: [
+                {
+                    key: SHIPMENTS_GROUP,
+                    label: pl.navigation.shipments,
+                    icon: ShoppingCart,
+                    items: [
+                        {label: pl.home.tiles.shipmentDetails.title, path: '/shipment-details', icon: LocalShipping},
+                        {label: pl.navigation.shipmentList, path: '/shipments/list', icon: ShoppingCart},
+                        {label: pl.navigation.returns, path: '/returns', icon: Loop},
+                        {label: pl.navigation.deliveries, path: '/deliveries', icon: LocalShipping},
+                        {label: pl.navigation.shipmentCreate, path: '/shipments/create', icon: LocalShipping},
+                        {label: pl.navigation.shipmentScanner, path: '/shipment-scanner', icon: WarehouseRounded},
+                        {label: pl.navigation.courierDeliveries, path: '/courier-deliveries', icon: LocalShipping},
+                    ],
+                },
+                {
+                    key: PALLETS_GROUP,
+                    label: pl.navigation.pallets,
+                    icon: Inventory2,
+                    items: [
+                        {label: pl.navigation.palletScanner, path: '/pallets/scan', icon: QrCodeScanner},
+                        {
+                            label: pl.navigation.palletCreate,
+                            path: '/pallets/create',
+                            icon: Add,
+                            onSelect: () => {
+                                setExpandedPanel(null);
+                                setProfileMenuOpen(false);
+                                setPalletCreateOpen(true);
+                            },
+                        },
+                        {label: pl.navigation.palletList, path: '/pallets', icon: ViewList},
+                        {label: pl.navigation.palletsCancelled, path: '/pallets/cancelled', icon: Block},
+                        {label: pl.navigation.palletsEmpty, path: '/pallets/empty', icon: ArchiveOutlined},
+                    ],
+                },
+                {
+                    key: TRANSPORT_GROUP,
+                    label: pl.navigation.transport,
+                    icon: LocalShipping,
+                    items: [
+                        {label: pl.navigation.carriers, path: '/carriers', icon: LocalShipping},
+                        {label: pl.navigation.drivers, path: '/drivers', icon: Person},
+                    ],
+                },
             ],
         },
         {
@@ -245,6 +312,9 @@ function Navbar({
     ];
     const isVisiblePath = (path: string) => isPathAllowedForProfile(path, operationalProfile)
         && (!isReturnPath(path) || returnsStatus === "available");
+    const visibleGroups = (menu: NavbarMenu): NavbarGroup[] => (menu.groups || [])
+        .map((group) => ({...group, items: group.items.filter((item) => isVisiblePath(item.path))}))
+        .filter((group) => group.items.length > 0);
 
     const updateDockIndicator = React.useCallback(() => {
         const navigation = quickNavRef.current;
@@ -340,9 +410,10 @@ function Navbar({
         const Icon = item.icon;
         return (
             <button
+                aria-haspopup={item.onSelect ? "dialog" : undefined}
                 className="top-nav-option"
                 key={item.path}
-                onClick={() => openTab(item)}
+                onClick={() => item.onSelect ? item.onSelect() : openTab({label: item.label, path: item.path})}
                 type="button"
             >
                 <Icon fontSize="small" />
@@ -399,39 +470,125 @@ function Navbar({
             </section>
 
             {menus.map((menu) => {
-                const visibleItems = menu.items.filter((item) => isVisiblePath(item.path));
-                if (!visibleItems.length) {
+                if (!menuItems(menu).some((item) => isVisiblePath(item.path))) {
                     return null;
                 }
 
                 const Icon = menu.icon;
+                const visibleItems = menu.items.filter((item) => isVisiblePath(item.path));
                 return (
                     <section className="top-nav-options-section" key={menu.label}>
                         <span className="top-nav-options-title"><Icon fontSize="small" />{menu.label}</span>
-                        <div className="top-nav-options-grid">{visibleItems.map(renderPanelItem)}</div>
+                        {visibleItems.length ? <div className="top-nav-options-grid">{visibleItems.map(renderPanelItem)}</div> : null}
+                        {visibleGroups(menu).map((group) => (
+                            <div className="top-nav-options-group" key={group.key}>
+                                <span className="top-nav-options-subtitle">{group.label}</span>
+                                <div className="top-nav-options-grid">{group.items.map(renderPanelItem)}</div>
+                            </div>
+                        ))}
                     </section>
                 );
             })}
         </nav>
     );
 
+    const renderShipmentCreateButton = () => (
+        operationalProfile === "warehouse" ? (
+            <button
+                className="top-nav-menu-primary"
+                onClick={() => openTab({label: pl.navigation.shipmentCreate, path: "/shipments/create"})}
+                type="button"
+            >
+                <Add fontSize="small" />
+                <span>{pl.navigation.add}</span>
+            </button>
+        ) : null
+    );
+
+    const focusSubmenu = (groupKey: string) => {
+        window.requestAnimationFrame(() => {
+            document.querySelector<HTMLButtonElement>(`#${submenuId(groupKey)} .top-nav-option`)?.focus();
+        });
+    };
+
+    const focusSubmenuTrigger = (groupKey: string) => {
+        document.querySelector<HTMLButtonElement>(`[aria-controls="${submenuId(groupKey)}"]`)?.focus();
+    };
+
+    const renderCascadePanel = (menu: NavbarMenu) => {
+        const Icon = menu.icon;
+        const groups = visibleGroups(menu);
+        const activeGroup = groups.find((group) => group.key === activeGroupKey)
+            || groups.find((group) => group.items.some((item) => item.path === activePath))
+            || groups[0];
+
+        return (
+            <nav aria-label={menu.label} className="top-nav-options-panel top-nav-category-panel top-nav-cascade-panel">
+                <span className="top-nav-options-title"><Icon fontSize="small" />{menu.label}</span>
+                <div className="top-nav-cascade">
+                    <div aria-label={menu.label} className="top-nav-cascade-groups" role="group">
+                        {groups.map((group) => {
+                            const GroupIcon = group.icon;
+                            const isActive = group.key === activeGroup?.key;
+                            return (
+                                <button
+                                    aria-controls={submenuId(group.key)}
+                                    aria-expanded={isActive}
+                                    aria-haspopup="true"
+                                    className={`top-nav-option top-nav-cascade-trigger${isActive ? " top-nav-option-active" : ""}`}
+                                    key={group.key}
+                                    onClick={() => setActiveGroupKey(group.key)}
+                                    onFocus={() => setActiveGroupKey(group.key)}
+                                    onKeyDown={(event) => {
+                                        if (event.key === "ArrowRight") {
+                                            event.preventDefault();
+                                            setActiveGroupKey(group.key);
+                                            focusSubmenu(group.key);
+                                        }
+                                    }}
+                                    onMouseEnter={() => setActiveGroupKey(group.key)}
+                                    title={pl.navigation.openSubmenu.replace("{label}", group.label)}
+                                    type="button"
+                                >
+                                    <GroupIcon fontSize="small" />
+                                    <span>{group.label}</span>
+                                    <ChevronRight className="top-nav-cascade-chevron" fontSize="small" />
+                                </button>
+                            );
+                        })}
+                    </div>
+                    {activeGroup ? (
+                        <div
+                            aria-label={activeGroup.label}
+                            className="top-nav-cascade-items"
+                            id={submenuId(activeGroup.key)}
+                            onKeyDown={(event) => {
+                                if (event.key === "ArrowLeft") {
+                                    event.preventDefault();
+                                    focusSubmenuTrigger(activeGroup.key);
+                                }
+                            }}
+                            role="group"
+                        >
+                            {activeGroup.items.map(renderPanelItem)}
+                            {activeGroup.key === SHIPMENTS_GROUP ? renderShipmentCreateButton() : null}
+                        </div>
+                    ) : null}
+                </div>
+            </nav>
+        );
+    };
+
     const renderCategoryPanel = (menu: NavbarMenu) => {
+        if (menu.groups?.length) {
+            return renderCascadePanel(menu);
+        }
         const Icon = menu.icon;
         const visibleItems = menu.items.filter((item) => isVisiblePath(item.path));
         return (
             <nav aria-label={menu.label} className="top-nav-options-panel top-nav-category-panel">
                 <span className="top-nav-options-title"><Icon fontSize="small" />{menu.label}</span>
                 <div className="top-nav-options-grid">{visibleItems.map(renderPanelItem)}</div>
-                {operationalProfile === "warehouse" && menu.label === pl.navigation.shipments ? (
-                    <button
-                        className="top-nav-menu-primary"
-                        onClick={() => openTab({label: pl.navigation.shipmentCreate, path: "/shipments/create"})}
-                        type="button"
-                    >
-                        <Add fontSize="small" />
-                        <span>{pl.navigation.add}</span>
-                    </button>
-                ) : null}
             </nav>
         );
     };
@@ -554,8 +711,7 @@ function Navbar({
                         <span aria-hidden="true" className="top-nav-dock-active-indicator" />
                         {mainItems.map(renderDockItem)}
                         {menus.map((menu) => {
-                            const visibleItems = menu.items.filter((item) => isVisiblePath(item.path));
-                            if (!visibleItems.length) {
+                            if (!menuItems(menu).some((item) => isVisiblePath(item.path))) {
                                 return null;
                             }
 
@@ -568,6 +724,7 @@ function Navbar({
                                     key={menu.label}
                                     onClick={() => {
                                         setProfileMenuOpen(false);
+                                        setActiveGroupKey(null);
                                         setExpandedPanel((panel) => panel === menu.label ? null : menu.label);
                                     }}
                                     title={menu.label}
@@ -657,6 +814,11 @@ function Navbar({
                     ) : null}
                 </div>
             </div>
+            <PalletCreateDialog
+                open={palletCreateOpen}
+                onClose={() => setPalletCreateOpen(false)}
+                onOpenTab={onOpenTab}
+            />
         </header>
     );
 }

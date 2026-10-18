@@ -17,6 +17,13 @@ export const tabTitles = (): Record<string, string> => ({
     "/couriers": pl.navigation.couriers,
     "/vehicles": pl.navigation.vehicles,
     "/pallets": pl.navigation.pallets,
+    "/pallets/scan": pl.navigation.palletScanner,
+    "/pallets/create": pl.pallets.createOptions.title,
+    "/pallets/create-from-shipments": pl.pallets.createFromShipments.title,
+    "/pallets/cancelled": pl.navigation.palletsCancelled,
+    "/pallets/empty": pl.navigation.palletsEmpty,
+    "/carriers": pl.navigation.carriers,
+    "/drivers": pl.navigation.drivers,
     "/shipment-scanner": pl.navigation.shipmentScanner,
     "/courier-deliveries": pl.navigation.courierDeliveries,
     "/suppliers": pl.navigation.suppliers,
@@ -59,6 +66,21 @@ export const getTabTitle = (path: string) => {
     const shipmentHistoryMatch = normalizedPath.match(/^\/shipments\/(\d+)\/history$/);
     if (shipmentHistoryMatch) {
         return `${pl.shipments.trackerlog} #${shipmentHistoryMatch[1]}`;
+    }
+
+    const palletMatch = normalizedPath.match(/^\/pallets\/tracking\/([^/]+)$/);
+    if (palletMatch) {
+        return `${pl.pallets.details.title} ${decodeURIComponent(palletMatch[1])}`;
+    }
+
+    const carrierMatch = normalizedPath.match(/^\/carriers\/([^/]+)$/);
+    if (carrierMatch) {
+        return `${pl.carriers.view.tabTitle} #${decodeURIComponent(carrierMatch[1])}`;
+    }
+
+    const driverMatch = normalizedPath.match(/^\/drivers\/([^/]+)$/);
+    if (driverMatch) {
+        return `${pl.drivers.view.tabTitle} #${decodeURIComponent(driverMatch[1])}`;
     }
 
     const processMatch = normalizedPath.match(/^\/processes\/([^/]+)$/);

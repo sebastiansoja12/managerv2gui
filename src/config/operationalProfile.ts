@@ -32,6 +32,12 @@ export const isPathAllowedForProfile = (path: string, profile: OperationalProfil
         return true;
     }
 
+    if (/^\/pallets\/tracking\/[^/]+$/.test(path)
+        || /^\/carriers\/[^/]+$/.test(path)
+        || /^\/drivers\/[^/]+$/.test(path)) {
+        return profile === "warehouse";
+    }
+
     if (/^\/deliveries\/[^/]+\/edit$/.test(path)) {
         return profile === "warehouse";
     }
@@ -55,6 +61,13 @@ export const isPathAllowedForProfile = (path: string, profile: OperationalProfil
         "/depots",
         "/pickup-points",
         "/pallets",
+        "/pallets/scan",
+        "/pallets/create",
+        "/pallets/create-from-shipments",
+        "/pallets/cancelled",
+        "/pallets/empty",
+        "/carriers",
+        "/drivers",
         "/couriers",
         "/processes",
         "/returns",
