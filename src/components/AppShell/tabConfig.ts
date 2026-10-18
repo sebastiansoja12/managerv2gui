@@ -71,6 +71,11 @@ export const getTabTitle = (path: string) => {
         return `${pl.pallets.details.title} ${decodeURIComponent(palletMatch[1])}`;
     }
 
+    const departmentMatch = normalizedPath.match(/^\/departments\/([^/]+)$/);
+    if (departmentMatch) {
+        return `${pl.departments.view.tabTitle} #${decodeURIComponent(departmentMatch[1])}`;
+    }
+
     const carrierMatch = normalizedPath.match(/^\/carriers\/([^/]+)$/);
     if (carrierMatch) {
         return `${pl.carriers.view.tabTitle} #${decodeURIComponent(carrierMatch[1])}`;

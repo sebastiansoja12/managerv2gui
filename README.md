@@ -31,7 +31,8 @@ configuration screens, plus a separate super-admin area.
 - Shipment document download, QR label preview and print support.
 - Return registration, list and detail views, processing/completion/cancellation actions, reason updates and token validation.
 - Delivery register with recent deliveries, an edit screen with step history and delivery method, and a cancel action. It uses Manager `GET /deliveries`, `GET /deliveries/{id}`, `PUT /deliveries/{id}/method`, and `POST /deliveries/{id}/cancel`.
-- Department list and department creation.
+- Department list and department creation. Clicking a department opens its own tab (`/departments/:departmentId`) with editable details, users and the department map.
+- Department map: SVG top-view editor for rooms, walls, aisles, zones, racks and storage locations (zoom, pan, grid, move, rotate, resize, undo) and an operational mode for placing, moving, reserving, searching and tracking pallet locations. It uses Manager `/department-maps` endpoints.
 - Courier list, details and courier creation.
 - Process list and process details.
 - User management with create, edit, role and permission dialogs.
