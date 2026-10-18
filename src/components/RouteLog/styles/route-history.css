@@ -1,0 +1,102 @@
+.route-history {
+    display: grid;
+    gap: 8px;
+}
+
+.route-history-timeline {
+    display: grid;
+    gap: 0;
+}
+
+.route-history-item {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: 14px minmax(0, 1fr);
+    padding-bottom: 14px;
+    position: relative;
+}
+
+.route-history-item:not(:last-child)::before {
+    background: var(--border);
+    bottom: 0;
+    content: "";
+    left: 6px;
+    position: absolute;
+    top: 16px;
+    width: 2px;
+}
+
+.route-history-dot {
+    background: var(--primary);
+    border: 2px solid var(--card);
+    border-radius: 999px;
+    box-shadow: 0 0 0 1px var(--primary);
+    height: 14px;
+    margin-top: 3px;
+    width: 14px;
+}
+
+.route-history-body {
+    display: grid;
+    gap: 6px;
+    min-width: 0;
+}
+
+.route-history-top {
+    align-items: baseline;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: space-between;
+}
+
+.route-history-top span,
+.route-history-source {
+    color: var(--muted-foreground);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+}
+
+.route-history-tags {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.route-history-body p {
+    color: var(--foreground);
+    font-size: 0.875rem;
+    margin: 0;
+}
+
+.route-history-body dl {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+    margin: 0;
+}
+
+.route-history-body dl div {
+    display: flex;
+    gap: 4px;
+}
+
+.route-history-body dt,
+.route-history-body dd {
+    font-size: 0.75rem;
+    margin: 0;
+}
+
+.route-history-body dt {
+    color: var(--muted-foreground);
+}
+
+.route-history-empty {
+    align-items: center;
+    color: var(--muted-foreground);
+    display: flex;
+    font-size: 0.875rem;
+    gap: 8px;
+    padding: 12px 0;
+}
