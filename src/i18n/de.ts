@@ -156,8 +156,6 @@ export const de: typeof pl = {
         billing: "Zahlungen",
         admins: "Benutzer",
         globalConfiguration: "Globale Konfiguration",
-        microservices: "Microservice-Status",
-        systemSettings: "Systemeinstellungen",
         support: "Support",
         profile: "Mein Profil",
         logout: "Abmelden",
@@ -436,10 +434,6 @@ export const de: typeof pl = {
             deliveries: {
                 title: "Zustellungen",
                 description: "Zustellungen, Status und Schrittverlauf anzeigen.",
-            },
-            systemSettings: {
-                title: "Systemeinstellungen",
-                description: "Technische Parameter und Verhalten der Anwendung konfigurieren.",
             },
             profile: {
                 title: "Mein Profil",
@@ -1604,46 +1598,19 @@ export const de: typeof pl = {
             },
         },
     },
-    softwareConfiguration: {
-        title: "Liste der Systemeigenschaften",
-        columns: {
-            id: "ID",
-            name: "Name",
-            category: "Kategorie",
-            value: "Wert",
-            action: "Aktion",
-        },
-        actions: {
-            update: "Aktualisieren",
-        },
-        messages: {
-            loadError: "Systemeigenschaften konnten nicht geladen werden",
-            updateError: "Eigenschaft konnte nicht aktualisiert werden",
-        },
-    },
     globalConfiguration: {
         page: {
             kicker: "Einstellungen",
             moduleTitle: "Konfiguration",
             title: "Globale Konfiguration",
-            subtitle: "Zentrale Parameter für Lieferanten, Sendungen und Systemkonfiguration.",
+            subtitle: "Zentrale Einstellungen für Sendungen, Geokodierung und Integrationen.",
             sectionsTitle: "Konfigurationsbereiche",
             propertiesCount: "Eigenschaften",
-            loading: "Konfiguration wird geladen...",
-            emptySection: "Keine Eigenschaften in diesem Bereich",
         },
         sections: {
-            suppliers: {
-                title: "Lieferanten",
-                description: "Parameter für Lieferanten, Kuriere und ihre operativen Berechtigungen.",
-            },
             shipments: {
                 title: "Sendungen",
                 description: "Regeln für Sendungsabwicklung, Validierung und Arbeitsablauf.",
-            },
-            configuration: {
-                title: "Konfiguration",
-                description: "Globale technische Einstellungen und Anwendungsverhalten.",
             },
             geocoding: {
                 title: "Geolokalisierung",
@@ -1653,11 +1620,6 @@ export const de: typeof pl = {
                 title: "Integrationen",
                 description: "Verbindungen zu externen Diensten außerhalb der Geolokalisierung.",
             },
-        },
-        columns: {
-            name: "Eigenschaft",
-            category: "Kategorie",
-            value: "Wert",
         },
         shipmentConfiguration: {
             previewNote: "Die Konfiguration wird für den aktuellen Operator geladen und gespeichert.",
@@ -1943,38 +1905,6 @@ export const de: typeof pl = {
                 defaultProviderRequired: "Wählen Sie vor dem Speichern einen aktiven Standardanbieter",
                 defaultProviderRequiredBeforeDelete: "Legen Sie zuerst einen anderen aktiven Anbieter als Standard fest",
             },
-        },
-        messages: {
-            loadError: "Globale Konfiguration konnte nicht geladen werden",
-            updateError: "Eigenschaft konnte nicht gespeichert werden",
-            updateSuccess: "Eigenschaft wurde gespeichert",
-        },
-    },
-    microservices: {
-        page: {
-            kicker: "Verwaltung",
-            title: "Microservice-Status",
-            subtitle: "Verfügbarkeitsübersicht der Dienste in der Anwendungsumgebung.",
-            listTitle: "Microservices",
-            servicesCount: "Dienste",
-            loading: "Microservices werden geprüft...",
-            empty: "Keine Microservices zum Prüfen",
-        },
-        columns: {
-            name: "Name",
-            url: "URL",
-            status: "Status",
-            latency: "Antwortzeit",
-            lastCheck: "Letzte Prüfung",
-            message: "Meldung",
-        },
-        status: {
-            online: "Läuft",
-            offline: "Nicht verfügbar",
-            unknown: "Nicht konfiguriert",
-        },
-        messages: {
-            loadError: "Microservices konnten nicht geprüft werden",
         },
     },
     routeLogs: {

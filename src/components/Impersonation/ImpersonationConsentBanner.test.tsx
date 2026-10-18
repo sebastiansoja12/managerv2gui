@@ -4,15 +4,21 @@ import {setAuthenticated, setUnauthenticated} from "../../auth/AuthState";
 import {CurrentUserDto} from "../../auth/UserProfileDto";
 import ImpersonationConsentService from "../../hooks/ImpersonationConsentService";
 import ImpersonationService from "../../hooks/ImpersonationService";
+import RealtimeService from "../../hooks/RealtimeService";
 import pl from "../../i18n/translate";
 import ImpersonationConsentBanner from "./ImpersonationConsentBanner";
 import ImpersonationConsentNotifications from "./ImpersonationConsentNotifications";
-import {stopImpersonationConsentPolling} from "./impersonationConsentStore";
+import {stopImpersonationConsentUpdates} from "./impersonationConsentStore";
 import {ImpersonationConsent} from "./model/ImpersonationConsent";
 
 jest.mock("../../hooks/ImpersonationService", () => ({
     __esModule: true,
     default: {getCurrent: jest.fn()},
+}));
+
+jest.mock("../../hooks/RealtimeService", () => ({
+    __esModule: true,
+    default: {subscribe: jest.fn(() => jest.fn())},
 }));
 
 jest.mock("../../hooks/ImpersonationConsentService", () => ({
@@ -75,12 +81,12 @@ describe("ImpersonationConsentBanner", () => {
 
     afterEach(() => {
         act(() => {
-            stopImpersonationConsentPolling();
+            stopImpersonationConsentUpdates();
             setUnauthenticated();
         });
     });
 
-    test("does not poll consents for users below superadministrator", async () => {
+    test("does not load consents for users below superadministrator", async () => {
         signIn("ADMIN");
 
         const {container} = render(<ImpersonationConsentBanner />);
@@ -162,6 +168,29 @@ describe("ImpersonationConsentBanner", () => {
 
         expect(screen.getByRole("dialog", {name: texts.notificationsTitle})).toBeInTheDocument();
         expect(screen.getAllByRole("button", {name: texts.approve})).toHaveLength(2);
+    });
+
+    test("reloads consents only when the server announces a change", async () => {
+        jest.useFakeTimers();
+        signIn("SUPERADMIN");
+        const subscribeMock = RealtimeService.subscribe as jest.Mock;
+        service.getPending.mockResolvedValueOnce([]).mockResolvedValue([pendingConsent]);
+
+        render(<ImpersonationConsentBanner />);
+        await waitFor(() => expect(subscribeMock).toHaveBeenCalledWith("/user/queue/impersonation-consents", expect.any(Function), expect.any(Function)));
+        await waitFor(() => expect(service.getPending).toHaveBeenCalledTimes(1));
+
+        act(() => {
+            jest.advanceTimersByTime(60_000);
+        });
+        expect(service.getPending).toHaveBeenCalledTimes(1);
+
+        act(() => {
+            subscribeMock.mock.calls[0][1]({body: "{}"});
+        });
+        expect(await screen.findByText(texts.requestTitle)).toBeInTheDocument();
+        expect(service.getPending).toHaveBeenCalledTimes(2);
+        jest.useRealTimers();
     });
 
     test("shows empty notifications without a badge", async () => {
