@@ -62,6 +62,9 @@ const getArchived = () => {
 const get = (depotCode: any) => {
     return http.get<Department>(`/depots/${depotCode}`);
 };
+const getById = (departmentId: number | string) => {
+    return http.get<Department>(`/departments/id/${encodeURIComponent(String(departmentId))}`);
+};
 
 const create = (data: DepartmentCreateRequest) => {
     return http.post<Department>("/departments", data);
@@ -100,6 +103,7 @@ const DepartmentService = {
     getAll,
     getArchived,
     get,
+    getById,
     create,
     updateAddress,
     changeType,
