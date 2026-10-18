@@ -3443,7 +3443,7 @@ export const en: typeof pl = {
         },
         createOptions: {
             title: "Create pallet",
-            subtitle: "Choose how to create the pallet. The tracking number is assigned by the pallet service.",
+            subtitle: "Choose how to create the pallet",
             creating: "Creating…",
             error: "Could not create the pallet.",
             close: "Close",
