@@ -2,7 +2,6 @@ import React, {useEffect, useMemo, useState} from "react";
 import {
     Alert,
     Button,
-    Chip,
     CircularProgress,
     Dialog,
     DialogActions,
@@ -40,6 +39,25 @@ const providerLabels: Record<string, string> = {
 
 const getProviderLabel = (provider: GeocodingProvider) => providerLabels[provider]
     || provider.toLowerCase().split("_").map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join(" ");
+
+const getProviderMonogram = (provider: GeocodingProvider) => {
+    const providerParts = provider.split("_").filter(Boolean);
+    return providerParts.length > 1
+        ? providerParts.slice(0, 2).map((part) => part.charAt(0)).join("")
+        : provider.slice(0, 2);
+};
+
+const splitEndpoint = (apiUrl: string | null) => {
+    if (!apiUrl) {
+        return {host: "", path: ""};
+    }
+    try {
+        const endpointUrl = new URL(apiUrl);
+        return {host: endpointUrl.host, path: endpointUrl.pathname === "/" ? "" : endpointUrl.pathname};
+    } catch {
+        return {host: apiUrl, path: ""};
+    }
+};
 
 const fieldLabels: Record<GeocodingConfigurationField, string> = {
     API_USER_NAME: pl.globalConfiguration.geocoding.fields.apiUserName,
@@ -364,110 +382,130 @@ function GeocodingConfigurationPanel() {
                     <span>{pl.globalConfiguration.geocoding.loading}</span>
                 </div>
             ) : configurations.length ? (
-                <div className="geocoding-provider-list">
-                    <div className="geocoding-provider-list-header" aria-hidden="true">
-                        <span>{pl.globalConfiguration.geocoding.columns.integration}</span>
-                        <span>{pl.globalConfiguration.geocoding.columns.provider}</span>
-                        <span>{pl.globalConfiguration.geocoding.columns.apiAddress}</span>
-                        <span>{pl.common.actions}</span>
+                <div className="geocoding-provider-table" role="table" aria-label={pl.globalConfiguration.geocoding.title}>
+                    <div className="geocoding-provider-table-head" role="row">
+                        <span role="columnheader">{pl.globalConfiguration.geocoding.columns.provider}</span>
+                        <span role="columnheader">{pl.globalConfiguration.geocoding.columns.apiAddress}</span>
+                        <span role="columnheader">{pl.globalConfiguration.geocoding.columns.status}</span>
+                        <span role="columnheader">{pl.common.actions}</span>
                     </div>
                     {configurations.map((configuration) => {
                         const definition = getDefinition(configuration.provider);
+                        const endpoint = splitEndpoint(configuration.apiUrl);
+                        const settingDefault = defaultProviderConfigurationId
+                            === configuration.geocodingConfigurationId.value;
                         return (
-                            <article
-                                className="geocoding-provider-card"
+                            <div
+                                className="geocoding-provider-row"
+                                data-default={configuration.defaultProvider || undefined}
+                                data-enabled={configuration.enabled}
                                 key={configuration.geocodingConfigurationId.value}
+                                role="row"
                             >
-                                <div className="geocoding-provider-status">
-                                    <Chip
-                                        color={configuration.enabled ? "success" : "default"}
-                                        label={configuration.enabled
+                                <div className="geocoding-provider-identity" role="cell">
+                                    <span className="geocoding-provider-monogram" aria-hidden="true">
+                                        {getProviderMonogram(configuration.provider)}
+                                    </span>
+                                    <div className="geocoding-provider-identity-text">
+                                        <strong className="geocoding-provider-name">
+                                            {getProviderLabel(configuration.provider)}
+                                        </strong>
+                                        <span className="geocoding-provider-meta">
+                                            <code>{configuration.provider}</code>
+                                            {definition?.providerApis?.length ? (
+                                                <span>{getProviderApiLabels(definition.providerApis)}</span>
+                                            ) : undefined}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div className="geocoding-provider-endpoint-cell" role="cell">
+                                    {configuration.apiUrl ? (
+                                        <a
+                                            className="geocoding-provider-url"
+                                            href={configuration.apiUrl}
+                                            rel="noreferrer"
+                                            target="_blank"
+                                            title={configuration.apiUrl}
+                                        >
+                                            <span className="geocoding-provider-url-host">{endpoint.host}</span>
+                                            <span className="geocoding-provider-url-path">{endpoint.path}</span>
+                                        </a>
+                                    ) : undefined}
+                                    <span
+                                        className="geocoding-provider-key"
+                                        data-configured={Boolean(configuration.apiKey)}
+                                    >
+                                        <VpnKey fontSize="inherit" />
+                                        {configuration.apiKey
+                                            ? pl.globalConfiguration.geocoding.apiKeyConfigured
+                                            : pl.globalConfiguration.geocoding.apiKeyMissing}
+                                    </span>
+                                </div>
+                                <div className="geocoding-provider-badges" role="cell">
+                                    <span
+                                        className="geocoding-provider-badge"
+                                        data-tone={configuration.enabled ? "success" : "muted"}
+                                    >
+                                        {configuration.enabled
                                             ? pl.globalConfiguration.geocoding.status.enabled
                                             : pl.globalConfiguration.geocoding.status.disabled}
-                                        size="small"
-                                        variant={configuration.enabled ? "filled" : "outlined"}
-                                    />
+                                    </span>
                                     {configuration.defaultProvider ? (
-                                        <Chip
-                                            color="primary"
-                                            label={pl.globalConfiguration.geocoding.status.defaultProvider}
-                                            size="small"
-                                            variant="outlined"
-                                        />
-                                    ) : undefined}
-                                </div>
-                            <div className="geocoding-provider-main">
-                                <div className="geocoding-provider-icon" aria-hidden="true">
-                                    <LocationOn />
-                                </div>
-                                <div>
-                                    <h4>{getProviderLabel(configuration.provider)}</h4>
-                                    <span className="geocoding-provider-code">{configuration.provider}</span>
-                                    {definition?.providerApis?.length ? (
-                                        <span className="geocoding-provider-api">
-                                            {getProviderApiLabels(definition.providerApis)}
+                                        <span className="geocoding-provider-badge" data-tone="accent">
+                                            {pl.globalConfiguration.geocoding.status.defaultProvider}
                                         </span>
                                     ) : undefined}
                                 </div>
-                            </div>
-                            <div className="geocoding-provider-endpoint">
-                                <a href={configuration.apiUrl || undefined} rel="noreferrer" target="_blank">
-                                    {configuration.apiUrl}
-                                </a>
-                                <span className="geocoding-provider-credential">
-                                    <VpnKey fontSize="small" />
-                                    {configuration.apiKey
-                                        ? pl.globalConfiguration.geocoding.apiKeyConfigured
-                                        : pl.globalConfiguration.geocoding.apiKeyMissing}
-                                </span>
-                            </div>
-                            <div className="geocoding-provider-actions">
-                                <Tooltip title={configuration.defaultProvider
-                                    ? pl.globalConfiguration.geocoding.defaultAlreadySelected
-                                    : pl.globalConfiguration.geocoding.setDefault}
-                                >
-                                    <IconButton
-                                        aria-label={configuration.defaultProvider
-                                            ? pl.globalConfiguration.geocoding.defaultAlreadySelected
-                                            : pl.globalConfiguration.geocoding.setDefault}
-                                        color={configuration.defaultProvider ? "primary" : undefined}
-                                        disabled={configuration.defaultProvider
-                                            || Boolean(defaultProviderConfigurationId)
-                                            || deleting
-                                            || saving}
-                                        size="small"
-                                        onClick={() => setConfigurationAsDefault(configuration)}
+                                <div className="geocoding-provider-toolbar" role="cell">
+                                    <Tooltip title={configuration.defaultProvider
+                                        ? pl.globalConfiguration.geocoding.defaultAlreadySelected
+                                        : pl.globalConfiguration.geocoding.setDefault}
                                     >
-                                        {defaultProviderConfigurationId === configuration.geocodingConfigurationId.value
-                                            ? <CircularProgress size={16} />
-                                            : <CheckCircleOutline fontSize="small" />}
-                                    </IconButton>
-                                </Tooltip>
-                                <Tooltip title={pl.globalConfiguration.geocoding.edit}>
-                                    <IconButton
-                                        aria-label={pl.globalConfiguration.geocoding.edit}
-                                        size="small"
-                                        onClick={() => openEditDialog(configuration)}
-                                    >
-                                        <EditOutlined fontSize="small" />
-                                    </IconButton>
-                                </Tooltip>
-                                <Tooltip title={pl.globalConfiguration.geocoding.delete}>
-                                    <IconButton
-                                        aria-label={pl.globalConfiguration.geocoding.delete}
-                                        color="error"
-                                        size="small"
-                                        onClick={() => {
-                                            setError("");
-                                            setSuccess("");
-                                            setConfigurationToDelete(configuration);
-                                        }}
-                                    >
-                                        <DeleteOutline fontSize="small" />
-                                    </IconButton>
-                                </Tooltip>
+                                        <IconButton
+                                            aria-label={configuration.defaultProvider
+                                                ? pl.globalConfiguration.geocoding.defaultAlreadySelected
+                                                : pl.globalConfiguration.geocoding.setDefault}
+                                            className="geocoding-provider-tool"
+                                            data-active={configuration.defaultProvider || undefined}
+                                            disabled={configuration.defaultProvider
+                                                || Boolean(defaultProviderConfigurationId)
+                                                || deleting
+                                                || saving}
+                                            size="small"
+                                            onClick={() => setConfigurationAsDefault(configuration)}
+                                        >
+                                            {settingDefault
+                                                ? <CircularProgress size={14} />
+                                                : <CheckCircleOutline fontSize="small" />}
+                                        </IconButton>
+                                    </Tooltip>
+                                    <Tooltip title={pl.globalConfiguration.geocoding.edit}>
+                                        <IconButton
+                                            aria-label={pl.globalConfiguration.geocoding.edit}
+                                            className="geocoding-provider-tool"
+                                            size="small"
+                                            onClick={() => openEditDialog(configuration)}
+                                        >
+                                            <EditOutlined fontSize="small" />
+                                        </IconButton>
+                                    </Tooltip>
+                                    <Tooltip title={pl.globalConfiguration.geocoding.delete}>
+                                        <IconButton
+                                            aria-label={pl.globalConfiguration.geocoding.delete}
+                                            className="geocoding-provider-tool"
+                                            data-tone="danger"
+                                            size="small"
+                                            onClick={() => {
+                                                setError("");
+                                                setSuccess("");
+                                                setConfigurationToDelete(configuration);
+                                            }}
+                                        >
+                                            <DeleteOutline fontSize="small" />
+                                        </IconButton>
+                                    </Tooltip>
+                                </div>
                             </div>
-                        </article>
                         );
                     })}
                 </div>
