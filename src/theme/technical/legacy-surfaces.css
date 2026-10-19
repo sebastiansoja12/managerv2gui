@@ -22,7 +22,6 @@
     .couriers-side-actions,
     .departments-side-actions,
     .users-side-actions,
-    .global-configuration-tabs,
     .global-configuration-toolbar,
     .shipment-scanner-side,
     .shipment-scanner-help,
@@ -91,7 +90,6 @@
     .couriers-header,
     .departments-header,
     .device-pairing-header,
-    .global-configuration-header,
     .microservice-status-header,
     .processes-header,
     .returns-header,
@@ -109,7 +107,7 @@
 }
 
 .app-main-content :is(
-    .device-pairing-header, .global-configuration-header,
+    .device-pairing-header,
     .microservice-status-header, .processes-header,
     .shipment-scanner-header, .user-profile-header
 ) :is(h1, h4) {
@@ -118,7 +116,7 @@
 }
 
 .app-main-content :is(
-    .device-pairing-header, .global-configuration-header,
+    .device-pairing-header,
     .microservice-status-header, .processes-header,
     .shipment-scanner-header, .user-profile-header
 ) {

@@ -227,8 +227,7 @@
 .top-nav-options-title,
 .top-nav-theme-switch > span,
 .top-nav-language-switch > span,
-.top-nav-env,
-.top-nav-version {
+.top-nav-env {
     font-family: var(--font-mono);
     letter-spacing: 0.075em;
 }

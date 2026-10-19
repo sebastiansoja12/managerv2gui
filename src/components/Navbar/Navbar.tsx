@@ -33,7 +33,6 @@ import {
 } from "components/ui/icons";
 import {isPathAllowedForProfile, isReturnPath, operationalProfiles, OperationalProfile} from "../../config/operationalProfile";
 import {getAppEnvironment} from "../../config/appEnvironment";
-import {getAppVersion} from "../../config/appVersion";
 import {AppTabDefinition} from "../AppShell/types";
 import AppTabs from "../AppShell/AppTabs";
 import './styles/main.css';
@@ -216,7 +215,6 @@ function Navbar({
     const {theme, setTheme} = useAppTheme();
 
     const environment = getAppEnvironment();
-    const appVersion = getAppVersion();
     const userName = [user?.firstName, user?.lastName].filter(Boolean).join(" ") || user?.username || pl.common.dash;
     const userRole = user?.role
         ? pl.usersManagement.roles[user.role as keyof typeof pl.usersManagement.roles] || user.role
@@ -652,8 +650,6 @@ function Navbar({
                 <Person fontSize="small" />
                 <span>{pl.navigation.profile}</span>
             </button>
-
-            <div className="top-nav-version"><span>{pl.common.version}</span><strong>{appVersion}</strong></div>
 
             <button className="top-nav-dropdown-item top-nav-logout-item" onClick={logout} type="button">
                 <Logout fontSize="small" />

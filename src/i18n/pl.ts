@@ -45,6 +45,16 @@ export const pl = {
             courierBlue: "Kurier",
         },
     },
+    footer: {
+        rights: "Wszelkie prawa zastrzeżone.",
+        environment: "Środowisko",
+        environments: {
+            development: "Deweloperskie",
+            test: "Testowe",
+            uat: "UAT",
+            production: "Produkcyjne",
+        },
+    },
     app: {
         tabs: {
             closeAll: "Zamknij wszystkie",

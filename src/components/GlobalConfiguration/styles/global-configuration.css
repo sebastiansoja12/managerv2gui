@@ -17,89 +17,6 @@
     box-sizing: border-box;
 }
 
-.global-configuration-header {
-    background: var(--brand-surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    box-shadow: none;
-    display: flex;
-    min-width: 0;
-    padding: 22px 24px;
-}
-
-.global-configuration-header h4 {
-    color: var(--foreground);
-    font-weight: 600;
-    letter-spacing: 0;
-}
-
-.global-configuration-header p {
-    color: var(--brand-muted);
-    margin: 6px 0 0;
-}
-
-.global-configuration-kicker {
-    color: var(--primary);
-    display: block;
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: 0;
-    margin-bottom: 4px;
-    text-transform: uppercase;
-}
-
-.global-configuration-tabs {
-    background: var(--brand-surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    box-shadow: none;
-    overflow: hidden;
-    padding: 10px;
-    min-width: 0;
-}
-
-.global-configuration-tab-list {
-    align-items: center;
-    display: flex;
-    gap: 8px;
-    min-width: 0;
-    overflow-x: auto;
-}
-
-.global-configuration-tab {
-    align-items: center;
-    background: var(--brand-surface);
-    border: 1px solid transparent;
-    border-radius: 8px;
-    color: var(--foreground);
-    cursor: pointer;
-    display: inline-flex;
-    font: inherit;
-    font-size: 15px;
-    font-weight: 600;
-    justify-content: center;
-    letter-spacing: 0;
-    min-height: 42px;
-    min-width: 138px;
-    padding: 0 16px;
-    transition: background 160ms ease, border-color 160ms ease, color 160ms ease;
-    white-space: nowrap;
-}
-
-.global-configuration-tab:hover,
-.global-configuration-tab:focus-visible {
-    background: var(--brand-accent-wash);
-    border-color: var(--border);
-    color: var(--primary);
-    outline: none;
-}
-
-.global-configuration-tab-active {
-    background: var(--surface-secondary);
-    border-color: var(--border);
-    color: var(--primary);
-}
-
 .global-configuration-toolbar,
 .global-configuration-section {
     background: var(--brand-surface);
@@ -1640,19 +1557,6 @@
         padding: 16px;
     }
 
-    .global-configuration-tabs {
-        padding: 8px;
-    }
-
-    .global-configuration-tab-list {
-        gap: 12px;
-    }
-
-    .global-configuration-tab {
-        font-size: 14px;
-        min-width: 128px;
-    }
-
     .global-configuration-toolbar {
         align-items: flex-start;
         flex-direction: column;
@@ -1761,5 +1665,110 @@
     .geocoding-provider-endpoint-cell,
     .geocoding-provider-badges {
         grid-column: 1 / -1;
+    }
+}
+
+.global-configuration-crumbs {
+    align-items: center;
+    background: var(--technical-panel, var(--surface));
+    border: 1px solid var(--border);
+    border-radius: var(--radius-panel, 12px);
+    display: flex;
+    gap: 16px;
+    justify-content: space-between;
+    min-height: 52px;
+    padding: 0 8px 0 18px;
+}
+
+.global-configuration-crumbs-trail {
+    align-items: center;
+    display: flex;
+    gap: 10px;
+    min-width: 0;
+}
+
+.global-configuration-crumbs-root {
+    align-items: center;
+    color: var(--foreground);
+    display: inline-flex;
+    flex: 0 0 auto;
+    font-size: 0.95rem;
+    font-weight: 650;
+    gap: 9px;
+    letter-spacing: -0.01em;
+}
+
+.global-configuration-crumbs-root svg {
+    color: var(--primary);
+}
+
+.global-configuration-crumbs-separator {
+    color: var(--muted-foreground);
+    flex: 0 0 auto;
+    font-size: 0.95rem;
+    opacity: 0.7;
+}
+
+.global-configuration-crumbs-sections {
+    align-items: center;
+    display: flex;
+    gap: 2px;
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.global-configuration-crumbs-sections::-webkit-scrollbar {
+    display: none;
+}
+
+.app-main-content .global-configuration-crumbs-section {
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: var(--radius-control, 9px) !important;
+    box-shadow: none !important;
+    color: var(--muted-foreground) !important;
+    cursor: pointer;
+    flex: 0 0 auto;
+    font-family: var(--font-ui) !important;
+    font-size: 0.95rem;
+    font-weight: 500 !important;
+    padding: 6px 10px;
+    transition: background-color 150ms ease, color 150ms ease;
+}
+
+.app-main-content .global-configuration-crumbs-section:hover {
+    background: var(--surface-secondary) !important;
+    color: var(--foreground) !important;
+}
+
+.app-main-content .global-configuration-crumbs-section[data-active="true"] {
+    background: transparent !important;
+    color: var(--foreground) !important;
+    font-weight: 600 !important;
+}
+
+.app-main-content .global-configuration-crumbs-section:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--primary) 55%, transparent);
+    outline-offset: 1px;
+}
+
+.global-configuration-crumbs-page {
+    color: var(--muted-foreground);
+    flex: 0 1 auto;
+    font-size: 0.82rem;
+    overflow: hidden;
+    padding-right: 10px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+    .global-configuration-crumbs {
+        padding: 0 8px 0 14px;
+    }
+
+    .global-configuration-crumbs-page {
+        display: none;
     }
 }

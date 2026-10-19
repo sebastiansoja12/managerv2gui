@@ -7,6 +7,7 @@ import Navbar from "../Navbar/Navbar";
 import AnnouncementBanner from "../Announcements/AnnouncementBanner";
 import ImpersonationBanner from "../Impersonation/ImpersonationBanner";
 import ImpersonationConsentBanner from "../Impersonation/ImpersonationConsentBanner";
+import AppFooter from "./AppFooter";
 import AppRoutes from "./AppRoutes";
 import {getTabTitle, normalizePath} from "./tabConfig";
 import {AppTabDefinition} from "./types";
@@ -287,6 +288,7 @@ function AppShell() {
             <div className="app-main-content">
                 <AppRoutes onOpenTab={openTab} operationalProfile={operationalProfile}/>
             </div>
+            <AppFooter />
             <HomeModuleTiles onOpenTab={openTab} operationalProfile={operationalProfile}/>
             <OrganizationChatDock />
             <Dialog
