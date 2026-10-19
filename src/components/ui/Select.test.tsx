@@ -39,6 +39,33 @@ describe("technical select", () => {
         expect(screen.getByRole("listbox")).toBeInTheDocument();
     });
 
+    it("opens above the field when there is no room below it", () => {
+        render(
+            <TextField label="Plan" select value="" onChange={jest.fn()}>
+                <MenuItem value="MINI">Mini</MenuItem>
+                <MenuItem value="BASIC">Basic</MenuItem>
+            </TextField>,
+        );
+        const trigger = screen.getByRole("combobox", {name: "Plan"});
+        jest.spyOn(trigger, "getBoundingClientRect").mockReturnValue({
+            bottom: window.innerHeight - 20,
+            height: 40,
+            left: 100,
+            right: 400,
+            top: window.innerHeight - 60,
+            width: 300,
+            x: 100,
+            y: window.innerHeight - 60,
+            toJSON: () => ({}),
+        });
+
+        fireEvent.click(trigger);
+
+        const menu = screen.getByRole("listbox");
+        expect(menu.style.bottom).toBe("66px");
+        expect(menu.style.top).toBe("");
+    });
+
     it("does not allow selecting a disabled option", () => {
         const handleChange = jest.fn();
 
