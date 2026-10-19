@@ -6,13 +6,19 @@ import {AccountTree, Add, Close, Hub, Map as MapIcon, WarningAmberOutlined} from
 import Department from "../../class/depots/Department";
 import pl from "../../i18n/translate";
 import DepartmentPicker from "./DepartmentPicker";
-import {DepartmentRelation, departmentRelationPairKey} from "./model/DepartmentRelation";
+import {
+    DepartmentRelation,
+    departmentRelationPairKey,
+    isOneWayRelation,
+    nextRelationDirection,
+} from "./model/DepartmentRelation";
 import "./styles/department-relations-map.css";
 
 type DepartmentRelationsMapProps = {
     departments: Department[];
     relations: DepartmentRelation[];
     onRelationsChange: (relations: DepartmentRelation[]) => void;
+    bidirectionalByDefault?: boolean;
 };
 
 type MappedDepartment = {
@@ -145,7 +151,7 @@ export const getRelationsWithAutomaticSortingAssignments = (
     return [...relations, ...automaticRelations];
 };
 
-const relationLabel = (first: string, second: string) => `${first} ↔ ${second}`;
+const relationLabel = (first: string, second: string, oneWay = false) => `${first} ${oneWay ? "→" : "↔"} ${second}`;
 
 const departmentTypeLabel = (department: Department) => (
     pl.departments.type[department.departmentType as keyof typeof pl.departments.type]
@@ -189,6 +195,7 @@ const DepartmentRelationsMap: React.FC<DepartmentRelationsMapProps> = ({
     departments,
     relations,
     onRelationsChange,
+    bidirectionalByDefault,
 }) => {
     const translations = pl.departments.relations;
     const mapElementRef = useRef<HTMLDivElement | null>(null);
@@ -279,8 +286,8 @@ const DepartmentRelationsMap: React.FC<DepartmentRelationsMapProps> = ({
             return;
         }
 
-        const relation = {sourceDepartmentId: sourceId, targetDepartmentId: targetId};
-        const label = relationLabel(codeOf(sourceId), codeOf(targetId));
+        const relation = {sourceDepartmentId: sourceId, targetDepartmentId: targetId, bidirectional: bidirectionalByDefault};
+        const label = relationLabel(codeOf(sourceId), codeOf(targetId), bidirectionalByDefault === false);
         if (relationKeys.has(departmentRelationPairKey(relation))) {
             setFeedback({severity: "info", message: translations.relationExists.replace("{relation}", label)});
             return;
@@ -288,7 +295,7 @@ const DepartmentRelationsMap: React.FC<DepartmentRelationsMapProps> = ({
 
         onRelationsChange([...relations, relation]);
         setFeedback({severity: "success", message: translations.relationAdded.replace("{relation}", label)});
-    }, [codeOf, departmentsById, onRelationsChange, relationKeys, relations, translations]);
+    }, [bidirectionalByDefault, codeOf, departmentsById, onRelationsChange, relationKeys, relations, translations]);
 
     const selectMapDepartment = useCallback((selectedDepartmentId: string) => {
         setSelectedRelationKey(null);
@@ -321,6 +328,22 @@ const DepartmentRelationsMap: React.FC<DepartmentRelationsMapProps> = ({
                 "{relation}",
                 relationLabel(codeOf(relation.sourceDepartmentId), codeOf(relation.targetDepartmentId)),
             ),
+        });
+    };
+
+    const changeRelationDirection = (relation: DepartmentRelation) => {
+        const relationKey = departmentRelationPairKey(relation);
+        const changedRelation = nextRelationDirection(relation);
+        onRelationsChange(relations.map((currentRelation) => (
+            departmentRelationPairKey(currentRelation) === relationKey ? changedRelation : currentRelation
+        )));
+        setFeedback({
+            severity: "info",
+            message: translations.directionChanged.replace("{relation}", relationLabel(
+                codeOf(changedRelation.sourceDepartmentId),
+                codeOf(changedRelation.targetDepartmentId),
+                isOneWayRelation(changedRelation),
+            )),
         });
     };
 
@@ -490,11 +513,13 @@ const DepartmentRelationsMap: React.FC<DepartmentRelationsMapProps> = ({
             L.polyline([source.position, target.position], {
                 bubblingMouseEvents: false,
                 className: "department-relations-line",
+                dashArray: isOneWayRelation(relation) ? "8 6" : undefined,
                 color: selected ? SELECTED_RELATION_COLOR : focused ? ACTIVE_COLOR : LINE_COLOR,
                 opacity: dimmed ? 0.18 : 0.85,
                 weight: selected || focused ? 5 : 3,
             })
-                .bindTooltip(relationLabel(departmentCode(source.department), departmentCode(target.department)), {
+                .bindTooltip(relationLabel(departmentCode(source.department), departmentCode(target.department),
+                    isOneWayRelation(relation)), {
                     sticky: true,
                 })
                 .on("click", () => {
@@ -532,10 +557,14 @@ const DepartmentRelationsMap: React.FC<DepartmentRelationsMapProps> = ({
 
     const instructions = () => {
         if (selectedRelation) {
-            const label = relationLabel(codeOf(selectedRelation.sourceDepartmentId), codeOf(selectedRelation.targetDepartmentId));
+            const label = relationLabel(codeOf(selectedRelation.sourceDepartmentId),
+                codeOf(selectedRelation.targetDepartmentId), isOneWayRelation(selectedRelation));
             return (
                 <>
                     <span>{translations.selectedRelation.replace("{relation}", label)}</span>
+                    <Button variant="outlined" onClick={() => changeRelationDirection(selectedRelation)}>
+                        {translations.changeDirection}
+                    </Button>
                     <Button color="error" variant="outlined" startIcon={<Close fontSize="small" />}
                             onClick={() => removeRelation(selectedRelation)}>
                         {translations.removeSelectedRelation}
@@ -687,7 +716,9 @@ const DepartmentRelationsMap: React.FC<DepartmentRelationsMapProps> = ({
                             onChange={(event: React.ChangeEvent<HTMLInputElement>) => setRelationFilter(event.target.value)}
                         />
                         {filteredRelations.length ? filteredRelations.map((relation) => {
-                            const label = relationLabel(codeOf(relation.sourceDepartmentId), codeOf(relation.targetDepartmentId));
+                            const oneWay = isOneWayRelation(relation);
+                            const label = relationLabel(codeOf(relation.sourceDepartmentId),
+                                codeOf(relation.targetDepartmentId), oneWay);
                             const relationKey = departmentRelationPairKey(relation);
                             return (
                                 <div
@@ -701,8 +732,17 @@ const DepartmentRelationsMap: React.FC<DepartmentRelationsMapProps> = ({
                                         onClick={() => focusRelation(relation)}
                                     >
                                         <strong>{codeOf(relation.sourceDepartmentId)}</strong>
-                                        <i aria-hidden="true">↔</i>
+                                        <i aria-hidden="true">{oneWay ? "→" : "↔"}</i>
                                         <strong>{codeOf(relation.targetDepartmentId)}</strong>
+                                    </button>
+                                    <button
+                                        aria-label={translations.changeDirectionOf.replace("{relation}", label)}
+                                        className="department-relations-list-direction"
+                                        title={oneWay ? translations.oneWay : translations.bidirectional}
+                                        type="button"
+                                        onClick={() => changeRelationDirection(relation)}
+                                    >
+                                        ⇆
                                     </button>
                                     <button
                                         aria-label={translations.removeRelation.replace("{relation}", label)}
