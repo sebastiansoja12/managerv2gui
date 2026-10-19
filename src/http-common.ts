@@ -2,6 +2,7 @@ import axios from "axios";
 import JSONBig from "json-bigint";
 import {configureAuthenticatedClient} from "./auth/configureAuthenticatedClient";
 import {isMaintenanceResponse, reportMaintenance} from "./components/Maintenance/maintenanceStore";
+import {isInactiveSubscriptionResponse, reportInactiveSubscription} from "./components/Subscription/subscriptionStore";
 
 const jsonBig = JSONBig({storeAsString: true});
 
@@ -57,6 +58,9 @@ http.interceptors.response.use(undefined, (error) => {
     const response = error?.response;
     if (isMaintenanceResponse(response?.status, response?.data)) {
         reportMaintenance((response.data as {message?: string | null}).message);
+    }
+    if (isInactiveSubscriptionResponse(response?.status, response?.data)) {
+        reportInactiveSubscription(response.data);
     }
     return Promise.reject(error);
 });

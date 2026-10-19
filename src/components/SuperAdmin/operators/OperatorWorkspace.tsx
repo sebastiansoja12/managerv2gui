@@ -17,6 +17,7 @@ import {
     SettingsSuggest,
     SyncAlt,
     Tune,
+    WorkspacePremium,
 } from "components/ui/icons";
 import {CourierDto} from "../../Couriers/dto/CourierDto";
 import Department from "../../../class/depots/Department";
@@ -32,6 +33,7 @@ import OperatorPrivacyPanel from "./OperatorPrivacyPanel";
 import OperatorLimitsFields from "./OperatorLimitsFields";
 import OperatorReadModelPanel from "./OperatorReadModelPanel";
 import OperatorSettingsPanel from "./OperatorSettingsPanel";
+import OperatorSubscriptionPanel from "./OperatorSubscriptionPanel";
 
 type OperatorWorkspaceTab = "users"
     | "departments"
@@ -40,6 +42,7 @@ type OperatorWorkspaceTab = "users"
     | "configuration"
     | "settings"
     | "access"
+    | "subscription"
     | "devices"
     | "readModels"
     | "privacy";
@@ -303,6 +306,7 @@ function OperatorWorkspace({
                     ["configuration", pl.superAdmin.workspace.configurationTab, SettingsSuggest],
                     ["settings", pl.superAdmin.workspace.settingsTab, Tune],
                     ["access", pl.superAdmin.workspace.accessTab, LockOpen],
+                    ["subscription", pl.superAdmin.workspace.subscriptionTab, WorkspacePremium],
                     ["devices", pl.superAdmin.workspace.devicesTab, DevicesOther],
                     ["readModels", pl.superAdmin.workspace.readModelsTab, SyncAlt],
                     ["privacy", pl.superAdmin.workspace.privacyTab, SecurityOutlined],
@@ -331,6 +335,7 @@ function OperatorWorkspace({
             {tab === "access" ? (
                 <OperatorAccessPanel onChangeStatus={onChangeStatus} onImpersonate={onImpersonate} operator={operator} users={users} />
             ) : null}
+            {tab === "subscription" ? <OperatorSubscriptionPanel key={operatorId} operatorId={operatorId} /> : null}
             {tab === "devices" ? <OperatorDevicesPanel operatorId={operatorId} users={users} /> : null}
             {tab === "readModels" ? <OperatorReadModelPanel operatorId={operatorId} /> : null}
             {tab === "privacy" ? <OperatorPrivacyPanel onErased={onDataErased} operator={operator} /> : null}

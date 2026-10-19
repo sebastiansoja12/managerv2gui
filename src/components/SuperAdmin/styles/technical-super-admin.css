@@ -1709,25 +1709,29 @@ button.super-admin-table-row:hover {
     gap: 6px;
 }
 
-.super-admin-read-model-form {
+.super-admin-read-model-form,
+.super-admin-subscription-form {
     align-items: end;
     display: grid;
     gap: 12px;
     grid-template-columns: minmax(160px, 1fr) minmax(140px, 0.8fr) minmax(140px, 0.8fr) auto;
 }
 
-.super-admin-read-model-form label {
+.super-admin-read-model-form label,
+.super-admin-subscription-form label {
     display: grid;
     gap: 6px;
 }
 
-.super-admin-read-model-form label > span {
+.super-admin-read-model-form label > span,
+.super-admin-subscription-form label > span {
     color: var(--muted-foreground);
     font-size: 0.72rem;
     font-weight: 600;
 }
 
-.super-admin-read-model-form input {
+.super-admin-read-model-form input,
+.super-admin-subscription-form input {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 4px;
@@ -1991,7 +1995,8 @@ button.super-admin-table-row:hover {
 @media (max-width: 900px) {
     .super-admin-form-grid.super-admin-form-grid-3,
     .super-admin-limits-grid,
-    .super-admin-read-model-form {
+    .super-admin-read-model-form,
+    .super-admin-subscription-form {
         grid-template-columns: minmax(0, 1fr);
     }
 

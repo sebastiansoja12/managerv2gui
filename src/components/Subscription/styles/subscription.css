@@ -1,0 +1,50 @@
+.subscription-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+}
+
+.subscription-logout {
+    align-items: center;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--foreground);
+    cursor: pointer;
+    display: inline-flex;
+    font: inherit;
+    font-weight: 600;
+    gap: 8px;
+    margin-top: 8px;
+    min-height: 40px;
+    padding: 0 16px;
+}
+
+.subscription-logout:focus-visible {
+    outline: 2px solid var(--ring, var(--primary));
+    outline-offset: 2px;
+}
+
+.operator-plan-panel {
+    margin-top: 14px;
+}
+
+.operator-plan-message {
+    color: var(--muted-foreground);
+    font-size: 0.85rem;
+    margin: 0;
+    padding: 0 16px 16px;
+}
+
+.operator-plan-status-active {
+    color: var(--success);
+}
+
+.operator-plan-status-expired {
+    color: var(--danger);
+}
+
+.operator-plan-status-not_started {
+    color: color-mix(in srgb, var(--warning) 70%, var(--foreground));
+}

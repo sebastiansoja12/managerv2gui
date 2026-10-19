@@ -1,6 +1,7 @@
 import React from "react";
 import {fireEvent, render, screen, waitFor} from "@testing-library/react";
 import AuthService from "../../hooks/AuthService";
+import SubscriptionService from "../../hooks/SubscriptionService";
 import pl from "../../i18n/translate";
 import UserProfile from "./UserProfile";
 
@@ -19,6 +20,10 @@ const currentUser = {
     createdAt: "2026-01-01T00:00:00Z",
     updatedAt: "2026-01-01T00:00:00Z",
 };
+
+beforeEach(() => {
+    jest.spyOn(SubscriptionService, "getCurrent").mockResolvedValue({status: "NOT_ASSIGNED", accessAllowed: true});
+});
 
 afterEach(() => {
     jest.restoreAllMocks();

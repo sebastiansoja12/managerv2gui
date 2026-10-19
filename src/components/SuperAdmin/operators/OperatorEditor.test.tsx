@@ -28,16 +28,16 @@ describe("OperatorEditor create wizard", () => {
         renderCreateEditor();
 
         expect(screen.getByLabelText("Nazwa firmy")).toBeVisible();
-        expect(screen.getByLabelText("Dostawca geokodowania")).not.toBeVisible();
+        expect(screen.getByRole("combobox", {name: "Dostawca geokodowania", hidden: true})).not.toBeVisible();
         expect(screen.getByLabelText("Kod oddziału")).not.toBeVisible();
 
         fireEvent.click(screen.getByRole("tab", {name: /Konfiguracja/}));
-        expect(screen.getByLabelText("Dostawca geokodowania")).toBeVisible();
+        expect(screen.getByRole("combobox", {name: "Dostawca geokodowania", hidden: true})).toBeVisible();
         expect(screen.getByLabelText("Nazwa firmy")).not.toBeVisible();
 
         fireEvent.click(screen.getByRole("tab", {name: /Pierwszy oddział/}));
         expect(screen.getByLabelText("Kod oddziału")).toBeVisible();
-        expect(screen.getByLabelText("Dostawca geokodowania")).not.toBeVisible();
+        expect(screen.getByRole("combobox", {name: "Dostawca geokodowania", hidden: true})).not.toBeVisible();
     });
 
     it("blocks moving forward until the current step is complete", () => {

@@ -26,7 +26,8 @@ test('renders manager navigation', async () => {
         language: 'pl',
       }, status: 200});
   render(<App />);
-  await screen.findByRole('button', {name: /Szczegóły przesyłki/i});
+  expect((await screen.findAllByRole('button', {name: 'Strona startowa'})).length).toBeGreaterThan(0);
+  expect(screen.getAllByRole('button', {name: 'Procesy'}).length).toBeGreaterThan(0);
   const brandElements = screen.getAllByText(/manager 2.0/i);
   expect(brandElements.length).toBeGreaterThan(0);
 });

@@ -1,5 +1,6 @@
 import http from "../http-super-admin";
 import {ShipmentConfigurationApi} from "../components/GlobalConfiguration/model/ShipmentConfiguration";
+import {AssignSubscriptionRequest, OperatorSubscription} from "../components/Subscription/model/Subscription";
 import {
     OperatorAccess,
     ReadModelRebuildJob,
@@ -40,6 +41,16 @@ const startReadModelRebuild = (operatorId: string, readModelType: string, reques
     ).then((response) => response.data)
 );
 
+const getSubscription = (operatorId: string) => (
+    http.get<OperatorSubscription | "">(`${operatorPath(operatorId)}/subscription`)
+        .then((response) => response.data || null)
+);
+
+const assignSubscription = (operatorId: string, request: AssignSubscriptionRequest) => (
+    http.put<OperatorSubscription>(`${operatorPath(operatorId)}/subscription`, request)
+        .then((response) => response.data)
+);
+
 const OperatorAdministrationService = {
     getAccess,
     revokeSessions,
@@ -48,6 +59,8 @@ const OperatorAdministrationService = {
     getReadModelTypes,
     getReadModelJobs,
     startReadModelRebuild,
+    getSubscription,
+    assignSubscription,
 };
 
 export default OperatorAdministrationService;
