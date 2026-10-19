@@ -1053,6 +1053,7 @@ export const pl = {
             geocodingProviders: {
                 GEOAPIFY: "Geoapify",
                 POSITION_STACK: "PositionStack",
+                OPEN_CAGE: "OpenCage",
             },
             featuresTitle: "Funkcje operatora",
             featuresSubtitle: "Włączanie i wyłączanie capabilities dla konkretnego operatora",
@@ -2166,6 +2167,7 @@ export const pl = {
             providers: {
                 geoapify: "Geoapify",
                 positionStack: "Positionstack",
+                openCage: "OpenCage",
             },
             providerApis: {
                 geocodingApi: "Geocoding API",
