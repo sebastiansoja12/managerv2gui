@@ -1496,7 +1496,7 @@ const ShipmentDetails: React.FC = () => {
                                                             </div>
                                                             <div className="shipment-delivery-step-facts">
                                                                 <div><span>{pl.deliveries.userLabel}</span><strong>{latestDeliveryStep.userId || pl.common.dash}</strong></div>
-                                                                <div><span>{pl.deliveries.departmentLabel}</span><strong>{latestDeliveryStep.departmentId || pl.common.dash}</strong></div>
+                                                                <div><span>{pl.deliveries.departmentLabel}</span><strong>{departmentCodeLabel(departments, latestDeliveryStep.departmentId)}</strong></div>
                                                                 <div><span>{pl.deliveries.courierLabel}</span><strong>{latestDeliveryStep.supplierId || pl.common.dash}</strong></div>
                                                             </div>
                                                         </div>
