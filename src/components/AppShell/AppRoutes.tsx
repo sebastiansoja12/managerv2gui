@@ -16,6 +16,7 @@ import ProcessDetails from "../Process/ProcessDetails";
 import Processes from "../Process/Processes";
 import PalletCreate from "../Pallets/PalletCreate";
 import PalletCreateFromShipments from "../Pallets/PalletCreateFromShipments";
+import PalletByIdRedirect from "../Pallets/PalletByIdRedirect";
 import PalletDetailsView from "../Pallets/PalletDetailsView";
 import PalletList from "../Pallets/PalletList";
 import PalletScanner from "../Pallets/PalletScanner";
@@ -92,6 +93,7 @@ function AppRoutes({onOpenTab, operationalProfile = "warehouse"}: AppRoutesProps
             <Route path="carriers/:carrierId" element={guarded("/carriers/1", <CarrierDetailsView onOpenTab={onOpenTab}/>)}/>
             <Route path="drivers" element={guarded("/drivers", <DriverList onOpenTab={onOpenTab}/>)}/>
             <Route path="drivers/:driverId" element={guarded("/drivers/1", <DriverDetailsView onOpenTab={onOpenTab}/>)}/>
+            <Route path="pallets/by-id/:palletId" element={guarded("/pallets/tracking/1", <PalletByIdRedirect/>)}/>
             <Route path="pallets/tracking/:trackingNumber" element={guarded("/pallets/tracking/1", <PalletDetailsView onOpenTab={onOpenTab}/>)}/>
             <Route path="shipment-scanner" element={guarded("/shipment-scanner", <ShipmentScanner/>)}/>
             <Route path="courier-deliveries" element={guarded("/courier-deliveries", <ModulePlaceholder title={pl.home.tiles.courierDeliveries.title}/>)}/>
