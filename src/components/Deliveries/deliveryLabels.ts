@@ -1,3 +1,4 @@
+import Department from "../../class/depots/Department";
 import pl from "../../i18n/translate";
 
 export const formatDeliveryDateTime = (value?: string | null) => {
@@ -31,3 +32,16 @@ export const deliveryMethodLabel = (method?: string | null) => method
 
 export const deliveryOutcomeLabel = (outcome: string) =>
     pl.deliveries.outcome[outcome as keyof typeof pl.deliveries.outcome] || pl.deliveries.unknown;
+
+export const pickupMethodLabel = (method?: string | null) => method
+    ? pl.shipments.pickupMethod[method as keyof typeof pl.shipments.pickupMethod] || pl.deliveries.unknown
+    : pl.common.dash;
+
+export const departmentCodeLabel = (departments: Department[], departmentId?: string | null) => {
+    if (!departmentId) {
+        return pl.common.dash;
+    }
+
+    return departments.find((department) => String(department.departmentId) === departmentId)
+        ?.departmentCode?.value || departmentId;
+};

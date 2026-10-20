@@ -3,7 +3,9 @@ import {Alert, Button, CircularProgress, MenuItem, TextField, Typography} from "
 import {ArrowBack, LocalShipping, Refresh, Save} from "components/ui/icons";
 import {Link, useNavigate, useParams} from "react-router-dom";
 import {getBackendErrorMessage} from "../../api/errorMessage";
+import Department from "../../class/depots/Department";
 import DeliveryService from "../../hooks/DeliveryService";
+import DepartmentService from "../../hooks/DepartmentService";
 import pl from "../../i18n/translate";
 import {
     deliveryLifecycleLabel,
@@ -12,7 +14,9 @@ import {
     deliveryStatusLabel,
     deliveryTargetLabel,
     deliveryTypeLabel,
+    departmentCodeLabel,
     formatDeliveryDateTime,
+    pickupMethodLabel,
 } from "./deliveryLabels";
 import {Delivery} from "./model/Delivery";
 import "./styles/deliveries.css";
@@ -29,6 +33,23 @@ function DeliveryEdit() {
     const [error, setError] = useState<string | null>(null);
     const [notice, setNotice] = useState<string | null>(null);
     const [reloadKey, setReloadKey] = useState(0);
+    const [departments, setDepartments] = useState<Department[]>([]);
+
+    useEffect(() => {
+        let active = true;
+        DepartmentService.getAll()
+            .then((response) => {
+                if (active) {
+                    setDepartments(Array.isArray(response.data) ? response.data : []);
+                }
+            })
+            .catch(() => {
+                if (active) {
+                    setDepartments([]);
+                }
+            });
+        return () => {active = false;};
+    }, []);
 
     useEffect(() => {
         let active = true;
@@ -124,7 +145,12 @@ function DeliveryEdit() {
                                             <div><dt>{pl.deliveries.columns.shipment}</dt><dd>{delivery.shipmentId
                                                 ? <Link className="deliveries-shipment-link" to={`/shipments/${encodeURIComponent(delivery.shipmentId)}/edit`}>
                                                     {delivery.shipmentId} ↗</Link> : pl.common.dash}</dd></div>
+                                            <div><dt>{pl.shipments.summary.originDepartment}</dt><dd>{departmentCodeLabel(departments, delivery.originDepartmentId)}</dd></div>
+                                            <div><dt>{pl.shipments.summary.destination}</dt><dd>{departmentCodeLabel(departments, delivery.destinationDepartmentId)}</dd></div>
+                                            <div><dt>{pl.shipments.form.fields.pickupMethod}</dt><dd>{pickupMethodLabel(delivery.pickupMethod)}</dd></div>
                                             <div><dt>{pl.deliveries.methodLabel}</dt><dd>{deliveryMethodLabel(delivery.method)}</dd></div>
+                                            <div><dt>{pl.shipments.summary.pickupPoint}</dt><dd>{delivery.pickupPointId || pl.common.dash}</dd></div>
+                                            <div><dt>{pl.shipments.summary.deliveryPickupPoint}</dt><dd>{delivery.deliveryPickupPointId || pl.common.dash}</dd></div>
                                         </dl>
                                     </article>
                                     <article className="deliveries-info-tile">
@@ -162,11 +188,11 @@ function DeliveryEdit() {
                                                 <p>{deliveryOutcomeLabel(step.outcome)}</p>
                                                 <dl className="deliveries-attempt-details">
                                                     <div><dt>{pl.deliveries.userLabel}</dt><dd>{step.userId || pl.common.dash}</dd></div>
-                                                    <div><dt>{pl.deliveries.departmentLabel}</dt><dd>{step.departmentId || pl.common.dash}</dd></div>
+                                                    <div><dt>{pl.deliveries.departmentLabel}</dt><dd>{departmentCodeLabel(departments, step.departmentId)}</dd></div>
                                                     <div><dt>{pl.deliveries.courierLabel}</dt><dd>{step.supplierId || pl.common.dash}</dd></div>
                                                     <div><dt>{pl.deliveries.attemptDateLabel}</dt><dd>{formatDeliveryDateTime(step.attemptedAt)}</dd></div>
                                                 </dl>
-                                                {(step.method || step.vehicleId) && <p>{deliveryMethodLabel(step.method || delivery.method)}{step.vehicleId ? ` · ${pl.deliveries.vehicleLabel}: ${step.vehicleId}` : ""}</p>}
+                                                {step.vehicleId && <p>{pl.deliveries.vehicleLabel}: {step.vehicleId}</p>}
                                                 {step.comment && <p>{step.comment}</p>}
                                                 {step.failureReason && step.failureReason !== step.comment && <p>{step.failureReason}</p>}
                                             </div>

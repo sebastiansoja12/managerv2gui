@@ -7,7 +7,6 @@ export type DeliveryStep = {
     departmentId: string | null;
     supplierId: string | null;
     vehicleId: string | null;
-    method: string | null;
     comment: string | null;
     failureReason: string | null;
 };
@@ -20,7 +19,12 @@ export type Delivery = {
     type: string;
     deliveryStatus: string | null;
     lifecycleStatus: string;
+    originDepartmentId: string | null;
+    destinationDepartmentId: string | null;
+    pickupMethod: string | null;
     method: string | null;
+    pickupPointId: string | null;
+    deliveryPickupPointId: string | null;
     createdAt: string;
     plannedAt: string | null;
     deliveredAt: string | null;

@@ -7,6 +7,9 @@ const client = new BackendClient(http);
 const getRecent = (offset: number, limit: number) =>
     client.get<Delivery[]>("/deliveries", {params: {offset, limit}});
 
+const getByDepartment = (departmentId: number | string, offset: number, limit: number) =>
+    client.get<Delivery[]>("/deliveries", {params: {offset, limit, departmentId}});
+
 const get = (deliveryId: string) => client.get<Delivery>(`/deliveries/${encodeURIComponent(deliveryId)}`);
 
 const getByShipmentId = (shipmentId: string) =>
@@ -21,6 +24,6 @@ const changeMethod = (deliveryId: string, method: string) =>
 const cancel = (deliveryId: string) =>
     client.post<Record<string, never>, void>(`/deliveries/${encodeURIComponent(deliveryId)}/cancel`, {});
 
-const DeliveryService = {getRecent, get, getByShipmentId, getByPalletId, changeMethod, cancel};
+const DeliveryService = {getRecent, getByDepartment, get, getByShipmentId, getByPalletId, changeMethod, cancel};
 
 export default DeliveryService;
