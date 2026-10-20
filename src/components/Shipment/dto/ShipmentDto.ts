@@ -87,12 +87,6 @@ export interface ShipmentDto {
     customerReference?: string | null;
     contentDescription?: string | null;
     declaredValue?: MoneyApi | null;
-    destination: DepartmentCodeValue;
-    originDepartmentId?: DepartmentIdDto | null;
-    pickupPointId?: PickupPointIdDto | null;
-    deliveryPickupPointId?: PickupPointIdDto | null;
-    pickupMethod?: PickupMethodDto | null;
-    deliveryMethod?: DeliveryMethodDto | null;
     shipmentStatus: ShipmentStatusDto;
     shipmentType: ShipmentTypeDto;
     shipmentRelatedId?: ShipmentIdDto | null;
@@ -164,7 +158,6 @@ export interface ShipmentUpdateRequestApi {
     shipmentId: ShipmentIdDto;
     sender: PersonApi;
     recipient: PersonApi;
-    destination: DepartmentCodeDto;
     dimensions: DimensionsApi;
     weight: WeightApi;
     contentDescription?: string;
@@ -194,7 +187,6 @@ export interface ShipmentSearchRequestApi {
     shipmentPriorities?: ShipmentPriorityDto[];
     senderName?: string | null;
     recipientName?: string | null;
-    destination?: string | null;
     minPrice?: number | null;
     maxPrice?: number | null;
     currency?: string | null;

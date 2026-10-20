@@ -31,7 +31,7 @@ const person = {firstName: "Jan", lastName: "Test", email: "", telephoneNumber: 
 const shipment = {
     shipmentId: {value: shipmentId}, trackingNumber: {value: "MGR-10"},
     sender: person, recipient: person, shipmentPriority: "MEDIUM",
-    destination: {value: "KT1"}, shipmentStatus: "CREATED", shipmentType: "PARENT",
+    shipmentStatus: "CREATED", shipmentType: "PARENT",
     price: {amount: 15, currency: "PLN"}, locked: false,
 };
 

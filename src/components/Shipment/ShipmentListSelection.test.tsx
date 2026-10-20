@@ -25,7 +25,6 @@ const shipment = {
     shipmentRelatedId: {value: "202"},
     sender: {firstName: "Anna", lastName: "Nowak"},
     recipient: {firstName: "Jan", lastName: "Kowalski"},
-    destination: {value: "KT1"},
     shipmentStatus: "CREATED",
     price: {amount: 60, currency: "PLN"},
     trackingNumber: {value: "TRACK-101"},

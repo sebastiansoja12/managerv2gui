@@ -18,7 +18,6 @@ import {useNavigate, useParams} from "react-router-dom";
 import ShipmentService from "../../hooks/ShipmentService";
 import {ApiErrorResponse} from "../../api/ApiResult";
 import {
-    departmentCodeValue,
     LengthUnitDto,
     PersonApi,
     PersonType,
@@ -203,7 +202,6 @@ const ShipmentEdit: React.FC = () => {
                     shipmentId: shipment.shipmentId,
                     sender,
                     recipient,
-                    destination: {value: departmentCodeValue(shipment.destination)},
                     dimensions: {
                         length: Number(length),
                         width: Number(width),
@@ -426,10 +424,6 @@ const ShipmentEdit: React.FC = () => {
                                     <strong>{shipment.dimensions
                                         ? `${shipment.dimensions.length} × ${shipment.dimensions.width} × ${shipment.dimensions.height} ${shipment.dimensions.unit}`
                                         : pl.common.dash}</strong>
-                                </div>
-                                <div>
-                                    <span>{pl.shipments.summary.destination}</span>
-                                    <strong>{departmentCodeValue(shipment.destination) || pl.common.dash}</strong>
                                 </div>
                                 <div>
                                     <span>{pl.shipments.summary.price}</span>

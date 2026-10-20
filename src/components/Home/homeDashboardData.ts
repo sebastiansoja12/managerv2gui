@@ -1,3 +1,4 @@
+import {Delivery} from "../Deliveries/model/Delivery";
 import {ShipmentDto} from "../Shipment/dto/ShipmentDto";
 
 export type DashboardPeriodDays = 7 | 14 | 30;
@@ -14,31 +15,15 @@ export type MoneyTotal = {
     currency: string;
 };
 
-const shipmentDepartmentCode = (shipment: ShipmentDto) => {
-    if (typeof shipment.destination === "string") {
-        return shipment.destination;
-    }
-
-    return shipment.destination?.value || "";
-};
-
 export const filterShipmentsForDepartment = (
     shipments: ShipmentDto[],
-    departmentCode: string,
-    departmentId?: number | string | null,
+    departmentDeliveries: Delivery[],
 ) => {
-    const normalizedDepartmentCode = departmentCode.trim().toLowerCase();
-    const normalizedDepartmentId = departmentId === undefined || departmentId === null
-        ? ""
-        : String(departmentId);
+    const departmentShipmentIds = new Set(departmentDeliveries
+        .map((delivery) => delivery.shipmentId)
+        .filter((shipmentId): shipmentId is string => Boolean(shipmentId)));
 
-    return shipments.filter((shipment) => {
-        const matchesDestination = shipmentDepartmentCode(shipment).trim().toLowerCase()
-            === normalizedDepartmentCode;
-        const matchesOrigin = normalizedDepartmentId
-            && String(shipment.originDepartmentId?.value ?? "") === normalizedDepartmentId;
-        return matchesDestination || Boolean(matchesOrigin);
-    });
+    return shipments.filter((shipment) => departmentShipmentIds.has(String(shipment.shipmentId?.value ?? "")));
 };
 
 const localDateKey = (date: Date) => [

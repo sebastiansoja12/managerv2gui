@@ -28,7 +28,6 @@ const shipment = {
     customerReference: "ORDER-42",
     declaredValue: {amount: 2500, currency: "PLN"},
     shipmentPriority: "MEDIUM",
-    destination: {value: "WAW"},
     shipmentStatus: "CREATED",
     shipmentType: "PARENT",
     price: {amount: 15, currency: "PLN"},
@@ -66,7 +65,6 @@ describe("ShipmentEdit parcel details", () => {
 
         await waitFor(() => expect(ShipmentService.update).toHaveBeenCalledWith(expect.objectContaining({
             shipmentId: shipment.shipmentId,
-            destination: {value: "WAW"},
             dimensions: {length: 45, width: 30, height: 20, unit: "CM"},
             weight: {value: 6, unit: "KG"},
             contentDescription: "Books",

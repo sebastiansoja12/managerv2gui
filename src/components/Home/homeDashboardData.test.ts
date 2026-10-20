@@ -1,3 +1,4 @@
+import {Delivery} from "../Deliveries/model/Delivery";
 import {ShipmentDto} from "../Shipment/dto/ShipmentDto";
 import {
     buildTurnoverSeries,
@@ -51,25 +52,11 @@ test("keeps monetary totals separated by currency", () => {
 });
 
 test("includes incoming and outgoing shipments for the user's department", () => {
-    const incoming = {
-        ...shipment("2026-09-11T08:00:00", 100),
-        shipmentId: {value: "1"},
-        destination: {value: "KT1"},
-        originDepartmentId: {value: 2},
-    } as ShipmentDto;
-    const outgoing = {
-        ...shipment("2026-09-11T09:00:00", 100),
-        shipmentId: {value: "2"},
-        destination: {value: "WAW1"},
-        originDepartmentId: {value: 7},
-    } as ShipmentDto;
-    const unrelated = {
-        ...shipment("2026-09-11T10:00:00", 100),
-        shipmentId: {value: "3"},
-        destination: {value: "POZ1"},
-        originDepartmentId: {value: 3},
-    } as ShipmentDto;
+    const incoming = {...shipment("2026-09-11T08:00:00", 100), shipmentId: {value: "1"}} as ShipmentDto;
+    const outgoing = {...shipment("2026-09-11T09:00:00", 100), shipmentId: {value: "2"}} as ShipmentDto;
+    const unrelated = {...shipment("2026-09-11T10:00:00", 100), shipmentId: {value: "3"}} as ShipmentDto;
+    const departmentDeliveries = ["1", "2", null].map((shipmentId) => ({shipmentId}) as Delivery);
 
-    expect(filterShipmentsForDepartment([incoming, outgoing, unrelated], "KT1", 7)
+    expect(filterShipmentsForDepartment([incoming, outgoing, unrelated], departmentDeliveries)
         .map((item) => item.shipmentId.value)).toEqual(["1", "2"]);
 });

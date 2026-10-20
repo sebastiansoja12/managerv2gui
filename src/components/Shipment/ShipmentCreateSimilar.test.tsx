@@ -44,22 +44,28 @@ it("copies all reusable shipment fields into the new create request", async () =
     };
     const shipment = {
         shipmentId: {value: "6805406359141427429"}, trackingNumber: {value: "MGR-10"},
-        sender, recipient, destination: {value: "KT1"}, shipmentStatus: "CREATED", shipmentType: "PARENT",
+        sender, recipient, shipmentStatus: "CREATED", shipmentType: "PARENT",
         dimensions: {length: 40, width: 30, height: 20, unit: "CM"},
         weight: {value: 5, unit: "KG"},
         contentDescription: "Książki", customerReference: "REF-42",
         declaredValue: {amount: 120, currency: "EUR"}, price: {amount: 35, currency: "PLN"},
         shipmentPriority: "HIGH", packagingType: "BOX", serviceLevel: "EXPRESS",
-        pickupMethod: "LOCKER", deliveryMethod: "PICKUP_POINT",
-        pickupPointId: {value: pickupPointId}, deliveryPickupPointId: {value: deliveryPickupPointId},
         locked: false,
+    };
+    const delivery = {
+        id: "6ce57331-8ef7-4a81-bf0f-14baa23231ad", targetType: "SHIPMENT", targetId: shipment.shipmentId.value,
+        shipmentId: shipment.shipmentId.value, type: "OUTBOUND", deliveryStatus: "DEPOT", lifecycleStatus: "CREATED",
+        originDepartmentId: "3", destinationDepartmentId: "5",
+        pickupMethod: "LOCKER", method: "PICKUP_POINT",
+        pickupPointId, deliveryPickupPointId,
+        createdAt: "2026-09-30T09:00:00", plannedAt: null, deliveredAt: null, steps: [],
     };
     (ShipmentService.getControlCenter as jest.Mock).mockResolvedValue({
         data: {shipment, routeLog: null, returnPackage: null}, status: 200,
     });
     (ShipmentService.create as jest.Mock).mockReturnValue(new Promise(() => undefined));
     (DepartmentService.getAll as jest.Mock).mockResolvedValue({data: []});
-    (DeliveryService.getByShipmentId as jest.Mock).mockRejectedValue({status: 404});
+    (DeliveryService.getByShipmentId as jest.Mock).mockResolvedValue({data: delivery, status: 200});
     (OperatorConfigurationService.getCurrentShipmentConfiguration as jest.Mock).mockResolvedValue({data: {}});
     (PickupPointService.getById as jest.Mock).mockResolvedValue({data: {code: "BER-001"}});
     (ShipmentContentService.listNotes as jest.Mock).mockResolvedValue({data: []});
@@ -95,9 +101,9 @@ it("copies all reusable shipment fields into the new create request", async () =
         shipmentPriority: shipment.shipmentPriority,
         packagingType: shipment.packagingType,
         serviceLevel: shipment.serviceLevel,
-        pickupMethod: shipment.pickupMethod,
-        deliveryMethod: shipment.deliveryMethod,
-        pickupPointId: shipment.pickupPointId,
-        deliveryPickupPointId: shipment.deliveryPickupPointId,
+        pickupMethod: delivery.pickupMethod,
+        deliveryMethod: delivery.method,
+        pickupPointId: {value: pickupPointId},
+        deliveryPickupPointId: {value: deliveryPickupPointId},
     })));
 });

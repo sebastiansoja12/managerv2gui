@@ -62,9 +62,10 @@ import Department from "../../class/depots/Department";
 import {getBackendErrorMessage} from "../../api/errorMessage";
 import RouteLogRecord from "../RouteLog/model/RouteLogRecord";
 import {
-    departmentCodeValue,
+    DeliveryMethodDto,
     PersonApi,
     PersonType,
+    PickupMethodDto,
     ShipmentCreateInitialState,
     ShipmentDto,
     shipmentChangeStatuses,
@@ -84,6 +85,7 @@ import {
     deliveryMethodLabel,
     deliveryOutcomeLabel,
     deliveryStatusLabel,
+    departmentCodeLabel,
     formatDeliveryDateTime,
 } from "../Deliveries/deliveryLabels";
 
@@ -340,17 +342,21 @@ const ShipmentDetails: React.FC = () => {
     );
     const currentCourierDetail = details.find((detail) => detail.supplierCode || detail.username) || null;
     const destinationDepartment = useMemo(() => {
-        const destinationCode = shipment ? departmentCodeValue(shipment.destination) : "";
-        return departments.find((department) => department.departmentCode?.value === destinationCode) || null;
-    }, [departments, shipment]);
-    const originDepartment = useMemo(() => {
-        const originDepartmentId = shipment?.originDepartmentId?.value;
-        if (originDepartmentId === undefined || originDepartmentId === null) {
+        const destinationDepartmentId = delivery?.destinationDepartmentId;
+        if (!destinationDepartmentId) {
             return null;
         }
 
-        return departments.find((department) => department.departmentId === originDepartmentId) || null;
-    }, [departments, shipment]);
+        return departments.find((department) => String(department.departmentId) === destinationDepartmentId) || null;
+    }, [delivery?.destinationDepartmentId, departments]);
+    const originDepartment = useMemo(() => {
+        const originDepartmentId = delivery?.originDepartmentId;
+        if (!originDepartmentId) {
+            return null;
+        }
+
+        return departments.find((department) => String(department.departmentId) === originDepartmentId) || null;
+    }, [delivery?.originDepartmentId, departments]);
     const cancellationWindowTimeLeft = useMemo(
         () => cancellationTimeLeft(shipment?.createdAt, cancellationWindowMinutes, currentTime),
         [cancellationWindowMinutes, currentTime, shipment?.createdAt],
@@ -359,9 +365,8 @@ const ShipmentDetails: React.FC = () => {
         shipment
         && !shipment.locked
         && draftShipmentStatuses.includes(shipment.shipmentStatus)
-        && shipment.originDepartmentId?.value !== null
-        && shipment.originDepartmentId?.value !== undefined
-        && Boolean(departmentCodeValue(shipment.destination))
+        && Boolean(delivery?.originDepartmentId)
+        && Boolean(delivery?.destinationDepartmentId)
         && cancellationWindowTimeLeft !== null
         && cancellationWindowTimeLeft > 0
     );
@@ -682,7 +687,7 @@ const ShipmentDetails: React.FC = () => {
 
     useEffect(() => {
         let active = true;
-        const pickupPointId = shipment?.deliveryPickupPointId?.value;
+        const pickupPointId = delivery?.deliveryPickupPointId;
 
         setDeliveryPickupPointCode(null);
         if (pickupPointId) {
@@ -702,7 +707,7 @@ const ShipmentDetails: React.FC = () => {
         return () => {
             active = false;
         };
-    }, [shipment?.deliveryPickupPointId?.value]);
+    }, [delivery?.deliveryPickupPointId]);
 
     useEffect(() => {
         let active = true;
@@ -849,10 +854,10 @@ const ShipmentDetails: React.FC = () => {
             serviceLevel: shipment.serviceLevel,
             priceAmount: String(shipment.price?.amount ?? ""),
             currency: shipment.price?.currency || "PLN",
-            pickupMethod: shipment.pickupMethod || "DEPARTMENT",
-            deliveryMethod: shipment.deliveryMethod || "COURIER",
-            pickupPointId: shipment.pickupPointId?.value,
-            deliveryPickupPointId: shipment.deliveryPickupPointId,
+            pickupMethod: (delivery?.pickupMethod as PickupMethodDto | null) || "DEPARTMENT",
+            deliveryMethod: (delivery?.method as DeliveryMethodDto | null) || "COURIER",
+            pickupPointId: delivery?.pickupPointId || undefined,
+            deliveryPickupPointId: delivery?.deliveryPickupPointId ? {value: delivery.deliveryPickupPointId} : null,
             deliveryPickupPointCode,
         };
 
@@ -1348,7 +1353,7 @@ const ShipmentDetails: React.FC = () => {
                                             <div>
                                                 <span>{pl.shipments.summary.destination}</span>
                                                 <div className="shipment-destination-control">
-                                                    <strong className="shipment-destination-value">{departmentCodeValue(shipment.destination) || pl.common.dash}</strong>
+                                                    <strong className="shipment-destination-value">{destinationDepartment?.departmentCode?.value || pl.common.dash}</strong>
                                                     <IconButton
                                                         aria-expanded={Boolean(destinationInfoAnchor)}
                                                         aria-haspopup="dialog"
@@ -1397,10 +1402,10 @@ const ShipmentDetails: React.FC = () => {
                                         <div className="shipment-dashboard-additional">
                                             <strong>{pl.shipments.dashboard.additionalInformation}</strong>
                                             <div>
-                                                <span>{pl.shipments.summary.pickupPoint}: <b>{shipment.pickupPointId?.value || pl.common.dash}</b></span>
+                                                <span>{pl.shipments.summary.pickupPoint}: <b>{delivery?.pickupPointId || pl.common.dash}</b></span>
                                                 <span>{pl.shipments.summary.deliveryPickupPoint}: <b>{deliveryPickupPointCode || pl.common.dash}</b></span>
-                                                <span>{pl.shipments.form.fields.pickupMethod}: <b>{shipment.pickupMethod ? pl.shipments.pickupMethod[shipment.pickupMethod] : pl.common.dash}</b></span>
-                                                <span>{pl.shipments.form.fields.deliveryMethod}: <b>{shipment.deliveryMethod ? pl.shipments.deliveryMethod[shipment.deliveryMethod] : pl.common.dash}</b></span>
+                                                <span>{pl.shipments.form.fields.pickupMethod}: <b>{delivery?.pickupMethod ? pl.shipments.pickupMethod[delivery.pickupMethod as PickupMethodDto] : pl.common.dash}</b></span>
+                                                <span>{pl.shipments.form.fields.deliveryMethod}: <b>{delivery?.method ? pl.shipments.deliveryMethod[delivery.method as DeliveryMethodDto] : pl.common.dash}</b></span>
                                                 <span>{pl.shipments.form.fields.priority}: <b>{pl.shipments.priority[shipment.shipmentPriority]}</b></span>
                                                 <span>{pl.shipments.form.fields.issuerCountry}: <b>{shipment.sender.countryCode || pl.common.dash}</b></span>
                                                 <span>{pl.shipments.form.fields.receiverCountry}: <b>{shipment.recipient.countryCode || pl.common.dash}</b></span>
@@ -1665,10 +1670,9 @@ const ShipmentDetails: React.FC = () => {
                                     </header>
                                     <div className="shipment-delivery-history-facts">
                                         <div><span>{pl.deliveries.userLabel}</span><strong>{step.userId || pl.common.dash}</strong></div>
-                                        <div><span>{pl.deliveries.departmentLabel}</span><strong>{step.departmentId || pl.common.dash}</strong></div>
+                                        <div><span>{pl.deliveries.departmentLabel}</span><strong>{departmentCodeLabel(departments, step.departmentId)}</strong></div>
                                         <div><span>{pl.deliveries.courierLabel}</span><strong>{step.supplierId || pl.common.dash}</strong></div>
                                         <div><span>{pl.deliveries.vehicleLabel}</span><strong>{step.vehicleId || pl.common.dash}</strong></div>
-                                        <div><span>{pl.deliveries.methodLabel}</span><strong>{deliveryMethodLabel(step.method)}</strong></div>
                                     </div>
                                     {step.comment ? (
                                         <p><strong>{pl.deliveries.commentLabel}:</strong> {step.comment}</p>

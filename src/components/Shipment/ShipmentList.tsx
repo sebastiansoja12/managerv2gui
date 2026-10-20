@@ -36,7 +36,6 @@ import {
     TrackingProviderId,
 } from "../GlobalConfiguration/model/TrackingIntegration";
 import {
-    departmentCodeValue,
     shipmentPriorities,
     ShipmentDto,
     ShipmentPriorityDto,
@@ -122,7 +121,7 @@ const mapShipmentToRow = (shipment: ShipmentDto): ShipmentRow => ({
     deliveryDate: formatDeliveryDate(shipment.signature?.signedAt),
     price: formatPrice(shipment),
     user: shipmentTranslations.table.unassigned,
-    destination: departmentCodeValue(shipment.destination) || shipment.recipient?.city || "-",
+    destination: shipment.recipient?.city || "-",
     relatedShipmentId: shipment.shipmentRelatedId?.value || null,
     status: shipment.shipmentStatus,
 });
@@ -180,7 +179,6 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
     const [shipmentPriorityFilter, setShipmentPriorityFilter] = useState<ShipmentPriorityDto | "">("");
     const [senderNameFilter, setSenderNameFilter] = useState<string>("");
     const [recipientNameFilter, setRecipientNameFilter] = useState<string>("");
-    const [destinationFilter, setDestinationFilter] = useState<string>("");
     const [minPriceFilter, setMinPriceFilter] = useState<string>("");
     const [maxPriceFilter, setMaxPriceFilter] = useState<string>("");
     const [currencyFilter, setCurrencyFilter] = useState<string>("");
@@ -359,7 +357,6 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
             shipmentPriorities: shipmentPriorityFilter ? [shipmentPriorityFilter] : [],
             senderName: senderNameFilter.trim() || null,
             recipientName: recipientNameFilter.trim() || null,
-            destination: destinationFilter.trim() || null,
             minPrice,
             maxPrice,
             currency: currencyFilter.trim().toUpperCase() || null,
@@ -385,7 +382,6 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
         setShipmentPriorityFilter("");
         setSenderNameFilter("");
         setRecipientNameFilter("");
-        setDestinationFilter("");
         setMinPriceFilter("");
         setMaxPriceFilter("");
         setCurrencyFilter("");
@@ -665,12 +661,6 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
                                 size="small"
                                 value={recipientNameFilter}
                                 onChange={(event) => setRecipientNameFilter(event.target.value)}
-                            />
-                            <TextField
-                                label={shipmentTranslations.table.columns.destination}
-                                size="small"
-                                value={destinationFilter}
-                                onChange={(event) => setDestinationFilter(event.target.value)}
                             />
                             <TextField
                                 inputProps={{min: 0, step: "0.01"}}

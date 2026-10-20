@@ -1,5 +1,5 @@
 import pl from "../../i18n/translate";
-import {departmentCodeValue, ShipmentDto} from "./dto/ShipmentDto";
+import {ShipmentDto} from "./dto/ShipmentDto";
 
 const personName = (firstName?: string, lastName?: string) =>
     [firstName, lastName].filter(Boolean).join(" ") || pl.common.dash;
@@ -22,7 +22,6 @@ export const exportShipmentExcel = async (shipment: ShipmentDto) => {
         [pl.shipments.table.columns.price, shipment.price
             ? `${shipment.price.amount} ${shipment.price.currency}` : pl.common.dash],
         [pl.shipments.table.columns.user, shipment.operatorId?.value?.toString() || pl.shipments.table.unassigned],
-        [pl.shipments.table.columns.destination, departmentCodeValue(shipment.destination) || pl.common.dash],
         [pl.shipments.table.columns.status, pl.shipments.status[shipment.shipmentStatus]],
         [pl.shipments.table.columns.relatedShipment, shipment.shipmentRelatedId?.value || pl.common.dash],
     ]);
