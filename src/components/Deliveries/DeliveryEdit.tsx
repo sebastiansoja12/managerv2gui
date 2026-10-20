@@ -1,39 +1,46 @@
 import React, {useEffect, useState} from "react";
-import {Alert, Button, CircularProgress, MenuItem, TextField, Typography} from "components/ui";
-import {ArrowBack, LocalShipping, Refresh, Save} from "components/ui/icons";
-import {Link, useNavigate, useParams} from "react-router-dom";
+import {Alert, Button, CircularProgress, Typography} from "components/ui";
+import {ArrowBack, LocalShipping, Refresh} from "components/ui/icons";
+import {useNavigate, useParams} from "react-router-dom";
+import {ApiResult} from "../../api/ApiResult";
 import {getBackendErrorMessage} from "../../api/errorMessage";
 import Department from "../../class/depots/Department";
+import CourierService from "../../hooks/CourierService";
 import DeliveryService from "../../hooks/DeliveryService";
 import DepartmentService from "../../hooks/DepartmentService";
 import pl from "../../i18n/translate";
-import {
-    deliveryLifecycleLabel,
-    deliveryMethodLabel,
-    deliveryOutcomeLabel,
-    deliveryStatusLabel,
-    deliveryTargetLabel,
-    deliveryTypeLabel,
-    departmentCodeLabel,
-    formatDeliveryDateTime,
-    pickupMethodLabel,
-} from "./deliveryLabels";
-import {Delivery} from "./model/Delivery";
+import {CourierDto} from "../Couriers/dto/CourierDto";
+import DeliveryDialogHost from "./details/DeliveryDialogHost";
+import DeliveryHistoryPanel from "./details/DeliveryHistoryPanel";
+import DeliveryLifecycleProgress from "./details/DeliveryLifecycleProgress";
+import DeliveryOperationsToolbar from "./details/DeliveryOperationsToolbar";
+import {DeliveryDialogState, DeliveryStepAction, isDeliveryActive} from "./details/deliveryDetails";
+import DeliveryCarrierTile from "./details/tiles/DeliveryCarrierTile";
+import DeliveryConditionsTile from "./details/tiles/DeliveryConditionsTile";
+import DeliveryMapTile from "./details/tiles/DeliveryMapTile";
+import DeliveryProofTile from "./details/tiles/DeliveryProofTile";
+import DeliveryRelatedTile from "./details/tiles/DeliveryRelatedTile";
+import DeliveryRouteTile from "./details/tiles/DeliveryRouteTile";
+import DeliveryStatusTile from "./details/tiles/DeliveryStatusTile";
+import DeliveryTargetTile from "./details/tiles/DeliveryTargetTile";
+import {useDeliveryContext} from "./details/useDeliveryContext";
+import {exportDeliveryExcel, exportDeliveryPdf} from "./deliveryExport";
+import {Delivery, DeliveryStep} from "./model/Delivery";
 import "./styles/deliveries.css";
-
-const deliveryMethods = ["COURIER", "PICKUP_POINT", "LOCKER"] as const;
 
 function DeliveryEdit() {
     const {deliveryId} = useParams();
     const navigate = useNavigate();
     const [delivery, setDelivery] = useState<Delivery | null>(null);
-    const [method, setMethod] = useState("");
     const [loading, setLoading] = useState(true);
-    const [saving, setSaving] = useState(false);
+    const [busy, setBusy] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [notice, setNotice] = useState<string | null>(null);
     const [reloadKey, setReloadKey] = useState(0);
     const [departments, setDepartments] = useState<Department[]>([]);
+    const [couriers, setCouriers] = useState<CourierDto[]>([]);
+    const [dialog, setDialog] = useState<DeliveryDialogState | null>(null);
+    const context = useDeliveryContext(delivery);
 
     useEffect(() => {
         let active = true;
@@ -48,6 +55,17 @@ function DeliveryEdit() {
                     setDepartments([]);
                 }
             });
+        CourierService.getAll()
+            .then((response) => {
+                if (active) {
+                    setCouriers(Array.isArray(response.data) ? response.data : []);
+                }
+            })
+            .catch(() => {
+                if (active) {
+                    setCouriers([]);
+                }
+            });
         return () => {active = false;};
     }, []);
 
@@ -60,12 +78,10 @@ function DeliveryEdit() {
         }
         setLoading(true);
         setError(null);
-        setNotice(null);
         DeliveryService.get(deliveryId)
             .then((response) => {
                 if (active) {
                     setDelivery(response.data);
-                    setMethod(response.data.method || "");
                 }
             })
             .catch((loadError) => {
@@ -82,27 +98,41 @@ function DeliveryEdit() {
         return () => {active = false;};
     }, [deliveryId, reloadKey]);
 
-    const saveMethod = async () => {
-        if (!delivery || !method) {
-            setError(pl.deliveries.methodRequired);
-            return;
-        }
-        setSaving(true);
+    const runOperation = async (operation: () => Promise<ApiResult<Delivery | void>>) => {
+        setBusy(true);
         setError(null);
         setNotice(null);
         try {
-            const response = await DeliveryService.changeMethod(delivery.id, method);
-            setDelivery(response.data);
-            setMethod(response.data.method || "");
+            const response = await operation();
+            if (response.data) {
+                setDelivery(response.data);
+            } else {
+                setReloadKey((current) => current + 1);
+            }
+            setDialog(null);
             setNotice(pl.deliveries.saveSuccess);
-        } catch (saveError) {
-            setError(getBackendErrorMessage(saveError, pl.deliveries.saveError));
+        } catch (operationError) {
+            setError(getBackendErrorMessage(operationError, pl.deliveries.saveError));
         } finally {
-            setSaving(false);
+            setBusy(false);
         }
     };
 
-    const canEdit = delivery && delivery.lifecycleStatus !== "CANCELED" && delivery.lifecycleStatus !== "COMPLETED";
+    const runExport = async (exporter: (value: Delivery, values: Department[]) => Promise<void>) => {
+        if (!delivery) {
+            return;
+        }
+        setError(null);
+        try {
+            await exporter(delivery, departments);
+        } catch {
+            setError(pl.deliveries.exportError);
+        }
+    };
+
+    const locked = busy || !delivery || !isDeliveryActive(delivery);
+
+    const openStepAction = (action: DeliveryStepAction, step: DeliveryStep) => setDialog({kind: action, step});
 
     return (
         <div className="deliveries-page">
@@ -117,91 +147,62 @@ function DeliveryEdit() {
                     </div>
                     <div className="deliveries-header-actions">
                         <Button variant="outlined" startIcon={<ArrowBack/>} onClick={() => navigate("/deliveries")}>{pl.deliveries.backToList}</Button>
-                        <Button variant="outlined" startIcon={<Refresh/>} disabled={loading || saving}
+                        <Button variant="outlined" startIcon={<Refresh/>} disabled={loading || busy}
                                 onClick={() => setReloadKey((current) => current + 1)}>{pl.common.refresh}</Button>
                     </div>
                 </header>
                 {error && <Alert severity="error">{error}</Alert>}
                 {notice && <Alert severity="success">{notice}</Alert>}
                 {loading ? <div className="deliveries-state"><CircularProgress size={24}/>{pl.deliveries.loadingDetails}</div> : delivery && (
-                    <div className="deliveries-detail-layout">
-                        <div className="deliveries-detail-main">
-                            <section className="deliveries-card" aria-label={pl.deliveries.informationTitle}>
-                                <Typography variant="h6">{pl.deliveries.informationTitle}</Typography>
-                                <div className="deliveries-info-grid">
-                                    <article className="deliveries-info-tile">
-                                        <h3>{pl.deliveries.deliveryCardTitle}</h3>
-                                        <dl className="deliveries-metadata">
-                                            <div><dt>{pl.deliveries.columns.id}</dt><dd>{delivery.id}</dd></div>
-                                            <div><dt>{pl.deliveries.columns.type}</dt><dd>{deliveryTypeLabel(delivery.type)}</dd></div>
-                                            <div><dt>{pl.deliveries.columns.status}</dt><dd>{deliveryStatusLabel(delivery.deliveryStatus)}</dd></div>
-                                            <div><dt>{pl.deliveries.lifecycleLabel}</dt><dd>{deliveryLifecycleLabel(delivery.lifecycleStatus)}</dd></div>
-                                        </dl>
-                                    </article>
-                                    <article className="deliveries-info-tile">
-                                        <h3>{pl.deliveries.destinationCardTitle}</h3>
-                                        <dl className="deliveries-metadata">
-                                            <div><dt>{pl.deliveries.columns.target}</dt><dd>{deliveryTargetLabel(delivery.targetType)} · {delivery.targetId}</dd></div>
-                                            <div><dt>{pl.deliveries.columns.shipment}</dt><dd>{delivery.shipmentId
-                                                ? <Link className="deliveries-shipment-link" to={`/shipments/${encodeURIComponent(delivery.shipmentId)}/edit`}>
-                                                    {delivery.shipmentId} ↗</Link> : pl.common.dash}</dd></div>
-                                            <div><dt>{pl.shipments.summary.originDepartment}</dt><dd>{departmentCodeLabel(departments, delivery.originDepartmentId)}</dd></div>
-                                            <div><dt>{pl.shipments.summary.destination}</dt><dd>{departmentCodeLabel(departments, delivery.destinationDepartmentId)}</dd></div>
-                                            <div><dt>{pl.shipments.form.fields.pickupMethod}</dt><dd>{pickupMethodLabel(delivery.pickupMethod)}</dd></div>
-                                            <div><dt>{pl.deliveries.methodLabel}</dt><dd>{deliveryMethodLabel(delivery.method)}</dd></div>
-                                            <div><dt>{pl.shipments.summary.pickupPoint}</dt><dd>{delivery.pickupPointId || pl.common.dash}</dd></div>
-                                            <div><dt>{pl.shipments.summary.deliveryPickupPoint}</dt><dd>{delivery.deliveryPickupPointId || pl.common.dash}</dd></div>
-                                        </dl>
-                                    </article>
-                                    <article className="deliveries-info-tile">
-                                        <h3>{pl.deliveries.timeCardTitle}</h3>
-                                        <dl className="deliveries-metadata">
-                                            <div><dt>{pl.deliveries.columns.created}</dt><dd>{formatDeliveryDateTime(delivery.createdAt)}</dd></div>
-                                            <div><dt>{pl.deliveries.plannedLabel}</dt><dd>{formatDeliveryDateTime(delivery.plannedAt)}</dd></div>
-                                            <div><dt>{pl.deliveries.deliveredLabel}</dt><dd>{formatDeliveryDateTime(delivery.deliveredAt)}</dd></div>
-                                            <div><dt>{pl.deliveries.columns.steps}</dt><dd>{delivery.steps.length}</dd></div>
-                                        </dl>
-                                    </article>
+                    <>
+                        <DeliveryOperationsToolbar delivery={delivery} busy={busy}
+                                                   onExportPdf={() => runExport(exportDeliveryPdf)}
+                                                   onExportExcel={() => runExport(exportDeliveryExcel)}/>
+                        <DeliveryLifecycleProgress delivery={delivery}/>
+                        <div className="deliveries-detail-split">
+                            <section className="deliveries-dashboard" aria-label={pl.deliveries.informationTitle}>
+                                <div className="deliveries-cell">
+                                    <DeliveryStatusTile delivery={delivery} editDisabled={locked} onOpen={setDialog}/>
+                                </div>
+                                <div className="deliveries-cell">
+                                    <DeliveryTargetTile delivery={delivery} shipment={context.shipment}/>
+                                </div>
+                                <div className="deliveries-cell">
+                                    <DeliveryCarrierTile delivery={delivery} couriers={couriers} editDisabled={locked}
+                                                         onEdit={() => setDialog({kind: "carrier"})}/>
+                                </div>
+                                <div className="deliveries-cell">
+                                    <DeliveryRouteTile delivery={delivery} departments={departments}
+                                                       pickupPoints={context.pickupPoints} editDisabled={locked}
+                                                       onEdit={() => setDialog({kind: "route"})}/>
+                                </div>
+                                <div className="deliveries-cell">
+                                    <DeliveryConditionsTile delivery={delivery} editDisabled={locked}
+                                                            onEdit={() => setDialog({kind: "conditions"})}/>
+                                </div>
+                                <div className="deliveries-cell">
+                                    <DeliveryProofTile delivery={delivery} signature={context.shipment?.signature || null}/>
+                                </div>
+                                <div className="deliveries-cell deliveries-cell-full">
+                                    <DeliveryMapTile delivery={delivery} departments={departments}
+                                                     pickupPoints={context.pickupPoints}/>
+                                </div>
+                                <div className="deliveries-cell deliveries-cell-full">
+                                    <DeliveryRelatedTile relations={context.relations}/>
                                 </div>
                             </section>
-                            {canEdit && <section className="deliveries-card" aria-label={pl.deliveries.editTitle}>
-                                <Typography variant="h6">{pl.deliveries.editTitle}</Typography>
-                                <div className="deliveries-edit-controls">
-                                <TextField select size="small" label={pl.deliveries.methodLabel} value={method}
-                                           onChange={(event) => setMethod(event.target.value)}>
-                                    {deliveryMethods.map((value) => <MenuItem key={value} value={value}>{deliveryMethodLabel(value)}</MenuItem>)}
-                                </TextField>
-                                <Button variant="contained" startIcon={<Save/>} disabled={saving || !method || method === delivery.method}
-                                        onClick={saveMethod}>{pl.deliveries.save}</Button>
-                                </div>
-                            </section>}
+                            <aside className="deliveries-history-aside">
+                                <DeliveryHistoryPanel delivery={delivery} history={context.history}
+                                                      departments={departments} couriers={couriers}
+                                                      pickupPoints={context.pickupPoints} busy={busy}
+                                                      onStepAction={openStepAction}/>
+                            </aside>
                         </div>
-                        <section className="deliveries-card deliveries-history-card" aria-label={pl.deliveries.historyTitle}>
-                            <Typography variant="h6">{pl.deliveries.historyTitle}</Typography>
-                            {delivery.steps.length === 0 ? <div className="deliveries-state">{pl.deliveries.noSteps}</div> : (
-                                <ol className="deliveries-timeline">
-                                    {[...delivery.steps].sort((left, right) => left.stepNumber - right.stepNumber).map((step) => (
-                                        <li key={step.stepNumber}>
-                                            <span className="deliveries-step-number">{step.stepNumber}</span>
-                                            <div>
-                                                <strong>{deliveryStatusLabel(step.deliveryStatus)}</strong>
-                                                <p>{deliveryOutcomeLabel(step.outcome)}</p>
-                                                <dl className="deliveries-attempt-details">
-                                                    <div><dt>{pl.deliveries.userLabel}</dt><dd>{step.userId || pl.common.dash}</dd></div>
-                                                    <div><dt>{pl.deliveries.departmentLabel}</dt><dd>{departmentCodeLabel(departments, step.departmentId)}</dd></div>
-                                                    <div><dt>{pl.deliveries.courierLabel}</dt><dd>{step.supplierId || pl.common.dash}</dd></div>
-                                                    <div><dt>{pl.deliveries.attemptDateLabel}</dt><dd>{formatDeliveryDateTime(step.attemptedAt)}</dd></div>
-                                                </dl>
-                                                {step.vehicleId && <p>{pl.deliveries.vehicleLabel}: {step.vehicleId}</p>}
-                                                {step.comment && <p>{step.comment}</p>}
-                                                {step.failureReason && step.failureReason !== step.comment && <p>{step.failureReason}</p>}
-                                            </div>
-                                        </li>
-                                    ))}
-                                </ol>
-                            )}
-                        </section>
-                    </div>
+                        <DeliveryDialogHost dialog={dialog} delivery={delivery} departments={departments}
+                                            couriers={couriers} pickupPoints={context.pickupPoints} busy={busy}
+                                            onClose={() => setDialog(null)}
+                                            onRun={runOperation}/>
+                    </>
                 )}
             </div>
         </div>

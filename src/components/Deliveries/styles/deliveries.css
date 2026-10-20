@@ -9,7 +9,8 @@
 .deliveries-shell {
     display: grid;
     gap: 1.25rem;
-    max-width: 1500px;
+    width: 100%;
+    max-width: none;
     margin: 0 auto;
 }
 
@@ -73,68 +74,67 @@
     box-shadow: var(--shadow-panel);
 }
 
-.deliveries-overview {
+.deliveries-filters {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 13.5rem;
-    align-items: start;
-    gap: 1rem;
-}
-
-.deliveries-action-panel {
-    display: grid;
-    gap: 0.75rem;
+    gap: 0.875rem;
     padding: 1rem;
     border: 1px solid var(--border);
-    border-radius: 1rem;
-    background: var(--card);
-    box-shadow: var(--shadow-panel);
+    border-radius: 0.875rem;
+    background: color-mix(in srgb, var(--primary) 4%, var(--card));
 }
 
-.deliveries-action-panel h6 {
-    font-size: 1rem;
-}
-
-.deliveries-action-panel p {
-    min-height: 2.5rem;
-    margin: 0;
-    overflow-wrap: anywhere;
+.deliveries-filters-search {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.75rem;
     color: var(--muted-foreground);
-    font-size: 0.8rem;
 }
 
-.deliveries-action-panel [data-ui="button"] {
-    justify-content: flex-start;
+.deliveries-filters-search > svg {
+    margin-bottom: 0.65rem;
 }
 
-.deliveries-action-divider {
-    height: 1px;
-    background: var(--border);
+.deliveries-filters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+    align-items: end;
+    gap: 0.75rem;
+}
+
+.deliveries-filters-grid .deliveries-filters-search {
+    grid-column: span 2;
+}
+
+.deliveries-filters-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1.5rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border);
+}
+
+.deliveries-filters-count {
+    margin-left: auto;
+    color: var(--muted-foreground);
+    font-size: 0.85rem;
+}
+
+.deliveries-list-meta {
+    display: flex;
+    align-items: flex-end;
+    gap: 1rem;
+    color: var(--muted-foreground);
+}
+
+.deliveries-list-meta [data-ui="text-field"] {
+    width: 7rem;
 }
 
 .deliveries-table-wrap {
     overflow-x: auto;
-}
-
-.deliveries-selection-column {
-    width: 2rem;
-}
-
-.deliveries-table tbody tr {
-    cursor: pointer;
-}
-
-.deliveries-table input[type="radio"] {
-    accent-color: var(--primary);
-    cursor: pointer;
-}
-
-.deliveries-table .visually-hidden {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
+    border: 1px solid var(--border);
+    border-radius: 0.875rem;
 }
 
 .deliveries-table {
@@ -144,29 +144,161 @@
 }
 
 .deliveries-table th {
-    padding: 0.75rem;
-    background: color-mix(in srgb, var(--primary) 9%, var(--card));
-    color: var(--foreground);
+    position: sticky;
+    top: 0;
+    padding: 0.7rem 0.75rem;
+    background: color-mix(in srgb, var(--primary) 6%, var(--card));
+    color: var(--muted-foreground);
+    font-size: 0.72rem;
     font-weight: 700;
+    letter-spacing: 0.04em;
     text-align: left;
+    text-transform: uppercase;
     white-space: nowrap;
+}
+
+.deliveries-sort {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    cursor: pointer;
+}
+
+.deliveries-sort:hover,
+.deliveries-sort.is-active {
+    color: var(--foreground);
+}
+
+.deliveries-sort svg {
+    width: 1rem;
+    height: 1rem;
 }
 
 .deliveries-table td {
-    padding: 0.625rem 0.75rem;
-    border-bottom: 1px solid var(--border);
+    padding: 0.6rem 0.75rem;
+    border-top: 1px solid var(--border);
     white-space: nowrap;
 }
 
-.deliveries-table tr.is-selected,
+.deliveries-table tbody tr {
+    transition: background 120ms ease;
+}
+
+.deliveries-table tbody tr:nth-child(even) {
+    background: color-mix(in srgb, var(--foreground) 2%, transparent);
+}
+
 .deliveries-table tbody tr:hover {
-    background: color-mix(in srgb, var(--primary) 7%, var(--card));
+    background: color-mix(in srgb, var(--primary) 8%, var(--card));
+}
+
+.deliveries-table tbody tr.is-inactive td {
+    color: var(--muted-foreground);
+}
+
+.deliveries-table a {
+    color: var(--primary);
+    text-decoration: none;
+}
+
+.deliveries-table a:hover {
+    text-decoration: underline;
+}
+
+.deliveries-target {
+    display: grid;
+    gap: 0.1rem;
+}
+
+.deliveries-target small {
+    color: var(--muted-foreground);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+}
+
+.deliveries-target a,
+.deliveries-target span {
+    display: block;
+    max-width: 14rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.deliveries-route-cell {
+    font-weight: 600;
+}
+
+.deliveries-route-cell span {
+    margin: 0 0.4rem;
+    color: var(--muted-foreground);
+}
+
+.deliveries-numeric {
+    text-align: right;
+}
+
+.deliveries-actions-column {
+    width: 1%;
+    text-align: right;
+}
+
+.deliveries-row-actions {
+    display: inline-flex;
+    gap: 0.35rem;
+}
+
+.deliveries-row-actions [data-ui="icon-button"] {
+    border: 1px solid var(--border);
+    background: var(--surface-secondary, color-mix(in srgb, var(--foreground) 6%, var(--card)));
+    color: var(--foreground);
+}
+
+.deliveries-row-actions [data-ui="icon-button"]:hover {
+    border-color: var(--primary);
+    background: color-mix(in srgb, var(--primary) 16%, var(--card));
+    color: var(--primary);
+}
+
+.deliveries-row-actions [data-ui="icon-button"][data-tone="danger"]:hover {
+    border-color: #dc2626;
+    background: color-mix(in srgb, #dc2626 16%, var(--card));
+    color: #dc2626;
+}
+
+.deliveries-row-actions [data-ui="icon-button"]:disabled {
+    opacity: 0.45;
+}
+
+.deliveries-tone-success {
+    border-color: color-mix(in srgb, #16a34a 45%, var(--border));
+    background: color-mix(in srgb, #16a34a 14%, var(--card));
+}
+
+.deliveries-tone-warning {
+    border-color: color-mix(in srgb, #f59e0b 45%, var(--border));
+    background: color-mix(in srgb, #f59e0b 16%, var(--card));
+}
+
+.deliveries-tone-danger {
+    border-color: color-mix(in srgb, #dc2626 45%, var(--border));
+    background: color-mix(in srgb, #dc2626 14%, var(--card));
+}
+
+.deliveries-action-divider {
+    height: 1px;
+    background: var(--border);
 }
 
 .deliveries-id {
-    max-width: 12rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    font-family: var(--font-mono, ui-monospace, monospace);
+    font-size: 0.8rem;
 }
 
 .deliveries-state {
@@ -181,6 +313,10 @@
 
 .deliveries-pagination {
     justify-content: flex-end;
+}
+
+.deliveries-card-heading {
+    align-items: flex-end;
 }
 
 .deliveries-metadata {
@@ -215,13 +351,26 @@
     background: color-mix(in srgb, var(--primary) 4%, var(--card));
 }
 
-.deliveries-info-tile:first-child {
+.deliveries-info-tile-wide {
     grid-column: 1 / -1;
 }
 
-.deliveries-info-tile h3 {
+.deliveries-tile-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
     margin: 0 0 0.875rem;
+}
+
+.deliveries-info-tile h3 {
+    margin: 0;
     font-size: 0.95rem;
+}
+
+.deliveries-tile-heading [data-ui="button"] {
+    min-height: 2rem;
+    padding: 0 0.75rem;
 }
 
 .deliveries-info-tile .deliveries-metadata {
@@ -306,6 +455,402 @@
     font-size: 0.875rem;
 }
 
+.deliveries-operations {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.deliveries-operations-group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.deliveries-operations-hint {
+    flex-basis: 100%;
+    margin: 0;
+    color: var(--muted-foreground);
+    font-size: 0.85rem;
+}
+
+.deliveries-step-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.deliveries-dialog-fields {
+    display: grid;
+    gap: 1rem;
+}
+
+.deliveries-tile-note {
+    display: block;
+    margin-top: 0.2rem;
+    color: var(--muted-foreground);
+    font-size: 0.75rem;
+    font-weight: 400;
+}
+
+.deliveries-tile-empty {
+    margin: 0;
+    color: var(--muted-foreground);
+    font-size: 0.875rem;
+}
+
+.deliveries-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.15rem 0.55rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.deliveries-badge-success {
+    border-color: color-mix(in srgb, #16a34a 45%, var(--border));
+    background: color-mix(in srgb, #16a34a 14%, var(--card));
+}
+
+.deliveries-badge-warning {
+    border-color: color-mix(in srgb, #f59e0b 45%, var(--border));
+    background: color-mix(in srgb, #f59e0b 16%, var(--card));
+}
+
+.deliveries-badge-danger {
+    border-color: color-mix(in srgb, #dc2626 45%, var(--border));
+    background: color-mix(in srgb, #dc2626 14%, var(--card));
+}
+
+.deliveries-progress {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.deliveries-progress ol {
+    display: grid;
+    flex: 1;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.deliveries-progress li {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: var(--muted-foreground);
+    font-size: 0.875rem;
+}
+
+.deliveries-progress li::after {
+    content: "";
+    flex: 1;
+    height: 2px;
+    background: var(--border);
+}
+
+.deliveries-progress li:last-child::after {
+    display: none;
+}
+
+.deliveries-progress-dot {
+    display: inline-flex;
+    width: 1.9rem;
+    height: 1.9rem;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--border);
+    border-radius: 50%;
+    font-weight: 700;
+}
+
+.deliveries-progress li[data-state="done"],
+.deliveries-progress li[data-state="current"] {
+    color: var(--foreground);
+}
+
+.deliveries-progress li[data-state="done"] .deliveries-progress-dot {
+    border-color: var(--primary);
+    background: var(--primary);
+    color: var(--primary-foreground, #fff);
+}
+
+.deliveries-progress li[data-state="done"]::after {
+    background: var(--primary);
+}
+
+.deliveries-progress li[data-state="current"] .deliveries-progress-dot {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.deliveries-progress li[data-state="canceled"] .deliveries-progress-dot {
+    border-color: #dc2626;
+    color: #dc2626;
+}
+
+.deliveries-map {
+    position: relative;
+    z-index: 0;
+    isolation: isolate;
+    height: 260px;
+    border-radius: 0.75rem;
+    overflow: hidden;
+}
+
+.deliveries-map-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    margin: 0.75rem 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.8rem;
+}
+
+.deliveries-map-legend li {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.deliveries-map-legend span {
+    width: 0.7rem;
+    height: 0.7rem;
+    border-radius: 50%;
+}
+
+.deliveries-related-list {
+    display: grid;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.deliveries-related-list li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.875rem;
+}
+
+.deliveries-signature-preview {
+    max-width: 100%;
+    max-height: 7rem;
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    background: #fff;
+}
+
+.deliveries-tabs {
+    display: flex;
+    gap: 0.25rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.deliveries-tab {
+    padding: 0.6rem 0.9rem;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    background: transparent;
+    color: var(--muted-foreground);
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.deliveries-tab-active {
+    border-bottom-color: var(--primary);
+    color: var(--foreground);
+}
+
+.deliveries-change-history {
+    display: grid;
+    gap: 0.875rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.deliveries-change-history li {
+    padding: 0.875rem;
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+}
+
+.deliveries-change-history p {
+    margin: 0.25rem 0 0;
+    color: var(--muted-foreground);
+    font-size: 0.8rem;
+}
+
+.deliveries-change-list {
+    display: grid;
+    gap: 0.4rem;
+    margin: 0.75rem 0 0;
+}
+
+.deliveries-change-list div {
+    display: grid;
+    grid-template-columns: minmax(7rem, 0.4fr) 1fr;
+    gap: 0.5rem;
+    font-size: 0.82rem;
+}
+
+.deliveries-change-list dt {
+    color: var(--muted-foreground);
+}
+
+.deliveries-change-list dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.deliveries-change-list s {
+    color: var(--muted-foreground);
+}
+
+.deliveries-point-picker {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.deliveries-point-picker-selected {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.deliveries-point-picker-selected span {
+    color: var(--muted-foreground);
+}
+
+.deliveries-point-results {
+    display: grid;
+    max-height: 14rem;
+    gap: 0.25rem;
+    margin: 0;
+    padding: 0.25rem;
+    overflow-y: auto;
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+    list-style: none;
+}
+
+.deliveries-point-results button {
+    display: grid;
+    width: 100%;
+    gap: 0.15rem;
+    padding: 0.5rem 0.65rem;
+    border: 0;
+    border-radius: 0.5rem;
+    background: transparent;
+    color: var(--foreground);
+    text-align: left;
+    cursor: pointer;
+}
+
+.deliveries-point-results button:hover {
+    background: var(--surface-secondary, color-mix(in srgb, var(--primary) 6%, var(--card)));
+}
+
+.deliveries-point-results small {
+    color: var(--muted-foreground);
+}
+
+.deliveries-detail-split {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(22rem, 1fr);
+    align-items: stretch;
+    gap: 1.25rem;
+}
+
+.deliveries-history-aside {
+    display: flex;
+    min-width: 0;
+}
+
+.deliveries-history-aside > .deliveries-history-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 0;
+    position: sticky;
+    top: 1rem;
+    flex: 1;
+    align-self: stretch;
+    max-height: calc(100dvh - 2rem);
+    overflow-y: auto;
+}
+
+.deliveries-dashboard {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-content: start;
+    align-items: stretch;
+    gap: 1.25rem;
+}
+
+.deliveries-cell {
+    display: flex;
+    min-width: 0;
+}
+
+.deliveries-cell > * {
+    flex: 1;
+    min-width: 0;
+}
+
+.deliveries-cell-wide {
+    grid-column: span 2;
+}
+
+.deliveries-cell-full {
+    grid-column: 1 / -1;
+}
+
+.deliveries-dashboard .deliveries-info-tile {
+    padding: 1.25rem;
+    border-radius: 1rem;
+    background: var(--card);
+}
+
+.deliveries-dashboard .deliveries-history-card {
+    margin: 0;
+}
+
+.deliveries-dashboard .deliveries-map {
+    height: 320px;
+}
+
+@media (max-width: 1100px) {
+    .deliveries-detail-split {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .deliveries-history-aside > .deliveries-history-card {
+        position: static;
+        max-height: none;
+    }
+}
+
 @media (max-width: 700px) {
     .deliveries-page {
         padding: 1rem;
@@ -316,28 +861,28 @@
         align-items: flex-start;
         flex-direction: column;
     }
-}
 
-@media (max-width: 1100px) {
-    .deliveries-overview,
-    .deliveries-detail-layout {
+    .deliveries-detail-layout,
+    .deliveries-info-grid,
+    .deliveries-dashboard,
+    .deliveries-progress ol {
         grid-template-columns: minmax(0, 1fr);
     }
 
-    .deliveries-action-panel {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+    .deliveries-cell-wide,
+    .deliveries-cell-full {
+        grid-column: auto;
     }
+}
 
-    .deliveries-action-panel h6,
-    .deliveries-action-panel p,
-    .deliveries-action-divider {
-        grid-column: 1 / -1;
+@media (max-width: 1100px) {
+    .deliveries-detail-layout {
+        grid-template-columns: minmax(0, 1fr);
     }
 }
 
 @media (max-width: 600px) {
     .deliveries-info-grid,
-    .deliveries-action-panel,
     .deliveries-attempt-details {
         grid-template-columns: minmax(0, 1fr);
     }
