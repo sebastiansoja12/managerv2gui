@@ -26,6 +26,9 @@ import {
     TableView,
 } from "components/ui/icons";
 import {Link, useNavigate} from "react-router-dom";
+import Department from "../../class/depots/Department";
+import DeliveryService from "../../hooks/DeliveryService";
+import DepartmentService from "../../hooks/DepartmentService";
 import ShipmentService from "../../hooks/ShipmentService";
 import DocumentService from "../../hooks/DocumentService";
 import TrackingService from "../../hooks/TrackingService";
@@ -44,6 +47,7 @@ import {
 } from "./dto/ShipmentDto";
 import pl from "../../i18n/translate";
 import {AppTabDefinition} from "../AppShell/types";
+import {departmentCodeLabel} from "../Deliveries/deliveryLabels";
 import {exportShipmentExcel} from "./shipmentExcelExport";
 import "./styles/shipments.css";
 
@@ -111,7 +115,7 @@ const formatPrice = (shipment: ShipmentDto) => {
     return `${shipment.price.amount.toLocaleString(pl.common.locale)} ${shipment.price.currency}`;
 };
 
-const mapShipmentToRow = (shipment: ShipmentDto): ShipmentRow => ({
+const mapShipmentToRow = (shipment: ShipmentDto, destination: string): ShipmentRow => ({
     id: `#${shipment.shipmentId.value}`,
     dimensions: shipment.dimensions
         ? `${shipment.dimensions.length} × ${shipment.dimensions.width} × ${shipment.dimensions.height} ${shipment.dimensions.unit}`
@@ -121,7 +125,7 @@ const mapShipmentToRow = (shipment: ShipmentDto): ShipmentRow => ({
     deliveryDate: formatDeliveryDate(shipment.signature?.signedAt),
     price: formatPrice(shipment),
     user: shipmentTranslations.table.unassigned,
-    destination: shipment.recipient?.city || "-",
+    destination,
     relatedShipmentId: shipment.shipmentRelatedId?.value || null,
     status: shipment.shipmentStatus,
 });
@@ -200,6 +204,10 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
     const qrPreviewRef = useRef<HTMLIFrameElement | null>(null);
 
     const displayedShipments = readModelSearchResults || shipments;
+    const [departments, setDepartments] = useState<Department[]>([]);
+    const [destinationDepartmentIds, setDestinationDepartmentIds] = useState<Record<string, string | null>>({});
+    const destinationLabel = (shipment: ShipmentDto) =>
+        departmentCodeLabel(departments, destinationDepartmentIds[String(shipment.shipmentId.value)]);
 
     const visibleShipments = useMemo(() => {
         return displayedShipments
@@ -217,8 +225,9 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
     ]);
 
     const shipmentRows = useMemo(() => {
-        return visibleShipments.map(mapShipmentToRow);
-    }, [visibleShipments]);
+        return visibleShipments.map((shipment) => mapShipmentToRow(shipment,
+            departmentCodeLabel(departments, destinationDepartmentIds[String(shipment.shipmentId.value)])));
+    }, [visibleShipments, departments, destinationDepartmentIds]);
     const selectedShipment = visibleShipments.find((shipment) => shipment.shipmentId.value === selectedShipmentId) || null;
 
     const statusCounts = useMemo(() => {
@@ -486,6 +495,49 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
             URL.revokeObjectURL(qrPreviewUrl);
         }
     }, [qrPreviewUrl]);
+
+    useEffect(() => {
+        let active = true;
+        DepartmentService.getAll()
+            .then((response) => {
+                if (active) {
+                    setDepartments(Array.isArray(response.data) ? response.data : []);
+                }
+            })
+            .catch(() => {
+                if (active) {
+                    setDepartments([]);
+                }
+            });
+        return () => {
+            active = false;
+        };
+    }, []);
+
+    useEffect(() => {
+        let active = true;
+        const shipmentIds = displayedShipments.map((shipment) => String(shipment.shipmentId.value));
+        if (!shipmentIds.length) {
+            setDestinationDepartmentIds({});
+            return undefined;
+        }
+        DeliveryService.query(0, shipmentIds.length, {shipmentIds})
+            .then((response) => {
+                if (active) {
+                    setDestinationDepartmentIds(Object.fromEntries(response.data.items
+                        .filter((delivery) => delivery.shipmentId)
+                        .map((delivery) => [delivery.shipmentId as string, delivery.destinationDepartmentId])));
+                }
+            })
+            .catch(() => {
+                if (active) {
+                    setDestinationDepartmentIds({});
+                }
+            });
+        return () => {
+            active = false;
+        };
+    }, [displayedShipments]);
 
     useEffect(() => {
         let active = true;
@@ -775,7 +827,7 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
                                 </thead>
                                 <tbody>
                                 {visibleShipments.map((shipment) => {
-                                    const row = mapShipmentToRow(shipment);
+                                    const row = mapShipmentToRow(shipment, destinationLabel(shipment));
                                     return (
                                         <tr
                                             aria-selected={selectedShipmentId === shipment.shipmentId.value}
