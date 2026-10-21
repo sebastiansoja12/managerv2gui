@@ -93,7 +93,7 @@
 
 .processes-table {
     border-collapse: collapse;
-    min-width: 1120px;
+    min-width: 1040px;
     table-layout: fixed;
     width: 100%;
 }
@@ -121,15 +121,6 @@
 
 .processes-table tbody tr:hover {
     background: var(--surface-secondary);
-}
-
-.processes-table td:first-child strong {
-    display: block;
-    font-size: 0.9rem;
-    max-width: 280px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
 }
 
 .processes-service {

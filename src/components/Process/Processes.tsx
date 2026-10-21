@@ -96,15 +96,12 @@ const Processes: React.FC = () => {
             <div className="processes-shell">
                 <div className="processes-header">
                     <div className="processes-title">
-                        <span className="processes-title-icon"><AccountTree /></span>
+                        <span aria-hidden="true" className="processes-title-icon"><AccountTree /></span>
                         <div>
                             <Typography variant="h4">{pl.processes.page.title}</Typography>
-                            <Typography variant="body2" color="text.secondary">{pl.processes.page.subtitle}</Typography>
+                            <p className="processes-subtitle">{pl.processes.page.subtitle}</p>
                         </div>
                     </div>
-                    <Button startIcon={<Refresh />} variant="outlined" onClick={() => loadProcesses()} disabled={loading}>
-                        {pl.common.refresh}
-                    </Button>
                 </div>
 
                 <section className="processes-panel">
@@ -112,6 +109,12 @@ const Processes: React.FC = () => {
                         <div>
                             <Typography variant="h6">{pl.processes.table.title}</Typography>
                             <span>{pl.processes.table.scope}</span>
+                        </div>
+                        <div className="processes-panel-actions">
+                            {!loading ? <span className="processes-count">{pl.departments.filters.results.replace("{count}", String(totalElements))}</span> : null}
+                            <Button startIcon={<Refresh />} variant="outlined" onClick={() => loadProcesses()} disabled={loading}>
+                                {pl.common.refresh}
+                            </Button>
                         </div>
                     </div>
 
@@ -125,6 +128,15 @@ const Processes: React.FC = () => {
                     ) : (
                         <div className="processes-table-wrap">
                             <table className="processes-table">
+                                <colgroup>
+                                    <col className="processes-col-id" />
+                                    <col className="processes-col-service" />
+                                    <col className="processes-col-user" />
+                                    <col className="processes-col-department" />
+                                    <col className="processes-col-date" />
+                                    <col className="processes-col-status" />
+                                    <col className="processes-col-actions" />
+                                </colgroup>
                                 <thead>
                                 <tr>
                                     <th>{pl.processes.table.columns.processId}</th>
@@ -140,12 +152,12 @@ const Processes: React.FC = () => {
                                 {sortedLogs.length ? sortedLogs.map((processLog) => (
                                     <tr key={processLog.processId} onClick={() => navigate(`/processes/${processLog.processId}`)}>
                                         <td>
-                                            <strong>{processLog.processId}</strong>
+                                            <strong title={processLog.processId}>{processLog.processId}</strong>
                                         </td>
                                         <td>
-                                            <span className="processes-service">
+                                            <span className="processes-service" title={serviceName(processLog)}>
                                                 <SyncAlt fontSize="small" />
-                                                {serviceName(processLog)}
+                                                <span>{serviceName(processLog)}</span>
                                             </span>
                                         </td>
                                         <td>{userLabel(processLog)}</td>
@@ -154,9 +166,9 @@ const Processes: React.FC = () => {
                                         <td>
                                             <Chip className={`process-status process-status-${String(processLog.status || "IN_PROGRESS").toLowerCase()}`} label={statusLabel(processLog.status)} size="small" />
                                         </td>
-                                        <td>
+                                        <td className="processes-actions-cell">
                                             <Tooltip title={pl.processes.actions.openDetails}>
-                                                <IconButton size="small" onClick={(event) => {
+                                                <IconButton aria-label={pl.processes.actions.openDetails} size="small" onClick={(event) => {
                                                     event.stopPropagation();
                                                     navigate(`/processes/${processLog.processId}`);
                                                 }}>
@@ -182,6 +194,7 @@ const Processes: React.FC = () => {
 
                     {!loading && sortedLogs.length ? (
                         <TablePagination
+                            className="processes-pagination"
                             component="div"
                             count={totalElements}
                             page={page}
