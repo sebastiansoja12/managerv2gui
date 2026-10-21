@@ -2,8 +2,8 @@ FROM node:20-alpine AS build
 
 WORKDIR /app
 
-ARG REACT_APP_SERVER_URL=http://localhost:8080/v2/api
-ARG REACT_APP_GATEWAY_URL=http://localhost:8080/v2/api
+ARG REACT_APP_SERVER_URL=http://localhost:8080/v1/api
+ARG REACT_APP_GATEWAY_URL=http://localhost:8080/v1/api
 ARG REACT_APP_VERSION=2026.4
 ARG REACT_APP_ENVIRONMENT=development
 
