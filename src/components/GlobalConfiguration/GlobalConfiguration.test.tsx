@@ -3,6 +3,16 @@ import {fireEvent, render, screen} from "@testing-library/react";
 import pl from "../../i18n/translate";
 import GlobalConfiguration from "./GlobalConfiguration";
 
+let mockRole = "SUPERADMIN";
+
+jest.mock("../../auth/AuthState", () => ({
+    useAuthState: () => ({user: {role: mockRole}}),
+}));
+
+beforeEach(() => {
+    mockRole = "SUPERADMIN";
+});
+
 jest.mock("./ShipmentConfigurationPanel", () => ({__esModule: true, default: () => null}));
 jest.mock("./CourierConfigurationPolicyPanel", () => ({__esModule: true, default: () => null}));
 jest.mock("./GeocodingConfigurationPanel", () => ({__esModule: true, default: () => null}));
@@ -39,4 +49,13 @@ it.each([
     render(<GlobalConfiguration />);
     fireEvent.click(screen.getByRole("tab", {name: pl.globalConfiguration.sections[section].title}));
     expect(screen.getByText(panelText)).toBeInTheDocument();
+});
+
+it("shows only department rules to a department admin", () => {
+    mockRole = "ADMIN";
+
+    render(<GlobalConfiguration />);
+
+    expect(screen.getAllByRole("tab")).toHaveLength(1);
+    expect(screen.getByText("Department rules panel")).toBeInTheDocument();
 });
