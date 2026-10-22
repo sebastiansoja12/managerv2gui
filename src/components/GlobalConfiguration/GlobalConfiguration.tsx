@@ -13,6 +13,8 @@ import {
     QrCodeScanner,
     Tune,
 } from "components/ui/icons";
+import {useAuthState} from "../../auth/AuthState";
+import {canEditOperatorConfiguration} from "../../config/roleAccess";
 import pl from "../../i18n/translate";
 import CommunicationConfigurationPanel from "./CommunicationConfigurationPanel";
 import CourierConfigurationPolicyPanel from "./CourierConfigurationPolicyPanel";
@@ -66,12 +68,17 @@ const sectionPanels: Record<GlobalConfigurationSectionKey, React.ReactNode> = {
     regional: <RegionalConfigurationPanel />,
 };
 
+const departmentAdminSections: GlobalConfigurationSectionKey[] = ["departments"];
+
 function GlobalConfiguration() {
-    const [activeSection, setActiveSection] = useState<GlobalConfigurationSectionKey>("shipments");
+    const {user} = useAuthState();
+    const visibleSections = canEditOperatorConfiguration(user?.role) ? sections : departmentAdminSections;
+    const [selectedSection, setActiveSection] = useState<GlobalConfigurationSectionKey>(visibleSections[0]);
+    const activeSection = visibleSections.includes(selectedSection) ? selectedSection : visibleSections[0];
     const activeSectionTranslation = pl.globalConfiguration.sections[activeSection];
 
     return (
-        <main className="global-configuration-page">
+        <main className="global-configuration-page" data-tour="global-configuration">
             <div className="global-configuration-shell">
                 <nav
                     className="global-configuration-crumbs"
@@ -84,7 +91,7 @@ function GlobalConfiguration() {
                         </span>
                         <ChevronRight className="global-configuration-crumbs-separator" aria-hidden="true" />
                         <div className="global-configuration-crumbs-sections" role="tablist">
-                            {sections.map((section) => {
+                            {visibleSections.map((section) => {
                                 const isActive = activeSection === section;
                                 return (
                                     <button
