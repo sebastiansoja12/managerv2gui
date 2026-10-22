@@ -52,6 +52,15 @@ export type DepartmentConfiguration = {
     preventDepartmentArchiving: boolean;
 } & Partial<DepartmentPolicies>;
 
+export type DepartmentSettingKey = "autoAssignDeliveryAreas" | "autoConnectDepartments"
+    | "preventDepartmentDeletion" | "preventDepartmentArchiving";
+
+type Nullable<T> = {[Key in keyof T]?: T[Key] | null};
+
+export type DepartmentConfigurationOverride = Nullable<Record<DepartmentSettingKey, boolean>> & {
+    [Policy in DepartmentPolicyKey]?: Nullable<DepartmentPolicies[Policy]> | null;
+};
+
 export const defaultDepartmentPolicies: DepartmentPolicies = {
     deliveryAreaPolicy: {
         deliveryAreaMode: "COUNTRY_PARTITION",
@@ -90,9 +99,8 @@ export const defaultDepartmentConfiguration: DepartmentConfiguration = {
 
 const eventName = "manager:department-configuration-changed";
 
-export const readDepartmentConfiguration = async (): Promise<DepartmentConfiguration> => {
-    const saved = (await OperatorConfigurationService.getCurrentDepartmentConfiguration()).data;
-    return {
+const normalizeDepartmentConfiguration = (saved?: Partial<DepartmentConfiguration> | null): DepartmentConfiguration => (
+    {
         autoAssignDeliveryAreas: saved?.autoAssignDeliveryAreas === true,
         autoConnectDepartments: saved?.autoConnectDepartments === true,
         preventDepartmentDeletion: saved?.preventDepartmentDeletion === true,
@@ -101,7 +109,28 @@ export const readDepartmentConfiguration = async (): Promise<DepartmentConfigura
         connectionPolicy: {...defaultDepartmentPolicies.connectionPolicy, ...saved?.connectionPolicy},
         lifecyclePolicy: {...defaultDepartmentPolicies.lifecyclePolicy, ...saved?.lifecyclePolicy},
         capacityPolicy: {...defaultDepartmentPolicies.capacityPolicy, ...saved?.capacityPolicy},
-    };
+    }
+);
+
+export const readDepartmentConfiguration = async (departmentId?: number | string): Promise<DepartmentConfiguration> => (
+    normalizeDepartmentConfiguration((departmentId === undefined || departmentId === null
+        ? await OperatorConfigurationService.getCurrentDepartmentConfiguration()
+        : await OperatorConfigurationService.getDepartmentConfiguration(departmentId)).data)
+);
+
+export const readDepartmentConfigurationOverride = async (
+    departmentId: number | string,
+): Promise<DepartmentConfigurationOverride> => (
+    (await OperatorConfigurationService.getDepartmentConfigurationOverride(departmentId)).data || {}
+);
+
+export const writeDepartmentConfigurationOverride = async (
+    departmentId: number | string,
+    override: DepartmentConfigurationOverride,
+) => {
+    const saved = (await OperatorConfigurationService.updateDepartmentConfigurationOverride(departmentId, override)).data;
+    window.dispatchEvent(new Event(eventName));
+    return saved;
 };
 
 export const writeDepartmentConfiguration = async (configuration: DepartmentConfiguration) => {
@@ -110,12 +139,12 @@ export const writeDepartmentConfiguration = async (configuration: DepartmentConf
     return saved;
 };
 
-export const useDepartmentConfiguration = (operatorId?: number) => {
+export const useDepartmentConfiguration = (operatorId?: number, departmentId?: number | string | null) => {
     const [configuration, setConfiguration] = useState<DepartmentConfiguration>(defaultDepartmentConfiguration);
     useEffect(() => {
         let active = true;
         const refresh = () => {
-            readDepartmentConfiguration()
+            readDepartmentConfiguration(departmentId ?? undefined)
                 .then((loaded) => {
                     if (active) setConfiguration(loaded);
                 })
@@ -129,6 +158,6 @@ export const useDepartmentConfiguration = (operatorId?: number) => {
             active = false;
             window.removeEventListener(eventName, refresh);
         };
-    }, [operatorId]);
+    }, [departmentId, operatorId]);
     return configuration;
 };

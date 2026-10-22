@@ -87,34 +87,7 @@
     margin: 5px 0 0;
 }
 
-.global-configuration-department-settings {
-    display: grid;
-    gap: 10px;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.global-configuration-department-setting {
-    background: var(--surface-secondary);
-    border: 1px solid var(--border);
-    border-radius: 9px;
-    padding: 13px 15px;
-}
-
-.global-configuration-department-setting [data-ui="form-control-label"] {
-    margin: 0;
-}
-
-.global-configuration-department-setting p {
-    color: var(--muted-foreground);
-    font-size: 13px;
-    margin: 5px 0 0 48px;
-}
-
 @media (max-width: 800px) {
-    .global-configuration-department-settings {
-        grid-template-columns: minmax(0, 1fr);
-    }
-
     .global-configuration-department-panel .global-configuration-panel-header {
         align-items: stretch;
         flex-direction: column;
@@ -2054,4 +2027,40 @@
     height: 40px;
     padding: 3px;
     width: 44px;
+}
+
+.department-configuration-scope {
+    align-items: flex-end;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.department-configuration-scope-select {
+    max-width: 360px;
+}
+
+.department-configuration-scope > span {
+    color: var(--muted-foreground);
+    flex: 1;
+    font-size: 13px;
+    min-width: 220px;
+}
+
+.department-setting-inherited {
+    color: var(--muted-foreground);
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    margin-top: 4px;
+    text-transform: uppercase;
+}
+
+.department-setting-inherit {
+    align-self: flex-start;
+    margin-top: 4px;
+}
+
+.department-setting-row--overridden {
+    box-shadow: inset 3px 0 0 var(--primary);
 }
