@@ -12,9 +12,11 @@ import AppRoutes from "./AppRoutes";
 import {getTabTitle, normalizePath} from "./tabConfig";
 import {AppTabDefinition} from "./types";
 import {
+    availableOperationalProfiles,
     getOperationalProfile,
     isReturnPath,
     OperationalProfile,
+    resolveOperationalProfile,
     setOperationalProfile,
 } from "../../config/operationalProfile";
 import pl from "../../i18n/translate";
@@ -96,10 +98,13 @@ function AppShell() {
     const location = useLocation();
     const navigate = useNavigate();
     const [openTabs, setOpenTabs] = React.useState<AppTabDefinition[]>(readStoredTabs);
-    const [operationalProfile, updateOperationalProfile] = React.useState<OperationalProfile>(getOperationalProfile);
+    const [selectedOperationalProfile, updateOperationalProfile] = React.useState<OperationalProfile>(getOperationalProfile);
     const [pendingOperationalProfile, setPendingOperationalProfile] = React.useState<OperationalProfile | null>(null);
     const [language, updateLanguage] = React.useState<Language>(getLanguage);
     const authState = useAuthState();
+    const userRole = authState.user?.role;
+    const allowedOperationalProfiles = availableOperationalProfiles(userRole);
+    const operationalProfile = resolveOperationalProfile(userRole, selectedOperationalProfile);
     const {returnsStatus} = useOperatorCapabilities();
 
     const activePath = normalizePath(location.pathname);
@@ -153,7 +158,7 @@ function AppShell() {
     };
 
     const changeOperationalProfile = (profile: OperationalProfile) => {
-        if (profile === operationalProfile) {
+        if (profile === operationalProfile || !allowedOperationalProfiles.includes(profile)) {
             return;
         }
 
@@ -197,6 +202,13 @@ function AppShell() {
     }, [authenticated, loginRoute, returnsStatus]);
 
     React.useEffect(() => subscribeLanguage(updateLanguage), []);
+
+    React.useEffect(() => {
+        if (authenticated && operationalProfile !== selectedOperationalProfile) {
+            setOperationalProfile(operationalProfile);
+            updateOperationalProfile(operationalProfile);
+        }
+    }, [authenticated, operationalProfile, selectedOperationalProfile]);
 
     React.useEffect(() => {
         const clearTabsBeforeExit = () => {
@@ -283,6 +295,7 @@ function AppShell() {
                 onOperationalProfileChange={changeOperationalProfile}
                 onSelectTab={navigate}
                 operationalProfile={operationalProfile}
+                operationalProfiles={allowedOperationalProfiles}
                 openTabs={visibleTabs}
             />
             <div className="app-main-content">
