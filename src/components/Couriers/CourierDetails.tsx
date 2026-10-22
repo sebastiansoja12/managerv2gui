@@ -929,7 +929,9 @@ const CourierDetails: React.FC = () => {
                 </DialogActions>
             </Dialog>
             <CourierConfigurationDialog
+                courierName={courier ? `${courier.firstName || ""} ${courier.lastName || ""}`.trim() : undefined}
                 open={configurationDialogOpen}
+                supplierCode={courier?.supplierCode.value || decodedSupplierCode}
                 onClose={() => setConfigurationDialogOpen(false)}
             />
         </main>

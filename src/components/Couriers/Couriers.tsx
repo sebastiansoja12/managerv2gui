@@ -614,10 +614,14 @@ function Couriers() {
                     </Button>
                 </DialogActions>
             </Dialog>
-            <CourierConfigurationDialog
-                open={configurationDialogOpen}
-                onClose={() => setConfigurationDialogOpen(false)}
-            />
+            {selectedCourier ? (
+                <CourierConfigurationDialog
+                    courierName={`${selectedCourier.firstName || ""} ${selectedCourier.lastName || ""}`.trim()}
+                    open={configurationDialogOpen}
+                    supplierCode={selectedCourier.supplierCode.value}
+                    onClose={() => setConfigurationDialogOpen(false)}
+                />
+            ) : undefined}
         </main>
     );
 }

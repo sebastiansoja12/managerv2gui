@@ -182,6 +182,7 @@ export const en: typeof pl = {
         shipmentScanner: "Shipment scanning",
         courierDeliveries: "Shipment delivery",
         devicePairing: "My device",
+        mySettings: "My settings",
         integrations: "Integrations",
         mainAriaLabel: "Main navigation",
         defaultUserName: "Admin",
@@ -553,6 +554,10 @@ export const en: typeof pl = {
             devicePairing: {
                 title: "My device",
                 description: "Pair a device with a QR code and view devices assigned to the account.",
+            },
+            mySettings: {
+                title: "My settings",
+                description: "Your configuration for shipments, deliveries, routes and returns.",
             },
             processes: {
                 title: "Processes",
@@ -1947,6 +1952,7 @@ export const en: typeof pl = {
             firstName: "First name",
             lastName: "Last name",
             telephoneNumber: "Phone",
+            email: "Email",
             department: "Department",
             certificateNumber: "Certificate number",
             issueDate: "Issue date",
@@ -2007,7 +2013,9 @@ export const en: typeof pl = {
             submit: "Add courier",
             saving: "Saving...",
             cancel: "Cancel",
-            required: "Courier code, first name, last name, and department are required.",
+            required: "Courier code, first name, last name, email and department are required.",
+            invalidEmail: "Enter a valid courier email address.",
+            emailHint: "We will send an invitation to set the system password to this address.",
             success: "Courier has been added.",
             error: "Could not add courier.",
             departmentLoading: "Loading departments...",
@@ -2038,6 +2046,10 @@ export const en: typeof pl = {
             integrations: {
                 title: "Integrations",
                 description: "Connections to external services unrelated to geolocation.",
+            },
+            couriers: {
+                title: "Couriers",
+                description: "Settings that couriers cannot change on their own.",
             },
         },
         shipmentConfiguration: {
@@ -2237,16 +2249,220 @@ export const en: typeof pl = {
         },
         courierConfiguration: {
             title: "Courier editing",
-            fields: {
-                copyDepartmentCodeFromDevice: "Copy department code from device",
-                skipInvalidShipments: "Skip invalid shipments",
-                generateNewReturnCodes: "Generate new return codes",
-                editDeliveryArea: "Edit delivery area",
-                substituteCourier: "Substitute courier",
-                autoGenerateLabels: "Automatically generate labels",
+            editingFor: "Courier configuration",
+            mySettings: {
+                title: "My settings",
+                description: "Your configuration for shipments, deliveries, routes and returns.",
+            },
+            tabs: {
+                SHIPMENTS: "Shipments",
+                DELIVERIES: "Deliveries",
+                ROUTES: "Areas and routes",
+                RETURNS: "Returns",
+                PREFERENCES: "Preferences",
+                SUBSTITUTE: "Substitute",
+                HISTORY: "Change history",
+            },
+            categories: {
+                PREFERENCE: "Preference",
+                OPERATIONAL_PERMISSION: "Operational permission",
+                MANDATORY_REQUIREMENT: "Mandatory requirement",
+            },
+            settings: {
+                COPY_DEPARTMENT_CODE_FROM_DEVICE: {
+                    label: "Copy department code from device",
+                    description: "The shipment department code is filled in from the paired device.",
+                },
+                SKIP_INVALID_SHIPMENTS: {
+                    label: "Skip invalid shipments",
+                    description: "Invalid items are skipped and the rest keep processing. Errors are recorded.",
+                },
+                AUTO_GENERATE_LABELS: {
+                    label: "Automatically generate labels",
+                    description: "Labels are created during supported shipment creation operations.",
+                },
+                REQUIRE_PICKUP_SCAN: {
+                    label: "Require scan on pickup",
+                    description: "The shipment must be scanned before the pickup is confirmed.",
+                },
+                REQUIRE_DELIVERY_SCAN: {
+                    label: "Require scan on delivery",
+                    description: "The shipment must be scanned before the delivery is confirmed.",
+                },
+                ALLOW_MANUAL_SHIPMENT_ADDITION: {
+                    label: "Allow adding shipments manually",
+                    description: "The courier can manually assign a shipment to their list.",
+                },
+                ALLOW_SHIPMENT_TRANSFER: {
+                    label: "Allow shipment transfers",
+                    description: "A transfer updates the shipment assignment and history.",
+                },
+                ALLOW_SHIPMENT_UNASSIGNMENT: {
+                    label: "Allow removing shipments from the list",
+                    description: "Unassigns the shipment from the courier — it is not deleted from the system.",
+                },
+                REQUIRE_PROOF_OF_DELIVERY: {
+                    label: "Require proof of delivery (POD)",
+                    description: "Proof must be recorded before the delivery is completed. Turned on automatically when a signature or photo is required.",
+                },
+                REQUIRE_RECIPIENT_SIGNATURE: {
+                    label: "Require recipient signature",
+                    description: "The delivery cannot be completed without the recipient's signature.",
+                },
+                REQUIRE_DELIVERY_PHOTO: {
+                    label: "Require delivery photo",
+                    description: "The delivery cannot be completed without a photo.",
+                },
+                REQUIRE_NON_DELIVERY_REASON: {
+                    label: "Require non-delivery reason",
+                    description: "A reason must be selected for a failed delivery.",
+                },
+                ALLOW_DELIVERY_ADDRESS_CHANGE: {
+                    label: "Allow delivery address changes",
+                    description: "Address changes are recorded in the shipment history.",
+                },
+                ALLOW_DELIVERY_AREA_EDITING: {
+                    label: "Edit delivery area",
+                    description: "The courier can change their own delivery area.",
+                },
+                ALLOW_OUT_OF_AREA_DELIVERY: {
+                    label: "Allow deliveries outside the area",
+                    description: "",
+                },
+                ALLOW_DELIVERY_REORDERING: {
+                    label: "Allow reordering deliveries",
+                    description: "The courier can manually reorder stops on the route.",
+                },
+                AUTO_ASSIGN_SHIPMENTS_BY_AREA: {
+                    label: "Automatically assign shipments by area",
+                    description: "Assignment takes the courier's current area into account.",
+                },
+                GENERATE_NEW_RETURN_CODES: {
+                    label: "Generate new return codes",
+                    description: "Every new return code is unique.",
+                },
+                AUTO_MARK_FOR_RETURN: {
+                    label: "Automatically mark shipments for return",
+                    description: "Only when the return process conditions are met.",
+                },
+                REQUIRE_RETURN_SCAN: {
+                    label: "Require scanning returned shipments",
+                    description: "A return cannot be accepted without a scan.",
+                },
+                AUTO_GENERATE_RETURN_LABELS: {
+                    label: "Automatically generate return labels",
+                    description: "Only for shipments whose process supports a return label.",
+                },
+                NOTIFY_ABOUT_NEW_SHIPMENTS: {
+                    label: "New shipment notifications",
+                    description: "",
+                },
+                NOTIFY_ABOUT_ROUTE_CHANGES: {
+                    label: "Route change notifications",
+                    description: "",
+                },
+                CONFIRM_SHIPMENT_TRANSFER: {
+                    label: "Confirm shipment transfers",
+                    description: "The app asks for confirmation before a shipment is transferred.",
+                },
+            },
+            parameters: {
+                MAX_DELIVERY_ATTEMPTS: {
+                    label: "Maximum delivery attempts",
+                    description: "The number of attempts cannot exceed this limit.",
+                },
+                MAX_SHIPMENTS_PER_ROUTE: {
+                    label: "Maximum shipments per route",
+                    description: "Leave empty for no limit.",
+                },
+                SUBSTITUTE_SUPPLIER_ID: {
+                    label: "Substitute courier code",
+                    description: "Enter the courier code (the same one used to sign in) or pick it from the list. Choosing a substitute does not transfer shipments automatically.",
+                },
+                PREFERRED_LABEL_FORMAT: {
+                    label: "Preferred label format",
+                    description: "",
+                },
+                DEFAULT_SHIPMENT_SORT_ORDER: {
+                    label: "Default shipment sorting",
+                    description: "",
+                },
+            },
+            labelFormats: {
+                PDF_A6: "PDF A6",
+                PDF_A4: "PDF A4",
+                ZPL: "ZPL (thermal printer)",
+            },
+            sortOrders: {
+                DELIVERY_ORDER: "Delivery order",
+                POSTAL_CODE: "Postal code",
+                RECIPIENT_NAME: "Recipient name",
+                ASSIGNED_AT: "Assignment date",
+            },
+            stateOn: "On",
+            stateOff: "Off",
+            substitute: {
+                placeholder: "e.g. KUR-02",
+                candidatesTitle: "Active couriers in the organization",
+                noCandidates: "There are no other active couriers. Only an active courier can be a substitute.",
+                clear: "Remove substitute",
+            },
+            noLimit: "No limit",
+            noSubstitute: "No substitute courier",
+            lockedByPolicy: "Enforced by the organization policy — cannot be changed",
+            forcedByProofRule: "Required because a signature or delivery photo is required",
+            validation: {
+                REQUIRED: "This field is required",
+                MUST_BE_POSITIVE: "The value must be a number greater than 0",
+                SUBSTITUTE_SELF: "A courier cannot substitute themselves",
+                SUBSTITUTE_UNAVAILABLE: "The selected courier is inactive or unavailable",
+                ENFORCED_BY_POLICY: "The value conflicts with the organization policy",
+            },
+            history: {
+                empty: "No configuration changes recorded.",
+                changedBy: "User",
+                unknownUser: "unknown",
+                emptyValue: "none",
+                enabledValue: "on",
+                disabledValue: "off",
+                changeTypes: {
+                    UPDATED: "Settings changed",
+                    RESET_TO_DEFAULTS: "Defaults restored",
+                },
+            },
+            actions: {
+                resetDefaults: "Restore defaults",
+                reload: "Reload",
+                cancel: "Cancel",
+                confirmReset: "Restore",
+                savePolicy: "Save policy",
+            },
+            confirmReset: {
+                title: "Restore default values?",
+                description: "The courier's settings will be replaced with the defaults allowed by the organization policy. The change is recorded in the history.",
+            },
+            policy: {
+                title: "Courier configuration policy",
+                description: "Settings enforced by the organization are shown to couriers as read-only and cannot be turned off by them.",
+                modes: {
+                    SUPPLIER: "Courier decides",
+                    ENFORCED_ON: "Enforced: on",
+                    ENFORCED_OFF: "Enforced: off",
+                },
             },
             messages: {
-                saved: "Courier editing configuration has been saved in the GUI",
+                loading: "Loading courier configuration...",
+                saved: "Courier configuration has been saved.",
+                reset: "Default values have been restored.",
+                loadError: "Failed to load courier configuration",
+                saveError: "Failed to save courier configuration",
+                conflict: "The configuration was changed by another user in the meantime. Reload the data to continue.",
+                validationError: "Correct the highlighted fields.",
+                unsavedChanges: "Unsaved changes",
+                historyLoadError: "Failed to load change history",
+                policySaved: "Courier configuration policy has been saved.",
+                policyLoadError: "Failed to load courier configuration policy",
+                policySaveError: "Failed to save courier configuration policy",
             },
         },
         geocoding: {
@@ -2536,6 +2752,27 @@ export const en: typeof pl = {
             deviceRequired: "Select a device",
             pairKeyRequired: "Enter the pair key",
             emptyList: "The shipment list is empty",
+        },
+    },
+    setPassword: {
+        title: "Set your password",
+        subtitle: "Activate your courier account by setting your own password.",
+        loading: "Checking the invitation...",
+        username: "Username",
+        password: "New password",
+        passwordConfirmation: "Repeat password",
+        passwordHint: "At least {min} characters.",
+        submit: "Set password",
+        saving: "Saving...",
+        success: "Your password has been set. You can now sign in to the system and the mobile app.",
+        goToLogin: "Go to sign in",
+        errors: {
+            notFound: "The invitation link is invalid.",
+            expired: "The invitation link has expired. Ask your administrator for a new invitation.",
+            alreadyAccepted: "This invitation has already been used. Sign in with your password.",
+            weakPassword: "The password is too short.",
+            mismatch: "The passwords do not match.",
+            generic: "Could not set the password. Please try again.",
         },
     },
     shipmentEdit: {

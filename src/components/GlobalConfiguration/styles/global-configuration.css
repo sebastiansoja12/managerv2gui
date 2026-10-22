@@ -1772,3 +1772,60 @@
         display: none;
     }
 }
+
+.courier-policy-panel {
+    display: grid;
+    gap: 16px;
+}
+
+.courier-policy-header {
+    align-items: flex-start;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: space-between;
+}
+
+.courier-policy-header h3 {
+    font-size: 1rem;
+    margin: 0;
+}
+
+.courier-policy-header p {
+    color: var(--muted-foreground);
+    font-size: 0.85rem;
+    margin: 4px 0 0;
+    max-width: 720px;
+}
+
+.courier-policy-group {
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    display: grid;
+    gap: 8px;
+    margin: 0;
+    padding: 12px;
+}
+
+.courier-policy-group legend {
+    font-size: 0.85rem;
+    font-weight: 700;
+    padding: 0 4px;
+}
+
+.courier-policy-row {
+    align-items: center;
+    display: grid;
+    gap: 8px 16px;
+    grid-template-columns: minmax(0, 1fr) minmax(200px, 260px);
+}
+
+.courier-policy-row > span {
+    font-size: 0.85rem;
+}
+
+@media (max-width: 640px) {
+    .courier-policy-row {
+        grid-template-columns: 1fr;
+    }
+}
