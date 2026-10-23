@@ -1,6 +1,7 @@
 import AuthService from "../hooks/AuthService";
 import {setAuthenticated, setUnauthenticated} from "./AuthState";
-import {clearDevicePairKeys} from "../components/Devices/devicePairKeyStore";
+import DeviceService from "../hooks/DeviceService";
+import {readBrowserDevice, removeLegacyPairKeys} from "../components/Devices/browserDeviceStore";
 
 let initializationPromise: Promise<void> | null = null;
 
@@ -38,11 +39,19 @@ export const authenticateCurrentUser = async () => {
     return loadCurrentUser();
 };
 
+const endBrowserDeviceSession = async () => {
+    const browserDevice = readBrowserDevice();
+    if (browserDevice) {
+        await DeviceService.endOperatorSession(browserDevice.pairKey).catch(() => undefined);
+    }
+};
+
 export const logoutAuthSession = async () => {
     try {
+        await endBrowserDeviceSession();
         await AuthService.logout();
     } finally {
-        clearDevicePairKeys();
+        removeLegacyPairKeys();
         setUnauthenticated();
         await refreshCsrfToken();
     }

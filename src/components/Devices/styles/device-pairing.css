@@ -232,3 +232,20 @@
         grid-template-columns: minmax(0, 1fr);
     }
 }
+
+.device-activation-panel {
+    margin-top: 16px;
+}
+
+.device-activation-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.device-activation-dialog {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}

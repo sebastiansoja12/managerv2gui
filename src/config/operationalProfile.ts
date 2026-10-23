@@ -62,6 +62,7 @@ export const isPathAllowedForProfile = (path: string, profile: OperationalProfil
         "/shipment-details",
         "/shipments/list",
         "/courier-deliveries",
+        "/processes",
         "/my-settings",
         "/vehicles",
         "/device-pairing",
