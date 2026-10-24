@@ -190,6 +190,8 @@ function CarrierDetailsView({onOpenTab}: CarrierDetailsViewProps) {
                             <thead>
                                 <tr>
                                     <th>{translations.vehicles.registrationNumber}</th>
+                                    <th>{translations.vehicles.brand}</th>
+                                    <th>{translations.vehicles.model}</th>
                                     <th>{translations.vehicles.vehicleType}</th>
                                     <th>{translations.vehicles.trailerRegistrationNumber}</th>
                                     <th>{translations.vehicles.maxLoadKg}</th>
@@ -201,6 +203,10 @@ function CarrierDetailsView({onOpenTab}: CarrierDetailsViewProps) {
                                     <tr key={vehicle.vehicleId}>
                                         <td><EditableCell label={translations.vehicles.registrationNumber} value={vehicle.registrationNumber}
                                                           onEdit={() => editVehicleField(vehicle, "registration-number", translations.vehicles.registrationNumber, vehicle.registrationNumber, undefined, true)} /></td>
+                                        <td><EditableCell label={translations.vehicles.brand} value={vehicle.brand}
+                                                          onEdit={() => editVehicleField(vehicle, "brand", translations.vehicles.brand, vehicle.brand)} /></td>
+                                        <td><EditableCell label={translations.vehicles.model} value={vehicle.model}
+                                                          onEdit={() => editVehicleField(vehicle, "model", translations.vehicles.model, vehicle.model)} /></td>
                                         <td><EditableCell label={translations.vehicles.vehicleType} value={translations.vehicleType[vehicle.vehicleType]}
                                                           onEdit={() => editVehicleField(vehicle, "vehicle-type", translations.vehicles.vehicleType, vehicle.vehicleType, vehicleTypeOptions, true)} /></td>
                                         <td><EditableCell label={translations.vehicles.trailerRegistrationNumber} value={vehicle.trailerRegistrationNumber}
@@ -220,7 +226,7 @@ function CarrierDetailsView({onOpenTab}: CarrierDetailsViewProps) {
                                         </td>
                                     </tr>
                                 )) : (
-                                    <tr><td className="pallet-empty" colSpan={5}>{translations.vehicles.empty}</td></tr>
+                                    <tr><td className="pallet-empty" colSpan={7}>{translations.vehicles.empty}</td></tr>
                                 )}
                             </tbody>
                         </table>
