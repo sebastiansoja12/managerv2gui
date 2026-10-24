@@ -1,5 +1,6 @@
 import React from "react";
 import Department from "../../../class/depots/Department";
+import {CarrierDto} from "../../Carriers/model/Carrier";
 import {CourierDto} from "../../Couriers/dto/CourierDto";
 import DeliveryService from "../../../hooks/DeliveryService";
 import pl from "../../../i18n/translate";
@@ -20,20 +21,21 @@ type DeliveryDialogHostProps = {
     delivery: Delivery;
     departments: Department[];
     couriers: CourierDto[];
+    carriers: CarrierDto[];
     pickupPoints: Record<string, PickupPointDetails>;
     busy: boolean;
     onClose: () => void;
     onRun: (operation: () => Promise<ApiResult<Delivery | void>>) => void;
 };
 
-function DeliveryDialogHost({dialog, delivery, departments, couriers, pickupPoints, busy, onClose, onRun}: DeliveryDialogHostProps) {
+function DeliveryDialogHost({dialog, delivery, departments, couriers, carriers, pickupPoints, busy, onClose, onRun}: DeliveryDialogHostProps) {
     if (!dialog) {
         return null;
     }
     const id = delivery.id;
     switch (dialog.kind) {
         case "carrier":
-            return <DeliveryCarrierDialog title={pl.deliveries.details.carrierTitle} couriers={couriers}
+            return <DeliveryCarrierDialog title={pl.deliveries.details.carrierTitle} couriers={couriers} carriers={carriers}
                                           supplierId={delivery.supplierId} vehicleId={delivery.vehicleId} busy={busy}
                                           onClose={onClose}
                                           onSubmit={(request) => onRun(() => DeliveryService.assignSupplier(id, request))}
@@ -82,7 +84,7 @@ function DeliveryDialogHost({dialog, delivery, departments, couriers, pickupPoin
         case "stepCarrier": {
             const step = dialog.step;
             return <DeliveryCarrierDialog title={`${pl.deliveries.details.stepCarrier} · ${pl.deliveries.stepNumberLabel} ${step.stepNumber}`}
-                                          couriers={couriers} supplierId={step.supplierId}
+                                          couriers={couriers} carriers={carriers} supplierId={step.supplierId}
                                           vehicleId={step.vehicleId} busy={busy} onClose={onClose}
                                           onSubmit={(request) => onRun(() =>
                                               DeliveryService.reassignStepCarrier(id, step.stepNumber, request))}/>;

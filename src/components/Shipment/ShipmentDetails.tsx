@@ -79,6 +79,7 @@ import "./styles/shipments.css";
 import ShipmentReturnSummary from "./ShipmentReturnSummary";
 import {ReturnPackageDto} from "../Returns/model/ReturnPackage";
 import {Delivery} from "../Deliveries/model/Delivery";
+import {useDeliveryPeople} from "../Deliveries/details/useDeliveryPeople";
 import {ShipmentDocument, ShipmentNote} from "./dto/ShipmentContentDto";
 import {
     deliveryLifecycleLabel,
@@ -256,6 +257,7 @@ const ShipmentDetails: React.FC = () => {
     const {shipmentId, trackingNumber} = useParams();
     const [shipment, setShipment] = useState<ShipmentDto | null>(null);
     const [delivery, setDelivery] = useState<Delivery | null>(null);
+    const {userName, courierCode} = useDeliveryPeople();
     const [loadingDelivery, setLoadingDelivery] = useState<boolean>(false);
     const [deliveryError, setDeliveryError] = useState<string | null>(null);
     const [deliveryReloadKey, setDeliveryReloadKey] = useState<number>(0);
@@ -1669,9 +1671,9 @@ const ShipmentDetails: React.FC = () => {
                                         <time>{formatDeliveryDateTime(step.attemptedAt)}</time>
                                     </header>
                                     <div className="shipment-delivery-history-facts">
-                                        <div><span>{pl.deliveries.userLabel}</span><strong>{step.userId || pl.common.dash}</strong></div>
+                                        <div><span>{pl.deliveries.userLabel}</span><strong>{userName(step.userId)}</strong></div>
                                         <div><span>{pl.deliveries.departmentLabel}</span><strong>{departmentCodeLabel(departments, step.departmentId)}</strong></div>
-                                        <div><span>{pl.deliveries.courierLabel}</span><strong>{step.supplierId || pl.common.dash}</strong></div>
+                                        <div><span>{pl.deliveries.courierLabel}</span><strong>{courierCode(step.supplierId)}</strong></div>
                                         <div><span>{pl.deliveries.vehicleLabel}</span><strong>{step.vehicleId || pl.common.dash}</strong></div>
                                     </div>
                                     {step.comment ? (

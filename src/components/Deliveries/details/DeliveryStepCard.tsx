@@ -7,6 +7,7 @@ import pl from "../../../i18n/translate";
 import {departmentCodeLabel, deliveryOutcomeLabel, deliveryStatusLabel, formatDeliveryDateTime} from "../deliveryLabels";
 import {DeliveryStep} from "../model/Delivery";
 import {courierLabel, DeliveryStepAction} from "./deliveryDetails";
+import {useDeliveryPeople} from "./useDeliveryPeople";
 
 type DeliveryStepCardProps = {
     step: DeliveryStep;
@@ -19,6 +20,7 @@ type DeliveryStepCardProps = {
 
 function DeliveryStepCard({step, departments, couriers, active, busy, onAction}: DeliveryStepCardProps) {
     const [anchor, setAnchor] = useState<HTMLElement | null>(null);
+    const {userName} = useDeliveryPeople();
 
     const select = (action: DeliveryStepAction) => {
         setAnchor(null);
@@ -48,7 +50,7 @@ function DeliveryStepCard({step, departments, couriers, active, busy, onAction}:
                 </div>
                 <p>{deliveryOutcomeLabel(step.outcome)}</p>
                 <dl className="deliveries-attempt-details">
-                    <div><dt>{pl.deliveries.userLabel}</dt><dd>{step.userId || pl.common.dash}</dd></div>
+                    <div><dt>{pl.deliveries.userLabel}</dt><dd>{userName(step.userId)}</dd></div>
                     <div><dt>{pl.deliveries.departmentLabel}</dt><dd>{departmentCodeLabel(departments, step.departmentId)}</dd></div>
                     <div><dt>{pl.deliveries.courierLabel}</dt><dd>{courierLabel(couriers, step.supplierId)}</dd></div>
                     <div><dt>{pl.deliveries.attemptDateLabel}</dt><dd>{formatDeliveryDateTime(step.attemptedAt)}</dd></div>

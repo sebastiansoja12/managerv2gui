@@ -2,6 +2,7 @@ import React from "react";
 import {fireEvent, render, screen, waitFor, within} from "@testing-library/react";
 import {MemoryRouter, Route, Routes} from "react-router-dom";
 import DeliveryService from "../../hooks/DeliveryService";
+import CarrierService from "../../hooks/CarrierService";
 import CourierService from "../../hooks/CourierService";
 import DepartmentService from "../../hooks/DepartmentService";
 import PickupPointService from "../../hooks/PickupPointService";
@@ -53,6 +54,11 @@ jest.mock("../../hooks/CourierService", () => ({
     default: {getAll: jest.fn()},
 }));
 
+jest.mock("../../hooks/CarrierService", () => ({
+    __esModule: true,
+    default: {findAll: jest.fn()},
+}));
+
 jest.mock("../../hooks/DepartmentService", () => ({
     __esModule: true,
     default: {getAll: jest.fn()},
@@ -74,6 +80,12 @@ const departments = [
 const couriers = [
     {supplierId: 30, supplierCode: {value: "SUP30"}, firstName: "Jan", lastName: "Nowak", telephoneNumber: "",
         vehicleId: {value: 77}},
+];
+
+const carriers = [
+    {carrierId: 3, name: "Trans-Pol", active: true, drivers: [], vehicles: [
+        {vehicleId: 77, registrationNumber: "SK 12345", brand: "Volvo", model: "FH16", vehicleType: "TRUCK", active: true},
+    ]},
 ];
 
 const delivery: Delivery = {
@@ -159,6 +171,7 @@ describe("Deliveries", () => {
         jest.clearAllMocks();
         (DepartmentService.getAll as jest.Mock).mockResolvedValue({data: departments});
         (CourierService.getAll as jest.Mock).mockResolvedValue({data: couriers});
+        (CarrierService.findAll as jest.Mock).mockResolvedValue({data: carriers});
         (ShipmentService.get as jest.Mock).mockRejectedValue({status: 404});
         (PickupPointService.getById as jest.Mock).mockRejectedValue({status: 404});
         (PickupPointService.search as jest.Mock).mockResolvedValue({data: {items: []}});
@@ -259,11 +272,12 @@ describe("Deliveries", () => {
         fireEvent.click(screen.getByRole("button", {name: `${pl.deliveries.edit} · ${pl.deliveries.details.carrierTitle}`}));
         await waitFor(() => expect(CourierService.getAll).toHaveBeenCalled());
         chooseOption(pl.deliveries.details.courierSelect, "Jan Nowak (SUP30)");
-        expect(screen.getByLabelText(pl.deliveries.details.vehicleInput)).toHaveValue("77");
+        expect(screen.getByLabelText(pl.deliveries.details.courierVehicle)).toHaveValue("SK 12345 · Volvo FH16 — Trans-Pol");
+        expect(screen.getByLabelText(pl.deliveries.details.courierVehicle)).toBeDisabled();
         fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", {name: pl.deliveries.save}));
 
         await waitFor(() => expect(mockedService.assignSupplier)
-            .toHaveBeenCalledWith(delivery.id, {supplierId: 30, vehicleId: 77}));
+            .toHaveBeenCalledWith(delivery.id, {supplierId: "30", vehicleId: "77"}));
         expect(await within(screen.getByRole("article", {name: pl.deliveries.details.carrierTitle}))
             .findByText("Jan Nowak (SUP30)")).toBeInTheDocument();
     });
