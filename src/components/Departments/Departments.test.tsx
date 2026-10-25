@@ -21,12 +21,17 @@ jest.mock("./DepartmentRelationsMap", () => ({
     default: () => null,
     getDepartmentsMissingSortingRelation: () => [],
 }));
+jest.mock("./DeliveryAreasMap", () => ({
+    __esModule: true,
+    default: () => <div>Mapa granic doręczeń</div>,
+}));
 
 const departments = departmentService as jest.Mocked<typeof departmentService>;
 const usersService = UserManagementService as jest.Mocked<typeof UserManagementService>;
 
 describe("Departments", () => {
     beforeEach(() => {
+        window.localStorage.clear();
         departments.getAll.mockResolvedValue({data: [{
             departmentId: "9007199254740993",
             departmentCode: {value: "KT1"},
@@ -48,5 +53,20 @@ describe("Departments", () => {
             path: "/departments/9007199254740993",
         });
         expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    });
+
+    it("keeps automatic boundary settings off the department list", async () => {
+        render(<Departments />);
+        await screen.findAllByText("KT1", {selector: "td strong"});
+        expect(screen.getByText("Mapa granic doręczeń")).toBeInTheDocument();
+        expect(screen.queryByRole("button", {name: "Wyznacz automatycznie dla Polski"})).not.toBeInTheDocument();
+    });
+
+    it("hides archiving when department settings disallow it", async () => {
+        window.localStorage.setItem("manager.department-configuration.v1.unknown",
+            JSON.stringify({preventDepartmentArchiving: true}));
+        render(<Departments />);
+        await screen.findAllByText("KT1", {selector: "td strong"});
+        expect(screen.queryByRole("button", {name: "Archiwizuj"})).not.toBeInTheDocument();
     });
 });

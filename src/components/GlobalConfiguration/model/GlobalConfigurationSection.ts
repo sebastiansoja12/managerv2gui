@@ -1,1 +1,1 @@
-export type GlobalConfigurationSectionKey = "shipments" | "couriers" | "geocoding" | "integrations";
+export type GlobalConfigurationSectionKey = "shipments" | "couriers" | "departments" | "geocoding" | "integrations";

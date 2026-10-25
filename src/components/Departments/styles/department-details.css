@@ -10,6 +10,10 @@
     width: 100%;
 }
 
+.department-details-page.delivery-area-tab-active {
+    padding: 16px 18px 22px;
+}
+
 .department-details-loading {
     align-items: center;
     color: var(--muted-foreground);

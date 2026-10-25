@@ -32,6 +32,12 @@ jest.mock("../DepartmentMap/DepartmentMapWorkspace", () => ({
         <div>{`map-workspace ${departmentId} ${departmentCode}`}</div>
     ),
 }));
+jest.mock("./DeliveryAreaEditor", () => ({
+    __esModule: true,
+    default: ({departmentId, departmentCode}: {departmentId: string; departmentCode: string}) => (
+        <div>{`delivery-area-editor ${departmentId} ${departmentCode}`}</div>
+    ),
+}));
 
 const departments = departmentService as jest.Mocked<typeof departmentService>;
 const usersService = UserManagementService as jest.Mocked<typeof UserManagementService>;
@@ -62,6 +68,7 @@ const renderView = () => render(
 describe("DepartmentDetailsView", () => {
     beforeEach(() => {
         jest.clearAllMocks();
+        window.localStorage.clear();
         departments.getById.mockResolvedValue({data: department} as never);
         usersService.getAll.mockResolvedValue({data: [
             {userId: {value: 1}, firstName: "Anna", lastName: "Nowak", username: "anowak", departmentCode: "KT1", role: "USER"},
@@ -107,5 +114,25 @@ describe("DepartmentDetailsView", () => {
         fireEvent.click(screen.getByRole("tab", {name: new RegExp(pl.departments.view.mapTab)}));
 
         expect(screen.getByText("map-workspace 100 KT1")).toBeInTheDocument();
+    });
+
+    it("opens a separate delivery area tab for the selected department", async () => {
+        renderView();
+        await screen.findByRole("heading", {name: "KT1"});
+
+        fireEvent.click(screen.getByRole("tab", {name: pl.departments.view.deliveryAreaTab}));
+
+        expect(screen.getByText("delivery-area-editor 100 KT1")).toBeInTheDocument();
+        expect(screen.queryByText("map-workspace 100 KT1")).not.toBeInTheDocument();
+    });
+
+    it("omits archived status when configuration blocks archiving", async () => {
+        window.localStorage.setItem("manager.department-configuration.v1.unknown",
+            JSON.stringify({preventDepartmentArchiving: true}));
+        renderView();
+        await screen.findByRole("heading", {name: "KT1"});
+        fireEvent.click(screen.getByRole("button", {name: pl.common.edit}));
+        expect(screen.queryByRole("option", {name: pl.departments.status.ARCHIVED})).not.toBeInTheDocument();
+        expect(departments.changeStatus).not.toHaveBeenCalled();
     });
 });

@@ -1,0 +1,285 @@
+.delivery-area-editor {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-height: 0;
+    width: 100%;
+}
+
+.delivery-area-editor.expanded {
+    background: var(--background, #ffffff);
+    box-sizing: border-box;
+    height: 100vh;
+    inset: 0;
+    overflow: auto;
+    padding: 16px 20px;
+    position: fixed;
+    width: 100vw;
+    z-index: 1200;
+}
+
+.delivery-area-header {
+    align-items: end;
+    display: flex;
+    gap: 16px;
+    justify-content: space-between;
+}
+
+.delivery-area-header p {
+    color: var(--muted-foreground);
+    margin: 6px 0 0;
+}
+
+.delivery-area-actions,
+.delivery-area-tools,
+.delivery-area-draw-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.delivery-area-workspace {
+    display: grid;
+    flex: 1;
+    gap: 14px;
+    grid-template-columns: minmax(0, 1fr) 260px;
+    height: clamp(650px, calc(100vh - 220px), 1000px);
+    min-height: 650px;
+}
+
+.delivery-area-editor.expanded .delivery-area-workspace {
+    height: auto;
+    min-height: 0;
+}
+
+.delivery-area-map-panel,
+.delivery-area-sidebar {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.delivery-area-map-panel {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.delivery-area-map-toolbar {
+    align-items: center;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: 0 6px 20px rgb(0 0 0 / 12%);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 14px;
+    justify-content: space-between;
+    max-width: calc(100% - 90px);
+    padding: 8px 10px;
+    position: absolute;
+    right: 12px;
+    top: 12px;
+    z-index: 1100;
+}
+
+.delivery-area-map-hint {
+    color: var(--muted-foreground);
+    font-size: 0.85rem;
+    font-weight: 700;
+    line-height: 1.35;
+    max-width: 410px;
+}
+
+.delivery-area-map {
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+}
+
+.delivery-area-map.drawing,
+.delivery-area-map.drawing .leaflet-interactive {
+    cursor: crosshair !important;
+}
+
+.delivery-area-map.drawing .delivery-area-start-point {
+    cursor: pointer !important;
+}
+
+.delivery-area-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 14px;
+}
+
+.delivery-area-sidebar-heading {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+}
+
+.delivery-area-sidebar-heading span {
+    background: var(--secondary);
+    border-radius: 999px;
+    font-size: 0.8rem;
+    padding: 3px 8px;
+}
+
+.delivery-area-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 350px;
+    overflow: auto;
+}
+
+.delivery-area-list button {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--foreground);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 9px 10px;
+    text-align: left;
+}
+
+.delivery-area-list button.selected {
+    background: var(--secondary);
+    border-color: var(--primary);
+}
+
+.delivery-area-list button:disabled {
+    cursor: default;
+    opacity: 0.65;
+}
+
+.delivery-area-list button:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+}
+
+.delivery-area-list button span,
+.delivery-area-empty,
+.delivery-area-tip {
+    color: var(--muted-foreground);
+    font-size: 0.82rem;
+    margin: 0;
+}
+
+.delivery-area-tools {
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+}
+
+.delivery-area-tools button {
+    flex: 1 1 100%;
+}
+
+.delivery-area-department-list {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-height: 0;
+    overflow: auto;
+}
+
+.delivery-area-department-list label,
+.delivery-area-department-list.preview > div {
+    align-items: center;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    display: flex;
+    gap: 9px;
+    padding: 8px;
+}
+
+.delivery-area-department-list label {
+    cursor: pointer;
+}
+
+.delivery-area-department-list input {
+    height: 17px;
+    width: 17px;
+}
+
+.delivery-area-department-list label span {
+    display: flex;
+    flex-direction: column;
+}
+
+.delivery-area-department-list small {
+    color: var(--muted-foreground);
+}
+
+.delivery-area-color {
+    border-radius: 50%;
+    display: inline-block;
+    height: 12px;
+    width: 12px;
+}
+
+.delivery-area-vertex {
+    background: #ffffff;
+    border: 3px solid #d97706;
+    border-radius: 50%;
+    box-sizing: border-box;
+    cursor: grab;
+}
+
+.delivery-area-vertex:active {
+    cursor: grabbing;
+}
+
+.delivery-area-vertex.selected {
+    background: #d97706;
+    border-color: #ffffff;
+    box-shadow: 0 0 0 2px #d97706;
+}
+
+@media (max-width: 900px) {
+    .delivery-area-header {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .delivery-area-workspace {
+        grid-template-columns: minmax(0, 1fr);
+        height: auto;
+        min-height: 0;
+    }
+
+    .delivery-area-map-panel {
+        min-height: 620px;
+    }
+
+    .delivery-area-sidebar {
+        order: -1;
+    }
+
+    .delivery-area-editor.expanded .delivery-area-workspace {
+        overflow: auto;
+    }
+}
+
+@media (max-width: 600px) {
+    .delivery-area-editor.expanded {
+        padding: 12px;
+    }
+
+    .delivery-area-map-toolbar {
+        left: 10px;
+        max-width: none;
+        right: 10px;
+        top: 62px;
+    }
+
+    .delivery-area-draw-actions {
+        width: 100%;
+    }
+}
