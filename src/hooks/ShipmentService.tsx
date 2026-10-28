@@ -1,7 +1,6 @@
 import BackendClient from "../api/BackendClient";
 import http from "../http-common";
 import {
-    CountryRequestApi,
     PersonApi,
     PersonType,
     ShipmentCreateRequestApi,
@@ -15,8 +14,6 @@ import {
     ShipmentStatusRequestApi,
     ShipmentTypeDto,
     ShipmentUpdateRequestApi,
-    SignatureChangeRequestApi,
-    SignatureMethod,
 } from "../components/Shipment/dto/ShipmentDto";
 
 const client = new BackendClient(http);
@@ -90,12 +87,6 @@ const updateStatus = (data: ShipmentStatusRequestApi) => {
     return client.put<ShipmentStatusRequestApi, ShipmentResponseInformation>("/shipments/status", data);
 };
 
-const changeSignature = (data: SignatureChangeRequestApi, signatureMethod: SignatureMethod) => {
-    return client.put<SignatureChangeRequestApi, ShipmentResponseInformation>("/shipments/signature", data, {
-        signatureMethod,
-    });
-};
-
 const exists = (shipmentId: string) => {
     return client.get<boolean>(`/shipments/exists/${shipmentId}`);
 };
@@ -113,12 +104,6 @@ const updateSender = (shipmentId: string, data: PersonApi) => {
 
 const updateRecipient = (shipmentId: string, data: PersonApi) => {
     return updatePerson(shipmentId, "RECIPIENT", data);
-};
-
-const updateCountries = (shipmentId: string, data: CountryRequestApi) => {
-    return client.put<CountryRequestApi, ShipmentResponseInformation>("/shipments/countries", data, {
-        shipmentId,
-    });
 };
 
 const changeShipmentType = (shipmentId: string, shipmentType: ShipmentTypeDto) => {
@@ -140,12 +125,10 @@ const ShipmentService = {
     returnShipment,
     deliverShipment,
     updateStatus,
-    changeSignature,
     exists,
     updatePerson,
     updateSender,
     updateRecipient,
-    updateCountries,
     changeShipmentType,
 };
 

@@ -20,6 +20,7 @@ jest.mock("../../hooks/DeliveryService", () => ({
         get: jest.fn(),
         getRelated: jest.fn(),
         getHistory: jest.fn(),
+        getSignature: jest.fn(),
         assignSupplier: jest.fn(),
         unassignSupplier: jest.fn(),
         changeRoute: jest.fn(),
@@ -197,7 +198,8 @@ describe("Deliveries", () => {
         expect(await screen.findByText(delivery.shipmentId as string)).toBeInTheDocument();
         expect(mockedService.query).toHaveBeenCalledWith(0, 25,
             {hideCanceled: true, hideCompleted: false, sort: "CREATED", direction: "desc"});
-        fireEvent.click(screen.getByRole("button", {name: `${pl.deliveries.edit} ${delivery.id}`}));
+        fireEvent.click(screen.getByText(delivery.id.slice(0, 8)));
+        fireEvent.click(screen.getByRole("button", {name: pl.deliveries.edit}));
         expect(await screen.findByText("Shipment created")).toBeInTheDocument();
         expect(screen.getByText(pl.deliveries.userLabel)).toBeInTheDocument();
         expect(screen.getByText("42")).toBeInTheDocument();
@@ -222,18 +224,20 @@ describe("Deliveries", () => {
         renderDeliveries();
 
         await screen.findByText(delivery.shipmentId as string);
-        fireEvent.click(screen.getByRole("button", {name: `${pl.deliveries.cancel} ${delivery.id}`}));
+        fireEvent.click(screen.getByText(delivery.id.slice(0, 8)));
+        fireEvent.click(screen.getByRole("button", {name: pl.deliveries.cancel}));
         expect(screen.getByText(pl.deliveries.cancelConfirmation.replace("{id}", delivery.id))).toBeInTheDocument();
         fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", {name: pl.deliveries.cancel}));
         await waitFor(() => expect(mockedService.cancel).toHaveBeenCalledWith(delivery.id));
         await waitFor(() => expect(mockedService.query).toHaveBeenCalledTimes(2));
-        await waitFor(() => expect(screen.getByRole("button", {name: `${pl.deliveries.cancel} ${delivery.id}`}))
+        await waitFor(() => expect(screen.getByRole("button", {name: pl.deliveries.cancel}))
             .toBeDisabled());
     });
 
     const openDetails = async () => {
         await screen.findByText(delivery.shipmentId as string);
-        fireEvent.click(screen.getByRole("button", {name: `${pl.deliveries.edit} ${delivery.id}`}));
+        fireEvent.click(screen.getByText(delivery.id.slice(0, 8)));
+        fireEvent.click(screen.getByRole("button", {name: pl.deliveries.edit}));
         await screen.findByRole("region", {name: pl.deliveries.details.operationsTitle});
     };
 
@@ -323,7 +327,8 @@ describe("Deliveries", () => {
     it("shows shipment, related deliveries, attempts and change history", async () => {
         const failedStep = {...delivery.steps[0], stepNumber: 2, outcome: "FAILED", deliveryStatus: "REJECTED",
             comment: "Nobody home", supplierId: null, vehicleId: null, userId: null};
-        const withAttempt = {...delivery, plannedAt: "2020-01-01T10:00:00", steps: [...delivery.steps, failedStep]};
+        const signedStep = {...delivery.steps[0], signatureId: "55"};
+        const withAttempt = {...delivery, plannedAt: "2020-01-01T10:00:00", steps: [signedStep, failedStep]};
         const source = {...delivery, id: "source-delivery", shipmentId: "100", targetId: "100",
             lifecycleStatus: "COMPLETED"};
         mockedService.query.mockResolvedValue(listPage([listItem(withAttempt)]));
@@ -337,8 +342,10 @@ describe("Deliveries", () => {
             trackingNumber: {value: "TRK-555"}, shipmentStatus: "SENT",
             recipient: {firstName: "Anna", lastName: "Kowalska", street: "Długa 1", postalCode: "00-001", city: "Warszawa"},
             weight: {value: 2.5, unit: "KILOGRAM"},
-            signature: {signerName: "Anna K.", signedAt: "2026-09-30T12:00:00", signatureMethod: "DIGITAL", signature: "x"},
         }});
+        mockedService.getSignature.mockResolvedValue({data: {signatureId: "55", signerName: "Anna K.",
+            signedAt: "2026-09-30T12:00:00", signatureMethod: "DIGITAL", documentReference: null, signature: "x"},
+            status: 200});
         renderDeliveries();
 
         await openDetails();
@@ -394,10 +401,11 @@ describe("Deliveries", () => {
 
         await screen.findByText(delivery.shipmentId as string);
         await waitFor(() => expect(DepartmentService.getAll).toHaveBeenCalled());
-        await screen.findByText("KT1");
-        fireEvent.click(screen.getByRole("button", {name: `${pl.deliveries.exportExcel} ${delivery.id}`}));
+        await screen.findByText("KT1", {selector: ".dlv-department"});
+        fireEvent.click(screen.getByText(delivery.id.slice(0, 8)));
+        fireEvent.click(screen.getByRole("button", {name: pl.deliveries.exportExcel}));
         await waitFor(() => expect(exportDeliveryExcel).toHaveBeenCalledWith(delivery, departments));
-        fireEvent.click(screen.getByRole("button", {name: `${pl.deliveries.exportPdf} ${delivery.id}`}));
+        fireEvent.click(screen.getByRole("button", {name: pl.deliveries.exportPdf}));
         await waitFor(() => expect(exportDeliveryPdf).toHaveBeenCalledWith(delivery, departments));
         expect(mockedService.get).toHaveBeenCalledTimes(2);
     });

@@ -4,7 +4,9 @@ import {ChatBubbleOutline, DirectionsCar, EditOutlined, MoreVert, TaskAlt} from 
 import Department from "../../../class/depots/Department";
 import {CourierDto} from "../../Couriers/dto/CourierDto";
 import pl from "../../../i18n/translate";
-import {departmentCodeLabel, deliveryOutcomeLabel, deliveryStatusLabel, formatDeliveryDateTime} from "../deliveryLabels";
+import {
+    departmentCodeLabel, deliveryOutcomeLabel, deliveryStatusLabel, deliveryStepCommentText, formatDeliveryDateTime,
+} from "../deliveryLabels";
 import {DeliveryStep} from "../model/Delivery";
 import {courierLabel, DeliveryStepAction} from "./deliveryDetails";
 import {useDeliveryPeople} from "./useDeliveryPeople";
@@ -21,6 +23,7 @@ type DeliveryStepCardProps = {
 function DeliveryStepCard({step, departments, couriers, active, busy, onAction}: DeliveryStepCardProps) {
     const [anchor, setAnchor] = useState<HTMLElement | null>(null);
     const {userName} = useDeliveryPeople();
+    const commentText = deliveryStepCommentText(step);
 
     const select = (action: DeliveryStepAction) => {
         setAnchor(null);
@@ -57,7 +60,7 @@ function DeliveryStepCard({step, departments, couriers, active, busy, onAction}:
                 </dl>
                 {step.vehicleId && <p>{pl.deliveries.vehicleLabel}: {step.vehicleId}</p>}
                 {step.signatureId && <p>{pl.deliveries.details.signatureIdLabel}: {step.signatureId}</p>}
-                {step.comment && <p>{step.comment}</p>}
+                {commentText && <p>{commentText}</p>}
                 {step.failureReason && step.failureReason !== step.comment && <p>{step.failureReason}</p>}
             </div>
         </li>

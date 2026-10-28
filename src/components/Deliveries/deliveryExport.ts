@@ -7,6 +7,7 @@ import {
     deliveryMethodLabel,
     deliveryOutcomeLabel,
     deliveryStatusLabel,
+    deliveryStepCommentText,
     deliveryTargetLabel,
     deliveryTypeLabel,
     departmentCodeLabel,
@@ -42,7 +43,7 @@ const attemptRows = (delivery: Delivery, departments: Department[]): string[][] 
         deliveryStatusLabel(step.deliveryStatus),
         deliveryOutcomeLabel(step.outcome),
         step.vehicleId || pl.common.dash,
-        step.comment || pl.common.dash,
+        deliveryStepCommentText(step) || pl.common.dash,
         step.failureReason || pl.common.dash,
     ]);
 

@@ -1,3 +1,14 @@
+export type SignatureMethod = "DIGITAL" | "HANDWRITTEN" | "BIOMETRIC" | "NONE";
+
+export type DeliverySignature = {
+    signatureId: string;
+    signerName: string;
+    signedAt: string;
+    signatureMethod: SignatureMethod;
+    documentReference: string | null;
+    signature: string;
+};
+
 export type DeliveryStep = {
     stepNumber: number;
     attemptedAt: string;
@@ -9,6 +20,7 @@ export type DeliveryStep = {
     vehicleId: string | null;
     signatureId: string | null;
     comment: string | null;
+    commentCode?: string | null;
     failureReason: string | null;
 };
 

@@ -195,7 +195,7 @@ function DeliveryEdit() {
                                                             onEdit={() => setDialog({kind: "conditions"})}/>
                                 </div>
                                 <div className="deliveries-cell">
-                                    <DeliveryProofTile delivery={delivery} signature={context.shipment?.signature || null}/>
+                                    <DeliveryProofTile delivery={delivery} signature={context.signature}/>
                                 </div>
                                 <div className="deliveries-cell deliveries-cell-full">
                                     <DeliveryMapTile delivery={delivery} departments={departments}

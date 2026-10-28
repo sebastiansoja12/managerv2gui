@@ -217,8 +217,6 @@ const ShipmentEdit: React.FC = () => {
                     price: shipment.price,
                     shipmentPriority: shipment.shipmentPriority,
                     shipmentStatus: status,
-                    issuerCountryCode: shipment.sender.countryCode || "PL",
-                    receiverCountryCode: shipment.recipient.countryCode || "DE",
                     shipmentConfiguration: {
                         forceUpdate: false,
                         publishInReturnManager: false,
