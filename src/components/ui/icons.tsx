@@ -12,6 +12,7 @@ import {
     FiStar, FiTable, FiTag, FiToggleLeft, FiToggleRight, FiTool, FiTrendingUp, FiTruck,
     FiUnlock, FiUpload, FiUser, FiUserPlus, FiUsers, FiX, FiXCircle, FiZap,
 } from "react-icons/fi";
+import {LuPin, LuPinOff} from "react-icons/lu";
 
 type LegacyIconProps = {
     className?: string;
@@ -114,6 +115,8 @@ export const PersonAddAlt = makeIcon(FiUserPlus);
 export const PersonPinCircle = makeIcon(FiUser);
 export const Phone = makeIcon(FiPhone);
 export const Print = makeIcon(FiPrinter);
+export const PushPin = makeIcon(LuPin);
+export const PushPinOff = makeIcon(LuPinOff);
 export const Public = makeIcon(FiCompass);
 export const QrCode2 = makeIcon(FiGrid);
 export const QrCodeScanner = makeIcon(FiAperture);

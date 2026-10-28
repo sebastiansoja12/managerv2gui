@@ -11,13 +11,9 @@ const renderNavbar = (onOpenTab = jest.fn()) => render(
             <Navbar
                 activePath="/"
                 language="pl"
-                onCloseAllTabs={jest.fn()}
-                onCloseTab={jest.fn()}
                 onLanguageChange={jest.fn()}
                 onOpenTab={onOpenTab}
                 onOperationalProfileChange={jest.fn()}
-                onSelectTab={jest.fn()}
-                openTabs={[]}
                 operationalProfile="warehouse"
             />
         </AppThemeProvider>

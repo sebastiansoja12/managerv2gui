@@ -1,0 +1,533 @@
+/* Second application row: open tabs get the full width instead of sharing it with the navigation. */
+.app-tabbar {
+    --tabbar-height: 42px;
+    --tab-height: 30px;
+    --tab-radius: 7px;
+    --tab-active-bg: var(--card);
+    align-items: center;
+    background: color-mix(in srgb, var(--background) 92%, #000 8%);
+    border-bottom: 1px solid var(--border);
+    box-shadow: inset 0 1px 0 color-mix(in srgb, var(--foreground) 4%, transparent);
+    display: flex;
+    flex: 0 0 auto;
+    font-family: var(--font-ui);
+    gap: 8px;
+    height: var(--tabbar-height);
+    padding: 0 10px 0 16px;
+    position: relative;
+    z-index: 40;
+}
+
+.app-tabbar-scroller {
+    align-items: center;
+    display: flex;
+    flex: 1 1 auto;
+    gap: 1px;
+    height: 100%;
+    min-width: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-inline: contain;
+    position: relative;
+    scrollbar-width: none;
+}
+
+.app-tabbar-scroller::-webkit-scrollbar {
+    display: none;
+}
+
+/* Fades at the edges show that more tabs are hidden on that side. */
+.app-tabbar-scroller[data-overflow-start] {
+    mask-image: linear-gradient(90deg, transparent, #000 40px);
+}
+
+.app-tabbar-scroller[data-overflow-end] {
+    mask-image: linear-gradient(90deg, #000 calc(100% - 40px), transparent);
+}
+
+.app-tabbar-scroller[data-overflow-start][data-overflow-end] {
+    mask-image: linear-gradient(90deg, transparent, #000 40px, #000 calc(100% - 40px), transparent);
+}
+
+.app-tabbar-tab {
+    align-items: center;
+    animation: appTabIn 160ms ease-out both;
+    border: 1px solid transparent;
+    border-radius: var(--tab-radius);
+    color: var(--muted-foreground);
+    display: flex;
+    flex: 0 0 auto;
+    height: var(--tab-height);
+    max-width: 240px;
+    position: relative;
+    transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease;
+}
+
+/* Thin divider between neighbouring inactive tabs; it disappears around the hovered and active tab. */
+.app-tabbar-tab + .app-tabbar-tab::before {
+    background: var(--border);
+    content: "";
+    height: 14px;
+    left: -1px;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    transition: opacity 140ms ease;
+    width: 1px;
+}
+
+.app-tabbar-tab-active::before,
+.app-tabbar-tab-active + .app-tabbar-tab::before,
+.app-tabbar-tab:hover::before,
+.app-tabbar-tab:hover + .app-tabbar-tab::before {
+    opacity: 0;
+}
+
+/* Pinned tabs form their own group, separated from the rest by a stronger divider. */
+.app-tabbar-tab-pinned + .app-tabbar-tab:not(.app-tabbar-tab-pinned) {
+    margin-left: 9px;
+}
+
+.app-tabbar-tab-pinned + .app-tabbar-tab:not(.app-tabbar-tab-pinned)::before {
+    background: var(--border-strong, var(--border));
+    height: 18px;
+    left: -6px;
+    opacity: 1;
+}
+
+.app-tabbar-tab:hover {
+    background: color-mix(in srgb, var(--surface) 80%, transparent);
+    color: var(--foreground);
+}
+
+.app-tabbar-tab-active,
+.app-tabbar-tab-active:hover {
+    background: var(--tab-active-bg);
+    border-color: color-mix(in srgb, var(--foreground) 10%, var(--border));
+    box-shadow:
+        0 1px 2px color-mix(in srgb, #000 28%, transparent),
+        inset 0 1px 0 color-mix(in srgb, var(--foreground) 6%, transparent);
+    color: var(--foreground);
+}
+
+/* Accent underline marks the current page. */
+.app-tabbar-tab-active::after {
+    background: var(--primary);
+    border-radius: 2px;
+    bottom: -1px;
+    content: "";
+    height: 2px;
+    left: 10px;
+    position: absolute;
+    right: 10px;
+}
+
+.app-tabbar-tab-select {
+    align-items: center;
+    background: transparent;
+    border: 0;
+    border-radius: inherit;
+    color: inherit;
+    cursor: pointer;
+    display: flex;
+    flex: 1 1 auto;
+    font: inherit;
+    font-size: 0.77rem;
+    font-weight: 500;
+    gap: 7px;
+    height: 100%;
+    letter-spacing: -0.005em;
+    min-width: 0;
+    padding: 0 2px 0 10px;
+    text-align: left;
+}
+
+.app-tabbar-tab-select:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--primary) 70%, transparent);
+    outline-offset: -2px;
+}
+
+.app-tabbar-tab-pinned .app-tabbar-tab-select {
+    padding-right: 10px;
+}
+
+.app-tabbar-tab-select span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.app-tabbar-tab-active .app-tabbar-tab-select {
+    font-weight: 600;
+}
+
+.app-tabbar-tab-preview .app-tabbar-tab-select span {
+    font-style: italic;
+    opacity: 0.85;
+}
+
+.app-tabbar-tab-icon {
+    flex: 0 0 auto;
+    font-size: 0.86rem;
+    opacity: 0.75;
+    transition: color 140ms ease, opacity 140ms ease;
+}
+
+.app-tabbar-tab:hover .app-tabbar-tab-icon {
+    opacity: 1;
+}
+
+.app-tabbar-tab-active .app-tabbar-tab-icon,
+.app-tabbar-tab-pinned .app-tabbar-tab-icon {
+    color: var(--primary);
+    opacity: 1;
+}
+
+.app-tabbar-tab-close,
+.app-tabbar-all-item-close {
+    align-items: center;
+    background: transparent;
+    border: 0;
+    border-radius: 5px;
+    color: var(--muted-foreground);
+    cursor: pointer;
+    display: inline-flex;
+    flex: 0 0 auto;
+    font-size: 0.95rem;
+    height: 20px;
+    justify-content: center;
+    line-height: 1;
+    padding: 0;
+    transition: background-color 120ms ease, color 120ms ease, opacity 120ms ease;
+    width: 20px;
+}
+
+.app-tabbar-tab-close {
+    margin: 0 5px 0 2px;
+    opacity: 0;
+}
+
+.app-tabbar-tab:hover .app-tabbar-tab-close,
+.app-tabbar-tab-active .app-tabbar-tab-close,
+.app-tabbar-tab:focus-within .app-tabbar-tab-close {
+    opacity: 1;
+}
+
+.app-tabbar-tab-close:hover,
+.app-tabbar-all-item-close:hover {
+    background: color-mix(in srgb, var(--danger) 16%, transparent);
+    color: var(--danger);
+}
+
+.app-tabbar-all {
+    align-items: center;
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex: 0 0 auto;
+    height: 22px;
+    padding-left: 8px;
+    position: relative;
+}
+
+.app-tabbar-all-trigger {
+    align-items: center;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--tab-radius);
+    color: var(--muted-foreground);
+    cursor: pointer;
+    display: inline-flex;
+    font: inherit;
+    font-size: 0.72rem;
+    font-weight: 600;
+    gap: 7px;
+    height: var(--tab-height);
+    padding: 0 6px 0 9px;
+    transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease;
+}
+
+.app-tabbar-all-trigger svg {
+    font-size: 0.92rem;
+}
+
+.app-tabbar-all-trigger span {
+    align-items: center;
+    background: color-mix(in srgb, var(--primary) 16%, transparent);
+    border: 1px solid color-mix(in srgb, var(--primary) 30%, transparent);
+    border-radius: 5px;
+    color: var(--primary);
+    display: inline-flex;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    height: 18px;
+    justify-content: center;
+    min-width: 20px;
+    padding: 0 4px;
+}
+
+.app-tabbar-all-trigger:hover,
+.app-tabbar-all-trigger[aria-expanded="true"] {
+    background: var(--surface);
+    border-color: var(--border);
+    color: var(--foreground);
+}
+
+.app-tabbar-all-panel,
+.app-tabbar-context-menu {
+    animation: appTabbarPopoverIn 140ms ease-out both;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow:
+        0 18px 40px color-mix(in srgb, #000 35%, transparent),
+        0 2px 6px color-mix(in srgb, #000 20%, transparent);
+    color: var(--card-foreground);
+    z-index: 120;
+}
+
+.app-tabbar-all-panel {
+    display: grid;
+    gap: 6px;
+    padding: 8px;
+    position: absolute;
+    right: 0;
+    top: calc(100% + 9px);
+    transform-origin: top right;
+    width: min(360px, calc(100vw - 24px));
+}
+
+.app-tabbar-all-search {
+    align-items: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    color: var(--muted-foreground);
+    display: flex;
+    gap: 8px;
+    padding: 0 10px;
+    transition: border-color 140ms ease, box-shadow 140ms ease;
+}
+
+.app-tabbar-all-search input {
+    background: transparent;
+    border: 0;
+    color: var(--foreground);
+    flex: 1 1 auto;
+    font: inherit;
+    font-size: 0.8rem;
+    min-height: 34px;
+    min-width: 0;
+    outline: 0;
+}
+
+.app-tabbar-all-search input::placeholder {
+    color: var(--muted-foreground);
+}
+
+.app-tabbar-all-search:focus-within {
+    border-color: color-mix(in srgb, var(--primary) 55%, var(--border));
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 14%, transparent);
+}
+
+.app-tabbar-all-list {
+    display: grid;
+    gap: 2px;
+    list-style: none;
+    margin: 0;
+    max-height: min(380px, calc(100vh - 220px));
+    overflow-y: auto;
+    padding: 0;
+}
+
+.app-tabbar-all-item {
+    align-items: center;
+    border-radius: 6px;
+    display: flex;
+    padding-right: 6px;
+    position: relative;
+    transition: background-color 120ms ease;
+}
+
+.app-tabbar-all-item:hover {
+    background: var(--surface);
+}
+
+.app-tabbar-all-item-active {
+    background: color-mix(in srgb, var(--primary) 11%, transparent);
+}
+
+.app-tabbar-all-item-active::before {
+    background: var(--primary);
+    border-radius: 2px;
+    bottom: 7px;
+    content: "";
+    left: 0;
+    position: absolute;
+    top: 7px;
+    width: 2px;
+}
+
+.app-tabbar-all-item-select {
+    align-items: center;
+    background: transparent;
+    border: 0;
+    color: inherit;
+    cursor: pointer;
+    display: flex;
+    flex: 1 1 auto;
+    font: inherit;
+    font-size: 0.8rem;
+    gap: 9px;
+    min-height: 34px;
+    min-width: 0;
+    padding: 0 8px 0 10px;
+    text-align: left;
+}
+
+.app-tabbar-all-item-select span {
+    flex: 1 1 auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.app-tabbar-all-item-preview .app-tabbar-all-item-select span {
+    font-style: italic;
+}
+
+.app-tabbar-all-item-select small {
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--muted-foreground);
+    flex: 0 0 auto;
+    font-size: 0.64rem;
+    padding: 1px 5px;
+}
+
+.app-tabbar-all-item-icon {
+    color: var(--muted-foreground);
+    flex: 0 0 auto;
+    font-size: 0.88rem;
+}
+
+.app-tabbar-all-item-active .app-tabbar-all-item-icon,
+.app-tabbar-all-item-pinned .app-tabbar-all-item-icon {
+    color: var(--primary);
+}
+
+.app-tabbar-all-empty {
+    color: var(--muted-foreground);
+    font-size: 0.78rem;
+    margin: 0;
+    padding: 14px 10px;
+    text-align: center;
+}
+
+.app-tabbar-all-footer {
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 6px;
+}
+
+.app-tabbar-all-close-all {
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    color: var(--muted-foreground);
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.75rem;
+    min-height: 28px;
+    padding: 0 10px;
+    transition: background-color 120ms ease, color 120ms ease;
+}
+
+.app-tabbar-all-close-all:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--danger) 13%, transparent);
+    color: var(--danger);
+}
+
+.app-tabbar-all-close-all:disabled {
+    cursor: default;
+    opacity: 0.45;
+}
+
+.app-tabbar-context-menu {
+    display: grid;
+    min-width: 236px;
+    padding: 5px;
+    position: fixed;
+}
+
+.app-tabbar-context-menu hr {
+    border: 0;
+    border-top: 1px solid var(--border);
+    margin: 4px 3px;
+}
+
+.app-tabbar-context-menu-item {
+    align-items: center;
+    background: transparent;
+    border: 0;
+    border-radius: 6px;
+    color: inherit;
+    cursor: pointer;
+    display: grid;
+    font: inherit;
+    font-size: 0.8rem;
+    gap: 9px;
+    grid-template-columns: 16px 1fr;
+    min-height: 32px;
+    padding: 0 10px;
+    text-align: left;
+    transition: background-color 120ms ease;
+}
+
+.app-tabbar-context-menu-item svg {
+    color: var(--muted-foreground);
+}
+
+.app-tabbar-context-menu-item:hover:not(:disabled),
+.app-tabbar-context-menu-item:focus-visible {
+    background: var(--surface);
+    color: var(--foreground);
+    outline: 0;
+}
+
+.app-tabbar-context-menu-item:disabled {
+    cursor: default;
+    opacity: 0.4;
+}
+
+@keyframes appTabIn {
+    from {
+        opacity: 0;
+        transform: translateY(3px);
+    }
+}
+
+@keyframes appTabbarPopoverIn {
+    from {
+        opacity: 0;
+        transform: translateY(-4px) scale(0.98);
+    }
+}
+
+@media (max-width: 680px) {
+    .app-tabbar {
+        padding-left: 8px;
+    }
+
+    .app-tabbar-tab {
+        max-width: 170px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .app-tabbar-tab,
+    .app-tabbar-all-panel,
+    .app-tabbar-context-menu {
+        animation: none;
+    }
+}

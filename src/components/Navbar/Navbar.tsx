@@ -34,7 +34,6 @@ import {
 import {isPathAllowedForProfile, isReturnPath, operationalProfiles as allOperationalProfiles, OperationalProfile} from "../../config/operationalProfile";
 import {getAppEnvironment} from "../../config/appEnvironment";
 import {AppTabDefinition} from "../AppShell/types";
-import AppTabs from "../AppShell/AppTabs";
 import './styles/main.css';
 import {logoutAuthSession} from "../../auth/AuthSession";
 import {clearAnnouncementDismissal} from "../Announcements/announcementStorage";
@@ -79,13 +78,9 @@ const submenuId = (groupKey: string) => `top-nav-submenu-${groupKey}`;
 
 type NavbarProps = {
     activePath: string;
-    openTabs: AppTabDefinition[];
-    onCloseAllTabs: () => void;
-    onCloseTab: (path: string) => void;
     onOpenTab: (tab: AppTabDefinition) => void;
     onLanguageChange: (language: Language) => void;
     onOperationalProfileChange: (profile: OperationalProfile) => void;
-    onSelectTab: (path: string) => void;
     language: Language;
     operationalProfile: OperationalProfile;
     operationalProfiles?: OperationalProfile[];
@@ -193,13 +188,9 @@ export function NavbarTrackingSearch({onClose, onOpenTab, open}: NavbarTrackingS
 
 function Navbar({
     activePath,
-    openTabs,
-    onCloseAllTabs,
-    onCloseTab,
     onOpenTab,
     onLanguageChange,
     onOperationalProfileChange,
-    onSelectTab,
     language,
     operationalProfile,
     operationalProfiles = allOperationalProfiles,
@@ -735,13 +726,6 @@ function Navbar({
                             );
                         })}
                     </nav>
-
-                    <AppTabs
-                        activePath={activePath}
-                        onCloseTab={onCloseTab}
-                        onSelectTab={onSelectTab}
-                        openTabs={openTabs}
-                    />
                 </div>
 
                 <div className="top-nav-island-expansion" id="top-nav-island-panel">
@@ -752,17 +736,6 @@ function Navbar({
             </div>
 
             <div className="top-nav-actions">
-                <button
-                    aria-label={pl.app.tabs.closeAll}
-                    className="app-close-tabs-button"
-                    disabled={!openTabs.length}
-                    onClick={onCloseAllTabs}
-                    title={pl.app.tabs.closeAll}
-                    type="button"
-                >
-                    <span aria-hidden="true" className="app-close-tabs-icon">×</span>
-                    <span>{pl.app.tabs.closeAll}</span>
-                </button>
                 <div className="top-nav-search-control">
                     <button
                         aria-controls="top-nav-tracking-search"
