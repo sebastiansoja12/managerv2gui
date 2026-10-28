@@ -75,6 +75,12 @@
     padding-inline: 18px;
 }
 
+.app-main-content .tm-refresh[data-ui="button"] {
+    border-radius: 999px !important;
+    min-height: 40px;
+    padding-inline: 18px;
+}
+
 .app-main-content .tm-add-new[data-ui="button"]:hover {
     background: color-mix(in srgb, var(--foreground) 88%, var(--primary)) !important;
 }

@@ -13,7 +13,7 @@ import {useLocation, useNavigate} from "react-router-dom";
 import ShipmentService from "../../hooks/ShipmentService";
 import {ApiErrorResponse} from "../../api/ApiResult";
 import {
-    countryCodes,
+    CountryCodeDto,
     DeliveryMethodDto,
     deliveryMethods,
     PackagingTypeDto,
@@ -32,6 +32,7 @@ import {
 import pl from "../../i18n/translate";
 import {PickupPointSummary} from "../PickupPoints/model/PickupPoint";
 import ShipmentDeliveryPointMapDialog from "./ShipmentDeliveryPointMapDialog";
+import ShipmentPostalCodeField from "./ShipmentPostalCodeField";
 import "./styles/shipments.css";
 
 type Notice = {
@@ -51,7 +52,6 @@ const emptyPerson: PersonApi = {
     city: "",
     postalCode: "",
     street: "",
-    countryCode: "PL",
 };
 
 const initialShipmentPriority: ShipmentPriorityDto = "MEDIUM";
@@ -94,8 +94,9 @@ const legacySizeForPickupPointSearch = (
 const clonePerson = (person?: PersonApi): PersonApi => ({
     ...emptyPerson,
     ...(person || {}),
-    countryCode: person?.countryCode || "PL",
 });
+
+const withoutCountryCode = ({countryCode, ...person}: PersonApi): PersonApi => person;
 
 const ShipmentCreate: React.FC = () => {
     const navigate = useNavigate();
@@ -202,26 +203,31 @@ const ShipmentCreate: React.FC = () => {
                 {textField(shipmentTranslations.form.fields.email, person.email, (value) => handlePersonChange(person, setPerson, "email", value), "email")}
                 {textField(shipmentTranslations.form.fields.phone, person.telephoneNumber, (value) => handlePersonChange(person, setPerson, "telephoneNumber", value))}
                 {textField(shipmentTranslations.form.fields.city, person.city, (value) => handlePersonChange(person, setPerson, "city", value))}
-                {textField(shipmentTranslations.form.fields.postalCode, person.postalCode, (value) => handlePersonChange(person, setPerson, "postalCode", value))}
-                {textField(shipmentTranslations.form.fields.street, person.street, (value) => handlePersonChange(person, setPerson, "street", value))}
-                {selectField(
-                    tone === "sender" ? shipmentTranslations.form.fields.issuerCountry : shipmentTranslations.form.fields.receiverCountry,
-                    person.countryCode || "PL",
-                    countryCodes,
-                    (value) => {
-                        setPerson({...person, countryCode: value});
+                <ShipmentPostalCodeField
+                    id={`shipment-create-${tone}-postal-code`}
+                    label={shipmentTranslations.form.fields.postalCode}
+                    value={person.postalCode}
+                    onChange={(value) => handlePersonChange(person, setPerson, "postalCode", value)}
+                    onSelect={(postalCode) => {
+                        setPerson({
+                            ...person,
+                            postalCode: postalCode.postalCode,
+                            city: postalCode.city,
+                            countryCode: postalCode.countryCode as CountryCodeDto,
+                        });
                         if (tone === "receiver") {
                             clearDeliveryPickupPoint();
                         }
-                    },
-                )}
+                    }}
+                />
+                {textField(shipmentTranslations.form.fields.street, person.street, (value) => handlePersonChange(person, setPerson, "street", value))}
             </div>
         </div>
     );
 
     const createRequest = (): ShipmentCreateRequestApi => ({
-        sender,
-        recipient,
+        sender: withoutCountryCode(sender),
+        recipient: withoutCountryCode(recipient),
         dimensions: {
             length: Number(length),
             width: Number(width),

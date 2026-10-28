@@ -8,7 +8,7 @@ export type ShipmentEditParty = {
     city: string;
     postalCode: string;
     street: string;
-    countryCode: string;
+    countryCode?: string;
 };
 
 export type ShipmentEditSummary = {
@@ -51,5 +51,4 @@ export const shipmentEditPartyFields: Array<keyof ShipmentEditParty> = [
     "street",
     "postalCode",
     "city",
-    "countryCode",
 ];

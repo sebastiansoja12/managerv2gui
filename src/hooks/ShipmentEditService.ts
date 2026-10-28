@@ -7,6 +7,7 @@ import {
     ShipmentEditSummary,
     ShipmentEditTokenIssued,
 } from "../components/ShipmentEdit/dto/ShipmentEdit";
+import {PostalCodeDto} from "../components/Shipment/dto/PostalCode";
 
 const client = new BackendClient(http);
 
@@ -28,11 +29,16 @@ const updateShipment = (trackingNumber: string, request: ShipmentEditRequest) =>
     client.put<ShipmentEditRequest, ShipmentEditAccepted>(shipmentPath(trackingNumber), request)
 );
 
+const searchPostalCodes = (query: string) => (
+    client.get<PostalCodeDto[]>("/postal-codes", {params: {query}})
+);
+
 const ShipmentEditService = {
     getShipment,
     requestToken,
     verifyToken,
     updateShipment,
+    searchPostalCodes,
 };
 
 export default ShipmentEditService;

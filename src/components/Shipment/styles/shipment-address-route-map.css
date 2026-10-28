@@ -1,0 +1,69 @@
+.shipment-address-route-map {
+    height: clamp(280px, 55dvh, 560px);
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    isolation: isolate;
+}
+
+.shipment-address-route-map-distance {
+    color: var(--muted-foreground);
+    font-size: 14px;
+}
+
+.shipment-address-route-map-status {
+    align-items: center;
+    color: var(--muted-foreground);
+    display: flex;
+    gap: 12px;
+    padding: 16px 0;
+}
+
+.shipment-address-route-map-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 20px;
+    margin-bottom: 12px;
+    font-size: 14px;
+}
+
+.shipment-address-route-map-legend span {
+    align-items: center;
+    display: inline-flex;
+    gap: 8px;
+}
+
+.shipment-address-route-map-legend .shipment-address-route-map-marker {
+    height: 14px;
+    width: 14px;
+    border-width: 2px;
+}
+
+.shipment-address-route-map-marker-container {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+}
+
+.shipment-address-route-map-marker {
+    border: 3px solid #fff;
+    border-radius: 50%;
+    box-shadow: 0 1px 5px rgba(15, 23, 42, 0.42);
+    display: inline-block;
+    height: 18px;
+    width: 18px;
+}
+
+.shipment-address-route-map-marker.is-sender {
+    background: #2563a9;
+}
+
+.shipment-address-route-map-marker.is-recipient {
+    background: #d97706;
+}
+
+.shipment-address-route-map-line {
+    stroke: #d97706;
+    stroke-width: 3;
+    stroke-dasharray: 8 8;
+}

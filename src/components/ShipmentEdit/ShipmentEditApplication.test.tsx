@@ -89,8 +89,8 @@ describe("ShipmentEditApplication", () => {
         expect(resolveShipmentEditError({status: 409, message: "x"})).toBe(pl.shipmentEdit.errors.notEditable);
     });
 
-    it("validates required party fields, e-mail and country", () => {
-        expect(validateShipmentEditParty({...party("wrong"), city: " ", countryCode: "XX"}))
-            .toEqual(["email", "city", "countryCode"]);
+    it("validates required party fields and e-mail without asking for country", () => {
+        expect(validateShipmentEditParty({...party("wrong"), city: " ", countryCode: undefined}))
+            .toEqual(["email", "city"]);
     });
 });
