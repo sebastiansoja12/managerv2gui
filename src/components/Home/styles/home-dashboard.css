@@ -43,8 +43,8 @@
     color: var(--muted-foreground);
     font-size: 0.68rem;
     font-weight: 700;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
+    letter-spacing: 0;
+    text-transform: none;
 }
 
 .home-dashboard-context > strong {
@@ -245,12 +245,12 @@
     align-items: center;
     color: var(--primary);
     display: inline-flex;
-    font-family: var(--font-mono);
+    font-family: var(--font-ui);
     font-size: 0.65rem;
     font-weight: 650;
     gap: 6px;
-    letter-spacing: 0.075em;
-    text-transform: uppercase;
+    letter-spacing: 0;
+    text-transform: none;
 }
 
 .home-panel-header h2,
@@ -685,7 +685,7 @@
     font-weight: 900;
     letter-spacing: 0;
     margin-bottom: 8px;
-    text-transform: uppercase;
+    text-transform: none;
 }
 
 .module-placeholder-panel h1 {
@@ -747,7 +747,7 @@
     font-size: 0.72rem;
     font-weight: 900;
     letter-spacing: 0;
-    text-transform: uppercase;
+    text-transform: none;
 }
 
 .home-tracking-lookup-intro strong {
@@ -782,8 +782,8 @@
     color: var(--brand-muted);
     font-size: 0.67rem;
     font-weight: 850;
-    letter-spacing: 0.025em;
-    text-transform: uppercase;
+    letter-spacing: 0;
+    text-transform: none;
 }
 
 .home-tracking-criterion [data-ui="text-field"] {

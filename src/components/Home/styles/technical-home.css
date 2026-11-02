@@ -4,17 +4,17 @@
 .home-tracking-criterion > span,
 .home-tracking-value > span,
 .home-tile-action {
-    font-family: var(--font-mono);
+    font-family: var(--font-ui);
     font-weight: 600;
-    letter-spacing: 0.075em;
-    text-transform: uppercase;
+    letter-spacing: 0;
+    text-transform: none;
 }
 
 .module-placeholder-panel h1 {
     font-family: var(--font-display);
     font-size: clamp(2.25rem, 4vw, 3.4rem);
-    font-weight: 400;
-    letter-spacing: -0.045em;
+    font-weight: var(--font-display-weight);
+    letter-spacing: var(--font-display-tracking);
     line-height: 0.98;
 }
 
