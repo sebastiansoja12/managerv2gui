@@ -1,10 +1,122 @@
 # Manager 2.0 GUI
 
+**English** | [Polski](README.pl.md) | [Deutsch](README.de.md)
+
 **Development Version 2026.4 - 10th September, 2026**
 
 Manager 2.0 GUI is a React/TypeScript frontend for the Manager 2.0 logistics
 backend. It provides warehouse, shipment, process, department, courier, user and
 configuration screens, plus a separate super-admin area.
+
+![Department dashboard](docs/screenshots/en/light/dashboard.png)
+
+## About the Application
+
+Manager 2.0 is a back-office application for parcel logistics companies. After
+signing in, an employee sees the dashboard of their own department: shipment
+counts, active returns, turnover, a 7/14/30-day volume chart and a map of
+connected departments. From the top menu they register and track shipments,
+handle deliveries and returns, build pallets, manage departments with their
+delivery areas and warehouse floor plans, maintain pickup points and lockers,
+review backend processes and talk to colleagues in the organization chat.
+Every screen opens in its own tab, so several shipments or departments can be
+worked on side by side. The interface is dense and table-driven, with maps
+(OpenStreetMap/Leaflet) wherever location matters. It is available in Polish,
+English and German and comes with a set of themes; the screenshots below show
+Light, Graphite and Warehouse.
+
+## Screenshots
+
+The same screens in three of the available themes. Click a thumbnail or a theme link to open the full-size image.
+
+<table>
+  <tr>
+    <th>Light</th>
+    <th>Graphite</th>
+    <th>Warehouse</th>
+  </tr>
+  <tr>
+    <td><a href="docs/screenshots/en/light/dashboard.png"><img src="docs/screenshots/en/light/dashboard.png" alt="Dashboard – Light"></a></td>
+    <td><a href="docs/screenshots/en/graphite/dashboard.png"><img src="docs/screenshots/en/graphite/dashboard.png" alt="Dashboard – Graphite"></a></td>
+    <td><a href="docs/screenshots/en/warehouse/dashboard.png"><img src="docs/screenshots/en/warehouse/dashboard.png" alt="Dashboard – Warehouse"></a></td>
+  </tr>
+</table>
+
+| Screen | What it shows | Light | Graphite | Warehouse |
+| --- | --- | --- | --- | --- |
+| Dashboard | Department KPIs, turnover chart, network map | [Light](docs/screenshots/en/light/dashboard.png) | [Graphite](docs/screenshots/en/graphite/dashboard.png) | [Warehouse](docs/screenshots/en/warehouse/dashboard.png) |
+| Shipments | Shipment list with status tabs, filters and actions | [Light](docs/screenshots/en/light/shipments.png) | [Graphite](docs/screenshots/en/graphite/shipments.png) | [Warehouse](docs/screenshots/en/warehouse/shipments.png) |
+| Shipment details | Data, delivery, history, costs, QR label and export | [Light](docs/screenshots/en/light/shipment-details.png) | [Graphite](docs/screenshots/en/graphite/shipment-details.png) | [Warehouse](docs/screenshots/en/warehouse/shipment-details.png) |
+| Deliveries | Delivery register with route, state and steps | [Light](docs/screenshots/en/light/deliveries.png) | [Graphite](docs/screenshots/en/graphite/deliveries.png) | [Warehouse](docs/screenshots/en/warehouse/deliveries.png) |
+| Returns | Return lookup and per-department return table | [Light](docs/screenshots/en/light/returns.png) | [Graphite](docs/screenshots/en/graphite/returns.png) | [Warehouse](docs/screenshots/en/warehouse/returns.png) |
+| Pallets | Pallets with carrier, labels and transport documents | [Light](docs/screenshots/en/light/pallets.png) | [Graphite](docs/screenshots/en/graphite/pallets.png) | [Warehouse](docs/screenshots/en/warehouse/pallets.png) |
+| Departments | Delivery boundary map and department list | [Light](docs/screenshots/en/light/departments.png) | [Graphite](docs/screenshots/en/graphite/departments.png) | [Warehouse](docs/screenshots/en/warehouse/departments.png) |
+| Department map | Warehouse floor plan with pallet locations | [Light](docs/screenshots/en/light/department-map.png) | [Graphite](docs/screenshots/en/graphite/department-map.png) | [Warehouse](docs/screenshots/en/warehouse/department-map.png) |
+| Delivery area | Drawing the area a department serves | [Light](docs/screenshots/en/light/delivery-area.png) | [Graphite](docs/screenshots/en/graphite/delivery-area.png) | [Warehouse](docs/screenshots/en/warehouse/delivery-area.png) |
+| Pickup points | Pickup point and locker catalog on a map | [Light](docs/screenshots/en/light/pickup-points.png) | [Graphite](docs/screenshots/en/graphite/pickup-points.png) | [Warehouse](docs/screenshots/en/warehouse/pickup-points.png) |
+| Processes | Microservice process log with status | [Light](docs/screenshots/en/light/processes.png) | [Graphite](docs/screenshots/en/graphite/processes.png) | [Warehouse](docs/screenshots/en/warehouse/processes.png) |
+| Chat | Organization chat with employee directory | [Light](docs/screenshots/en/light/chat.png) | [Graphite](docs/screenshots/en/graphite/chat.png) | [Warehouse](docs/screenshots/en/warehouse/chat.png) |
+| Global configuration | Operator-wide settings by section | [Light](docs/screenshots/en/light/global-configuration.png) | [Graphite](docs/screenshots/en/graphite/global-configuration.png) | [Warehouse](docs/screenshots/en/warehouse/global-configuration.png) |
+
+<details>
+<summary>All screens in the Light theme</summary>
+
+<p>
+  <img src="docs/screenshots/en/light/dashboard.png" alt="Dashboard – Light" width="49%">
+  <img src="docs/screenshots/en/light/shipments.png" alt="Shipments – Light" width="49%">
+  <img src="docs/screenshots/en/light/shipment-details.png" alt="Shipment details – Light" width="49%">
+  <img src="docs/screenshots/en/light/deliveries.png" alt="Deliveries – Light" width="49%">
+  <img src="docs/screenshots/en/light/returns.png" alt="Returns – Light" width="49%">
+  <img src="docs/screenshots/en/light/pallets.png" alt="Pallets – Light" width="49%">
+  <img src="docs/screenshots/en/light/departments.png" alt="Departments – Light" width="49%">
+  <img src="docs/screenshots/en/light/department-map.png" alt="Department map – Light" width="49%">
+  <img src="docs/screenshots/en/light/delivery-area.png" alt="Delivery area – Light" width="49%">
+  <img src="docs/screenshots/en/light/pickup-points.png" alt="Pickup points – Light" width="49%">
+  <img src="docs/screenshots/en/light/processes.png" alt="Processes – Light" width="49%">
+  <img src="docs/screenshots/en/light/chat.png" alt="Chat – Light" width="49%">
+  <img src="docs/screenshots/en/light/global-configuration.png" alt="Global configuration – Light" width="49%">
+</p>
+</details>
+
+<details>
+<summary>All screens in the Graphite theme</summary>
+
+<p>
+  <img src="docs/screenshots/en/graphite/dashboard.png" alt="Dashboard – Graphite" width="49%">
+  <img src="docs/screenshots/en/graphite/shipments.png" alt="Shipments – Graphite" width="49%">
+  <img src="docs/screenshots/en/graphite/shipment-details.png" alt="Shipment details – Graphite" width="49%">
+  <img src="docs/screenshots/en/graphite/deliveries.png" alt="Deliveries – Graphite" width="49%">
+  <img src="docs/screenshots/en/graphite/returns.png" alt="Returns – Graphite" width="49%">
+  <img src="docs/screenshots/en/graphite/pallets.png" alt="Pallets – Graphite" width="49%">
+  <img src="docs/screenshots/en/graphite/departments.png" alt="Departments – Graphite" width="49%">
+  <img src="docs/screenshots/en/graphite/department-map.png" alt="Department map – Graphite" width="49%">
+  <img src="docs/screenshots/en/graphite/delivery-area.png" alt="Delivery area – Graphite" width="49%">
+  <img src="docs/screenshots/en/graphite/pickup-points.png" alt="Pickup points – Graphite" width="49%">
+  <img src="docs/screenshots/en/graphite/processes.png" alt="Processes – Graphite" width="49%">
+  <img src="docs/screenshots/en/graphite/chat.png" alt="Chat – Graphite" width="49%">
+  <img src="docs/screenshots/en/graphite/global-configuration.png" alt="Global configuration – Graphite" width="49%">
+</p>
+</details>
+
+<details>
+<summary>All screens in the Warehouse theme</summary>
+
+<p>
+  <img src="docs/screenshots/en/warehouse/dashboard.png" alt="Dashboard – Warehouse" width="49%">
+  <img src="docs/screenshots/en/warehouse/shipments.png" alt="Shipments – Warehouse" width="49%">
+  <img src="docs/screenshots/en/warehouse/shipment-details.png" alt="Shipment details – Warehouse" width="49%">
+  <img src="docs/screenshots/en/warehouse/deliveries.png" alt="Deliveries – Warehouse" width="49%">
+  <img src="docs/screenshots/en/warehouse/returns.png" alt="Returns – Warehouse" width="49%">
+  <img src="docs/screenshots/en/warehouse/pallets.png" alt="Pallets – Warehouse" width="49%">
+  <img src="docs/screenshots/en/warehouse/departments.png" alt="Departments – Warehouse" width="49%">
+  <img src="docs/screenshots/en/warehouse/department-map.png" alt="Department map – Warehouse" width="49%">
+  <img src="docs/screenshots/en/warehouse/delivery-area.png" alt="Delivery area – Warehouse" width="49%">
+  <img src="docs/screenshots/en/warehouse/pickup-points.png" alt="Pickup points – Warehouse" width="49%">
+  <img src="docs/screenshots/en/warehouse/processes.png" alt="Processes – Warehouse" width="49%">
+  <img src="docs/screenshots/en/warehouse/chat.png" alt="Chat – Warehouse" width="49%">
+  <img src="docs/screenshots/en/warehouse/global-configuration.png" alt="Global configuration – Warehouse" width="49%">
+</p>
+</details>
 
 ## Technology
 
