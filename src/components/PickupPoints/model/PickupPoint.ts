@@ -8,7 +8,7 @@ export type DepartmentIdDto = {
 
 export type PickupPointType = "SERVICE_POINT" | "PARCEL_LOCKER";
 
-export type PickupPointStatus = "ACTIVE" | "SUSPENDED" | "CLOSED";
+export type PickupPointStatus = "ACTIVE" | "SUSPENDED" | "CLOSED" | "DELETED";
 
 export type PickupPointCapability = "DROP_OFF" | "COLLECTION";
 
