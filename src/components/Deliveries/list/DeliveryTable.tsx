@@ -11,6 +11,7 @@ import {
     deliveryTypeLabel,
     departmentCodeLabel,
     formatDeliveryDateTime,
+    isDestinationDepartmentMissing,
 } from "../deliveryLabels";
 import {DeliveryListItem, DeliverySortField} from "../model/Delivery";
 import {deliveryTargetPath} from "../details/deliveryTargetLinks";
@@ -103,7 +104,9 @@ function DeliveryTable({deliveries, departments, sort, selectedId, onSort, onSel
                                 <span className="dlv-route">
                                     <span className="dlv-department">{departmentCodeLabel(departments, delivery.originDepartmentId)}</span>
                                     <span className="dlv-route-arrow" aria-hidden="true">→</span>
-                                    <span className="dlv-department">{departmentCodeLabel(departments, delivery.destinationDepartmentId)}</span>
+                                    {isDestinationDepartmentMissing(delivery)
+                                        ? <span className="dlv-status dlv-tone-warning">{pl.deliveries.destinationNotDetermined}</span>
+                                        : <span className="dlv-department">{departmentCodeLabel(departments, delivery.destinationDepartmentId)}</span>}
                                 </span>
                             </td>
                             <td>

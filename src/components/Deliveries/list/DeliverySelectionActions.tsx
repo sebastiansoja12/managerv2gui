@@ -1,6 +1,6 @@
 import React from "react";
 import {Button} from "components/ui";
-import {Close, Download, Print, Visibility} from "components/ui/icons";
+import {Close, Download, Print, Refresh, Route, Visibility} from "components/ui/icons";
 import pl from "../../../i18n/translate";
 import {DeliveryListItem} from "../model/Delivery";
 
@@ -10,9 +10,12 @@ type DeliverySelectionActionsProps = {
     onOpen: (delivery: DeliveryListItem) => void;
     onExport: (delivery: DeliveryListItem, format: "excel" | "pdf") => void;
     onCancel: (delivery: DeliveryListItem) => void;
+    onSetDestination?: (delivery: DeliveryListItem) => void;
+    onResolveDestination?: (delivery: DeliveryListItem) => void;
 };
 
-function DeliverySelectionActions({delivery, busy, onOpen, onExport, onCancel}: DeliverySelectionActionsProps) {
+function DeliverySelectionActions({delivery, busy, onOpen, onExport, onCancel, onSetDestination,
+                                      onResolveDestination}: DeliverySelectionActionsProps) {
     const cancelable = Boolean(delivery)
         && delivery?.lifecycleStatus !== "CANCELED" && delivery?.lifecycleStatus !== "COMPLETED";
 
@@ -24,6 +27,18 @@ function DeliverySelectionActions({delivery, busy, onOpen, onExport, onCancel}: 
                     onClick={() => delivery && onOpen(delivery)}>
                 {pl.deliveries.edit}
             </Button>
+            {onSetDestination && (
+                <Button disabled={!delivery || busy} startIcon={<Route/>} variant="outlined"
+                        onClick={() => delivery && onSetDestination(delivery)}>
+                    {pl.deliveries.incomplete.setDestination}
+                </Button>
+            )}
+            {onResolveDestination && (
+                <Button disabled={!delivery || busy} startIcon={<Refresh/>} variant="outlined"
+                        onClick={() => delivery && onResolveDestination(delivery)}>
+                    {pl.deliveries.incomplete.resolveDestination}
+                </Button>
+            )}
             <Button disabled={!delivery || busy} startIcon={<Download/>} variant="outlined"
                     onClick={() => delivery && onExport(delivery, "excel")}>
                 {pl.deliveries.exportExcel}
