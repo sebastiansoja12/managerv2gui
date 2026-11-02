@@ -1,76 +1,73 @@
 import {
+    addTab,
     closeOtherTabs,
     closeTabsToRight,
     closeUnpinnedTabs,
-    keepTab,
     normalizeTabFlags,
-    openPreviewTab,
+    removeTab,
     togglePinnedTab,
     trimTabs,
 } from "./tabState";
 import {AppTabDefinition} from "./types";
 
 const tab = (path: string, flags: Partial<AppTabDefinition> = {}): AppTabDefinition => ({label: path, path, ...flags});
+const paths = (tabs: AppTabDefinition[]) => tabs.map((current) => current.path);
 
 describe("tabState", () => {
-    it("appends a new page as the preview tab", () => {
-        expect(openPreviewTab([tab("/")], tab("/chat"))).toEqual([tab("/"), tab("/chat", {preview: true})]);
-    });
+    it("opens every new page in its own tab next to the previous ones", () => {
+        const tabs = [tab("/"), tab("/global-configuration")];
 
-    it("replaces the current preview tab instead of adding another one", () => {
-        const tabs = [tab("/"), tab("/chat", {preview: true}), tab("/processes")];
-
-        expect(openPreviewTab(tabs, tab("/pallets"))).toEqual([
-            tab("/"),
-            tab("/pallets", {preview: true}),
-            tab("/processes"),
-        ]);
+        expect(paths(addTab(addTab(tabs, tab("/depots")), tab("/pallets"))))
+            .toEqual(["/", "/global-configuration", "/depots", "/pallets"]);
     });
 
     it("only activates a page that is already open", () => {
-        const tabs = [tab("/"), tab("/chat", {preview: true})];
+        const tabs = [tab("/"), tab("/chat")];
 
-        expect(openPreviewTab(tabs, tab("/"))).toBe(tabs);
+        expect(addTab(tabs, tab("/chat"))).toBe(tabs);
+        expect(addTab(tabs, tab("/"))).toBe(tabs);
     });
 
-    it("keeps a preview tab so the next page opens next to it", () => {
-        const tabs = keepTab([tab("/"), tab("/chat", {preview: true})], "/chat");
+    it("keeps the home tab first and open", () => {
+        const tabs = [tab("/"), tab("/a"), tab("/b")];
 
-        expect(tabs).toEqual([tab("/"), tab("/chat", {preview: false})]);
-        expect(openPreviewTab(tabs, tab("/pallets"))).toHaveLength(3);
+        expect(paths(removeTab(tabs, "/"))).toEqual(["/", "/a", "/b"]);
+        expect(paths(closeOtherTabs(tabs, "/b"))).toEqual(["/", "/b"]);
+        expect(paths(closeUnpinnedTabs(tabs))).toEqual(["/"]);
+        expect(togglePinnedTab(tabs, "/")).toBe(tabs);
     });
 
-    it("drops the least recently used unpinned tab above the limit", () => {
-        const tabs = [tab("/a", {pinned: true}), tab("/b"), tab("/c"), tab("/d")];
+    it("drops the least recently used closable tab above the limit", () => {
+        const tabs = [tab("/"), tab("/a", {pinned: true}), tab("/b"), tab("/c"), tab("/d")];
 
-        expect(trimTabs(tabs, "/d", ["/a", "/c", "/b"], 3).map((current) => current.path))
-            .toEqual(["/a", "/b", "/d"]);
+        expect(paths(trimTabs(tabs, "/d", ["/", "/a", "/c", "/b"], 4))).toEqual(["/", "/a", "/b", "/d"]);
     });
 
-    it("moves pinned tabs to the front and never keeps them as preview", () => {
-        expect(togglePinnedTab([tab("/"), tab("/chat", {preview: true})], "/chat")).toEqual([
-            tab("/chat", {pinned: true, preview: false}),
+    it("moves pinned tabs right after the home tab", () => {
+        expect(togglePinnedTab([tab("/"), tab("/a"), tab("/chat")], "/chat")).toEqual([
             tab("/"),
+            tab("/chat", {pinned: true}),
+            tab("/a"),
         ]);
     });
 
     it("keeps pinned tabs when closing other, right-hand or all tabs", () => {
-        const tabs = [tab("/pinned", {pinned: true}), tab("/a"), tab("/b"), tab("/c")];
+        const tabs = [tab("/"), tab("/pinned", {pinned: true}), tab("/a"), tab("/b"), tab("/c")];
 
-        expect(closeOtherTabs(tabs, "/b").map((current) => current.path)).toEqual(["/pinned", "/b"]);
-        expect(closeTabsToRight(tabs, "/a").map((current) => current.path)).toEqual(["/pinned", "/a"]);
-        expect(closeUnpinnedTabs(tabs).map((current) => current.path)).toEqual(["/pinned"]);
+        expect(paths(closeOtherTabs(tabs, "/b"))).toEqual(["/", "/pinned", "/b"]);
+        expect(paths(closeTabsToRight(tabs, "/a"))).toEqual(["/", "/pinned", "/a"]);
+        expect(paths(closeUnpinnedTabs(tabs))).toEqual(["/", "/pinned"]);
     });
 
-    it("repairs stored flags: pinned first and a single preview tab", () => {
+    it("repairs stored tabs: home first, pinned next and no legacy preview flag", () => {
         expect(normalizeTabFlags([
-            tab("/a", {preview: true}),
-            tab("/b", {pinned: true, preview: true}),
-            tab("/c", {preview: true}),
-        ])).toEqual([
+            {...tab("/a"), preview: true} as AppTabDefinition,
             tab("/b", {pinned: true}),
-            tab("/a", {preview: true}),
-            tab("/c"),
+            tab("/", {pinned: true}),
+        ])).toEqual([
+            tab("/"),
+            tab("/b", {pinned: true}),
+            tab("/a"),
         ]);
     });
 });
