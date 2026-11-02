@@ -36,8 +36,8 @@
 .returns-page .returns-title [data-ui="typography"][data-variant="h4"] {
     font-family: var(--font-display) !important;
     font-size: clamp(2rem, 3vw, 3.15rem) !important;
-    font-weight: 400 !important;
-    letter-spacing: -0.045em !important;
+    font-weight: var(--font-display-weight) !important;
+    letter-spacing: var(--font-display-tracking) !important;
     line-height: 0.98 !important;
 }
 
@@ -246,7 +246,7 @@
     color: var(--foreground) !important;
     font-family: var(--font-display) !important;
     font-size: 1.6rem !important;
-    font-weight: 400 !important;
+    font-weight: var(--font-display-weight) !important;
 }
 
 .returns-dialog [data-ui="dialog-content"] {
