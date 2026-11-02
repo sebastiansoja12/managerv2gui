@@ -137,11 +137,11 @@
     border: 1px solid var(--border) !important;
     border-radius: 3px !important;
     color: var(--muted-foreground) !important;
-    font-family: var(--font-mono);
+    font-family: var(--font-ui);
     font-size: 0.62rem !important;
-    letter-spacing: 0.04em;
+    letter-spacing: 0;
     padding: 4px 7px !important;
-    text-transform: uppercase;
+    text-transform: none;
 }
 
 .global-configuration-empty {
