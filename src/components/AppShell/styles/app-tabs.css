@@ -161,11 +161,6 @@
     font-weight: 600;
 }
 
-.app-tabbar-tab-preview .app-tabbar-tab-select span {
-    font-style: italic;
-    opacity: 0.85;
-}
-
 .app-tabbar-tab-icon {
     flex: 0 0 auto;
     font-size: 0.86rem;
@@ -391,19 +386,6 @@
     white-space: nowrap;
 }
 
-.app-tabbar-all-item-preview .app-tabbar-all-item-select span {
-    font-style: italic;
-}
-
-.app-tabbar-all-item-select small {
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    color: var(--muted-foreground);
-    flex: 0 0 auto;
-    font-size: 0.64rem;
-    padding: 1px 5px;
-}
-
 .app-tabbar-all-item-icon {
     color: var(--muted-foreground);
     flex: 0 0 auto;
@@ -530,4 +512,145 @@
     .app-tabbar-context-menu {
         animation: none;
     }
+}
+
+/* Matches the rounded command bar: pill tabs on a transparent strip aligned with the bar's edges. */
+.app-tabbar {
+    --tabbar-height: 44px;
+    --tab-height: 32px;
+    --tab-radius: 999px;
+    --tab-active-bg: color-mix(in srgb, var(--surface) 72%, var(--background));
+    background: transparent;
+    border-bottom: 0;
+    box-shadow: none;
+    gap: 6px;
+    margin: 0 12px;
+    padding: 0 2px;
+}
+
+.app-tabbar-scroller {
+    gap: 4px;
+}
+
+.app-tabbar-tab + .app-tabbar-tab::before,
+.app-tabbar-tab-active::after {
+    display: none;
+}
+
+.app-tabbar-tab-pinned + .app-tabbar-tab:not(.app-tabbar-tab-pinned) {
+    margin-left: 10px;
+}
+
+.app-tabbar-tab:hover {
+    background: color-mix(in srgb, var(--surface) 55%, transparent);
+}
+
+.app-tabbar-tab-active,
+.app-tabbar-tab-active:hover {
+    border-color: var(--border);
+    box-shadow: none;
+}
+
+.app-tabbar-tab-select {
+    font-size: 0.84rem;
+    gap: 8px;
+    padding: 0 4px 0 12px;
+}
+
+.app-tabbar-tab-pinned .app-tabbar-tab-select {
+    padding-right: 12px;
+}
+
+.app-tabbar-tab-active .app-tabbar-tab-select {
+    font-weight: 500;
+}
+
+.app-tabbar-tab-icon {
+    font-size: 0.95rem;
+    opacity: 0.6;
+}
+
+.app-tabbar-tab-active .app-tabbar-tab-icon {
+    color: var(--foreground);
+}
+
+.app-tabbar-tab-close {
+    border-radius: 50%;
+    height: 22px;
+    margin: 0 5px 0 0;
+    width: 22px;
+}
+
+.app-tabbar-all {
+    border-left: 0;
+    height: auto;
+    padding-left: 0;
+}
+
+.app-tabbar-all-trigger {
+    border-color: var(--border);
+    font-size: 0.8rem;
+    font-weight: 500;
+    gap: 8px;
+    padding: 0 6px 0 12px;
+}
+
+.app-tabbar-all-trigger span {
+    background: var(--surface);
+    border-color: var(--border);
+    border-radius: 999px;
+    color: var(--foreground);
+    min-width: 22px;
+}
+
+.App .app-tabbar-all-search input[type],
+.App .app-tabbar-all-search input:not([type="checkbox"]):not([type="radio"]),
+.App .app-tabbar-all-search input:not([type="checkbox"]):not([type="radio"]):focus {
+    background-color: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
+/* Visibility: every tab is a filled pill, the active one is inverted like the primary "+" button. */
+.app-tabbar-tab {
+    background: color-mix(in srgb, var(--surface) 70%, var(--background));
+    border-color: var(--border);
+    color: color-mix(in srgb, var(--foreground) 78%, var(--muted-foreground));
+}
+
+.app-tabbar-tab:hover {
+    background: var(--surface);
+    border-color: var(--border-strong);
+    color: var(--foreground);
+}
+
+.app-tabbar-tab-active,
+.app-tabbar-tab-active:hover {
+    background: var(--foreground);
+    border-color: var(--foreground);
+    color: var(--background);
+}
+
+.app-tabbar-tab-icon {
+    opacity: 0.85;
+}
+
+.app-tabbar-tab-active .app-tabbar-tab-icon,
+.app-tabbar-tab-active.app-tabbar-tab-pinned .app-tabbar-tab-icon {
+    color: var(--background);
+    opacity: 1;
+}
+
+.app-tabbar-tab-active .app-tabbar-tab-close {
+    color: color-mix(in srgb, var(--background) 70%, var(--foreground));
+}
+
+.app-tabbar-tab-active .app-tabbar-tab-close:hover {
+    background: color-mix(in srgb, var(--background) 14%, transparent);
+    color: var(--background);
+}
+
+.app-tabbar-tab-select:focus-visible {
+    outline-offset: 2px;
 }

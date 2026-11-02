@@ -17,11 +17,11 @@
 
 .operational-profile-dialog-kicker {
     color: var(--muted-foreground);
-    font-family: var(--font-mono);
+    font-family: var(--font-ui);
     font-size: 0.62rem;
     font-weight: 600;
-    letter-spacing: 0.085em;
-    text-transform: uppercase;
+    letter-spacing: 0;
+    text-transform: none;
 }
 
 .operational-profile-dialog-title strong {
