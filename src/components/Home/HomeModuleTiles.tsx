@@ -7,11 +7,13 @@ import {
     ChevronRight,
     Close,
     DevicesOther,
+    GridView,
     DirectionsCar,
     History,
     Inventory2,
     LocalShipping,
     Person,
+    Route,
     Settings,
     TableRows,
     Warehouse,
@@ -43,6 +45,7 @@ const homeTiles: HomeTile[] = [
     {key: "returns", path: "/returns", icon: History, accent: "rose"},
     {key: "deliveries", path: "/deliveries", icon: LocalShipping, accent: "emerald"},
     {key: "shipmentScanner", path: "/shipment-scanner", icon: Warehouse, accent: "teal"},
+    {key: "shipmentRoute", path: "/shipment-route", icon: Route, accent: "indigo"},
     {key: "courierDeliveries", path: "/courier-deliveries", icon: LocalShipping, accent: "emerald"},
     {key: "profile", path: "/profile", icon: Person, accent: "slate"},
     {key: "chat", path: "/chat", icon: ChatBubbleOutline, accent: "violet"},
@@ -89,27 +92,29 @@ function HomeModuleTiles({onOpenTab, operationalProfile}: HomeModuleTilesProps) 
         setOpen(false);
     };
 
+    // Opened on demand from the navbar so the tiles never cover the page by themselves.
     return (
-        <>
-            {!open ? (
-                <button
-                    aria-controls="home-module-menu"
-                    aria-expanded="false"
-                    aria-label={pl.home.dashboard.quickLinks.open}
-                    className="home-module-menu-trigger"
-                    onClick={() => setOpen(true)}
-                    type="button"
-                >
-                    <ChevronRight aria-hidden="true" className="home-module-menu-trigger-arrow" fontSize="small" />
-                </button>
-            ) : undefined}
+        <div className="home-module-menu-control">
             <button
-                aria-label={pl.home.dashboard.quickLinks.close}
-                className={`home-module-menu-backdrop${open ? " is-open" : ""}`}
-                onClick={() => setOpen(false)}
-                tabIndex={open ? 0 : -1}
+                aria-controls="home-module-menu"
+                aria-expanded={open}
+                aria-label={pl.home.dashboard.quickLinks.open}
+                className={`top-nav-action-icon home-module-menu-trigger${open ? " is-active" : ""}`}
+                onClick={() => setOpen((isOpen) => !isOpen)}
+                title={pl.home.dashboard.quickLinks.menuLabel}
                 type="button"
-            />
+            >
+                <GridView fontSize="small" />
+            </button>
+            {open ? (
+                <button
+                    aria-hidden="true"
+                    className="home-module-menu-backdrop"
+                    onClick={() => setOpen(false)}
+                    tabIndex={-1}
+                    type="button"
+                />
+            ) : undefined}
             <aside
                 aria-hidden={!open}
                 aria-label={pl.home.dashboard.quickLinks.title}
@@ -152,7 +157,7 @@ function HomeModuleTiles({onOpenTab, operationalProfile}: HomeModuleTilesProps) 
                     })}
                 </div>
             </aside>
-        </>
+        </div>
     );
 }
 

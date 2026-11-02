@@ -18,14 +18,12 @@ import {getBackendErrorMessage} from "../../api/errorMessage";
 import {useAuthState} from "../../auth/AuthState";
 import Department from "../../class/depots/Department";
 import DeliveryNetworkService from "../../hooks/DeliveryNetworkService";
-import DeliveryService from "../../hooks/DeliveryService";
 import DepartmentService from "../../hooks/DepartmentService";
 import ReturnService from "../../hooks/ReturnService";
 import ShipmentService from "../../hooks/ShipmentService";
 import pl from "../../i18n/translate";
 import {AppTabDefinition} from "../AppShell/types";
 import {useOperatorCapabilities} from "../AppShell/OperatorCapabilitiesContext";
-import {Delivery} from "../Deliveries/model/Delivery";
 import {DepartmentRelation} from "../Departments/model/DepartmentRelation";
 import {ReturnPackageDto} from "../Returns/model/ReturnPackage";
 import {ShipmentDto, ShipmentStatusDto} from "../Shipment/dto/ShipmentDto";
@@ -34,9 +32,9 @@ import {
     buildTurnoverSeries,
     calculateMoneyTotals,
     DashboardPeriodDays,
-    filterShipmentsForDepartment,
     getPrimaryCurrency,
     shipmentsInPeriod,
+    startOfDashboardPeriod,
     TurnoverDay,
 } from "./homeDashboardData";
 import "./styles/home-dashboard.css";
@@ -49,9 +47,8 @@ type ShipmentLookupCriterion = "TRACKING_NUMBER" | "SHIPMENT_ID";
 
 const SHIPMENT_PAGE_SIZE = 100;
 const MAX_SHIPMENT_PAGES = 20;
-const DELIVERY_PAGE_SIZE = 100;
-const MAX_DELIVERY_PAGES = 20;
-const ACTIVE_SHIPMENT_STATUSES: ShipmentStatusDto[] = ["PREPARED", "ACCEPTED", "REROUTE", "SENT", "REDIRECT"];
+const LONGEST_DASHBOARD_PERIOD: DashboardPeriodDays = 30;
+const ACTIVE_SHIPMENT_STATUSES: ShipmentStatusDto[] = ["PREPARED", "COLLECTED", "ACCEPTED", "REROUTE", "SENT", "REDIRECT"];
 
 const formatDateTime = (value?: string | null) => {
     if (!value) {
@@ -78,38 +75,74 @@ const formatMoney = (amount: number, currency: string, compact = false) => new I
     },
 ).format(amount);
 
-const loadShipments = async () => {
-    const shipments: ShipmentDto[] = [];
-    let page = 0;
-    let currentPage: ShipmentDto[] = [];
-
-    do {
-        const response = await ShipmentService.search({
-            page,
-            size: SHIPMENT_PAGE_SIZE,
-        });
-        currentPage = response.data;
-        shipments.push(...currentPage);
-        page += 1;
-    } while (currentPage.length === SHIPMENT_PAGE_SIZE && page < MAX_SHIPMENT_PAGES);
-
-    return shipments;
+const localDateTimeValue = (date: Date) => {
+    const pad = (value: number) => String(value).padStart(2, "0");
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T00:00:00`;
 };
 
-const loadDepartmentDeliveries = async (departmentId: number) => {
-    const deliveries: Delivery[] = [];
-    let page = 0;
-    let currentPage: Delivery[] = [];
+const loadDepartmentShipments = async (departmentId: number) => {
+    const request = {
+        departmentId: {value: departmentId},
+        createdFrom: localDateTimeValue(startOfDashboardPeriod(LONGEST_DASHBOARD_PERIOD)),
+        size: SHIPMENT_PAGE_SIZE,
+    };
+    const firstPage = (await ShipmentService.search({...request, page: 0})).data;
+    const remainingPages = Array.from({length: Math.min(firstPage.totalPages, MAX_SHIPMENT_PAGES) - 1},
+        (_, index) => ShipmentService.search({...request, page: index + 1}));
+    const responses = await Promise.all(remainingPages);
+    return [firstPage.content, ...responses.map((response) => response.data.content)].flat();
+};
 
-    do {
-        const response = await DeliveryService.getByDepartment(departmentId, page * DELIVERY_PAGE_SIZE,
-            DELIVERY_PAGE_SIZE);
-        currentPage = response.data;
-        deliveries.push(...currentPage);
-        page += 1;
-    } while (currentPage.length === DELIVERY_PAGE_SIZE && page < MAX_DELIVERY_PAGES);
+type DashboardData = {
+    shipments: ShipmentDto[];
+    returnPackages: ReturnPackageDto[];
+    departments: Department[];
+    relations: DepartmentRelation[];
+    failure: unknown;
+};
 
-    return deliveries;
+let pendingDashboardLoad: {key: string; promise: Promise<DashboardData>} | null = null;
+
+const loadDashboard = async (departmentCode: string, returnsAvailable: boolean): Promise<DashboardData> => {
+    const departmentsRequest = DepartmentService.getAll().then((response) => response.data);
+    const currentDepartmentRequest = departmentsRequest.then((loadedDepartments) => loadedDepartments.find(
+        (department) => department.departmentCode?.value === departmentCode));
+    const [shipmentResult, returnResult, departmentResult, relationResult] = await Promise.allSettled([
+        currentDepartmentRequest.then((currentDepartment) => currentDepartment
+            ? loadDepartmentShipments(currentDepartment.departmentId)
+            : [] as ShipmentDto[]),
+        returnsAvailable ? currentDepartmentRequest.then((currentDepartment) => {
+            if (!currentDepartment) {
+                throw new Error(pl.returns.messages.departmentsLoadError);
+            }
+            return ReturnService.getAllByDepartment(String(currentDepartment.departmentId));
+        }) : Promise.resolve([] as ReturnPackageDto[]),
+        departmentsRequest,
+        DeliveryNetworkService.getCurrentNetwork().then((response) => response.data),
+    ]);
+    const failure = [shipmentResult, returnResult, departmentResult, relationResult]
+        .find((result) => result.status === "rejected");
+    return {
+        shipments: shipmentResult.status === "fulfilled" ? shipmentResult.value : [],
+        returnPackages: returnResult.status === "fulfilled" ? returnResult.value : [],
+        departments: departmentResult.status === "fulfilled" ? departmentResult.value : [],
+        relations: relationResult.status === "fulfilled" ? relationResult.value : [],
+        failure: failure?.status === "rejected" ? failure.reason : null,
+    };
+};
+
+const loadDashboardOnce = (departmentCode: string, returnsAvailable: boolean, reloadKey: number) => {
+    const key = JSON.stringify([departmentCode, returnsAvailable, reloadKey]);
+    if (pendingDashboardLoad?.key === key) {
+        return pendingDashboardLoad.promise;
+    }
+    const promise = loadDashboard(departmentCode, returnsAvailable).finally(() => {
+        if (pendingDashboardLoad?.promise === promise) {
+            pendingDashboardLoad = null;
+        }
+    });
+    pendingDashboardLoad = {key, promise};
+    return promise;
 };
 
 const sortByNewest = <T extends {createdAt?: string | null}>(items: T[]) => [...items].sort((left, right) => (
@@ -122,8 +155,34 @@ type TurnoverChartProps = {
     series: TurnoverDay[];
 };
 
+const DEFAULT_CHART_WIDTH = 760;
+
+// Draws at the container's real width so labels keep their size instead of scaling with the panel.
+const useMeasuredWidth = (elementRef: React.RefObject<HTMLElement>) => {
+    const [measuredWidth, setMeasuredWidth] = React.useState(DEFAULT_CHART_WIDTH);
+
+    React.useEffect(() => {
+        const element = elementRef.current;
+        if (!element || typeof ResizeObserver === "undefined") {
+            return undefined;
+        }
+
+        const observer = new ResizeObserver(([entry]) => {
+            const contentWidth = Math.round(entry.contentRect.width);
+            if (contentWidth > 0) {
+                setMeasuredWidth(contentWidth);
+            }
+        });
+        observer.observe(element);
+        return () => observer.disconnect();
+    }, [elementRef]);
+
+    return measuredWidth;
+};
+
 function TurnoverChart({currency, periodDays, series}: TurnoverChartProps) {
-    const width = 760;
+    const chartRef = React.useRef<HTMLDivElement>(null);
+    const width = useMeasuredWidth(chartRef);
     const height = 280;
     const plot = {left: 48, right: 60, top: 20, bottom: 45};
     const plotWidth = width - plot.left - plot.right;
@@ -146,7 +205,7 @@ function TurnoverChart({currency, periodDays, series}: TurnoverChartProps) {
     const labelEvery = periodDays === 7 ? 1 : periodDays === 14 ? 2 : 5;
 
     return (
-        <div className="home-turnover-chart">
+        <div className="home-turnover-chart" ref={chartRef}>
             <svg aria-label={pl.home.dashboard.chart.ariaLabel} role="img" viewBox={`0 0 ${width} ${height}`}>
                 <defs>
                     <linearGradient id="home-turnover-area" x1="0" x2="0" y1="0" y2="1">
@@ -238,52 +297,23 @@ function OperationalDashboard({onOpenTab}: OperationalDashboardProps) {
         && (lookupCriterion === "TRACKING_NUMBER" || /^\d+$/.test(trimmedLookupValue));
 
     useEffect(() => {
-        if (!departmentCode) {
+        if (!departmentCode || returnsStatus === "loading") {
             return undefined;
         }
 
         let ignore = false;
         setLoading(true);
         setDashboardError("");
-        const departmentsRequest = DepartmentService.getAll().then((response) => response.data);
-        Promise.allSettled([
-            loadShipments(),
-            returnsAvailable ? departmentsRequest.then((loadedDepartments) => {
-                const currentDepartment = loadedDepartments.find(
-                    (department) => department.departmentCode?.value === departmentCode,
-                );
-                if (!currentDepartment) {
-                    throw new Error(pl.returns.messages.departmentsLoadError);
-                }
-                return ReturnService.getAllByDepartment(String(currentDepartment.departmentId));
-            }) : Promise.resolve([] as ReturnPackageDto[]),
-            departmentsRequest,
-            DeliveryNetworkService.getCurrentNetwork().then((response) => response.data),
-            departmentsRequest.then((loadedDepartments) => {
-                const currentDepartment = loadedDepartments.find(
-                    (department) => department.departmentCode?.value === departmentCode,
-                );
-                return currentDepartment
-                    ? loadDepartmentDeliveries(currentDepartment.departmentId)
-                    : [] as Delivery[];
-            }),
-        ]).then(([shipmentResult, returnResult, departmentResult, relationResult, deliveryResult]) => {
+        loadDashboardOnce(departmentCode, returnsAvailable, reloadKey).then((data) => {
             if (ignore) {
                 return;
             }
-
-            const loadedDepartments = departmentResult.status === "fulfilled" ? departmentResult.value : [];
-            setShipments(shipmentResult.status === "fulfilled" && deliveryResult.status === "fulfilled"
-                ? filterShipmentsForDepartment(shipmentResult.value, deliveryResult.value)
-                : []);
-            setReturnPackages(returnResult.status === "fulfilled" ? returnResult.value : []);
-            setDepartments(loadedDepartments);
-            setRelations(relationResult.status === "fulfilled" ? relationResult.value : []);
-
-            const failure = [shipmentResult, returnResult, departmentResult, relationResult, deliveryResult]
-                .find((result) => result.status === "rejected");
-            if (failure?.status === "rejected") {
-                setDashboardError(getBackendErrorMessage(failure.reason, pl.home.dashboard.messages.loadError));
+            setShipments(data.shipments);
+            setReturnPackages(data.returnPackages);
+            setDepartments(data.departments);
+            setRelations(data.relations);
+            if (data.failure) {
+                setDashboardError(getBackendErrorMessage(data.failure, pl.home.dashboard.messages.loadError));
             }
             setLastUpdated(new Date());
         }).finally(() => {
@@ -295,7 +325,7 @@ function OperationalDashboard({onOpenTab}: OperationalDashboardProps) {
         return () => {
             ignore = true;
         };
-    }, [departmentCode, reloadKey, returnsAvailable]);
+    }, [departmentCode, reloadKey, returnsAvailable, returnsStatus]);
 
     const periodShipments = useMemo(
         () => shipmentsInPeriod(shipments, periodDays),
