@@ -23,7 +23,6 @@ import {
     Block,
     Cable,
     ChatBubbleOutline,
-    CheckCircleOutline,
     Close,
     ContentCopy,
     DocumentScanner,
@@ -34,7 +33,6 @@ import {
     History,
     LocalShipping,
     LocationCity,
-    LocationOn,
     Loop,
     Map,
     MoreVert,
@@ -47,7 +45,6 @@ import {
     Save,
     TableView,
     Print,
-    WarningAmberOutlined,
     Upload,
 } from "components/ui/icons";
 import {useNavigate, useParams} from "react-router-dom";
@@ -55,6 +52,7 @@ import ShipmentService from "../../hooks/ShipmentService";
 import DeliveryService from "../../hooks/DeliveryService";
 import DocumentService from "../../hooks/DocumentService";
 import ShipmentContentService from "../../hooks/ShipmentContentService";
+import AuditLogTimeline from "../AuditLog/AuditLogTimeline";
 import DepartmentService from "../../hooks/DepartmentService";
 import OperatorConfigurationService from "../../hooks/OperatorConfigurationService";
 import PickupPointService from "../../hooks/PickupPointService";
@@ -321,21 +319,6 @@ const ShipmentDetails: React.FC = () => {
 
     const details = useMemo(() => routeDetails(routeLog), [routeLog]);
     const recentDetails = useMemo(() => details.slice(0, 5), [details]);
-    const routeStops = useMemo(() => {
-        const seen = new Set<string>();
-
-        return [...details]
-            .reverse()
-            .map((detail) => detailDepartment(detail))
-            .filter((department) => department !== pl.common.dash)
-            .filter((department) => {
-                if (seen.has(department)) {
-                    return false;
-                }
-                seen.add(department);
-                return true;
-            });
-    }, [details]);
     const availableShipmentStatuses = useMemo(
         () => {
             const configuredStatuses = getConfiguredShipmentStatuses(configuredDraftStatus);
@@ -345,7 +328,6 @@ const ShipmentDetails: React.FC = () => {
         },
         [configuredDraftStatus, shipment?.shipmentStatus],
     );
-    const currentCourierDetail = details.find((detail) => detail.supplierCode || detail.username) || null;
     const destinationDepartment = useMemo(() => {
         const destinationDepartmentId = delivery?.destinationDepartmentId;
         if (!destinationDepartmentId) {
@@ -379,20 +361,6 @@ const ShipmentDetails: React.FC = () => {
         shipment
         && draftShipmentStatuses.includes(shipment.shipmentStatus)
     );
-    const shipmentWarnings = useMemo(() => {
-        if (!shipment) {
-            return [];
-        }
-
-        const warnings: string[] = [];
-        if (shipment.locked) {
-            warnings.push(pl.shipments.dashboard.lockedWarning);
-        }
-        if (showCancellationWindow && cancellationWindowTimeLeft === 0) {
-            warnings.push(pl.shipments.dashboard.cancellationExpiredWarning);
-        }
-        return warnings;
-    }, [cancellationWindowTimeLeft, shipment, showCancellationWindow]);
     const historyPath = decodedTrackingNumber
         ? `/shipments/tracking/${encodeURIComponent(decodedTrackingNumber)}/history`
         : `/shipments/${shipmentId || shipment?.shipmentId.value || ""}/history`;
@@ -1010,22 +978,9 @@ const ShipmentDetails: React.FC = () => {
         );
     };
 
-    const partySummary = (personType: PersonType, person: PersonApi) => (
-        <article className="shipment-dashboard-party">
-            <div className="shipment-dashboard-party-heading">
-                <span className="shipment-dashboard-party-icon"><PersonPinCircle fontSize="small" /></span>
-                <div>
-                    <span>{personType === "SENDER" ? pl.shipments.form.sections.sender : pl.shipments.form.sections.receiver}</span>
-                    <strong>{fullName(person)}</strong>
-                </div>
-            </div>
-            <p>{personAddress(person)}</p>
-            <p>{person.telephoneNumber || pl.common.dash}</p>
-            <p>{person.email || pl.common.dash}</p>
-            <button type="button" onClick={() => selectDetailTab(personType === "SENDER" ? "sender" : "recipient")}>
-                {pl.shipments.dashboard.showFullData}
-            </button>
-        </article>
+    const auditLogDepartmentLabel = (departmentId: number) => (
+        departments.find((department) => String(department.departmentId) === String(departmentId))
+            ?.departmentCode?.value || String(departmentId)
     );
 
     const workspaceTabs: Array<{
@@ -1155,6 +1110,18 @@ const ShipmentDetails: React.FC = () => {
             );
         }
 
+        if (activeWorkspaceTab === "audit" && shipment?.shipmentId?.value) {
+            return (
+                <AuditLogTimeline
+                    departmentLabel={auditLogDepartmentLabel}
+                    inset
+                    reloadKey={contentReloadKey}
+                    resourceId={shipment.shipmentId.value}
+                    resourceType="SHIPMENT"
+                />
+            );
+        }
+
         const emptyMessages: Record<Exclude<ShipmentWorkspaceTab, "history">, string> = {
             notes: pl.shipments.dashboard.workspace.emptyNotes,
             documents: pl.shipments.dashboard.workspace.emptyDocuments,
@@ -1184,10 +1151,16 @@ const ShipmentDetails: React.FC = () => {
                     <div className="shipments-title">
                         <span className="shipments-title-icon"><LocalShipping /></span>
                         <Box>
-                            <Typography variant="h4">{pl.shipments.page.detailsTitle}</Typography>
+                            <span className="shipment-cc-kicker">{pl.shipments.page.detailsTitle}</span>
+                            <div className="shipment-cc-title-row">
+                                <Typography variant="h4">{shipment?.trackingNumber?.value || pl.shipments.page.detailsTitle}</Typography>
+                                {shipment ? (
+                                    <Chip className={`tm-status tm-status-${shipment.shipmentStatus.toLowerCase()}`} label={pl.shipments.status[shipment.shipmentStatus]} size="small" />
+                                ) : null}
+                            </div>
                             <Typography variant="body2" color="text.secondary">
                                 {shipment
-                                    ? `${shipment.trackingNumber?.value || pl.common.dash} · ${fullName(shipment.sender)} → ${fullName(shipment.recipient)}`
+                                    ? `${fullName(shipment.sender)} → ${fullName(shipment.recipient)} · #${shipment.shipmentId.value}`
                                     : pl.shipments.page.detailsSubtitle}
                             </Typography>
                         </Box>
@@ -1403,7 +1376,6 @@ const ShipmentDetails: React.FC = () => {
                                                 </div>
                                             </div>
                                             <div><span>{pl.shipments.summary.createdAt}</span><strong>{formatDateTime(shipment.createdAt || undefined)}</strong></div>
-                                            <div><span>{pl.shipments.dashboard.plannedDelivery}</span><strong>{pl.common.dash}</strong></div>
                                             <div><span>{pl.shipments.summary.status}</span><strong>{pl.shipments.status[shipment.shipmentStatus]}</strong></div>
                                             <div><span>{pl.shipments.dashboard.service}</span><strong>{pl.shipments.priority[shipment.shipmentPriority]}</strong></div>
                                         </div>
@@ -1434,37 +1406,6 @@ const ShipmentDetails: React.FC = () => {
                                             </div>
                                         </div>
                                     </section>
-
-                                    <div className="shipment-dashboard-lower-grid">
-                                        <section className="shipment-dashboard-card shipment-workspace" id="shipment-workspace">
-                                            <div className="shipment-workspace-tabs" role="tablist" aria-label={pl.shipments.dashboard.workspace.history}>
-                                                {workspaceTabs.map((tab) => (
-                                                    <button
-                                                        aria-controls={`shipment-workspace-panel-${tab.id}`}
-                                                        aria-selected={activeWorkspaceTab === tab.id}
-                                                        className={activeWorkspaceTab === tab.id ? "shipment-workspace-tab-active" : ""}
-                                                        id={`shipment-workspace-tab-${tab.id}`}
-                                                        key={tab.id}
-                                                        role="tab"
-                                                        type="button"
-                                                        onClick={() => setActiveWorkspaceTab(tab.id)}
-                                                    >
-                                                        {tab.icon}
-                                                        <span>{tab.label}</span>
-                                                        {tab.count !== undefined ? <small>{tab.count}</small> : null}
-                                                    </button>
-                                                ))}
-                                            </div>
-                                            <div
-                                                aria-labelledby={`shipment-workspace-tab-${activeWorkspaceTab}`}
-                                                id={`shipment-workspace-panel-${activeWorkspaceTab}`}
-                                                role="tabpanel"
-                                            >
-                                                {renderWorkspaceContent()}
-                                            </div>
-                                        </section>
-
-                                    </div>
 
                                     <section className="shipment-dashboard-card shipment-dashboard-delivery" aria-label={pl.deliveries.informationTitle}>
                                         <div className="shipment-dashboard-card-header">
@@ -1537,6 +1478,38 @@ const ShipmentDetails: React.FC = () => {
                                         </div>
                                     </section>
 
+                                    <div className="shipment-dashboard-lower-grid">
+                                        <section className="shipment-dashboard-card shipment-workspace" id="shipment-workspace">
+                                            <div className="shipment-workspace-tabs" role="tablist" aria-label={pl.shipments.dashboard.workspace.history}>
+                                                {workspaceTabs.map((tab) => (
+                                                    <button
+                                                        aria-controls={`shipment-workspace-panel-${tab.id}`}
+                                                        aria-selected={activeWorkspaceTab === tab.id}
+                                                        className={activeWorkspaceTab === tab.id ? "shipment-workspace-tab-active" : ""}
+                                                        id={`shipment-workspace-tab-${tab.id}`}
+                                                        key={tab.id}
+                                                        role="tab"
+                                                        type="button"
+                                                        onClick={() => setActiveWorkspaceTab(tab.id)}
+                                                    >
+                                                        {tab.icon}
+                                                        <span>{tab.label}</span>
+                                                        {tab.count !== undefined ? <small>{tab.count}</small> : null}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                            <div
+                                                aria-labelledby={`shipment-workspace-tab-${activeWorkspaceTab}`}
+                                                id={`shipment-workspace-panel-${activeWorkspaceTab}`}
+                                                role="tabpanel"
+                                            >
+                                                {renderWorkspaceContent()}
+                                            </div>
+                                        </section>
+
+                                    </div>
+
+
 
                                     <div className="shipment-dashboard-bottom-tools">
                                         <section className="shipment-dashboard-card shipment-operator-notes">
@@ -1588,37 +1561,6 @@ const ShipmentDetails: React.FC = () => {
                             {activeDetailTab === "route" ? <ShipmentAddressRouteMap sender={sender} recipient={recipient} /> : null}
                         </main>
 
-                        <aside className="shipment-dashboard-workflow">
-                            <section className="shipment-dashboard-card shipment-dashboard-next-operation">
-                                <div className="shipment-dashboard-card-title"><span><CheckCircleOutline fontSize="small" /></span><Typography variant="h6">{pl.shipments.dashboard.nextOperation}</Typography></div>
-                                <span>{pl.shipments.dashboard.currentStage}</span>
-                                <strong>{pl.shipments.status[shipment.shipmentStatus]}</strong>
-                                <p>{pl.shipments.dashboard.nextOperationUnavailable}</p>
-                                {currentCourierDetail ? <small>{pl.shipments.summary.lastActivity.replace("{date}", formatDateTime(currentCourierDetail.timestamp)).replace("{department}", detailDepartment(currentCourierDetail))}</small> : null}
-                                <Button disabled fullWidth startIcon={<Route fontSize="small" />}>{pl.shipments.dashboard.startOperation}</Button>
-                            </section>
-
-                            <section className={`shipment-dashboard-card shipment-dashboard-warnings${shipmentWarnings.length ? " shipment-dashboard-warnings-active" : ""}`}>
-                                <div className="shipment-dashboard-card-title"><span><WarningAmberOutlined fontSize="small" /></span><Typography variant="h6">{pl.shipments.dashboard.warnings}</Typography></div>
-                                {shipmentWarnings.length ? (
-                                    <ul>{shipmentWarnings.map((warning) => <li key={warning}>{warning}</li>)}</ul>
-                                ) : <p><CheckCircleOutline fontSize="small" /> {pl.shipments.dashboard.noWarnings}</p>}
-                            </section>
-
-                            <section className="shipment-dashboard-card shipment-dashboard-route">
-                                <div className="shipment-dashboard-card-title"><span><Route fontSize="small" /></span><Typography variant="h6">{pl.shipments.dashboard.shipmentRoute}</Typography></div>
-                                {routeStops.length ? (
-                                    <ol>{routeStops.map((stop, index) => (
-                                        <li className={index === routeStops.length - 1 ? "shipment-dashboard-route-current" : ""} key={stop}>
-                                            <i />
-                                            <span>{stop}</span>
-                                            {index === routeStops.length - 1 ? <small>{pl.shipments.dashboard.currentStop}</small> : null}
-                                        </li>
-                                    ))}</ol>
-                                ) : <p><LocationOn fontSize="small" /> {pl.shipments.dashboard.routeEmpty}</p>}
-                            </section>
-                        </aside>
-
                         <aside className="shipment-dashboard-right-rail">
                             <section className="shipment-dashboard-card shipment-cc-side" id="shipment-history">
                                 <div className="shipment-cc-side-header">
@@ -1643,12 +1585,6 @@ const ShipmentDetails: React.FC = () => {
                                     <div><dt>{pl.shipments.dashboard.paymentStatus}</dt><dd>{pl.shipments.dashboard.unavailable}</dd></div>
                                     <div><dt>{pl.shipments.dashboard.invoice}</dt><dd>{pl.shipments.dashboard.unavailable}</dd></div>
                                 </dl>
-                            </section>
-
-                            <section className="shipment-dashboard-card shipment-dashboard-parties">
-                                <div className="shipment-dashboard-card-title"><span><PersonPinCircle fontSize="small" /></span><Typography variant="h6">{pl.shipments.dashboard.parties}</Typography></div>
-                                {partySummary("SENDER", sender)}
-                                {partySummary("RECIPIENT", recipient)}
                             </section>
                         </aside>
                     </div>
