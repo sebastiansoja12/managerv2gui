@@ -9,7 +9,6 @@ import {
     Block,
     ChatBubbleOutline,
     ChevronRight,
-    Close,
     Dashboard,
     DevicesOther,
     ExpandMore,
@@ -21,7 +20,9 @@ import {
     Loop,
     Person,
     QrCodeScanner,
-    Search,
+    ReportProblemOutlined,
+    Route,
+    Send,
     Settings,
     SettingsSuggest,
     ShoppingCart,
@@ -45,6 +46,7 @@ import {clearStoredTabs} from "../AppShell/tabStorage";
 import {AppTheme, useAppTheme} from "../../theme/ThemeProvider";
 import {useOperatorCapabilities} from "../AppShell/OperatorCapabilitiesContext";
 import PalletCreateDialog from "../Pallets/PalletCreateDialog";
+import HomeModuleTiles from "../Home/HomeModuleTiles";
 
 type NavbarItem = AppTabDefinition & {
     icon: React.ElementType;
@@ -68,6 +70,7 @@ type NavbarMenu = {
 const SHIPMENTS_GROUP = "shipments";
 const PALLETS_GROUP = "pallets";
 const TRANSPORT_GROUP = "transport";
+const DELIVERIES_GROUP = "deliveries";
 
 const menuItems = (menu: NavbarMenu): NavbarItem[] => [
     ...menu.items,
@@ -90,41 +93,29 @@ const languages = Object.keys(translations) as Language[];
 const NAVIGATION_PANEL = "navigation";
 
 type NavbarTrackingSearchProps = {
-    onClose: () => void;
     onOpenTab: (tab: AppTabDefinition) => void;
-    open: boolean;
 };
 
-export function NavbarTrackingSearch({onClose, onOpenTab, open}: NavbarTrackingSearchProps) {
+const focusShortcutLabel = typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform) ? "⌘K" : "Ctrl K";
+const isFocusShortcut = (event: KeyboardEvent) => (event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k";
+
+// Always-visible scan field: a barcode reader types the code and Enter, Ctrl/Cmd+K focuses it.
+export function NavbarTrackingSearch({onOpenTab}: NavbarTrackingSearchProps) {
     const [trackingNumber, setTrackingNumber] = React.useState("");
-    const fieldRef = React.useRef<HTMLDivElement>(null);
     const inputRef = React.useRef<HTMLInputElement>(null);
 
     React.useEffect(() => {
-        if (!open) {
-            return undefined;
-        }
-
-        const animationFrame = window.requestAnimationFrame(() => inputRef.current?.focus());
-        const closeOnOutsideInteraction = (event: PointerEvent) => {
-            if (event.target instanceof Node && !fieldRef.current?.contains(event.target)) {
-                onClose();
-            }
-        };
-        const closeOnEscape = (event: KeyboardEvent) => {
-            if (event.key === "Escape") {
-                onClose();
+        const focusOnShortcut = (event: KeyboardEvent) => {
+            if (isFocusShortcut(event)) {
+                event.preventDefault();
+                inputRef.current?.focus();
+                inputRef.current?.select();
             }
         };
 
-        document.addEventListener("pointerdown", closeOnOutsideInteraction);
-        document.addEventListener("keydown", closeOnEscape);
-        return () => {
-            window.cancelAnimationFrame(animationFrame);
-            document.removeEventListener("pointerdown", closeOnOutsideInteraction);
-            document.removeEventListener("keydown", closeOnEscape);
-        };
-    }, [onClose, open]);
+        document.addEventListener("keydown", focusOnShortcut);
+        return () => document.removeEventListener("keydown", focusOnShortcut);
+    }, []);
 
     const submitSearch = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -138,50 +129,33 @@ export function NavbarTrackingSearch({onClose, onOpenTab, open}: NavbarTrackingS
             path: `/shipments/tracking/${encodeURIComponent(normalizedTrackingNumber)}/edit`,
         });
         setTrackingNumber("");
-        onClose();
+        inputRef.current?.blur();
     };
 
     return (
         <form
-            aria-hidden={!open}
             aria-label={pl.home.trackingLookup.ariaLabel}
-            className={`top-nav-search-overlay${open ? " top-nav-search-overlay-open" : ""}`}
+            className="top-nav-scan"
             id="top-nav-tracking-search"
             onSubmit={submitSearch}
         >
-            <div className="top-nav-search-field" ref={fieldRef}>
-                <Search aria-hidden="true" fontSize="small" />
-                <input
-                    aria-label={pl.home.trackingLookup.inputLabel}
-                    disabled={!open}
-                    onChange={(event) => setTrackingNumber(event.target.value)}
-                    placeholder={pl.home.trackingLookup.placeholder}
-                    ref={inputRef}
-                    className="top-nav-tracking-input"
-                    type="search"
-                    value={trackingNumber}
-                />
-                <button
-                    aria-label={pl.home.trackingLookup.search}
-                    className="top-nav-search-submit"
-                    disabled={!open || !trackingNumber.trim()}
-                    title={pl.home.trackingLookup.search}
-                    type="submit"
-                >
-                    <Search fontSize="small" />
-                </button>
-            </div>
-            <button
-                aria-label={`${pl.common.close}: ${pl.navigation.search}`}
-                className="top-nav-search-close"
-                disabled={!open}
-                onClick={onClose}
-                onPointerDown={(event) => event.stopPropagation()}
-                title={pl.common.close}
-                type="button"
-            >
-                <Close fontSize="small" />
-            </button>
+            <QrCodeScanner aria-hidden="true" fontSize="small" />
+            <input
+                aria-label={pl.home.trackingLookup.inputLabel}
+                className="top-nav-tracking-input"
+                onChange={(event) => setTrackingNumber(event.target.value)}
+                onKeyDown={(event) => {
+                    if (event.key === "Escape") {
+                        setTrackingNumber("");
+                        event.currentTarget.blur();
+                    }
+                }}
+                placeholder={pl.navigation.scanPlaceholder}
+                ref={inputRef}
+                type="search"
+                value={trackingNumber}
+            />
+            <kbd className="top-nav-scan-shortcut" title={pl.navigation.scanShortcut}>{focusShortcutLabel}</kbd>
         </form>
     );
 }
@@ -199,10 +173,13 @@ function Navbar({
     const [activeGroupKey, setActiveGroupKey] = React.useState<string | null>(null);
     const [palletCreateOpen, setPalletCreateOpen] = React.useState(false);
     const [profileMenuOpen, setProfileMenuOpen] = React.useState(false);
-    const [searchOpen, setSearchOpen] = React.useState(false);
+    const [createMenuOpen, setCreateMenuOpen] = React.useState(false);
     const [isScrolled, setIsScrolled] = React.useState(false);
+    const [expansionLeft, setExpansionLeft] = React.useState<number | null>(null);
     const navbarRef = React.useRef<HTMLElement>(null);
     const quickNavRef = React.useRef<HTMLElement>(null);
+    const islandRef = React.useRef<HTMLDivElement>(null);
+    const expansionRef = React.useRef<HTMLDivElement>(null);
     const {user} = useAuthState();
     const {returnsStatus} = useOperatorCapabilities();
     const {theme, setTheme} = useAppTheme();
@@ -237,9 +214,9 @@ function Navbar({
                         {label: pl.home.tiles.shipmentDetails.title, path: '/shipment-details', icon: LocalShipping},
                         {label: pl.navigation.shipmentList, path: '/shipments/list', icon: ShoppingCart},
                         {label: pl.navigation.returns, path: '/returns', icon: Loop},
-                        {label: pl.navigation.deliveries, path: '/deliveries', icon: LocalShipping},
                         {label: pl.navigation.shipmentCreate, path: '/shipments/create', icon: LocalShipping},
                         {label: pl.navigation.shipmentScanner, path: '/shipment-scanner', icon: WarehouseRounded},
+                        {label: pl.navigation.shipmentRoute, path: '/shipment-route', icon: Route},
                         {label: pl.navigation.courierDeliveries, path: '/courier-deliveries', icon: LocalShipping},
                     ],
                 },
@@ -273,6 +250,15 @@ function Navbar({
                         {label: pl.navigation.drivers, path: '/drivers', icon: Person},
                     ],
                 },
+                {
+                    key: DELIVERIES_GROUP,
+                    label: pl.navigation.deliveries,
+                    icon: Send,
+                    items: [
+                        {label: pl.navigation.allDeliveries, path: '/deliveries', icon: ViewList},
+                        {label: pl.navigation.incompleteDeliveries, path: '/deliveries/incomplete', icon: ReportProblemOutlined},
+                    ],
+                },
             ],
         },
         {
@@ -299,6 +285,19 @@ function Navbar({
             ],
         },
     ];
+    const createItems: NavbarItem[] = [
+        {label: pl.navigation.shipmentCreate, path: '/shipments/create', icon: LocalShipping},
+        {
+            label: pl.navigation.palletCreate,
+            path: '/pallets/create',
+            icon: Inventory2,
+            onSelect: () => {
+                setCreateMenuOpen(false);
+                setPalletCreateOpen(true);
+            },
+        },
+        {label: pl.navigation.palletFromShipments, path: '/pallets/create-from-shipments', icon: ViewList},
+    ].filter((item) => isPathAllowedForProfile(item.path, operationalProfile));
     const isVisiblePath = (path: string) => isPathAllowedForProfile(path, operationalProfile)
         && (!isReturnPath(path) || returnsStatus === "available");
     const visibleGroups = (menu: NavbarMenu): NavbarGroup[] => (menu.groups || [])
@@ -339,6 +338,25 @@ function Navbar({
         };
     }, [activePath, operationalProfile, updateDockIndicator]);
 
+    // A category panel opens under its own dock button; the last position is kept so the panel closes in place.
+    React.useLayoutEffect(() => {
+        if (!expandedPanel) {
+            return;
+        }
+        const island = islandRef.current;
+        const expansion = expansionRef.current;
+        const trigger = island?.querySelector<HTMLButtonElement>('.top-nav-dock-control[aria-expanded="true"]');
+        if (expandedPanel === NAVIGATION_PANEL || !island || !expansion || !trigger) {
+            setExpansionLeft(null);
+            return;
+        }
+
+        const islandRect = island.getBoundingClientRect();
+        const triggerLeft = trigger.getBoundingClientRect().left - islandRect.left;
+        const maxLeft = Math.max(0, islandRect.width - expansion.offsetWidth);
+        setExpansionLeft(Math.min(Math.max(0, triggerLeft), maxLeft));
+    }, [expandedPanel]);
+
     React.useEffect(() => {
         const scrollContainer = document.querySelector<HTMLElement>(".app-main-content");
         if (!scrollContainer) {
@@ -356,12 +374,14 @@ function Navbar({
             if (event.target instanceof Node && !navbarRef.current?.contains(event.target)) {
                 setExpandedPanel(null);
                 setProfileMenuOpen(false);
+                setCreateMenuOpen(false);
             }
         };
         const closeOnEscape = (event: KeyboardEvent) => {
             if (event.key === "Escape") {
                 setExpandedPanel(null);
                 setProfileMenuOpen(false);
+                setCreateMenuOpen(false);
             }
         };
 
@@ -389,6 +409,7 @@ function Navbar({
         onOpenTab(tab);
         setExpandedPanel(null);
         setProfileMenuOpen(false);
+        setCreateMenuOpen(false);
     };
 
     const renderPanelItem = (item: NavbarItem) => {
@@ -667,7 +688,11 @@ function Navbar({
         expandedPanel ? "top-nav-island-expanded" : "",
         expandedPanel === NAVIGATION_PANEL ? "top-nav-island-expanded-from-package" : "",
         isScrolled ? "top-nav-island-scrolled" : "",
+        expansionLeft !== null ? "top-nav-island-anchored" : "",
     ].filter(Boolean).join(" ");
+    const islandStyle = expansionLeft !== null
+        ? {"--top-nav-expansion-left": `${expansionLeft}px`} as React.CSSProperties
+        : undefined;
 
     return (
         <header
@@ -675,7 +700,7 @@ function Navbar({
             data-environment={environment}
             ref={navbarRef}
         >
-            <div className={islandClassName}>
+            <div className={islandClassName} ref={islandRef} style={islandStyle}>
                 <div className="top-nav-left">
                     <button
                         aria-controls="top-nav-island-panel"
@@ -713,6 +738,7 @@ function Navbar({
                                     key={menu.label}
                                     onClick={() => {
                                         setProfileMenuOpen(false);
+                                        setCreateMenuOpen(false);
                                         setActiveGroupKey(null);
                                         setExpandedPanel((panel) => panel === menu.label ? null : menu.label);
                                     }}
@@ -728,7 +754,7 @@ function Navbar({
                     </nav>
                 </div>
 
-                <div className="top-nav-island-expansion" id="top-nav-island-panel">
+                <div className="top-nav-island-expansion" id="top-nav-island-panel" ref={expansionRef}>
                     <div className="top-nav-island-expansion-content">
                         {renderExpandedContent()}
                     </div>
@@ -736,28 +762,56 @@ function Navbar({
             </div>
 
             <div className="top-nav-actions">
-                <div className="top-nav-search-control">
-                    <button
-                        aria-controls="top-nav-tracking-search"
-                        aria-expanded={searchOpen}
-                        aria-label={pl.navigation.search}
-                        className="top-nav-action-icon"
-                        onClick={() => {
-                            setExpandedPanel(null);
-                            setProfileMenuOpen(false);
-                            setSearchOpen(true);
-                        }}
-                        title={pl.navigation.search}
-                        type="button"
+                <NavbarTrackingSearch onOpenTab={onOpenTab} />
+                {user?.departmentCode ? (
+                    <span
+                        aria-label={`${pl.navigation.currentDepartment}: ${user.departmentCode}`}
+                        className="top-nav-department"
+                        title={pl.navigation.currentDepartment}
                     >
-                        <Search fontSize="small" />
-                    </button>
-                    <NavbarTrackingSearch
-                        onClose={() => setSearchOpen(false)}
-                        onOpenTab={onOpenTab}
-                        open={searchOpen}
-                    />
-                </div>
+                        <WarehouseRounded aria-hidden="true" fontSize="small" />
+                        <span>{user.departmentCode}</span>
+                    </span>
+                ) : null}
+                {operationalProfile === "warehouse" ? (
+                    <div className="top-nav-create-control">
+                        <button
+                            aria-controls="top-nav-create-menu"
+                            aria-expanded={createMenuOpen}
+                            aria-label={pl.navigation.createMenu}
+                            className="top-nav-create-trigger"
+                            onClick={() => {
+                                setExpandedPanel(null);
+                                setProfileMenuOpen(false);
+                                setCreateMenuOpen((isOpen) => !isOpen);
+                            }}
+                            title={pl.navigation.createMenu}
+                            type="button"
+                        >
+                            <Add fontSize="small" />
+                        </button>
+                        {createMenuOpen ? (
+                            <nav aria-label={pl.navigation.createMenu} className="top-nav-create-menu" id="top-nav-create-menu">
+                                <span className="top-nav-create-title">{pl.navigation.createMenu}</span>
+                                {createItems.map((item) => {
+                                    const Icon = item.icon;
+                                    return (
+                                        <button
+                                            className="top-nav-dropdown-item"
+                                            key={item.path}
+                                            onClick={() => item.onSelect ? item.onSelect() : openTab({label: item.label, path: item.path})}
+                                            type="button"
+                                        >
+                                            <Icon fontSize="small" />
+                                            <span>{item.label}</span>
+                                        </button>
+                                    );
+                                })}
+                            </nav>
+                        ) : null}
+                    </div>
+                ) : null}
+                <HomeModuleTiles onOpenTab={onOpenTab} operationalProfile={operationalProfile} />
                 <ImpersonationConsentNotifications />
                 <div className="top-nav-profile-control">
                     <button
@@ -767,6 +821,7 @@ function Navbar({
                         className={`top-nav-user${profileMenuOpen ? " top-nav-user-active" : ""}`}
                         onClick={() => {
                             setExpandedPanel(null);
+                            setCreateMenuOpen(false);
                             setProfileMenuOpen((isOpen) => !isOpen);
                         }}
                         type="button"
