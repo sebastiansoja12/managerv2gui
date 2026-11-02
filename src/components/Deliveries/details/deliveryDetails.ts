@@ -115,11 +115,16 @@ export const formatDuration = (milliseconds: number) => {
     return [days ? `${days} d` : "", hours ? `${hours} h` : "", `${minutes} min`].filter(Boolean).join(" ");
 };
 
+const PALLET_HANDLING_COMMENT_CODES = new Set(["REPLACED_BY_PALLET_DELIVERY", "PALLET_LOADING_REVERTED", "UNLOADED_FROM_PALLET"]);
+
+const hasDeliveryAttempt = (delivery: Delivery) => delivery.steps.some((step) =>
+    step.stepNumber > 1 && !PALLET_HANDLING_COMMENT_CODES.has(step.commentCode || ""));
+
 export const deliveryLifecycleStage = (delivery: Delivery): DeliveryLifecycleStage => {
     if (delivery.lifecycleStatus === "COMPLETED") {
         return "COMPLETED";
     }
-    if (delivery.steps.length > 1 || delivery.deliveryStatus === "DELIVERY") {
+    if (hasDeliveryAttempt(delivery) || delivery.deliveryStatus === "DELIVERY") {
         return "IN_DELIVERY";
     }
     return delivery.supplierId ? "ASSIGNED" : "CREATED";
