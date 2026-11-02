@@ -121,11 +121,11 @@
 
 .chat-notification-copy small {
     color: var(--primary);
-    font-family: var(--font-mono);
+    font-family: var(--font-ui);
     font-size: 0.58rem;
     font-weight: 800;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
+    letter-spacing: 0;
+    text-transform: none;
 }
 
 .chat-notification-copy strong {
