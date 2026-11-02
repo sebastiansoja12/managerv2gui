@@ -24,11 +24,17 @@ import {exportDeliveryExcel, exportDeliveryPdf} from "./deliveryExport";
 import "../Shipment/styles/shipments.css";
 import "./styles/deliveries.css";
 
-function Deliveries() {
+type DeliveriesProps = {
+    variant?: "all" | "incomplete";
+};
+
+function Deliveries({variant = "all"}: DeliveriesProps) {
+    const incomplete = variant === "incomplete";
     const navigate = useNavigate();
     const [page, setPage] = useState(0);
     const [pageSize, setPageSize] = useState<number>(25);
-    const [filters, setFilters] = useState<DeliveryListFilters>(defaultDeliveryListFilters);
+    const [filters, setFilters] = useState<DeliveryListFilters>(
+        incomplete ? {...defaultDeliveryListFilters, hideCompleted: true} : defaultDeliveryListFilters);
     const [sort, setSort] = useState<DeliveryListSort>(defaultDeliveryListSort);
     const [reloadKey, setReloadKey] = useState(0);
     const [deliveries, setDeliveries] = useState<DeliveryListItem[]>([]);
@@ -39,6 +45,9 @@ function Deliveries() {
     const [cancelError, setCancelError] = useState<string | null>(null);
     const [exporting, setExporting] = useState(false);
     const [exportError, setExportError] = useState<string | null>(null);
+    const [resolving, setResolving] = useState(false);
+    const [resolveNotice, setResolveNotice] = useState<string | null>(null);
+    const [resolveError, setResolveError] = useState<string | null>(null);
     const [hasNextPage, setHasNextPage] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -52,6 +61,9 @@ function Deliveries() {
 
     const openDelivery = (delivery: DeliveryListItem) =>
         navigate(`/deliveries/${encodeURIComponent(delivery.id)}/edit`);
+
+    const setDestination = (delivery: DeliveryListItem) =>
+        navigate(`/deliveries/${encodeURIComponent(delivery.id)}/edit?dialog=route`);
 
     const changeSort = (field: DeliverySortField) => {
         setSort((current) => toggleSort(current, field));
@@ -78,7 +90,12 @@ function Deliveries() {
         let active = true;
         setLoading(true);
         setError(null);
-        DeliveryService.query(page, pageSize, {...filters, sort: sort.field, direction: sort.direction})
+        DeliveryService.query(page, pageSize, {
+            ...filters,
+            missingDestination: incomplete || undefined,
+            sort: sort.field,
+            direction: sort.direction,
+        })
             .then((response) => {
                 if (!active) {
                     return;
@@ -99,7 +116,7 @@ function Deliveries() {
                 }
             });
         return () => {active = false;};
-    }, [filters, page, pageSize, reloadKey, sort]);
+    }, [filters, incomplete, page, pageSize, reloadKey, sort]);
 
     const cancelDelivery = async () => {
         if (!deliveryToCancel) {
@@ -115,6 +132,22 @@ function Deliveries() {
             setCancelError(getBackendErrorMessage(cancelFailure, pl.deliveries.cancelError));
         } finally {
             setCanceling(false);
+        }
+    };
+
+    const resolveDestination = async (delivery: DeliveryListItem) => {
+        setResolving(true);
+        setResolveNotice(null);
+        setResolveError(null);
+        try {
+            await DeliveryService.resolveDestination(delivery.id);
+            setResolveNotice(pl.deliveries.incomplete.resolved.replace("{id}", delivery.id));
+            setSelectedId(null);
+            setReloadKey((current) => current + 1);
+        } catch (failure) {
+            setResolveError(getBackendErrorMessage(failure, pl.deliveries.incomplete.resolveError));
+        } finally {
+            setResolving(false);
         }
     };
 
@@ -141,8 +174,10 @@ function Deliveries() {
                 <div className="tm-top-row">
                     <div className="tm-page-heading">
                         <span className="tm-heading-kicker">{pl.common.brand}</span>
-                        <Typography variant="h4">{pl.deliveries.title}</Typography>
-                        <p>{pl.deliveries.subtitle}</p>
+                        <Typography variant="h4">
+                            {incomplete ? pl.navigation.incompleteDeliveries : pl.deliveries.title}
+                        </Typography>
+                        <p>{incomplete ? pl.deliveries.incomplete.subtitle : pl.deliveries.subtitle}</p>
                     </div>
                     <div className="tm-top-actions">
                         <Button className="tm-refresh" variant="outlined" startIcon={<Refresh/>} disabled={loading}
@@ -154,7 +189,9 @@ function Deliveries() {
 
                 <section className="tm-card tm-orders-card" aria-label={pl.deliveries.listTitle}>
                     <div className="tm-orders-header">
-                        <Typography variant="h5">{pl.deliveries.listTitle}</Typography>
+                        <Typography variant="h5">
+                            {incomplete ? pl.deliveries.incomplete.listTitle : pl.deliveries.listTitle}
+                        </Typography>
                         <div className="dlv-page-size">
                             <TextField select size="small" label={pl.deliveries.filters.pageSize} value={String(pageSize)}
                                        onChange={(event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -168,6 +205,8 @@ function Deliveries() {
                     <div className="dlv-card-section">
                         <DeliveryFilters filters={filters} departments={departments} onChange={changeFilters}/>
                         {exportError && <Alert severity="error">{exportError}</Alert>}
+                        {resolveNotice && <Alert severity="success">{resolveNotice}</Alert>}
+                        {resolveError && <Alert severity="error">{resolveError}</Alert>}
                         {error && <Alert severity="error" action={
                             <Button variant="text" onClick={() => setReloadKey((current) => current + 1)}>
                                 {pl.deliveries.retry}
@@ -177,7 +216,9 @@ function Deliveries() {
                     {loading ? (
                         <div className="deliveries-state"><CircularProgress size={24}/>{pl.deliveries.loading}</div>
                     ) : !error && deliveries.length === 0 ? (
-                        <div className="deliveries-state">{pl.deliveries.empty}</div>
+                        <div className="deliveries-state">
+                            {incomplete ? pl.deliveries.incomplete.empty : pl.deliveries.empty}
+                        </div>
                     ) : !error ? (
                         <div className="tm-results-layout">
                             <DeliveryTable deliveries={deliveries} departments={departments} sort={sort}
@@ -185,9 +226,11 @@ function Deliveries() {
                                            onSort={changeSort}
                                            onSelect={(delivery) => setSelectedId(delivery.id)}
                                            onOpen={openDelivery}/>
-                            <DeliverySelectionActions delivery={selectedDelivery} busy={exporting}
+                            <DeliverySelectionActions delivery={selectedDelivery} busy={exporting || resolving}
                                                       onOpen={openDelivery}
                                                       onExport={exportDelivery}
+                                                      onSetDestination={incomplete ? setDestination : undefined}
+                                                      onResolveDestination={incomplete ? resolveDestination : undefined}
                                                       onCancel={(delivery) => {
                                                           setCancelError(null);
                                                           setDeliveryToCancel(delivery);

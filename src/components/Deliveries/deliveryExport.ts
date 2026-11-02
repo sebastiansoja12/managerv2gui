@@ -11,6 +11,7 @@ import {
     deliveryTargetLabel,
     deliveryTypeLabel,
     departmentCodeLabel,
+    destinationDepartmentLabel,
     formatDeliveryDateTime,
     pickupMethodLabel,
 } from "./deliveryLabels";
@@ -23,7 +24,7 @@ const detailRows = (delivery: Delivery, departments: Department[]): [string, str
     [pl.deliveries.columns.status, deliveryStatusLabel(delivery.deliveryStatus)],
     [pl.deliveries.lifecycleLabel, deliveryLifecycleLabel(delivery.lifecycleStatus)],
     [pl.shipments.summary.originDepartment, departmentCodeLabel(departments, delivery.originDepartmentId)],
-    [pl.shipments.summary.destination, departmentCodeLabel(departments, delivery.destinationDepartmentId)],
+    [pl.shipments.summary.destination, destinationDepartmentLabel(departments, delivery)],
     [pl.shipments.form.fields.pickupMethod, pickupMethodLabel(delivery.pickupMethod)],
     [pl.deliveries.methodLabel, deliveryMethodLabel(delivery.method)],
     [pl.shipments.summary.pickupPoint, delivery.pickupPointId || pl.common.dash],

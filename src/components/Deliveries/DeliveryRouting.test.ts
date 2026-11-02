@@ -10,4 +10,10 @@ describe("delivery edit route", () => {
         expect(isPathAllowedForProfile(path, "warehouse")).toBe(true);
         expect(isPathAllowedForProfile(path, "courier")).toBe(false);
     });
+
+    it("registers incomplete deliveries for warehouse only", () => {
+        expect(getTabTitle("/deliveries/incomplete")).toBe(pl.navigation.incompleteDeliveries);
+        expect(isPathAllowedForProfile("/deliveries/incomplete", "warehouse")).toBe(true);
+        expect(isPathAllowedForProfile("/deliveries/incomplete", "courier")).toBe(false);
+    });
 });
