@@ -1,10 +1,16 @@
 import React from "react";
-import {act, render, screen} from "@testing-library/react";
+import {act, render, screen, waitFor} from "@testing-library/react";
 import * as L from "leaflet";
 import Department from "../../class/depots/Department";
+import DeliveryAreaService from "../../hooks/DeliveryAreaService";
 import pl from "../../i18n/translate";
-import {writeAreas} from "./deliveryAreaDraft";
 import DeliveryAreasMap from "./DeliveryAreasMap";
+import {notifyDeliveryAreasChanged} from "./model/DeliveryArea";
+
+jest.mock("../../hooks/DeliveryAreaService", () => ({
+    __esModule: true,
+    default: {getAll: jest.fn()},
+}));
 
 jest.mock("leaflet", () => {
     const polygons: unknown[] = [];
@@ -28,21 +34,23 @@ const department = {
     status: "ACTIVE",
     coordinates: {latitude: 50.26, longitude: 19.02},
 } as Department;
-const area = {id: "1", name: "Centrum", points: [
+const area = {deliveryAreaId: 1, departmentId: 100, name: "Centrum", source: "MANUAL" as const, updatedAt: "", points: [
     {latitude: 50, longitude: 19}, {latitude: 50, longitude: 20}, {latitude: 51, longitude: 20},
 ]};
+const service = DeliveryAreaService as jest.Mocked<typeof DeliveryAreaService>;
 
 describe("DeliveryAreasMap", () => {
-    beforeEach(() => window.localStorage.clear());
-
-    it("shows saved boundaries and updates after a draft is saved", () => {
+    it("shows saved boundaries and reloads them after a change", async () => {
         const polygons = (L as unknown as {__polygons: unknown[]}).__polygons;
-        render(<DeliveryAreasMap departments={[department]} operatorId={7} />);
+        service.getAll.mockResolvedValueOnce({data: [], status: 200});
+        render(<DeliveryAreasMap departments={[department]} />);
+        await waitFor(() => expect(service.getAll).toHaveBeenCalledTimes(1));
         expect(screen.getByText(pl.departments.deliveryArea.overviewEmpty)).toBeInTheDocument();
         expect(polygons).toHaveLength(0);
 
-        act(() => writeAreas("manager.delivery-area-draft.v1.7.100", [area]));
-        expect(screen.getByText(pl.departments.deliveryArea.overviewCount.replace("{count}", "1"))).toBeInTheDocument();
+        service.getAll.mockResolvedValueOnce({data: [area], status: 200});
+        act(() => notifyDeliveryAreasChanged());
+        expect(await screen.findByText(pl.departments.deliveryArea.overviewCount.replace("{count}", "1"))).toBeInTheDocument();
         expect(screen.queryByText(pl.departments.deliveryArea.overviewEmpty)).not.toBeInTheDocument();
         expect(polygons).toHaveLength(1);
     });
