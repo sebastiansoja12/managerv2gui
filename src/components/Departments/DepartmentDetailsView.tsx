@@ -10,7 +10,10 @@ import UserManagementService from "../../hooks/UserManagementService";
 import pl from "../../i18n/translate";
 import {useDepartmentConfiguration} from "../GlobalConfiguration/model/DepartmentConfiguration";
 import DepartmentMapWorkspace from "../DepartmentMap/DepartmentMapWorkspace";
+import {AppTabDefinition} from "../AppShell/types";
 import DeliveryAreaEditor from "./DeliveryAreaEditor";
+import DepartmentConnectionsPanel from "./DepartmentConnectionsPanel";
+import {notifyDeliveryAreasChanged} from "./model/DeliveryArea";
 import {User} from "../Users/model/User";
 import {canManageUsers, isAdministrator} from "../Users/model/UserRoleAccess";
 import "./styles/departments.css";
@@ -83,7 +86,11 @@ const findDepartment = async (departmentId: string, includeArchived: boolean): P
     return department;
 };
 
-function DepartmentDetailsView() {
+type DepartmentDetailsViewProps = {
+    onOpenTab?: (tab: AppTabDefinition) => void;
+};
+
+function DepartmentDetailsView({onOpenTab}: DepartmentDetailsViewProps) {
     const translations = pl.departments;
     const {departmentId = ""} = useParams();
     const decodedDepartmentId = decodeURIComponent(departmentId);
@@ -184,6 +191,9 @@ function DepartmentDetailsView() {
         setNotice(null);
         try {
             await Promise.all(requests);
+            if (canChangeStatus && form.status === "DELETED" && department.status !== "DELETED") {
+                notifyDeliveryAreasChanged();
+            }
             setEditing(false);
             setNotice(translations.edit.success);
             await load();
@@ -378,6 +388,8 @@ function DepartmentDetailsView() {
                                 <p className="department-details-hint">{usersLoading ? pl.common.loading : translations.usersDialog.empty}</p>
                             )}
                         </div>
+                        <DepartmentConnectionsPanel key={String(department.departmentId)} canEdit={canEdit}
+                                                    department={department} onOpenTab={onOpenTab} />
                     </section>
                 </div>
             ) : null}
@@ -391,7 +403,7 @@ function DepartmentDetailsView() {
                 <div aria-label={translations.view.deliveryAreaTab} className="department-details-content"
                      hidden={tab !== "deliveryArea"} role="tabpanel">
                     <DeliveryAreaEditor departmentId={String(department.departmentId)} departmentCode={departmentCode}
-                                        coordinates={department.coordinates} operatorId={currentUser?.operatorId?.value}
+                                        coordinates={department.coordinates}
                                         canEdit={canEdit} active={tab === "deliveryArea"} />
                 </div>
             ) : null}
