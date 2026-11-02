@@ -48,6 +48,7 @@ const departmentMap = (overrides: Partial<DepartmentMapDto> = {}): DepartmentMap
             pallets: [{palletTrackingNumber: "PAL000000000002", placedAt: "2026-10-18T10:00:00Z"}],
         },
     ],
+    directions: [{departmentId: "200", departmentCode: "KT1"}, {departmentId: "300", departmentCode: "PO1"}],
     ...overrides,
 });
 
@@ -87,7 +88,12 @@ describe("DepartmentMapWorkspace", () => {
         expect(request.version).toBe(0);
         expect(request.width).toBe(35);
         expect(request.elements.some((element) => element.type === "SORTER")).toBe(true);
-        expect(request.elements.some((element) => element.type === "STORAGE_LOCATION")).toBe(true);
+        expect(request.elements.some((element) => element.type === "INBOUND")).toBe(true);
+        expect(request.elements.filter((element) => element.type === "RAMP")
+            .map((element) => element.destinationDepartmentCode)).toEqual(["KT1", "PO1"]);
+        expect(request.elements.some((element) => element.type === "INBOUND_RAMP")).toBe(true);
+        expect(request.elements.some((element) => element.type === "WORKSTATION")).toBe(true);
+        expect(request.elements.some((element) => element.type === "STORAGE_LOCATION")).toBe(false);
         expect(await screen.findByLabelText(pl.departmentMap.canvas.ariaLabel)).toBeInTheDocument();
     });
 
@@ -129,7 +135,10 @@ describe("DepartmentMapWorkspace", () => {
         const request = service.saveLayout.mock.calls[0][1];
         expect(request.width).toBe(80);
         expect(request.height).toBe(50);
-        expect(request.elements.filter((element) => element.type === "RACK").length).toBeGreaterThan(4);
+        expect(request.elements.filter((element) => element.type === "RAMP")
+            .map((element) => element.destinationDepartmentCode)).toEqual(["KT1", "PO1"]);
+        expect(request.elements.some((element) => element.type === "RACK" || element.type === "STORAGE_LOCATION"))
+            .toBe(false);
     });
 
     it("refuses to regenerate a layout while pallets stand on the map", async () => {
