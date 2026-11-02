@@ -56,3 +56,12 @@ export const departmentCodeLabel = (departments: Department[], departmentId?: st
     return departments.find((department) => String(department.departmentId) === departmentId)
         ?.departmentCode?.value || departmentId;
 };
+
+export const isDestinationDepartmentMissing = (delivery: {targetType: string; destinationDepartmentId?: string | null}) =>
+    delivery.targetType === "SHIPMENT" && !delivery.destinationDepartmentId;
+
+export const destinationDepartmentLabel = (departments: Department[],
+                                           delivery: {targetType: string; destinationDepartmentId?: string | null}) =>
+    isDestinationDepartmentMissing(delivery)
+        ? pl.deliveries.destinationNotDetermined
+        : departmentCodeLabel(departments, delivery.destinationDepartmentId);
