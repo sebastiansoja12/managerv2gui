@@ -1,7 +1,6 @@
 import React from "react";
 import {fireEvent, render, screen, waitFor, within} from "@testing-library/react";
 import {MemoryRouter} from "react-router-dom";
-import DeliveryService from "../../hooks/DeliveryService";
 import DepartmentService from "../../hooks/DepartmentService";
 import DocumentService from "../../hooks/DocumentService";
 import ShipmentService from "../../hooks/ShipmentService";
@@ -20,11 +19,6 @@ jest.mock("../../hooks/DocumentService", () => ({
     default: {getQrLabel: jest.fn()},
 }));
 
-jest.mock("../../hooks/DeliveryService", () => ({
-    __esModule: true,
-    default: {query: jest.fn()},
-}));
-
 jest.mock("../../hooks/DepartmentService", () => ({
     __esModule: true,
     default: {getAll: jest.fn()},
@@ -40,29 +34,71 @@ const shipment = {
     shipmentStatus: "CREATED",
     price: {amount: 60, currency: "PLN"},
     trackingNumber: {value: "TRACK-101"},
+    createdAt: "2026-08-12T10:37:00",
+    updatedAt: "2026-08-15T10:00:00",
+    delivery: {
+        originDepartmentId: {value: 3},
+        destinationDepartmentId: {value: 5},
+        plannedDeliveryAt: null,
+        deliveredAt: "2026-08-15T10:00:00",
+    },
 } as ShipmentDto;
 
 describe("shipment list selection", () => {
     beforeEach(() => {
         jest.clearAllMocks();
-        (ShipmentService.search as jest.Mock).mockResolvedValue({data: [shipment], status: 200});
-        (DepartmentService.getAll as jest.Mock).mockResolvedValue({data: [{departmentId: 5, departmentCode: {value: "POZ1"}}]});
-        (DeliveryService.query as jest.Mock).mockResolvedValue({
-            data: {items: [{shipmentId: "101", destinationDepartmentId: "5"}], page: 0, size: 1, hasNext: false},
-            status: 200,
-        });
+        (ShipmentService.search as jest.Mock).mockResolvedValue({data: {content: [
+            shipment,
+            {...shipment, shipmentId: {value: "303"}, createdAt: null},
+        ], page: 0, size: 25, totalElements: 60, totalPages: 3}, status: 200});
+        (DepartmentService.getAll as jest.Mock).mockResolvedValue({data: [
+            {departmentId: 3, departmentCode: {value: "KAT1"}},
+            {departmentId: 5, departmentCode: {value: "POZ1"}},
+        ]});
         (exportShipmentExcel as jest.Mock).mockResolvedValue(undefined);
         (DocumentService.getQrLabel as jest.Mock).mockResolvedValue({blob: new Blob(["label"], {type: "application/pdf"})});
         URL.createObjectURL = jest.fn(() => "blob:shipment-label");
         URL.revokeObjectURL = jest.fn();
     });
 
-    it("shows the destination department code from the shipment delivery", async () => {
+    it("shows the creation date with hours and minutes and a dash when it is missing", async () => {
+        render(<MemoryRouter><ShipmentList/></MemoryRouter>);
+
+        expect(screen.getByRole("columnheader", {name: pl.shipments.summary.createdAt})).toBeInTheDocument();
+        const row = await screen.findByRole("row", {name: /#101/});
+        expect(within(row).getAllByRole("cell")[4]).toHaveTextContent("12.08.2026, 10:37");
+        const undatedRow = screen.getByRole("row", {name: /#303/});
+        expect(within(undatedRow).getAllByRole("cell")[4]).toHaveTextContent(pl.common.dash);
+    });
+
+    it("shows origin and destination department codes and the delivery date from the shipment read model", async () => {
         render(<MemoryRouter><ShipmentList variant="details" onOpenTab={jest.fn()}/></MemoryRouter>);
 
         const row = await screen.findByRole("row", {name: /#101/});
         expect(await within(row).findByText("POZ1")).toBeInTheDocument();
-        expect(DeliveryService.query).toHaveBeenCalledWith(0, 1, {shipmentIds: ["101"]});
+        expect(within(row).getByText("KAT1")).toBeInTheDocument();
+        expect(within(row).getAllByRole("cell")[5]).not.toHaveTextContent(pl.common.dash);
+    });
+
+    it("loads the selected page from the server", async () => {
+        render(<MemoryRouter><ShipmentList/></MemoryRouter>);
+        await screen.findByRole("row", {name: /#101/});
+
+        fireEvent.click(screen.getByRole("button", {name: "2"}));
+
+        await waitFor(() => expect(ShipmentService.search).toHaveBeenLastCalledWith(
+            expect.objectContaining({page: 1, size: 25})));
+        expect(screen.getByRole("button", {name: "2"})).toHaveAttribute("aria-current", "page");
+    });
+
+    it("passes the status tab to the server search", async () => {
+        render(<MemoryRouter><ShipmentList/></MemoryRouter>);
+        await screen.findByRole("row", {name: /#101/});
+
+        fireEvent.click(screen.getByRole("button", {name: pl.shipments.status.DELIVERY}));
+
+        await waitFor(() => expect(ShipmentService.search).toHaveBeenLastCalledWith(
+            expect.objectContaining({shipmentStatuses: ["DELIVERY"], page: 0})));
     });
 
     it("enables actions for the selected shipment and opens its related shipment", async () => {

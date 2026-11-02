@@ -1,7 +1,6 @@
 import React from "react";
 import {act, fireEvent, render, screen, waitFor} from "@testing-library/react";
 import {MemoryRouter} from "react-router-dom";
-import DeliveryService from "../../hooks/DeliveryService";
 import DepartmentService from "../../hooks/DepartmentService";
 import ShipmentService from "../../hooks/ShipmentService";
 import TrackingService from "../../hooks/TrackingService";
@@ -11,11 +10,6 @@ import ShipmentList from "./ShipmentList";
 jest.mock("../../hooks/ShipmentService", () => ({
     __esModule: true,
     default: {search: jest.fn()},
-}));
-
-jest.mock("../../hooks/DeliveryService", () => ({
-    __esModule: true,
-    default: {query: jest.fn()},
 }));
 
 jest.mock("../../hooks/DepartmentService", () => ({
@@ -33,6 +27,7 @@ jest.mock("../../hooks/TrackingService", () => ({
 
 describe("external tracking search", () => {
     const selectExternalSource = async () => {
+        await screen.findByRole("cell", {name: pl.shipments.table.empty});
         fireEvent.mouseDown(screen.getByLabelText(pl.shipments.externalSearch.source));
         fireEvent.click(await screen.findByRole("option", {name: pl.shipments.externalSearch.external}));
         await waitFor(() => expect(
@@ -42,9 +37,8 @@ describe("external tracking search", () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
-        (DeliveryService.query as jest.Mock).mockResolvedValue({data: {items: [], page: 0, size: 0, hasNext: false}});
         (DepartmentService.getAll as jest.Mock).mockResolvedValue({data: []});
-        (ShipmentService.search as jest.Mock).mockResolvedValue({data: [], status: 200});
+        (ShipmentService.search as jest.Mock).mockResolvedValue({data: {content: []}, status: 200});
         (TrackingService.getAvailableProviders as jest.Mock).mockResolvedValue({
             data: [{id: "INPOST", displayName: "InPost"}],
             status: 200,
@@ -77,6 +71,7 @@ describe("external tracking search", () => {
         expect(screen.getByLabelText(pl.shipments.externalSearch.source)).toHaveTextContent(
             pl.shipments.externalSearch.system);
         expect(screen.queryByLabelText(pl.shipments.externalSearch.provider)).not.toBeInTheDocument();
+        expect(await screen.findByRole("cell", {name: pl.shipments.table.empty})).toHaveAttribute("colspan", "12");
 
         await selectExternalSource();
         expect(TrackingService.getAvailableProviders).toHaveBeenCalledTimes(1);
@@ -146,7 +141,7 @@ describe("external tracking search", () => {
             senderName: "Anna Nowak",
             minPrice: 25.5,
             page: 0,
-            size: 100,
+            size: 25,
         })));
         expect(await screen.findByText(pl.shipments.filters.applied)).toBeInTheDocument();
     });
