@@ -37,10 +37,10 @@
 
 .maintenance-kicker {
     color: var(--muted-foreground);
-    font-family: var(--font-mono);
+    font-family: var(--font-ui);
     font-size: 0.72rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    letter-spacing: 0;
+    text-transform: none;
 }
 
 .maintenance-card h1 {
