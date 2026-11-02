@@ -23,6 +23,11 @@
     padding: 0;
 }
 
+/* main.css pads the scrolled + expanded island, which shifts the whole bar when a panel opens. */
+.top-nav-island-scrolled.top-nav-island-expanded {
+    padding: 0;
+}
+
 .top-nav-menu-trigger {
     background: transparent;
     border-color: transparent;
@@ -692,11 +697,11 @@
 
 .top-nav-options-subtitle {
     color: var(--muted-foreground);
-    font-family: var(--font-mono);
+    font-family: var(--font-ui);
     font-size: 0.6rem;
-    letter-spacing: 0.075em;
+    letter-spacing: 0;
     padding: 0 5px;
-    text-transform: uppercase;
+    text-transform: none;
 }
 
 @media (max-width: 620px) {
@@ -709,4 +714,311 @@
         border-top: 1px solid var(--border);
         padding: 6px 0 0;
     }
+}
+
+/* Rounded command bar: text navigation, inline scan field, department chip and create menu. */
+.top-nav-shell,
+.top-nav-shell-scrolled {
+    backdrop-filter: none;
+    background: color-mix(in srgb, var(--surface) 72%, var(--background));
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    column-gap: 10px;
+    grid-template-columns: max-content minmax(0, 1fr);
+    margin: 10px 12px 0;
+    min-height: 56px;
+    padding: 6px 8px 6px 10px;
+}
+
+.top-nav-brand {
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.top-nav-dock-control {
+    color: var(--muted-foreground);
+    font-size: 0.86rem;
+    gap: 4px;
+    min-height: 36px;
+    padding: 0 10px;
+}
+
+.top-nav-dock-control > svg:first-child {
+    display: none;
+}
+
+.top-nav-dock-control .top-nav-dock-chevron {
+    font-size: 1rem;
+    opacity: 0.7;
+}
+
+.top-nav-dock-active-indicator {
+    background: var(--surface);
+    border-color: var(--border);
+    height: 36px;
+}
+
+.top-nav-actions {
+    gap: 8px;
+    min-width: 0;
+}
+
+.top-nav-scan {
+    align-items: center;
+    background: color-mix(in srgb, var(--background) 55%, transparent);
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    color: var(--muted-foreground);
+    display: flex;
+    flex: 1 1 360px;
+    gap: 8px;
+    height: 40px;
+    margin-right: 4px;
+    max-width: 460px;
+    min-width: 160px;
+    padding: 0 8px 0 14px;
+    transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.top-nav-scan:focus-within {
+    border-color: color-mix(in srgb, var(--primary) 55%, var(--border-strong));
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 14%, transparent);
+}
+
+.top-nav-scan > svg {
+    flex: 0 0 auto;
+    font-size: 1.1rem;
+}
+
+/* Beats the global .App input field rules from theme/technical/fields.css. */
+.App .top-nav-shell .top-nav-scan input.top-nav-tracking-input[type="search"],
+.App .top-nav-shell .top-nav-scan input.top-nav-tracking-input[type="search"]:hover,
+.App .top-nav-shell .top-nav-scan input.top-nav-tracking-input[type="search"]:focus {
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent !important;
+    background-color: transparent !important;
+    outline: none !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    color: var(--foreground);
+    flex: 1 1 auto;
+    font-size: 0.88rem;
+    height: 100%;
+    min-width: 0;
+    outline: none;
+    padding: 0;
+}
+
+.App .top-nav-scan .top-nav-tracking-input::placeholder {
+    color: var(--muted-foreground);
+}
+
+.top-nav-scan-shortcut {
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--muted-foreground);
+    flex: 0 0 auto;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    line-height: 1;
+    padding: 4px 6px;
+}
+
+.top-nav-department {
+    align-items: center;
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    color: var(--foreground);
+    display: inline-flex;
+    flex: 0 0 auto;
+    gap: 6px;
+    height: 36px;
+    padding: 0 12px;
+}
+
+.top-nav-department > span {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    font-weight: 500;
+}
+
+.top-nav-department svg {
+    color: var(--muted-foreground);
+    font-size: 1.05rem;
+}
+
+.top-nav-create-control {
+    position: relative;
+}
+
+.top-nav-create-trigger {
+    align-items: center;
+    background: var(--foreground);
+    border: 0;
+    border-radius: 50%;
+    color: var(--background);
+    cursor: pointer;
+    display: inline-flex;
+    height: 36px;
+    justify-content: center;
+    transition: transform 120ms ease, background-color 120ms ease;
+    width: 36px;
+}
+
+.top-nav-create-trigger:hover,
+.top-nav-create-trigger[aria-expanded="true"] {
+    background: color-mix(in srgb, var(--foreground) 86%, var(--primary));
+}
+
+.top-nav-create-trigger[aria-expanded="true"] svg {
+    transform: rotate(45deg);
+}
+
+.top-nav-create-trigger svg {
+    transition: transform 150ms ease;
+}
+
+.top-nav-create-menu {
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: 12px;
+    box-shadow: var(--shadow-floating);
+    display: grid;
+    gap: 2px;
+    min-width: 220px;
+    padding: 8px;
+    position: absolute;
+    right: 0;
+    top: calc(100% + 10px);
+    z-index: 30;
+}
+
+.top-nav-create-title {
+    color: var(--muted-foreground);
+    font-size: 0.76rem;
+    padding: 4px 8px 6px;
+}
+
+.top-nav-user-avatar {
+    border-radius: 50%;
+}
+
+@media (max-width: 1060px) {
+    .top-nav-scan-shortcut,
+    .top-nav-department {
+        display: none;
+    }
+}
+
+@media (max-width: 720px) {
+    .top-nav-shell,
+    .top-nav-shell-scrolled {
+        margin: 6px 6px 0;
+    }
+
+    .top-nav-scan {
+        flex-basis: 40px;
+        min-width: 40px;
+    }
+}
+
+/* Bar polish: centered scan field, one height for every control, no dividers. */
+.top-nav-actions {
+    flex: 1 1 auto;
+    gap: 6px;
+    justify-content: flex-end;
+}
+
+.top-nav-scan {
+    background: color-mix(in srgb, var(--background) 40%, transparent);
+    border-color: var(--border);
+    height: 36px;
+    margin: 0 auto;
+    max-width: 420px;
+}
+
+.top-nav-scan:hover {
+    border-color: var(--border-strong);
+}
+
+.top-nav-scan-shortcut {
+    background: var(--surface);
+    padding: 3px 6px;
+}
+
+.top-nav-department {
+    border-color: var(--border);
+    height: 36px;
+    padding: 0 12px 0 10px;
+}
+
+.top-nav-actions .top-nav-action-icon,
+.top-nav-actions .top-nav-action-icon:first-child {
+    border: 0;
+    border-radius: 50%;
+    height: 36px;
+    margin: 0;
+    padding: 0;
+    width: 36px;
+}
+
+.top-nav-actions .top-nav-action-icon:hover,
+.top-nav-actions .top-nav-action-icon.is-active {
+    background: var(--surface);
+}
+
+.top-nav-actions .top-nav-user,
+.top-nav-actions .top-nav-user:hover,
+.top-nav-actions .top-nav-user-active {
+    background: transparent;
+    border: 0;
+    border-radius: 50%;
+    height: 36px;
+    min-height: 36px;
+    padding: 0;
+    width: 36px;
+}
+
+.top-nav-actions .top-nav-user-avatar {
+    border: 1px solid color-mix(in srgb, var(--primary) 30%, transparent);
+    border-radius: 50%;
+    font-size: 0.72rem;
+    height: 32px;
+    width: 32px;
+}
+
+.top-nav-actions .top-nav-user:hover .top-nav-user-avatar,
+.top-nav-actions .top-nav-user-active .top-nav-user-avatar {
+    border-color: var(--primary);
+}
+
+.top-nav-create-control {
+    margin-inline: 2px;
+}
+
+/* Proportions from the mockup: the scan field fills the space between menus and the right cluster. */
+.top-nav-shell .top-nav-scan {
+    flex: 1 1 auto;
+    margin: 0 10px 0 16px;
+    max-width: none;
+}
+
+.top-nav-shell .top-nav-dock-control {
+    color: color-mix(in srgb, var(--foreground) 72%, var(--muted-foreground));
+    font-size: 0.9rem;
+}
+
+.top-nav-shell .top-nav-dock-control:hover,
+.top-nav-shell .top-nav-dock-control[aria-expanded="true"] {
+    color: var(--foreground);
+}
+
+.top-nav-shell .top-nav-brand {
+    font-size: 1rem;
+}
+
+.App .top-nav-shell .top-nav-scan input.top-nav-tracking-input[type="search"] {
+    font-size: 0.92rem;
 }
