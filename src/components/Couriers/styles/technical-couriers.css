@@ -39,13 +39,13 @@
     align-items: center;
     color: var(--muted-foreground) !important;
     display: inline-flex;
-    font-family: var(--font-mono) !important;
+    font-family: var(--font-ui) !important;
     font-size: 0.66rem !important;
     font-weight: 600 !important;
     gap: 8px;
-    letter-spacing: 0.09em !important;
+    letter-spacing: 0 !important;
     margin-bottom: 7px;
-    text-transform: uppercase !important;
+    text-transform: none !important;
 }
 
 .app-main-content .couriers-kicker::before {
@@ -61,8 +61,8 @@
     color: var(--foreground) !important;
     font-family: var(--font-display) !important;
     font-size: clamp(2rem, 3vw, 3.15rem) !important;
-    font-weight: 400 !important;
-    letter-spacing: -0.045em !important;
+    font-weight: var(--font-display-weight) !important;
+    letter-spacing: var(--font-display-tracking) !important;
     line-height: 0.98;
 }
 
@@ -97,11 +97,11 @@
 
 .app-main-content .couriers-summary span {
     color: var(--muted-foreground) !important;
-    font-family: var(--font-mono);
+    font-family: var(--font-ui);
     font-size: 0.61rem;
     font-weight: 600;
-    letter-spacing: 0.045em;
-    text-transform: uppercase;
+    letter-spacing: 0;
+    text-transform: none;
 }
 
 .app-main-content .couriers-summary strong {
@@ -257,13 +257,13 @@
 .app-main-content .couriers-table th {
     background: var(--surface-secondary) !important;
     color: var(--muted-foreground) !important;
-    font-family: var(--font-mono);
+    font-family: var(--font-ui);
     font-size: 0.65rem;
     font-weight: 600;
     height: 48px;
-    letter-spacing: 0.055em;
+    letter-spacing: 0;
     line-height: 1.2;
-    text-transform: uppercase;
+    text-transform: none;
 }
 
 .app-main-content .couriers-table td {
@@ -292,12 +292,12 @@
 
 .app-main-content :is(.couriers-status, .couriers-check-ok, .couriers-check-bad) {
     border-radius: 4px !important;
-    font-family: var(--font-mono);
+    font-family: var(--font-ui);
     font-size: 0.63rem !important;
     font-weight: 600;
-    letter-spacing: 0.035em;
+    letter-spacing: 0;
     padding: 4px 7px;
-    text-transform: uppercase;
+    text-transform: none;
 }
 
 .app-main-content .couriers-side-actions {
@@ -316,11 +316,11 @@
 
 .app-main-content .couriers-side-actions-title span,
 .app-main-content .couriers-side-actions-title strong {
-    font-family: var(--font-mono);
+    font-family: var(--font-ui);
     font-size: 0.68rem;
     font-weight: 600;
-    letter-spacing: 0.045em;
-    text-transform: uppercase;
+    letter-spacing: 0;
+    text-transform: none;
 }
 
 .app-main-content .couriers-side-actions-title strong {

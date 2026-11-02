@@ -41,7 +41,7 @@
     font-weight: 800;
     letter-spacing: 0;
     margin-bottom: 4px;
-    text-transform: uppercase;
+    text-transform: none;
 }
 
 .couriers-summary {
@@ -1256,8 +1256,8 @@
     color: var(--muted-foreground);
     font-size: 0.7rem;
     font-weight: 850;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
+    letter-spacing: 0;
+    text-transform: none;
 }
 
 .couriers-filter-bar [data-ui="text-field"] > [data-ui="input"],
@@ -1317,8 +1317,8 @@
     background: var(--surface-secondary);
     color: var(--muted-foreground);
     font-size: 0.7rem;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
+    letter-spacing: 0;
+    text-transform: none;
 }
 
 .couriers-table tbody tr:hover td {
@@ -1387,8 +1387,8 @@
 .couriers-side-actions-title span {
     color: var(--muted-foreground);
     font-size: 0.7rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    letter-spacing: 0;
+    text-transform: none;
 }
 
 .couriers-side-actions-title strong {
@@ -1408,8 +1408,8 @@
 .couriers-selection-details dt {
     color: var(--muted-foreground);
     font-size: 0.68rem;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
+    letter-spacing: 0;
+    text-transform: none;
 }
 
 .couriers-selection-details dd {
@@ -1444,8 +1444,8 @@
     color: var(--muted-foreground);
     font-size: 0.72rem;
     font-weight: 800;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
+    letter-spacing: 0;
+    text-transform: none;
 }
 
 @media (max-width: 1180px) {
@@ -1734,8 +1734,8 @@
     color: var(--muted-foreground);
     font-size: 0.68rem;
     font-weight: 850;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    letter-spacing: 0;
+    text-transform: none;
 }
 
 .courier-summary-list dd {
@@ -1809,8 +1809,8 @@
 .courier-operational-card dt {
     color: var(--muted-foreground);
     font-size: 0.68rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    letter-spacing: 0;
+    text-transform: none;
 }
 
 .courier-operational-card-header dt,
@@ -1847,9 +1847,9 @@
     border-radius: 999px;
     color: var(--success);
     font-size: 0.72rem;
-    letter-spacing: 0.06em;
+    letter-spacing: 0;
     padding: 6px 12px;
-    text-transform: uppercase;
+    text-transform: none;
 }
 
 /* The detail edit/configuration dialogs use the same theme tokens as the page. */
@@ -2060,9 +2060,9 @@
     color: var(--muted-foreground) !important;
     font-size: 0.7rem;
     font-weight: 850;
-    letter-spacing: 0.07em;
+    letter-spacing: 0;
     margin-bottom: 6px;
-    text-transform: uppercase;
+    text-transform: none;
 }
 
 .courier-configuration-grid > [data-ui="text-field"] > [data-ui="select"] {
