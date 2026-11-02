@@ -6,6 +6,7 @@ import DepartmentRelationsMap, {
     getDepartmentsMissingSortingRelation,
     getRelationsWithAutomaticSortingAssignments,
     getUniqueDepartmentRelations,
+    spreadOverlappingDepartments,
 } from "./DepartmentRelationsMap";
 import {DepartmentRelation} from "./model/DepartmentRelation";
 
@@ -53,6 +54,18 @@ describe("DepartmentRelationsMap", () => {
             [departments[0], archivedSortingFacility],
             [{sourceDepartmentId: "1", targetDepartmentId: "2"}],
         ).map((item) => item.departmentId)).toEqual([1]);
+    });
+
+    it("spreads departments with identical coordinates so each marker stays clickable", () => {
+        const [first, second, third] = spreadOverlappingDepartments([
+            {department: departments[0], position: [54.35, 18.65]},
+            {department: departments[1], position: [54.35, 18.65]},
+            {department: departments[2], position: [50.06, 19.94]},
+        ]);
+
+        expect(first.position).not.toEqual(second.position);
+        expect(Math.abs(first.position[0] - 54.35)).toBeLessThan(0.02);
+        expect(third.position).toEqual([50.06, 19.94]);
     });
 
     it("collapses opposite directions into one bidirectional relation", () => {
@@ -118,9 +131,20 @@ describe("DepartmentRelationsMap", () => {
             "WAW01 ↔ SORT01",
         );
 
-        fireEvent.change(screen.getByLabelText(pl.departments.relations.source), {target: {value: "1"}});
-        fireEvent.change(screen.getByLabelText(pl.departments.relations.target), {target: {value: "2"}});
+        const chooseDepartment = (label: string, query: string, code: string) => {
+            const input = screen.getByRole("combobox", {name: label});
+            fireEvent.focus(input);
+            fireEvent.change(input, {target: {value: query}});
+            fireEvent.mouseDown(screen.getByRole("option", {name: new RegExp(`^${code}`)}));
+        };
+
+        chooseDepartment(pl.departments.relations.source, "waw", "WAW01");
+        chooseDepartment(pl.departments.relations.target, "sort", "SORT01");
         fireEvent.click(screen.getByRole("button", {name: pl.departments.relations.addRelation}));
+
+        expect(screen.getByRole("status")).toHaveTextContent(
+            pl.departments.relations.relationAdded.replace("{relation}", "WAW01 ↔ SORT01"),
+        );
 
         expect(screen.getByRole("button", {name: removeRelationLabel})).toBeInTheDocument();
         expect(screen.getByText("↔")).toBeInTheDocument();
