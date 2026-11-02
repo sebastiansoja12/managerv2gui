@@ -2,6 +2,7 @@ import React from "react";
 import {PushPin, PushPinOff, Search, ViewList} from "components/ui/icons";
 import pl from "../../i18n/translate";
 import {getTabIcon} from "./tabIcons";
+import {isHomeTab} from "./tabState";
 import {AppTabDefinition} from "./types";
 import "./styles/app-tabs.css";
 
@@ -12,7 +13,6 @@ type AppTabsProps = {
     onCloseOtherTabs: (path: string) => void;
     onCloseTab: (path: string) => void;
     onCloseTabsToRight: (path: string) => void;
-    onKeepTab: (path: string) => void;
     onSelectTab: (path: string) => void;
     onTogglePinnedTab: (path: string) => void;
 };
@@ -36,7 +36,6 @@ function AppTabs({
     onCloseOtherTabs,
     onCloseTab,
     onCloseTabsToRight,
-    onKeepTab,
     onSelectTab,
     onTogglePinnedTab,
 }: AppTabsProps) {
@@ -193,7 +192,8 @@ function AppTabs({
         setContextMenu(null);
     };
 
-    const unpinnedTabsCount = openTabs.filter((tab) => !tab.pinned).length;
+    const isClosable = (tab: AppTabDefinition) => !tab.pinned && !isHomeTab(tab);
+    const closableTabsCount = openTabs.filter(isClosable).length;
     const normalizedFilter = tabFilter.trim().toLocaleLowerCase();
     const filteredTabs = normalizedFilter
         ? openTabs.filter((tab) => tab.label.toLocaleLowerCase().includes(normalizedFilter))
@@ -207,7 +207,6 @@ function AppTabs({
     const tabClassName = (baseClassName: string, tab: AppTabDefinition) => [
         baseClassName,
         tab.path === activePath ? `${baseClassName}-active` : "",
-        tab.preview ? `${baseClassName}-preview` : "",
         tab.pinned ? `${baseClassName}-pinned` : "",
     ].filter(Boolean).join(" ");
 
@@ -217,7 +216,7 @@ function AppTabs({
     };
 
     const renderCloseButton = (tab: AppTabDefinition, className: string) => (
-        tab.pinned ? null : (
+        isClosable(tab) ? (
             <button
                 aria-label={`${pl.app.tabs.close}: ${tab.label}`}
                 className={className}
@@ -227,7 +226,7 @@ function AppTabs({
             >
                 ×
             </button>
-        )
+        ) : null
     );
 
     const renderTab = (tab: AppTabDefinition) => (
@@ -235,7 +234,7 @@ function AppTabs({
             className={tabClassName("app-tabbar-tab", tab)}
             key={tab.path}
             onAuxClick={(event) => {
-                if (isMiddleButton(event) && !tab.pinned) {
+                if (isMiddleButton(event) && isClosable(tab)) {
                     event.preventDefault();
                     onCloseTab(tab.path);
                 }
@@ -259,8 +258,7 @@ function AppTabs({
                 aria-current={tab.path === activePath ? "page" : undefined}
                 className="app-tabbar-tab-select"
                 onClick={() => onSelectTab(tab.path)}
-                onDoubleClick={() => onKeepTab(tab.path)}
-                title={tab.preview ? `${tab.label} - ${pl.app.tabs.previewHint}` : tab.label}
+                title={tab.label}
                 type="button"
             >
                 {renderTabIcon(tab, "app-tabbar-tab-icon")}
@@ -273,41 +271,35 @@ function AppTabs({
     const contextMenuTab = contextMenu ? openTabs.find((tab) => tab.path === contextMenu.path) : undefined;
     const contextMenuTabIndex = contextMenuTab ? openTabs.indexOf(contextMenuTab) : -1;
     const contextMenuItems = contextMenuTab ? [
-        ...(contextMenuTab.preview ? [{
-            action: onKeepTab,
-            disabled: false,
-            key: "keep",
-            label: pl.app.tabs.keep,
-        }] : []),
-        {
+        ...(isClosable(contextMenuTab) || contextMenuTab.pinned ? [{
             action: onTogglePinnedTab,
             disabled: false,
             icon: contextMenuTab.pinned ? PushPinOff : PushPin,
             key: "pin",
             label: contextMenuTab.pinned ? pl.app.tabs.unpin : pl.app.tabs.pin,
-        },
-        {
+        }] : []),
+        ...(isClosable(contextMenuTab) ? [{
             action: onCloseTab,
             disabled: false,
             key: "close",
             label: pl.app.tabs.close,
             separated: true,
-        },
+        }] : []),
         {
             action: onCloseOtherTabs,
-            disabled: !openTabs.some((tab) => !tab.pinned && tab.path !== contextMenuTab.path),
+            disabled: !openTabs.some((tab) => isClosable(tab) && tab.path !== contextMenuTab.path),
             key: "close-others",
             label: pl.app.tabs.closeOthers,
         },
         {
             action: onCloseTabsToRight,
-            disabled: !openTabs.slice(contextMenuTabIndex + 1).some((tab) => !tab.pinned),
+            disabled: !openTabs.slice(contextMenuTabIndex + 1).some(isClosable),
             key: "close-right",
             label: pl.app.tabs.closeToRight,
         },
         {
             action: onCloseAllTabs,
-            disabled: !unpinnedTabsCount,
+            disabled: !closableTabsCount,
             key: "close-all",
             label: pl.app.tabs.closeAll,
         },
@@ -377,7 +369,6 @@ function AppTabs({
                                     >
                                         {renderTabIcon(tab, "app-tabbar-all-item-icon")}
                                         <span>{tab.label}</span>
-                                        {tab.preview ? <small>{pl.app.tabs.preview}</small> : null}
                                     </button>
                                     {renderCloseButton(tab, "app-tabbar-all-item-close")}
                                 </li>
@@ -388,7 +379,7 @@ function AppTabs({
                         <div className="app-tabbar-all-footer">
                             <button
                                 className="app-tabbar-all-close-all"
-                                disabled={!unpinnedTabsCount}
+                                disabled={!closableTabsCount}
                                 onClick={() => {
                                     onCloseAllTabs();
                                     closeAllTabsList();

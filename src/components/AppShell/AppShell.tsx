@@ -34,16 +34,14 @@ import {clearStoredTabs, OPEN_TABS_STORAGE_KEY} from "./tabStorage";
 import {
     closeOtherTabs,
     closeTabsToRight,
+    addTab,
     closeUnpinnedTabs,
-    keepTab,
     normalizeTabFlags,
-    openPreviewTab,
     removeTab,
     togglePinnedTab,
 } from "./tabState";
 import {OrganizationChatDockProvider} from "../Chat/ChatDockContext";
 import OrganizationChatDock from "../Chat/OrganizationChatDock";
-import HomeModuleTiles from "../Home/HomeModuleTiles";
 import {useOperatorCapabilities} from "./OperatorCapabilitiesContext";
 
 const homeTab = (): AppTabDefinition => ({
@@ -63,7 +61,8 @@ const buildTab = (path: string): AppTabDefinition => {
 const normalizeTabs = (tabs: AppTabDefinition[]): AppTabDefinition[] => {
     const visitedPaths = new Set<string>();
 
-    return normalizeTabFlags(tabs
+    // The home tab is always open, even when the stored tabs lost it.
+    return normalizeTabFlags([homeTab(), ...tabs]
         .map((tab) => ({...tab, ...buildTab(tab.path)}))
         .filter((tab) => {
             if (tab.path === "/login" || visitedPaths.has(tab.path)) {
@@ -124,6 +123,13 @@ function AppShell() {
     const authenticated = authState.status === "authenticated";
     const returnsAvailable = returnsStatus === "available";
     const visibleTabs = returnsAvailable ? openTabs : openTabs.filter((tab) => !isReturnPath(tab.path));
+    const mountedTabPaths = visibleTabs.some((tab) => tab.path === activePath)
+        ? visibleTabs.map((tab) => tab.path)
+        : [...visibleTabs.map((tab) => tab.path), activePath];
+
+    React.useEffect(() => {
+        window.dispatchEvent(new Event("resize"));
+    }, [activePath]);
 
     React.useEffect(() => {
         void initializeAuthSession();
@@ -139,7 +145,7 @@ function AppShell() {
             path: normalizePath(tab.path),
         };
 
-        setOpenTabs((currentTabs) => openPreviewTab(currentTabs, normalizedTab, recentTabPathsRef.current));
+        setOpenTabs((currentTabs) => addTab(currentTabs, normalizedTab, recentTabPathsRef.current));
         navigate(normalizedTab.path);
     };
 
@@ -193,7 +199,7 @@ function AppShell() {
             .filter((path) => path !== activePath)
             .concat(activePath);
         const label = getTabTitle(activePath);
-        setOpenTabs((currentTabs) => openPreviewTab(currentTabs, {label, path: activePath}, recentTabPathsRef.current));
+        setOpenTabs((currentTabs) => addTab(currentTabs, {label, path: activePath}, recentTabPathsRef.current));
     }, [activePath, loginRoute, returnsAvailable]);
 
     React.useEffect(() => {
@@ -262,10 +268,6 @@ function AppShell() {
         navigate(fallbackTab?.path || "/");
     };
 
-    const keepActiveTab = () => {
-        setOpenTabs((currentTabs) => keepTab(currentTabs, activePath));
-    };
-
     if (authState.status === "initializing") {
         return null;
     }
@@ -302,17 +304,21 @@ function AppShell() {
                 onCloseOtherTabs={(path) => replaceTabs(closeOtherTabs(openTabs, path))}
                 onCloseTab={(path) => replaceTabs(removeTab(openTabs, path))}
                 onCloseTabsToRight={(path) => replaceTabs(closeTabsToRight(openTabs, path))}
-                onKeepTab={(path) => setOpenTabs((currentTabs) => keepTab(currentTabs, path))}
                 onSelectTab={navigate}
                 onTogglePinnedTab={(path) => setOpenTabs((currentTabs) => togglePinnedTab(currentTabs, path))}
                 openTabs={visibleTabs}
             />
-            {/* Typing in a previewed page keeps its tab, so the next navigation does not replace it. */}
-            <div className="app-main-content" onInput={keepActiveTab}>
-                <AppRoutes onOpenTab={openTab} operationalProfile={operationalProfile}/>
-            </div>
+            {/* Every open tab stays mounted, so switching tabs keeps what was typed or loaded there. */}
+            {mountedTabPaths.map((tabPath) => (
+                <div className="app-main-content" hidden={tabPath !== activePath} key={tabPath}>
+                    <AppRoutes
+                        location={tabPath === activePath ? location : tabPath}
+                        onOpenTab={openTab}
+                        operationalProfile={operationalProfile}
+                    />
+                </div>
+            ))}
             <AppFooter />
-            <HomeModuleTiles onOpenTab={openTab} operationalProfile={operationalProfile}/>
             <OrganizationChatDock />
             <Dialog
                 className="operational-profile-dialog"
