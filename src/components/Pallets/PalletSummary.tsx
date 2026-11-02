@@ -2,7 +2,7 @@ import React from "react";
 import {Chip} from "components/ui";
 import pl from "../../i18n/translate";
 import {PalletDto} from "./model/Pallet";
-import {formatPalletDate, formatPalletWeight, palletStatusLabel, palletStatusTone} from "./palletLabels";
+import {formatPalletDate, palletStatusLabel, palletStatusTone} from "./palletLabels";
 
 type PalletSummaryProps = {
     pallet: PalletDto;
@@ -10,7 +10,6 @@ type PalletSummaryProps = {
 
 function PalletSummary({pallet}: PalletSummaryProps) {
     const translations = pl.pallets.summary;
-    const blockReason = pallet.loadBlockReason ? pl.pallets.blockReasons[pallet.loadBlockReason] : null;
 
     return (
         <div className="pallet-summary">
@@ -29,12 +28,15 @@ function PalletSummary({pallet}: PalletSummaryProps) {
                 <strong>{pallet.shipmentIds.length}</strong>
             </div>
             <div className="pallet-summary-item">
-                <span>{translations.grossWeight}</span>
-                <strong>{formatPalletWeight(pallet.grossWeight, pallet.grossWeightUnit)}</strong>
+                <span>{pl.pallets.carrier.carrier}</span>
+                <strong>{pallet.carrier?.carrierName || pl.common.dash}</strong>
             </div>
             <div className="pallet-summary-item">
-                <span>{translations.loadable}</span>
-                <strong>{pallet.loadable ? translations.loadableYes : blockReason || translations.loadableNo}</strong>
+                <span>{pl.pallets.carrier.vehicle}</span>
+                <strong className="pallet-code">
+                    {[pallet.carrier?.vehicleRegistrationNumber, pallet.carrier?.trailerRegistrationNumber]
+                        .filter(Boolean).join(" / ") || pl.common.dash}
+                </strong>
             </div>
             <div className="pallet-summary-item">
                 <span>{translations.modified}</span>

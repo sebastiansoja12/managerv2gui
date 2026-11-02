@@ -7,7 +7,7 @@ import pl from "../../i18n/translate";
 import {ShipmentDto, ShipmentStatusDto} from "../Shipment/dto/ShipmentDto";
 import "./styles/pallets.css";
 
-export const PALLET_SHIPMENT_STATUSES: ShipmentStatusDto[] = ["CREATED", "PREPARED", "ACCEPTED"];
+export const PALLET_SHIPMENT_STATUSES: ShipmentStatusDto[] = ["CREATED", "PREPARED", "COLLECTED", "ACCEPTED"];
 const PAGE_SIZE = 20;
 
 export type SelectedShipment = {
@@ -49,7 +49,7 @@ function PalletShipmentPicker({selected, onChange, excludedShipmentIds = [], rel
                 page,
                 size: PAGE_SIZE,
             });
-            setShipments(response.data);
+            setShipments(response.data.content);
         } catch (error) {
             setShipments([]);
             setLoadError(getBackendErrorMessage(error, translations.loadError));

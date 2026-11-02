@@ -5,7 +5,14 @@ import {
     Button,
     Chip,
     CircularProgress,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
     IconButton,
+    Menu,
+    MenuItem,
     TextField,
     Typography,
 } from "components/ui";
@@ -15,6 +22,7 @@ import {
     CheckCircle,
     DeleteOutline,
     Edit,
+    ExpandMore,
     Inventory2,
     LocalShipping,
     QrCode2,
@@ -23,6 +31,7 @@ import {
     Send,
     TableView,
     FactCheckOutlined,
+    Undo,
     ViewList,
 } from "components/ui/icons";
 import DeliveryService from "../../hooks/DeliveryService";
@@ -39,6 +48,7 @@ import {PalletDto, PalletHistoryEntryDto, PalletManualStatusDto} from "./model/P
 import PalletAddShipmentsDialog from "./PalletAddShipmentsDialog";
 import PalletCarrierDialog from "./PalletCarrierDialog";
 import PalletEditDialog from "./PalletEditDialog";
+import AuditLogTimeline from "../AuditLog/AuditLogTimeline";
 import PalletHistoryTimeline from "./PalletHistoryTimeline";
 import PalletSummary from "./PalletSummary";
 import {isPalletCancellable} from "./PalletList";
@@ -58,6 +68,14 @@ type PalletDetailsViewProps = {
     onOpenTab?: (tab: AppTabDefinition) => void;
 };
 
+type PalletConfirmation = {
+    title: string;
+    message: string;
+    confirmLabel: string;
+    destructive: boolean;
+    onConfirm: () => void;
+};
+
 type PalletItem = {
     shipmentId: string;
     shipment: ShipmentDto | null;
@@ -66,8 +84,7 @@ type PalletItem = {
 };
 
 const CONTENT_MODIFIABLE_STATUSES = ["CREATED", "PREPARING", "NOT_READY", "READY"];
-const FINISHED_STATUSES = ["DELIVERED", "CANCELLED"];
-const TRANSPORT_LOCKED_STATUSES = ["IN_TRANSIT", "DELIVERED", "CANCELLED"];
+const TRANSPORT_LOCKED_STATUSES = ["LOADED", "IN_TRANSIT", "DELIVERED", "CANCELLED"];
 
 const toKilograms = (value: number, unit?: string | null) => {
     switch (unit) {
@@ -87,7 +104,7 @@ export const departmentLabel = (department?: Department | null) => department
 export const isPalletContentEditable = (pallet: PalletDto) =>
     CONTENT_MODIFIABLE_STATUSES.includes(pallet.palletStatus) && pallet.storageStatus !== "LOCKED";
 
-export const isPalletEditable = (pallet: PalletDto) => !FINISHED_STATUSES.includes(pallet.palletStatus);
+export const isPalletEditable = (pallet: PalletDto) => CONTENT_MODIFIABLE_STATUSES.includes(pallet.palletStatus);
 
 export const isPalletTransportEditable = (pallet: PalletDto) => !TRANSPORT_LOCKED_STATUSES.includes(pallet.palletStatus);
 
@@ -113,6 +130,8 @@ function PalletDetailsView({onOpenTab}: PalletDetailsViewProps) {
     const [addFromListOpen, setAddFromListOpen] = useState(false);
     const [editOpen, setEditOpen] = useState(false);
     const [carrierOpen, setCarrierOpen] = useState(false);
+    const [operationsAnchor, setOperationsAnchor] = useState<HTMLElement | null>(null);
+    const [confirmation, setConfirmation] = useState<PalletConfirmation | null>(null);
     const [newShipmentNumber, setNewShipmentNumber] = useState("");
 
     const departmentsById = useMemo(
@@ -265,6 +284,7 @@ function PalletDetailsView({onOpenTab}: PalletDetailsViewProps) {
     };
 
     const loadPalletOnTruck = () => {
+        setOperationsAnchor(null);
         if (!pallet) {
             return;
         }
@@ -282,19 +302,55 @@ function PalletDetailsView({onOpenTab}: PalletDetailsViewProps) {
             return;
         }
         const statusTranslations = translations.statusActions;
-        const confirmation = palletStatus === "IN_TRANSIT" ? statusTranslations.confirmDispatch : statusTranslations.confirmDelivered;
-        if (!window.confirm(confirmation.replace("{trackingNumber}", pallet.trackingNumber))) {
+        const dispatch = palletStatus === "IN_TRANSIT";
+        setConfirmation({
+            title: dispatch ? statusTranslations.dispatchTitle : statusTranslations.deliveredTitle,
+            message: (dispatch ? statusTranslations.confirmDispatch : statusTranslations.confirmDelivered)
+                .replace("{trackingNumber}", pallet.trackingNumber),
+            confirmLabel: dispatch ? statusTranslations.dispatch : statusTranslations.markDelivered,
+            destructive: false,
+            onConfirm: () => runAction(async () => (dispatch
+                    ? await PalletService.changeStatus(pallet.palletId, palletStatus)
+                    : await PalletService.unload(pallet.palletId)).data,
+                dispatch ? statusTranslations.dispatched : statusTranslations.delivered),
+        });
+    };
+
+    const revertLoading = () => {
+        setOperationsAnchor(null);
+        if (!pallet) {
             return;
         }
-        runAction(async () => (await PalletService.changeStatus(pallet.palletId, palletStatus)).data,
-            palletStatus === "IN_TRANSIT" ? statusTranslations.dispatched : statusTranslations.delivered);
+        const statusTranslations = translations.statusActions;
+        setConfirmation({
+            title: statusTranslations.revertLoadingTitle,
+            message: statusTranslations.confirmRevertLoading.replace("{trackingNumber}", pallet.trackingNumber),
+            confirmLabel: statusTranslations.revertLoading,
+            destructive: false,
+            onConfirm: () => runAction(async () => (await PalletService.revertLoading(pallet.palletId)).data,
+                statusTranslations.loadingReverted),
+        });
     };
 
     const cancelPallet = () => {
-        if (!pallet || !window.confirm(pl.pallets.list.cancelDialog.description.replace("{trackingNumber}", pallet.trackingNumber))) {
+        setOperationsAnchor(null);
+        if (!pallet) {
             return;
         }
-        runAction(async () => (await PalletService.cancel(pallet.palletId)).data, translations.cancelled);
+        const cancelDialog = pl.pallets.list.cancelDialog;
+        setConfirmation({
+            title: cancelDialog.title,
+            message: cancelDialog.description.replace("{trackingNumber}", pallet.trackingNumber),
+            confirmLabel: cancelDialog.confirm,
+            destructive: true,
+            onConfirm: () => runAction(async () => (await PalletService.cancel(pallet.palletId)).data, translations.cancelled),
+        });
+    };
+
+    const confirmPendingAction = () => {
+        const pendingConfirmation = confirmation;
+        setConfirmation(null);
+        pendingConfirmation?.onConfirm();
     };
 
     if (loading) {
@@ -325,6 +381,8 @@ function PalletDetailsView({onOpenTab}: PalletDetailsViewProps) {
     const formatKg = (value: number) => `${value.toLocaleString(pl.common.locale, {maximumFractionDigits: 3})} KG`;
     const carrier = pallet.carrier;
     const actions = translations.actions;
+    const loaded = pallet.palletStatus === "LOADED";
+    const loadable = pallet.loadable && !loaded;
 
     return (
         <main className="pallet-page">
@@ -348,9 +406,6 @@ function PalletDetailsView({onOpenTab}: PalletDetailsViewProps) {
                     <Button disabled={busy || !isPalletEditable(pallet)} startIcon={<Edit />} onClick={() => setEditOpen(true)}>
                         {actions.edit}
                     </Button>
-                    <Button disabled={busy || !isPalletTransportEditable(pallet)} startIcon={<LocalShipping />} variant="outlined" onClick={() => setCarrierOpen(true)}>
-                        {carrier ? actions.changeCarrier : actions.assignCarrier}
-                    </Button>
                     <Button disabled={documents.loading !== null} startIcon={documents.loading === "label" ? <CircularProgress size={16} /> : <QrCode2 />} variant="outlined" onClick={() => documents.openDocument(pallet, "label")}>
                         {actions.label}
                     </Button>
@@ -360,31 +415,65 @@ function PalletDetailsView({onOpenTab}: PalletDetailsViewProps) {
                     <Button disabled={documents.loading !== null} startIcon={documents.loading === "excel" ? <CircularProgress size={16} /> : <TableView />} variant="outlined" onClick={() => documents.exportExcel(pallet)}>
                         {actions.excel}
                     </Button>
-                    {pallet.loadable ? (
-                        <Button disabled={busy} startIcon={<QrCodeScanner />} variant="outlined" onClick={loadPalletOnTruck}>{translations.load}</Button>
-                    ) : null}
-                    {pallet.palletStatus === "LOADED" ? (
-                        <Button
-                            disabled={busy || !carrier}
-                            startIcon={<Send />}
-                            title={carrier ? undefined : translations.statusActions.carrierRequired}
-                            variant="outlined"
-                            onClick={() => changeStatus("IN_TRANSIT")}
+                    <Button
+                        disabled={busy || !loaded || !carrier}
+                        startIcon={<Send />}
+                        title={loaded && !carrier ? translations.statusActions.carrierRequired : undefined}
+                        variant="outlined"
+                        onClick={() => changeStatus("IN_TRANSIT")}
+                    >
+                        {translations.statusActions.dispatch}
+                    </Button>
+                    <Button disabled={busy || pallet.palletStatus !== "IN_TRANSIT"} startIcon={<CheckCircle />} variant="outlined" onClick={() => changeStatus("DELIVERED")}>
+                        {translations.statusActions.markDelivered}
+                    </Button>
+                    <Button
+                        aria-haspopup="menu"
+                        disabled={busy}
+                        endIcon={<ExpandMore />}
+                        variant="outlined"
+                        onClick={(event: React.MouseEvent<HTMLElement>) => setOperationsAnchor(event.currentTarget)}
+                    >
+                        {translations.statusActions.operations}
+                    </Button>
+                    <Menu anchorEl={operationsAnchor} open={Boolean(operationsAnchor)} onClose={() => setOperationsAnchor(null)}>
+                        <MenuItem disabled={!loadable} onClick={loadPalletOnTruck}>
+                            <QrCodeScanner fontSize="small" />
+                            {translations.load}
+                        </MenuItem>
+                        <MenuItem
+                            disabled={!isPalletTransportEditable(pallet)}
+                            onClick={() => {
+                                setOperationsAnchor(null);
+                                setCarrierOpen(true);
+                            }}
                         >
-                            {translations.statusActions.dispatch}
-                        </Button>
-                    ) : null}
-                    {pallet.palletStatus === "IN_TRANSIT" ? (
-                        <Button disabled={busy} startIcon={<CheckCircle />} variant="outlined" onClick={() => changeStatus("DELIVERED")}>
-                            {translations.statusActions.markDelivered}
-                        </Button>
-                    ) : null}
-                    {isPalletCancellable(pallet) ? (
-                        <Button color="error" disabled={busy} startIcon={<Block />} variant="outlined" onClick={cancelPallet}>
+                            <LocalShipping fontSize="small" />
+                            {carrier ? actions.changeCarrier : actions.assignCarrier}
+                        </MenuItem>
+                        <MenuItem disabled={!loaded} onClick={revertLoading}>
+                            <Undo fontSize="small" />
+                            {translations.statusActions.revertLoading}
+                        </MenuItem>
+                        <MenuItem disabled={!isPalletCancellable(pallet)} onClick={cancelPallet}>
+                            <Block fontSize="small" />
                             {translations.cancel}
-                        </Button>
-                    ) : null}
+                        </MenuItem>
+                    </Menu>
                 </nav>
+
+                <Dialog fullWidth maxWidth="xs" open={confirmation !== null} onClose={() => setConfirmation(null)}>
+                    <DialogTitle>{confirmation?.title}</DialogTitle>
+                    <DialogContent>
+                        <DialogContentText>{confirmation?.message}</DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button variant="outlined" onClick={() => setConfirmation(null)}>{pl.pallets.list.cancelDialog.back}</Button>
+                        <Button color={confirmation?.destructive ? "error" : "primary"} onClick={confirmPendingAction}>
+                            {confirmation?.confirmLabel}
+                        </Button>
+                    </DialogActions>
+                </Dialog>
 
                 {overweight ? (
                     <Alert severity="warning">
@@ -402,115 +491,115 @@ function PalletDetailsView({onOpenTab}: PalletDetailsViewProps) {
 
                 <PalletSummary pallet={pallet} />
 
-                <section className="pallet-details-grid">
-                    <div className="pallet-details-column">
-                        <div className="pallet-panel">
-                            <div className="pallet-panel-header">
-                                <div>
-                                    <Typography variant="h5">{translations.items.title}</Typography>
-                                    <p>{translations.items.count.replace("{count}", String(pallet.shipmentIds.length))}</p>
-                                </div>
-                            </div>
-                            {editable ? (
-                                <div className="pallet-items-toolbar">
-                                    <form className="pallet-scan-form" onSubmit={addShipment}>
-                                        <TextField
-                                            autoComplete="off"
-                                            disabled={busy}
-                                            label={translations.items.inputLabel}
-                                            placeholder={translations.items.placeholder}
-                                            size="small"
-                                            value={newShipmentNumber}
-                                            onChange={(event: React.ChangeEvent<HTMLInputElement>) => setNewShipmentNumber(event.target.value)}
-                                        />
-                                        <Button disabled={busy} startIcon={<Add />} type="submit" variant="outlined">{translations.items.add}</Button>
-                                    </form>
-                                    <Button disabled={busy} startIcon={<ViewList />} onClick={() => setAddFromListOpen(true)}>
-                                        {translations.items.addFromList}
-                                    </Button>
-                                </div>
-                            ) : (
-                                <p className="pallet-hint">{translations.items.locked}</p>
-                            )}
-                            <div className="pallet-table-wrap">
-                                <table className="pallet-table">
-                                    <thead>
-                                        <tr>
-                                            <th>{translations.items.columns.trackingNumber}</th>
-                                            <th>{translations.items.columns.status}</th>
-                                            <th>{translations.items.columns.recipient}</th>
-                                            <th>{translations.items.columns.weight}</th>
-                                            {editable ? <th aria-label={translations.items.columns.actions} /> : null}
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {itemsLoading ? (
-                                            <tr><td className="pallet-empty" colSpan={5}>{translations.items.loading}</td></tr>
-                                        ) : items.length ? items.map((item) => {
-                                            const itemTrackingNumber = item.shipment?.trackingNumber?.value;
-                                            return (
-                                                <tr key={item.shipmentId}>
-                                                    <td className="pallet-code">
-                                                        {itemTrackingNumber && onOpenTab ? (
-                                                            <button
-                                                                className="pallet-link"
-                                                                onClick={() => onOpenTab({
-                                                                    label: `${pl.shipments.page.detailsTitle} ${itemTrackingNumber}`,
-                                                                    path: `/shipments/tracking/${encodeURIComponent(itemTrackingNumber)}/edit`,
-                                                                })}
-                                                                type="button"
-                                                            >
-                                                                {itemTrackingNumber}
-                                                            </button>
-                                                        ) : itemTrackingNumber || item.shipmentId}
-                                                    </td>
-                                                    <td>{item.shipment ? pl.shipments.status[item.shipment.shipmentStatus] : item.error}</td>
-                                                    <td>{item.shipment
-                                                        ? [item.shipment.recipient?.city, [item.shipment.recipient?.firstName, item.shipment.recipient?.lastName].filter(Boolean).join(" ")].filter(Boolean).join(" · ")
-                                                        : pl.common.dash}</td>
-                                                    <td>{item.shipment?.weight ? `${item.shipment.weight.value} ${item.shipment.weight.unit}` : pl.common.dash}</td>
-                                                    {editable ? (
-                                                        <td className="pallet-actions-cell">
-                                                            <IconButton
-                                                                aria-label={translations.items.remove.replace("{trackingNumber}", itemTrackingNumber || item.shipmentId)}
-                                                                disabled={busy}
-                                                                size="small"
-                                                                title={translations.items.remove.replace("{trackingNumber}", itemTrackingNumber || item.shipmentId)}
-                                                                onClick={() => removeShipment(item)}
-                                                            >
-                                                                <DeleteOutline fontSize="small" />
-                                                            </IconButton>
-                                                        </td>
-                                                    ) : null}
-                                                </tr>
-                                            );
-                                        }) : (
-                                            <tr><td className="pallet-empty" colSpan={5}>{translations.items.empty}</td></tr>
-                                        )}
-                                    </tbody>
-                                </table>
+                <section className="pallet-main-grid">
+                    <div className="pallet-panel">
+                        <div className="pallet-panel-header">
+                            <div>
+                                <Typography variant="h5">{translations.items.title}</Typography>
+                                <p>{translations.items.count.replace("{count}", String(pallet.shipmentIds.length))}</p>
                             </div>
                         </div>
-
-                        <div className="pallet-panel">
-                            <div className="pallet-panel-header">
-                                <div>
-                                    <Typography variant="h5">{translations.route.title}</Typography>
-                                    <p>{translations.route.description}</p>
-                                </div>
+                        {editable ? (
+                            <div className="pallet-items-toolbar">
+                                <form className="pallet-scan-form" onSubmit={addShipment}>
+                                    <TextField
+                                        autoComplete="off"
+                                        disabled={busy}
+                                        label={translations.items.inputLabel}
+                                        placeholder={translations.items.placeholder}
+                                        size="small"
+                                        value={newShipmentNumber}
+                                        onChange={(event: React.ChangeEvent<HTMLInputElement>) => setNewShipmentNumber(event.target.value)}
+                                    />
+                                    <Button disabled={busy} startIcon={<Add />} type="submit" variant="outlined">{translations.items.add}</Button>
+                                </form>
+                                <Button disabled={busy} startIcon={<ViewList />} onClick={() => setAddFromListOpen(true)}>
+                                    {translations.items.addFromList}
+                                </Button>
                             </div>
-                            <PalletHistoryTimeline
-                                departmentsById={departmentsById}
-                                entries={history}
-                                error={historyError}
-                                loading={historyLoading}
-                            />
+                        ) : (
+                            <p className="pallet-hint">{translations.items.locked}</p>
+                        )}
+                        <div className="pallet-table-wrap">
+                            <table className="pallet-table">
+                                <thead>
+                                    <tr>
+                                        <th>{translations.items.columns.trackingNumber}</th>
+                                        <th>{translations.items.columns.status}</th>
+                                        <th>{translations.items.columns.recipient}</th>
+                                        <th>{translations.items.columns.weight}</th>
+                                        {editable ? <th aria-label={translations.items.columns.actions} /> : null}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {itemsLoading ? (
+                                        <tr><td className="pallet-empty" colSpan={5}>{translations.items.loading}</td></tr>
+                                    ) : items.length ? items.map((item) => {
+                                        const itemTrackingNumber = item.shipment?.trackingNumber?.value;
+                                        return (
+                                            <tr key={item.shipmentId}>
+                                                <td className="pallet-code">
+                                                    {itemTrackingNumber && onOpenTab ? (
+                                                        <button
+                                                            className="pallet-link"
+                                                            onClick={() => onOpenTab({
+                                                                label: `${pl.shipments.page.detailsTitle} ${itemTrackingNumber}`,
+                                                                path: `/shipments/tracking/${encodeURIComponent(itemTrackingNumber)}/edit`,
+                                                            })}
+                                                            type="button"
+                                                        >
+                                                            {itemTrackingNumber}
+                                                        </button>
+                                                    ) : itemTrackingNumber || item.shipmentId}
+                                                </td>
+                                                <td>{item.shipment ? pl.shipments.status[item.shipment.shipmentStatus] : item.error}</td>
+                                                <td>{item.shipment
+                                                    ? [item.shipment.recipient?.city, [item.shipment.recipient?.firstName, item.shipment.recipient?.lastName].filter(Boolean).join(" ")].filter(Boolean).join(" · ")
+                                                    : pl.common.dash}</td>
+                                                <td>{item.shipment?.weight ? `${item.shipment.weight.value} ${item.shipment.weight.unit}` : pl.common.dash}</td>
+                                                {editable ? (
+                                                    <td className="pallet-actions-cell">
+                                                        <IconButton
+                                                            aria-label={translations.items.remove.replace("{trackingNumber}", itemTrackingNumber || item.shipmentId)}
+                                                            disabled={busy}
+                                                            size="small"
+                                                            title={translations.items.remove.replace("{trackingNumber}", itemTrackingNumber || item.shipmentId)}
+                                                            onClick={() => removeShipment(item)}
+                                                        >
+                                                            <DeleteOutline fontSize="small" />
+                                                        </IconButton>
+                                                    </td>
+                                                ) : null}
+                                            </tr>
+                                        );
+                                    }) : (
+                                        <tr><td className="pallet-empty" colSpan={5}>{translations.items.empty}</td></tr>
+                                    )}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
 
-                    <div className="pallet-details-column">
-                        <div className="pallet-panel">
-                            <Typography variant="h5">{translations.weight.title}</Typography>
+                    <div className="pallet-panel">
+                        <div className="pallet-panel-header">
+                            <Typography variant="h5">{translations.info.title}</Typography>
+                            <Button disabled={busy || !isPalletEditable(pallet)} startIcon={<Edit />} variant="text" onClick={() => setEditOpen(true)}>{actions.edit}</Button>
+                        </div>
+                        <dl className="pallet-definition-list">
+                            <div><dt>{translations.departments.origin}</dt><dd>{departmentById(pallet.originDepartmentId)}</dd></div>
+                            <div><dt>{translations.departments.destination}</dt><dd>{departmentById(pallet.destinationDepartmentId)}</dd></div>
+                            <div><dt>{pl.pallets.edit.palletType}</dt><dd>{pallet.palletType ? pl.pallets.palletType[pallet.palletType] : pl.common.dash}</dd></div>
+                            <div><dt>{pl.pallets.edit.priority}</dt><dd>{pallet.handlingPriority ? pl.pallets.priority[pallet.handlingPriority] : pl.common.dash}</dd></div>
+                            <div><dt>{pl.pallets.edit.refrigerated}</dt><dd>{pallet.refrigerated ? pl.pallets.edit.yes : pl.pallets.edit.no}</dd></div>
+                            <div><dt>{pl.pallets.edit.dimensions}</dt><dd>{pallet.dimension ? `${pallet.dimension.length} × ${pallet.dimension.width} × ${pallet.dimension.height} cm` : pl.common.dash}</dd></div>
+                            <div><dt>{translations.info.sealNumber}</dt><dd className="pallet-code">{pallet.sealNumber || pl.common.dash}</dd></div>
+                            <div><dt>{translations.info.storageStatus}</dt><dd>{pallet.storageStatus ? pl.pallets.storageStatus[pallet.storageStatus as keyof typeof pl.pallets.storageStatus] || pallet.storageStatus : pl.common.dash}</dd></div>
+                            <div><dt>{translations.info.palletId}</dt><dd className="pallet-code">{pallet.palletId}</dd></div>
+                            <div><dt>{translations.info.created}</dt><dd>{formatPalletDate(pallet.created)}</dd></div>
+                            <div><dt>{translations.info.modified}</dt><dd>{formatPalletDate(pallet.modified)}</dd></div>
+                        </dl>
+                        <div className="pallet-panel-section">
+                            <h3 className="pallet-section-title">{translations.weight.title}</h3>
                             <p className="pallet-hint">{translations.weight.autoHint}</p>
                             {utilization !== null ? (
                                 <>
@@ -531,52 +620,26 @@ function PalletDetailsView({onOpenTab}: PalletDetailsViewProps) {
                             </dl>
                             <p className="pallet-hint">{maxWeightKg !== null ? translations.weight.maxLocked : translations.weight.maxInEdit}</p>
                         </div>
+                    </div>
+                </section>
 
-                        <div className="pallet-panel">
-                            <div className="pallet-panel-header">
-                                <Typography variant="h5">{pl.pallets.carrier.title}</Typography>
-                                {isPalletTransportEditable(pallet) ? (
-                                    <Button disabled={busy} startIcon={<LocalShipping />} variant="text" onClick={() => setCarrierOpen(true)}>
-                                        {carrier ? actions.changeCarrier : actions.assignCarrier}
-                                    </Button>
-                                ) : null}
+                <section className="pallet-main-grid">
+                    <div className="pallet-panel">
+                        <div className="pallet-panel-header">
+                            <div>
+                                <Typography variant="h5">{translations.route.title}</Typography>
+                                <p>{translations.route.description}</p>
                             </div>
-                            {carrier ? (
-                                <dl className="pallet-definition-list">
-                                    <div><dt>{pl.pallets.carrier.carrier}</dt><dd>{carrier.carrierName}</dd></div>
-                                    <div><dt>{pl.pallets.carrier.transportType}</dt><dd>{transportTypeLabel(carrier.transportType)}</dd></div>
-                                    <div><dt>{pl.pallets.carrier.driver}</dt><dd>{[carrier.driverName, carrier.driverPhone].filter(Boolean).join(" · ") || pl.common.dash}</dd></div>
-                                    <div><dt>{pl.pallets.carrier.vehicle}</dt><dd className="pallet-code">{[carrier.vehicleRegistrationNumber, carrier.trailerRegistrationNumber].filter(Boolean).join(" / ") || pl.common.dash}</dd></div>
-                                    <div><dt>{pl.pallets.carrier.assignedAt}</dt><dd>{formatPalletDate(carrier.assignedAt)}{carrier.assignedBy ? ` · ${carrier.assignedBy}` : ""}</dd></div>
-                                </dl>
-                            ) : (
-                                <p className="pallet-hint">{pl.pallets.carrier.none}</p>
-                            )}
-                            {!isPalletTransportEditable(pallet) ? <p className="pallet-hint">{pl.pallets.carrier.locked}</p> : null}
                         </div>
+                        <PalletHistoryTimeline
+                            departmentsById={departmentsById}
+                            entries={history}
+                            error={historyError}
+                            loading={historyLoading}
+                        />
+                    </div>
 
-                        <div className="pallet-panel">
-                            <div className="pallet-panel-header">
-                                <Typography variant="h5">{translations.info.title}</Typography>
-                                {isPalletEditable(pallet) ? (
-                                    <Button disabled={busy} startIcon={<Edit />} variant="text" onClick={() => setEditOpen(true)}>{actions.edit}</Button>
-                                ) : null}
-                            </div>
-                            <dl className="pallet-definition-list">
-                                <div><dt>{translations.departments.origin}</dt><dd>{departmentById(pallet.originDepartmentId)}</dd></div>
-                                <div><dt>{translations.departments.destination}</dt><dd>{departmentById(pallet.destinationDepartmentId)}</dd></div>
-                                <div><dt>{pl.pallets.edit.palletType}</dt><dd>{pallet.palletType ? pl.pallets.palletType[pallet.palletType] : pl.common.dash}</dd></div>
-                                <div><dt>{pl.pallets.edit.priority}</dt><dd>{pallet.handlingPriority ? pl.pallets.priority[pallet.handlingPriority] : pl.common.dash}</dd></div>
-                                <div><dt>{pl.pallets.edit.refrigerated}</dt><dd>{pallet.refrigerated ? pl.pallets.edit.yes : pl.pallets.edit.no}</dd></div>
-                                <div><dt>{pl.pallets.edit.dimensions}</dt><dd>{pallet.dimension ? `${pallet.dimension.length} × ${pallet.dimension.width} × ${pallet.dimension.height} cm` : pl.common.dash}</dd></div>
-                                <div><dt>{translations.info.sealNumber}</dt><dd className="pallet-code">{pallet.sealNumber || pl.common.dash}</dd></div>
-                                <div><dt>{translations.info.storageStatus}</dt><dd>{pallet.storageStatus ? pl.pallets.storageStatus[pallet.storageStatus as keyof typeof pl.pallets.storageStatus] || pallet.storageStatus : pl.common.dash}</dd></div>
-                                <div><dt>{translations.info.palletId}</dt><dd className="pallet-code">{pallet.palletId}</dd></div>
-                                <div><dt>{translations.info.created}</dt><dd>{formatPalletDate(pallet.created)}</dd></div>
-                                <div><dt>{translations.info.modified}</dt><dd>{formatPalletDate(pallet.modified)}</dd></div>
-                            </dl>
-                        </div>
-
+                    <div className="pallet-panel-stack">
                         <div className="pallet-panel">
                             <div className="pallet-panel-header">
                                 <Typography variant="h5">{translations.delivery.title}</Typography>
@@ -609,7 +672,41 @@ function PalletDetailsView({onOpenTab}: PalletDetailsViewProps) {
                                 <p className="pallet-hint">{translations.delivery.empty}</p>
                             )}
                         </div>
+
+                        <div className="pallet-panel">
+                            <div className="pallet-panel-header">
+                                <Typography variant="h5">{pl.pallets.carrier.title}</Typography>
+                                <Button disabled={busy || !isPalletTransportEditable(pallet)} startIcon={<LocalShipping />} variant="text" onClick={() => setCarrierOpen(true)}>
+                                    {carrier ? actions.changeCarrier : actions.assignCarrier}
+                                </Button>
+                            </div>
+                            {carrier ? (
+                                <dl className="pallet-definition-list">
+                                    <div><dt>{pl.pallets.carrier.carrier}</dt><dd>{carrier.carrierName}</dd></div>
+                                    <div><dt>{pl.pallets.carrier.transportType}</dt><dd>{transportTypeLabel(carrier.transportType)}</dd></div>
+                                    <div><dt>{pl.pallets.carrier.driver}</dt><dd>{[carrier.driverName, carrier.driverPhone].filter(Boolean).join(" · ") || pl.common.dash}</dd></div>
+                                    <div><dt>{pl.pallets.carrier.vehicle}</dt><dd className="pallet-code">{[carrier.vehicleRegistrationNumber, carrier.trailerRegistrationNumber].filter(Boolean).join(" / ") || pl.common.dash}</dd></div>
+                                    <div><dt>{pl.pallets.carrier.assignedAt}</dt><dd>{formatPalletDate(carrier.assignedAt)}{carrier.assignedBy ? ` · ${carrier.assignedBy}` : ""}</dd></div>
+                                </dl>
+                            ) : (
+                                <p className="pallet-hint">{pl.pallets.carrier.none}</p>
+                            )}
+                            {!isPalletTransportEditable(pallet) ? <p className="pallet-hint">{pl.pallets.carrier.locked}</p> : null}
+                        </div>
                     </div>
+                </section>
+
+                <section className="pallet-panel">
+                    <div className="pallet-panel-header">
+                        <Typography variant="h5">{pl.auditLog.title}</Typography>
+                    </div>
+                    <AuditLogTimeline
+                        departmentLabel={(departmentId) => departmentsById.get(String(departmentId))?.departmentCode?.value
+                            || String(departmentId)}
+                        reloadKey={history.length}
+                        resourceId={pallet.palletId}
+                        resourceType="PALLET"
+                    />
                 </section>
             </div>
             <PalletAddShipmentsDialog
