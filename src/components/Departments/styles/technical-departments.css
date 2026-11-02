@@ -44,8 +44,8 @@
 .app-main-content .departments-heading [data-ui="typography"] {
     font-family: var(--font-display) !important;
     font-size: clamp(2rem, 3vw, 3.15rem) !important;
-    font-weight: 400 !important;
-    letter-spacing: -0.045em !important;
+    font-weight: var(--font-display-weight) !important;
+    letter-spacing: var(--font-display-tracking) !important;
     line-height: 0.98;
 }
 
@@ -68,11 +68,11 @@
 
 .app-main-content .departments-stats span {
     color: var(--muted-foreground);
-    font-family: var(--font-mono);
+    font-family: var(--font-ui);
     font-size: 0.61rem;
     font-weight: 600;
-    letter-spacing: 0.045em;
-    text-transform: uppercase;
+    letter-spacing: 0;
+    text-transform: none;
 }
 
 .app-main-content .departments-stats strong {
@@ -281,10 +281,10 @@
 
 .app-main-content .departments-side-actions-title span,
 .app-main-content .departments-side-actions-title strong {
-    font-family: var(--font-mono);
+    font-family: var(--font-ui);
     font-size: 0.68rem;
-    letter-spacing: 0.045em;
-    text-transform: uppercase;
+    letter-spacing: 0;
+    text-transform: none;
 }
 
 .app-main-content .departments-side-actions-title strong {
@@ -330,7 +330,7 @@
 .departments-dialog-title {
     background: var(--surface) !important;
     font-family: var(--font-display) !important;
-    font-weight: 400 !important;
+    font-weight: var(--font-display-weight) !important;
 }
 
 .departments-dialog-actions {
