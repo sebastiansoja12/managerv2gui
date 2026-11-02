@@ -19,7 +19,8 @@ export type CurrentUserDto = {
     role: string;
     departmentCode: string;
     language: string;
-    apiKey: string | null;
+    hasApiKey: boolean;
+    apiKey?: string | null;
     rolePermissions: RolePermissionApi[];
     deleted: boolean;
     operatorId?: OperatorIdDto | null;

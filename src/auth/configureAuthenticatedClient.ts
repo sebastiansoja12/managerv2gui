@@ -100,17 +100,61 @@ const isUnsafeRequest = (request?: AxiosRequestConfig) => {
     return !!method && UNSAFE_METHODS.has(method);
 };
 
+const lastRefreshKey = (refreshPath: string) => `auth:lastRefreshAt:${refreshPath}`;
+
+const readLastRefreshAt = (refreshPath: string) => {
+    try {
+        return Number(window.localStorage.getItem(lastRefreshKey(refreshPath))) || 0;
+    } catch {
+        return 0;
+    }
+};
+
+const writeLastRefreshAt = (refreshPath: string, time: number) => {
+    try {
+        window.localStorage.setItem(lastRefreshKey(refreshPath), String(time));
+    } catch {
+    }
+};
+
+// All tabs share one refresh cookie, so refreshes must not run in parallel across tabs.
+const withCrossTabLock = <T>(name: string, task: () => Promise<T>): Promise<T> => {
+    const locks = typeof navigator !== "undefined" ? navigator.locks : undefined;
+    return locks ? locks.request(name, task) : task();
+};
+
+const responseStatus = (error: unknown) => (error as AxiosError | undefined)?.response?.status;
+
+const postRefresh = async (refreshPath: string) => {
+    try {
+        await refreshClient.post<void>(refreshPath, undefined, {headers: xsrfHeaders(await ensureCsrfToken())});
+    } catch (error) {
+        if (responseStatus(error) !== 403) {
+            throw error;
+        }
+        csrfToken = null;
+        await refreshClient.post<void>(refreshPath, undefined, {headers: xsrfHeaders(await ensureCsrfToken())});
+    }
+};
+
+// Only an explicit 401 from the refresh endpoint ends the session; network errors and 5xx are transient.
+export const isSessionRejected = (error: unknown) => responseStatus(error) === 401;
+
 const refreshAccessToken = (refreshPath: string) => {
     const pendingRefresh = refreshPromises.get(refreshPath);
     if (pendingRefresh) {
         return pendingRefresh;
     }
 
-    const refreshPromise = ensureCsrfToken()
-        .then((token) => refreshClient.post<void>(refreshPath, undefined, {
-            headers: xsrfHeaders(token),
-        }))
-        .then(() => undefined)
+    const requestedAt = Date.now();
+    const refreshPromise = withCrossTabLock(`auth-refresh:${refreshPath}`, async () => {
+        if (readLastRefreshAt(refreshPath) >= requestedAt) {
+            // Another tab refreshed the session while this one was waiting for the lock.
+            return;
+        }
+        await postRefresh(refreshPath);
+        writeLastRefreshAt(refreshPath, Date.now());
+    })
         .finally(() => {
             refreshPromises.delete(refreshPath);
         });
@@ -175,7 +219,9 @@ export const configureAuthenticatedClient = (
                 await refreshAccessToken(refreshPath);
                 return http.request(request);
             } catch (refreshError) {
-                onUnauthenticated();
+                if (isSessionRejected(refreshError)) {
+                    onUnauthenticated();
+                }
                 return Promise.reject(refreshError);
             }
         },
