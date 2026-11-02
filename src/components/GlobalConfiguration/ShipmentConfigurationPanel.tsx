@@ -19,8 +19,11 @@ import {useAuthState} from "../../auth/AuthState";
 import OperatorConfigurationService from "../../hooks/OperatorConfigurationService";
 import pl from "../../i18n/translate";
 import {
+    CashOnDeliveryPaymentMethodApi,
     DefaultShipmentStatusApi,
+    ProofOfDeliveryModeApi,
     ShipmentConfigurationApi,
+    ShipmentConfigurationSection,
     ShipmentLabelFormatApi,
     ShipmentNotificationChannelApi,
     ShipmentServiceLevelApi,
@@ -67,9 +70,147 @@ type ShipmentConfigurationDraft = {
     notifyRecipientOnDelivered: boolean;
     notifySenderOnException: boolean;
     notificationChannel: string;
+    requireDeliveryToken: boolean;
+    proofOfDelivery: string;
+    maxDeliveryAttempts: string;
+    allowNeighbourDelivery: boolean;
+    allowSafePlaceDelivery: boolean;
+    redirectToPickupPointAfterFailure: boolean;
+    allowReturns: boolean;
+    returnWindowDays: string;
+    autoReturnAfterFailedDelivery: boolean;
+    pickupPointStorageDays: string;
+    requireReturnReason: boolean;
+    allowCashOnDelivery: boolean;
+    maxCashOnDeliveryAmount: string;
+    cashOnDeliveryPaymentMethod: string;
+    requireInsuranceAboveValue: string;
+    economySlaHours: string;
+    standardSlaHours: string;
+    expressSlaHours: string;
+    flagDelayedAfterHours: string;
+    requireExceptionNote: boolean;
+    escalateDelaysToDepartmentManager: boolean;
+    anonymizeRecipientDataAfterDays: string;
+    archiveClosedShipmentsAfterDays: string;
+    deliveryPhotoRetentionDays: string;
 };
 
 type TrackingNumberPrefixMode = "custom" | "departmentCode" | "none";
+
+type ShipmentConfigurationGroup =
+    | "validation"
+    | "labels"
+    | "limits"
+    | "workflow"
+    | "notifications"
+    | "delivery"
+    | "returns"
+    | "payments"
+    | "sla"
+    | "dataRetention";
+
+const groupSections: Record<ShipmentConfigurationGroup, ShipmentConfigurationSection[]> = {
+    validation: ["validationConfiguration"],
+    labels: ["labelConfiguration"],
+    limits: ["shipmentLimits"],
+    workflow: ["workflowConfiguration", "trackingNumberRule"],
+    notifications: ["notificationConfiguration"],
+    delivery: ["deliveryConfiguration"],
+    returns: ["returnConfiguration"],
+    payments: ["paymentConfiguration"],
+    sla: ["slaConfiguration"],
+    dataRetention: ["dataRetentionConfiguration"],
+};
+
+const sectionDraftFields: Record<ShipmentConfigurationSection, (keyof ShipmentConfigurationDraft)[]> = {
+    validationConfiguration: [
+        "validateAddressData",
+        "requireRecipientPhone",
+        "requireRecipientEmail",
+        "preventDuplicateTracking",
+        "requireSenderReference",
+        "validatePostalCode",
+    ],
+    labelConfiguration: ["autoGenerateLabels", "includeReturnLabel", "attachPackingSlip", "labelFormat"],
+    shipmentLimits: [
+        "maximumWeightKg",
+        "minimumWeightKg",
+        "maximumLengthCm",
+        "maximumWidthCm",
+        "maximumHeightCm",
+        "maximumShipmentValue",
+        "allowOversized",
+    ],
+    workflowConfiguration: [
+        "defaultStatus",
+        "defaultServiceLevel",
+        "autoAssignCourier",
+        "autoCloseDelivered",
+        "generateTrackingNumber",
+        "cancellationWindowMinutes",
+        "pickupCutoffTime",
+    ],
+    trackingNumberRule: [
+        "trackingNumberPrefixMode",
+        "trackingNumberKey",
+        "trackingNumberSeparator",
+        "trackingNumberSource",
+        "trackingNumberRandomLength",
+        "trackingNumberIncludeDate",
+        "trackingNumberDateFormat",
+        "trackingNumberUppercase",
+    ],
+    notificationConfiguration: [
+        "notifyRecipientOnCreated",
+        "notifyRecipientOnDispatched",
+        "notifyRecipientOnDelivered",
+        "notifySenderOnException",
+        "notificationChannel",
+    ],
+    deliveryConfiguration: [
+        "requireDeliveryToken",
+        "proofOfDelivery",
+        "maxDeliveryAttempts",
+        "allowNeighbourDelivery",
+        "allowSafePlaceDelivery",
+        "redirectToPickupPointAfterFailure",
+    ],
+    returnConfiguration: [
+        "allowReturns",
+        "returnWindowDays",
+        "autoReturnAfterFailedDelivery",
+        "pickupPointStorageDays",
+        "requireReturnReason",
+    ],
+    paymentConfiguration: [
+        "allowCashOnDelivery",
+        "maxCashOnDeliveryAmount",
+        "cashOnDeliveryPaymentMethod",
+        "requireInsuranceAboveValue",
+    ],
+    slaConfiguration: [
+        "economySlaHours",
+        "standardSlaHours",
+        "expressSlaHours",
+        "flagDelayedAfterHours",
+        "requireExceptionNote",
+        "escalateDelaysToDepartmentManager",
+    ],
+    dataRetentionConfiguration: [
+        "anonymizeRecipientDataAfterDays",
+        "archiveClosedShipmentsAfterDays",
+        "deliveryPhotoRetentionDays",
+    ],
+};
+
+const groupDraftFields = (group: ShipmentConfigurationGroup) => (
+    groupSections[group].flatMap((section) => sectionDraftFields[section])
+);
+
+const pickDraftFields = (configuration: ShipmentConfigurationDraft, fields: (keyof ShipmentConfigurationDraft)[]) => (
+    Object.fromEntries(fields.map((field) => [field, configuration[field]])) as Partial<ShipmentConfigurationDraft>
+);
 
 type BooleanSettingKey = {
     [Key in keyof ShipmentConfigurationDraft]: ShipmentConfigurationDraft[Key] extends boolean ? Key : never;
@@ -133,6 +274,30 @@ const defaultShipmentConfiguration: ShipmentConfigurationDraft = {
     notifyRecipientOnDelivered: true,
     notifySenderOnException: true,
     notificationChannel: "sms",
+    requireDeliveryToken: false,
+    proofOfDelivery: "signature",
+    maxDeliveryAttempts: "2",
+    allowNeighbourDelivery: false,
+    allowSafePlaceDelivery: false,
+    redirectToPickupPointAfterFailure: true,
+    allowReturns: true,
+    returnWindowDays: "14",
+    autoReturnAfterFailedDelivery: true,
+    pickupPointStorageDays: "7",
+    requireReturnReason: false,
+    allowCashOnDelivery: true,
+    maxCashOnDeliveryAmount: "5000",
+    cashOnDeliveryPaymentMethod: "both",
+    requireInsuranceAboveValue: "0",
+    economySlaHours: "96",
+    standardSlaHours: "48",
+    expressSlaHours: "24",
+    flagDelayedAfterHours: "24",
+    requireExceptionNote: true,
+    escalateDelaysToDepartmentManager: false,
+    anonymizeRecipientDataAfterDays: "365",
+    archiveClosedShipmentsAfterDays: "90",
+    deliveryPhotoRetentionDays: "180",
 };
 
 const labelFormatFromApi: Record<ShipmentLabelFormatApi, string> = {
@@ -214,6 +379,32 @@ const notificationChannelFromApi: Record<ShipmentNotificationChannelApi, string>
 const notificationChannelToApi: Record<string, ShipmentNotificationChannelApi> = {
     sms: "SMS",
     email: "EMAIL",
+    both: "BOTH",
+};
+
+const proofOfDeliveryFromApi: Record<ProofOfDeliveryModeApi, string> = {
+    NONE: "none",
+    SIGNATURE: "signature",
+    PHOTO: "photo",
+    SIGNATURE_AND_PHOTO: "signatureAndPhoto",
+};
+
+const proofOfDeliveryToApi: Record<string, ProofOfDeliveryModeApi> = {
+    none: "NONE",
+    signature: "SIGNATURE",
+    photo: "PHOTO",
+    signatureAndPhoto: "SIGNATURE_AND_PHOTO",
+};
+
+const cashOnDeliveryPaymentMethodFromApi: Record<CashOnDeliveryPaymentMethodApi, string> = {
+    CASH: "cash",
+    CARD: "card",
+    BOTH: "both",
+};
+
+const cashOnDeliveryPaymentMethodToApi: Record<string, CashOnDeliveryPaymentMethodApi> = {
+    cash: "CASH",
+    card: "CARD",
     both: "BOTH",
 };
 
@@ -381,6 +572,32 @@ const mapApiToDraft = (
         notifySenderOnException: Boolean(configuration.notificationConfiguration?.notifySenderOnException),
         notificationChannel: notificationChannelFromApi[configuration.notificationConfiguration?.notificationChannel]
             || defaultShipmentConfiguration.notificationChannel,
+        requireDeliveryToken: configuration.deliveryConfiguration?.requireDeliveryToken ?? defaultShipmentConfiguration.requireDeliveryToken,
+        proofOfDelivery: proofOfDeliveryFromApi[configuration.deliveryConfiguration?.proofOfDelivery]
+            || defaultShipmentConfiguration.proofOfDelivery,
+        maxDeliveryAttempts: toTextNumber(configuration.deliveryConfiguration?.maxDeliveryAttempts, defaultShipmentConfiguration.maxDeliveryAttempts),
+        allowNeighbourDelivery: configuration.deliveryConfiguration?.allowNeighbourDelivery ?? defaultShipmentConfiguration.allowNeighbourDelivery,
+        allowSafePlaceDelivery: configuration.deliveryConfiguration?.allowSafePlaceDelivery ?? defaultShipmentConfiguration.allowSafePlaceDelivery,
+        redirectToPickupPointAfterFailure: configuration.deliveryConfiguration?.redirectToPickupPointAfterFailure ?? defaultShipmentConfiguration.redirectToPickupPointAfterFailure,
+        allowReturns: configuration.returnConfiguration?.allowReturns ?? defaultShipmentConfiguration.allowReturns,
+        returnWindowDays: toTextNumber(configuration.returnConfiguration?.returnWindowDays, defaultShipmentConfiguration.returnWindowDays),
+        autoReturnAfterFailedDelivery: configuration.returnConfiguration?.autoReturnAfterFailedDelivery ?? defaultShipmentConfiguration.autoReturnAfterFailedDelivery,
+        pickupPointStorageDays: toTextNumber(configuration.returnConfiguration?.pickupPointStorageDays, defaultShipmentConfiguration.pickupPointStorageDays),
+        requireReturnReason: configuration.returnConfiguration?.requireReturnReason ?? defaultShipmentConfiguration.requireReturnReason,
+        allowCashOnDelivery: configuration.paymentConfiguration?.allowCashOnDelivery ?? defaultShipmentConfiguration.allowCashOnDelivery,
+        maxCashOnDeliveryAmount: toTextNumber(configuration.paymentConfiguration?.maxCashOnDeliveryAmount, defaultShipmentConfiguration.maxCashOnDeliveryAmount),
+        cashOnDeliveryPaymentMethod: cashOnDeliveryPaymentMethodFromApi[configuration.paymentConfiguration?.cashOnDeliveryPaymentMethod]
+            || defaultShipmentConfiguration.cashOnDeliveryPaymentMethod,
+        requireInsuranceAboveValue: toTextNumber(configuration.paymentConfiguration?.requireInsuranceAboveValue, defaultShipmentConfiguration.requireInsuranceAboveValue),
+        economySlaHours: toTextNumber(configuration.slaConfiguration?.economySlaHours, defaultShipmentConfiguration.economySlaHours),
+        standardSlaHours: toTextNumber(configuration.slaConfiguration?.standardSlaHours, defaultShipmentConfiguration.standardSlaHours),
+        expressSlaHours: toTextNumber(configuration.slaConfiguration?.expressSlaHours, defaultShipmentConfiguration.expressSlaHours),
+        flagDelayedAfterHours: toTextNumber(configuration.slaConfiguration?.flagDelayedAfterHours, defaultShipmentConfiguration.flagDelayedAfterHours),
+        requireExceptionNote: configuration.slaConfiguration?.requireExceptionNote ?? defaultShipmentConfiguration.requireExceptionNote,
+        escalateDelaysToDepartmentManager: configuration.slaConfiguration?.escalateDelaysToDepartmentManager ?? defaultShipmentConfiguration.escalateDelaysToDepartmentManager,
+        anonymizeRecipientDataAfterDays: toTextNumber(configuration.dataRetentionConfiguration?.anonymizeRecipientDataAfterDays, defaultShipmentConfiguration.anonymizeRecipientDataAfterDays),
+        archiveClosedShipmentsAfterDays: toTextNumber(configuration.dataRetentionConfiguration?.archiveClosedShipmentsAfterDays, defaultShipmentConfiguration.archiveClosedShipmentsAfterDays),
+        deliveryPhotoRetentionDays: toTextNumber(configuration.dataRetentionConfiguration?.deliveryPhotoRetentionDays, defaultShipmentConfiguration.deliveryPhotoRetentionDays),
     };
 };
 
@@ -446,11 +663,48 @@ const mapDraftToApi = (
         notifySenderOnException: configuration.notifySenderOnException,
         notificationChannel: notificationChannelToApi[configuration.notificationChannel] || "SMS",
     },
+    deliveryConfiguration: {
+        requireDeliveryToken: configuration.requireDeliveryToken,
+        proofOfDelivery: proofOfDeliveryToApi[configuration.proofOfDelivery] || "SIGNATURE",
+        maxDeliveryAttempts: toApiNumber(configuration.maxDeliveryAttempts, defaultShipmentConfiguration.maxDeliveryAttempts),
+        allowNeighbourDelivery: configuration.allowNeighbourDelivery,
+        allowSafePlaceDelivery: configuration.allowSafePlaceDelivery,
+        redirectToPickupPointAfterFailure: configuration.redirectToPickupPointAfterFailure,
+    },
+    returnConfiguration: {
+        allowReturns: configuration.allowReturns,
+        returnWindowDays: toApiNumber(configuration.returnWindowDays, defaultShipmentConfiguration.returnWindowDays),
+        autoReturnAfterFailedDelivery: configuration.autoReturnAfterFailedDelivery,
+        pickupPointStorageDays: toApiNumber(configuration.pickupPointStorageDays, defaultShipmentConfiguration.pickupPointStorageDays),
+        requireReturnReason: configuration.requireReturnReason,
+    },
+    paymentConfiguration: {
+        allowCashOnDelivery: configuration.allowCashOnDelivery,
+        maxCashOnDeliveryAmount: toApiNumber(configuration.maxCashOnDeliveryAmount, defaultShipmentConfiguration.maxCashOnDeliveryAmount),
+        cashOnDeliveryPaymentMethod: cashOnDeliveryPaymentMethodToApi[configuration.cashOnDeliveryPaymentMethod] || "BOTH",
+        requireInsuranceAboveValue: toApiNumber(configuration.requireInsuranceAboveValue, defaultShipmentConfiguration.requireInsuranceAboveValue),
+    },
+    slaConfiguration: {
+        economySlaHours: toApiNumber(configuration.economySlaHours, defaultShipmentConfiguration.economySlaHours),
+        standardSlaHours: toApiNumber(configuration.standardSlaHours, defaultShipmentConfiguration.standardSlaHours),
+        expressSlaHours: toApiNumber(configuration.expressSlaHours, defaultShipmentConfiguration.expressSlaHours),
+        flagDelayedAfterHours: toApiNumber(configuration.flagDelayedAfterHours, defaultShipmentConfiguration.flagDelayedAfterHours),
+        requireExceptionNote: configuration.requireExceptionNote,
+        escalateDelaysToDepartmentManager: configuration.escalateDelaysToDepartmentManager,
+    },
+    dataRetentionConfiguration: {
+        anonymizeRecipientDataAfterDays: toApiNumber(configuration.anonymizeRecipientDataAfterDays, defaultShipmentConfiguration.anonymizeRecipientDataAfterDays),
+        archiveClosedShipmentsAfterDays: toApiNumber(configuration.archiveClosedShipmentsAfterDays, defaultShipmentConfiguration.archiveClosedShipmentsAfterDays),
+        deliveryPhotoRetentionDays: toApiNumber(configuration.deliveryPhotoRetentionDays, defaultShipmentConfiguration.deliveryPhotoRetentionDays),
+    },
 });
 
 export type ShipmentConfigurationSource = {
     load: () => Promise<ShipmentConfigurationApi>;
-    save: (configuration: ShipmentConfigurationApi) => Promise<ShipmentConfigurationApi>;
+    save: (
+        section: ShipmentConfigurationSection,
+        configuration: ShipmentConfigurationApi,
+    ) => Promise<ShipmentConfigurationApi>;
 };
 
 type ShipmentConfigurationPanelProps = {
@@ -461,8 +715,8 @@ type ShipmentConfigurationPanelProps = {
 
 const currentOperatorSource: ShipmentConfigurationSource = {
     load: async () => (await OperatorConfigurationService.getCurrentShipmentConfiguration()).data,
-    save: async (configuration) => (
-        await OperatorConfigurationService.updateCurrentShipmentConfiguration(configuration)
+    save: async (section, configuration) => (
+        await OperatorConfigurationService.updateCurrentShipmentConfigurationSection(section, configuration[section])
     ).data,
 };
 
@@ -489,7 +743,8 @@ export function ShipmentConfigurationPanel({
     );
     const [saved, setSaved] = useState(false);
     const [loading, setLoading] = useState(true);
-    const [saving, setSaving] = useState(false);
+    const [persistedConfiguration, setPersistedConfiguration] = useState<ShipmentConfigurationApi | null>(null);
+    const [savingGroup, setSavingGroup] = useState<ShipmentConfigurationGroup | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [trackingNumberDialogOpen, setTrackingNumberDialogOpen] = useState(false);
     const [trackingNumberRuleDraft, setTrackingNumberRuleDraft] = useState<TrackingNumberRuleDraft>(
@@ -519,6 +774,7 @@ export function ShipmentConfigurationPanel({
                 }
 
                 const nextConfiguration = mapApiToDraft(loadedConfiguration, departmentCode);
+                setPersistedConfiguration(loadedConfiguration);
                 setConfiguration(nextConfiguration);
                 rememberConfiguration(persistLocally, nextConfiguration);
             } catch (exception) {
@@ -553,22 +809,63 @@ export function ShipmentConfigurationPanel({
         setSaved(false);
     };
 
-    const saveConfiguration = async () => {
+    const isSectionChanged = (section: ShipmentConfigurationSection) => {
+        if (!persistedConfiguration) {
+            return true;
+        }
+        const fields = sectionDraftFields[section];
+        return JSON.stringify(pickDraftFields(configuration, fields))
+            !== JSON.stringify(pickDraftFields(mapApiToDraft(persistedConfiguration, departmentCode), fields));
+    };
+
+    const isGroupChanged = (group: ShipmentConfigurationGroup) => groupSections[group].some(isSectionChanged);
+
+    const saveGroup = async (group: ShipmentConfigurationGroup) => {
         try {
-            setSaving(true);
+            setSavingGroup(group);
             setError(null);
-            const savedConfiguration = await source.save(mapDraftToApi(configuration, departmentCode));
-            const nextConfiguration = mapApiToDraft(savedConfiguration, departmentCode);
-            setConfiguration(nextConfiguration);
-            rememberConfiguration(persistLocally, nextConfiguration);
+            const draftConfiguration = mapDraftToApi(configuration, departmentCode);
+            let savedConfiguration = persistedConfiguration ?? draftConfiguration;
+            for (const section of groupSections[group].filter(isSectionChanged)) {
+                savedConfiguration = await source.save(section, {
+                    ...savedConfiguration,
+                    [section]: draftConfiguration[section],
+                });
+            }
+            const savedDraft = mapApiToDraft(savedConfiguration, departmentCode);
+            const savedGroupFields = pickDraftFields(savedDraft, groupDraftFields(group));
+            setPersistedConfiguration(savedConfiguration);
+            setConfiguration((currentConfiguration) => ({
+                ...currentConfiguration,
+                ...savedGroupFields,
+            }));
+            rememberConfiguration(persistLocally, savedDraft);
             setSaved(true);
         } catch (exception) {
             setError(getBackendErrorMessage(exception, shipmentConfiguration.messages.saveError));
             setSaved(false);
         } finally {
-            setSaving(false);
+            setSavingGroup(null);
         }
     };
+
+    const renderGroupHeader = (group: ShipmentConfigurationGroup) => (
+        <header>
+            <div>
+                <h3>{shipmentConfiguration.categories[group]}</h3>
+                <p>{shipmentConfiguration.categoryDescriptions[group]}</p>
+            </div>
+            <Button
+                aria-label={`${pl.common.saveChanges}: ${shipmentConfiguration.categories[group]}`}
+                disabled={loading || savingGroup !== null || !isGroupChanged(group)}
+                startIcon={<Save />}
+                variant="outlined"
+                onClick={() => saveGroup(group)}
+            >
+                {savingGroup === group ? shipmentConfiguration.messages.saving : pl.common.saveChanges}
+            </Button>
+        </header>
+    );
 
     const openTrackingNumberDialog = () => {
         setTrackingNumberRuleDraft(getTrackingNumberRule(configuration));
@@ -629,17 +926,23 @@ export function ShipmentConfigurationPanel({
         label: string,
         hint: string,
         options?: {
+            disabled?: boolean;
             min?: string;
             step?: string;
             type?: string;
             unit?: string;
         },
     ) => (
-        <div className="shipment-setting-row" key={field}>
+        <div
+            aria-disabled={options?.disabled || undefined}
+            className={options?.disabled ? "shipment-setting-row shipment-setting-row--disabled" : "shipment-setting-row"}
+            key={field}
+        >
             {renderSettingDescription(label, hint)}
             <div className="shipment-setting-input">
                 <TextField
                     aria-label={label}
+                    disabled={options?.disabled}
                     fullWidth
                     inputProps={{min: options?.min, step: options?.step}}
                     size="small"
@@ -683,14 +986,6 @@ export function ShipmentConfigurationPanel({
                     <InfoOutlined fontSize="small" />
                     <span>{shipmentConfiguration.previewNote}</span>
                 </div>
-                <Button
-                    disabled={loading || saving}
-                    startIcon={<Save />}
-                    variant="outlined"
-                    onClick={saveConfiguration}
-                >
-                    {saving ? shipmentConfiguration.messages.saving : pl.common.saveChanges}
-                </Button>
             </div>
 
             {loading ? (
@@ -705,10 +1000,7 @@ export function ShipmentConfigurationPanel({
 
             <div className="shipment-configuration-sections">
                 <section className="shipment-configuration-group">
-                    <header>
-                        <h3>{shipmentConfiguration.categories.validation}</h3>
-                        <p>{shipmentConfiguration.categoryDescriptions.validation}</p>
-                    </header>
+                    {renderGroupHeader("validation")}
                     <div className="shipment-configuration-grid">
                         {renderBooleanSetting("validateAddressData", shipmentConfiguration.fields.validateAddressData.label, shipmentConfiguration.fields.validateAddressData.hint)}
                         {renderBooleanSetting("requireRecipientPhone", shipmentConfiguration.fields.requireRecipientPhone.label, shipmentConfiguration.fields.requireRecipientPhone.hint)}
@@ -720,10 +1012,7 @@ export function ShipmentConfigurationPanel({
                 </section>
 
                 <section className="shipment-configuration-group">
-                    <header>
-                        <h3>{shipmentConfiguration.categories.labels}</h3>
-                        <p>{shipmentConfiguration.categoryDescriptions.labels}</p>
-                    </header>
+                    {renderGroupHeader("labels")}
                     <div className="shipment-configuration-grid">
                         {renderBooleanSetting("autoGenerateLabels", shipmentConfiguration.fields.autoGenerateLabels.label, shipmentConfiguration.fields.autoGenerateLabels.hint)}
                         {renderBooleanSetting("includeReturnLabel", shipmentConfiguration.fields.includeReturnLabel.label, shipmentConfiguration.fields.includeReturnLabel.hint)}
@@ -737,24 +1026,18 @@ export function ShipmentConfigurationPanel({
                 </section>
 
                 <section className="shipment-configuration-group">
-                    <header>
-                        <h3>{shipmentConfiguration.categories.limits}</h3>
-                        <p>{shipmentConfiguration.categoryDescriptions.limits}</p>
-                    </header>
+                    {renderGroupHeader("limits")}
                     <div className="shipment-configuration-grid">
-                        {renderInputSetting("maximumWeightKg", shipmentConfiguration.fields.maximumWeightKg.label, shipmentConfiguration.fields.maximumWeightKg.hint, {min: "0.1", step: "0.1", type: "number", unit: "kg"})}
-                        {renderInputSetting("maximumLengthCm", shipmentConfiguration.fields.maximumLengthCm.label, shipmentConfiguration.fields.maximumLengthCm.hint, {min: "1", step: "1", type: "number", unit: "cm"})}
-                        {renderInputSetting("maximumWidthCm", shipmentConfiguration.fields.maximumWidthCm.label, shipmentConfiguration.fields.maximumWidthCm.hint, {min: "1", step: "1", type: "number", unit: "cm"})}
-                        {renderInputSetting("maximumHeightCm", shipmentConfiguration.fields.maximumHeightCm.label, shipmentConfiguration.fields.maximumHeightCm.hint, {min: "1", step: "1", type: "number", unit: "cm"})}
+                        {renderInputSetting("maximumWeightKg", shipmentConfiguration.fields.maximumWeightKg.label, shipmentConfiguration.fields.maximumWeightKg.hint, {disabled: configuration.allowOversized, min: "0.1", step: "0.1", type: "number", unit: "kg"})}
+                        {renderInputSetting("maximumLengthCm", shipmentConfiguration.fields.maximumLengthCm.label, shipmentConfiguration.fields.maximumLengthCm.hint, {disabled: configuration.allowOversized, min: "1", step: "1", type: "number", unit: "cm"})}
+                        {renderInputSetting("maximumWidthCm", shipmentConfiguration.fields.maximumWidthCm.label, shipmentConfiguration.fields.maximumWidthCm.hint, {disabled: configuration.allowOversized, min: "1", step: "1", type: "number", unit: "cm"})}
+                        {renderInputSetting("maximumHeightCm", shipmentConfiguration.fields.maximumHeightCm.label, shipmentConfiguration.fields.maximumHeightCm.hint, {disabled: configuration.allowOversized, min: "1", step: "1", type: "number", unit: "cm"})}
                         {renderBooleanSetting("allowOversized", shipmentConfiguration.fields.allowOversized.label, shipmentConfiguration.fields.allowOversized.hint)}
                     </div>
                 </section>
 
                 <section className="shipment-configuration-group">
-                    <header>
-                        <h3>{shipmentConfiguration.categories.workflow}</h3>
-                        <p>{shipmentConfiguration.categoryDescriptions.workflow}</p>
-                    </header>
+                    {renderGroupHeader("workflow")}
                     <div className="shipment-configuration-grid">
                         {renderSelectSetting("defaultStatus", shipmentConfiguration.fields.defaultStatus.label, shipmentConfiguration.fields.defaultStatus.hint, [
                             {value: "created", label: shipmentConfiguration.statuses.created},
@@ -783,10 +1066,7 @@ export function ShipmentConfigurationPanel({
                 </section>
 
                 <section className="shipment-configuration-group">
-                    <header>
-                        <h3>{shipmentConfiguration.categories.notifications}</h3>
-                        <p>{shipmentConfiguration.categoryDescriptions.notifications}</p>
-                    </header>
+                    {renderGroupHeader("notifications")}
                     <div className="shipment-configuration-grid">
                         {renderBooleanSetting("notifyRecipientOnCreated", shipmentConfiguration.fields.notifyRecipientOnCreated.label, shipmentConfiguration.fields.notifyRecipientOnCreated.hint)}
                         {renderBooleanSetting("notifyRecipientOnDispatched", shipmentConfiguration.fields.notifyRecipientOnDispatched.label, shipmentConfiguration.fields.notifyRecipientOnDispatched.hint)}
@@ -797,6 +1077,69 @@ export function ShipmentConfigurationPanel({
                             {value: "email", label: shipmentConfiguration.notificationChannels.email},
                             {value: "both", label: shipmentConfiguration.notificationChannels.both},
                         ])}
+                    </div>
+                </section>
+
+                <section className="shipment-configuration-group">
+                    {renderGroupHeader("delivery")}
+                    <div className="shipment-configuration-grid">
+                        {renderBooleanSetting("requireDeliveryToken", shipmentConfiguration.fields.requireDeliveryToken.label, shipmentConfiguration.fields.requireDeliveryToken.hint)}
+                        {renderSelectSetting("proofOfDelivery", shipmentConfiguration.fields.proofOfDelivery.label, shipmentConfiguration.fields.proofOfDelivery.hint, [
+                            {value: "none", label: shipmentConfiguration.proofOfDeliveryOptions.none},
+                            {value: "signature", label: shipmentConfiguration.proofOfDeliveryOptions.signature},
+                            {value: "photo", label: shipmentConfiguration.proofOfDeliveryOptions.photo},
+                            {value: "signatureAndPhoto", label: shipmentConfiguration.proofOfDeliveryOptions.signatureAndPhoto},
+                        ])}
+                        {renderInputSetting("maxDeliveryAttempts", shipmentConfiguration.fields.maxDeliveryAttempts.label, shipmentConfiguration.fields.maxDeliveryAttempts.hint, {min: "1", step: "1", type: "number"})}
+                        {renderBooleanSetting("allowNeighbourDelivery", shipmentConfiguration.fields.allowNeighbourDelivery.label, shipmentConfiguration.fields.allowNeighbourDelivery.hint)}
+                        {renderBooleanSetting("allowSafePlaceDelivery", shipmentConfiguration.fields.allowSafePlaceDelivery.label, shipmentConfiguration.fields.allowSafePlaceDelivery.hint)}
+                        {renderBooleanSetting("redirectToPickupPointAfterFailure", shipmentConfiguration.fields.redirectToPickupPointAfterFailure.label, shipmentConfiguration.fields.redirectToPickupPointAfterFailure.hint)}
+                    </div>
+                </section>
+
+                <section className="shipment-configuration-group">
+                    {renderGroupHeader("returns")}
+                    <div className="shipment-configuration-grid">
+                        {renderBooleanSetting("allowReturns", shipmentConfiguration.fields.allowReturns.label, shipmentConfiguration.fields.allowReturns.hint)}
+                        {renderInputSetting("returnWindowDays", shipmentConfiguration.fields.returnWindowDays.label, shipmentConfiguration.fields.returnWindowDays.hint, {disabled: !configuration.allowReturns, min: "0", step: "1", type: "number", unit: shipmentConfiguration.units.days})}
+                        {renderBooleanSetting("autoReturnAfterFailedDelivery", shipmentConfiguration.fields.autoReturnAfterFailedDelivery.label, shipmentConfiguration.fields.autoReturnAfterFailedDelivery.hint)}
+                        {renderInputSetting("pickupPointStorageDays", shipmentConfiguration.fields.pickupPointStorageDays.label, shipmentConfiguration.fields.pickupPointStorageDays.hint, {min: "0", step: "1", type: "number", unit: shipmentConfiguration.units.days})}
+                        {renderBooleanSetting("requireReturnReason", shipmentConfiguration.fields.requireReturnReason.label, shipmentConfiguration.fields.requireReturnReason.hint)}
+                    </div>
+                </section>
+
+                <section className="shipment-configuration-group">
+                    {renderGroupHeader("payments")}
+                    <div className="shipment-configuration-grid">
+                        {renderBooleanSetting("allowCashOnDelivery", shipmentConfiguration.fields.allowCashOnDelivery.label, shipmentConfiguration.fields.allowCashOnDelivery.hint)}
+                        {renderInputSetting("maxCashOnDeliveryAmount", shipmentConfiguration.fields.maxCashOnDeliveryAmount.label, shipmentConfiguration.fields.maxCashOnDeliveryAmount.hint, {disabled: !configuration.allowCashOnDelivery, min: "0", step: "0.01", type: "number", unit: shipmentConfiguration.units.currency})}
+                        {renderSelectSetting("cashOnDeliveryPaymentMethod", shipmentConfiguration.fields.cashOnDeliveryPaymentMethod.label, shipmentConfiguration.fields.cashOnDeliveryPaymentMethod.hint, [
+                            {value: "cash", label: shipmentConfiguration.cashOnDeliveryPaymentMethodOptions.cash},
+                            {value: "card", label: shipmentConfiguration.cashOnDeliveryPaymentMethodOptions.card},
+                            {value: "both", label: shipmentConfiguration.cashOnDeliveryPaymentMethodOptions.both},
+                        ])}
+                        {renderInputSetting("requireInsuranceAboveValue", shipmentConfiguration.fields.requireInsuranceAboveValue.label, shipmentConfiguration.fields.requireInsuranceAboveValue.hint, {min: "0", step: "0.01", type: "number", unit: shipmentConfiguration.units.currency})}
+                    </div>
+                </section>
+
+                <section className="shipment-configuration-group">
+                    {renderGroupHeader("sla")}
+                    <div className="shipment-configuration-grid">
+                        {renderInputSetting("economySlaHours", shipmentConfiguration.fields.economySlaHours.label, shipmentConfiguration.fields.economySlaHours.hint, {min: "0", step: "1", type: "number", unit: shipmentConfiguration.units.hours})}
+                        {renderInputSetting("standardSlaHours", shipmentConfiguration.fields.standardSlaHours.label, shipmentConfiguration.fields.standardSlaHours.hint, {min: "0", step: "1", type: "number", unit: shipmentConfiguration.units.hours})}
+                        {renderInputSetting("expressSlaHours", shipmentConfiguration.fields.expressSlaHours.label, shipmentConfiguration.fields.expressSlaHours.hint, {min: "0", step: "1", type: "number", unit: shipmentConfiguration.units.hours})}
+                        {renderInputSetting("flagDelayedAfterHours", shipmentConfiguration.fields.flagDelayedAfterHours.label, shipmentConfiguration.fields.flagDelayedAfterHours.hint, {min: "0", step: "1", type: "number", unit: shipmentConfiguration.units.hours})}
+                        {renderBooleanSetting("requireExceptionNote", shipmentConfiguration.fields.requireExceptionNote.label, shipmentConfiguration.fields.requireExceptionNote.hint)}
+                        {renderBooleanSetting("escalateDelaysToDepartmentManager", shipmentConfiguration.fields.escalateDelaysToDepartmentManager.label, shipmentConfiguration.fields.escalateDelaysToDepartmentManager.hint)}
+                    </div>
+                </section>
+
+                <section className="shipment-configuration-group">
+                    {renderGroupHeader("dataRetention")}
+                    <div className="shipment-configuration-grid">
+                        {renderInputSetting("anonymizeRecipientDataAfterDays", shipmentConfiguration.fields.anonymizeRecipientDataAfterDays.label, shipmentConfiguration.fields.anonymizeRecipientDataAfterDays.hint, {min: "0", step: "1", type: "number", unit: shipmentConfiguration.units.days})}
+                        {renderInputSetting("archiveClosedShipmentsAfterDays", shipmentConfiguration.fields.archiveClosedShipmentsAfterDays.label, shipmentConfiguration.fields.archiveClosedShipmentsAfterDays.hint, {min: "0", step: "1", type: "number", unit: shipmentConfiguration.units.days})}
+                        {renderInputSetting("deliveryPhotoRetentionDays", shipmentConfiguration.fields.deliveryPhotoRetentionDays.label, shipmentConfiguration.fields.deliveryPhotoRetentionDays.hint, {min: "0", step: "1", type: "number", unit: shipmentConfiguration.units.days})}
                     </div>
                 </section>
             </div>
