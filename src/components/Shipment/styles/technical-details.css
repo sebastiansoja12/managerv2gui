@@ -40,8 +40,8 @@
 .shipment-cc-page .shipments-title [data-ui="typography"][data-variant="h4"] {
     font-family: var(--font-display) !important;
     font-size: clamp(1.8rem, 2.3vw, 2.45rem) !important;
-    font-weight: 400 !important;
-    letter-spacing: -0.04em !important;
+    font-weight: var(--font-display-weight) !important;
+    letter-spacing: var(--font-display-tracking) !important;
     line-height: 1 !important;
 }
 
@@ -270,3 +270,253 @@
     }
 }
 
+
+/* Modern pass: compact header with the tracking number, pill tabs and calm cards with sentence-case labels. */
+.app-main-content .shipment-cc-page {
+    padding-top: 16px !important;
+}
+
+.app-main-content .shipment-cc-page .shipments-header {
+    border-bottom: 0 !important;
+    padding: 4px 0 2px !important;
+}
+
+.app-main-content .shipment-cc-page .shipments-title {
+    align-items: center;
+    gap: 14px;
+}
+
+.app-main-content .shipment-cc-page .shipments-title-icon {
+    background: color-mix(in srgb, var(--surface) 80%, var(--background)) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 12px !important;
+    color: var(--foreground) !important;
+    flex-basis: 48px;
+    height: 48px;
+    width: 48px;
+}
+
+.shipment-cc-page .shipment-cc-kicker {
+    color: var(--muted-foreground);
+    display: block;
+    font-size: 0.78rem;
+    margin-bottom: 4px;
+}
+
+.shipment-cc-page .shipment-cc-title-row {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.app-main-content .shipment-cc-page .shipments-title [data-ui="typography"][data-variant="h4"] {
+    font-family: var(--font-mono) !important;
+    font-size: clamp(1.25rem, 1.6vw, 1.6rem) !important;
+    font-weight: 500 !important;
+    letter-spacing: -0.01em !important;
+}
+
+.app-main-content .shipment-cc-page .shipments-title [data-ui="typography"][data-variant="body2"] {
+    font-size: 0.86rem;
+    font-weight: 400;
+    margin-top: 6px;
+}
+
+.app-main-content .shipment-cc-page :is(.shipment-edit-header-actions, .shipment-delivery-actions, .shipment-cc-side-header) [data-ui="button"] {
+    border-radius: 999px !important;
+    font-size: 0.82rem !important;
+    min-height: 36px;
+    padding-inline: 14px !important;
+}
+
+/* Section tabs as one segmented pill control. */
+.app-main-content .shipment-cc-page .shipment-detail-tabs {
+    align-self: flex-start;
+    background: color-mix(in srgb, var(--surface) 70%, var(--background)) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 999px !important;
+    display: inline-flex;
+    gap: 2px;
+    padding: 3px !important;
+    width: fit-content;
+}
+
+.app-main-content .shipment-cc-page .shipment-detail-tabs :is(a, button) {
+    align-items: center;
+    display: inline-flex;
+    justify-content: center;
+    line-height: 1;
+    text-decoration: none;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 999px !important;
+    color: var(--muted-foreground) !important;
+    font-size: 0.84rem !important;
+    font-weight: 500 !important;
+    min-height: 32px;
+    padding: 0 14px !important;
+}
+
+.app-main-content .shipment-cc-page .shipment-detail-tabs :is(a, button):hover {
+    color: var(--foreground) !important;
+}
+
+.app-main-content .shipment-cc-page .shipment-detail-tabs .shipment-detail-tab-active {
+    background: var(--foreground) !important;
+    color: var(--background) !important;
+}
+
+/* Cards. */
+.app-main-content .shipment-cc-page .shipment-dashboard-card {
+    background: color-mix(in srgb, var(--surface) 60%, var(--background)) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 12px !important;
+    box-shadow: none !important;
+}
+
+.app-main-content .shipment-cc-page .shipment-dashboard-card-header {
+    border-bottom-color: var(--border) !important;
+    min-height: 54px;
+    padding: 0 18px;
+}
+
+.app-main-content .shipment-cc-page .shipment-dashboard-card-title [data-ui="typography"],
+.app-main-content .shipment-cc-page .shipment-cc-side-header [data-ui="typography"] {
+    font-size: 0.98rem !important;
+    font-weight: 600 !important;
+    letter-spacing: -0.01em !important;
+}
+
+.app-main-content .shipment-cc-page .shipment-dashboard-card-title > span {
+    color: var(--muted-foreground) !important;
+}
+
+.app-main-content .shipment-cc-page :is(.shipment-dashboard-facts, .shipment-dashboard-metrics) > div {
+    border-color: color-mix(in srgb, var(--foreground) 7%, transparent) !important;
+    gap: 6px;
+    padding: 14px 18px;
+}
+
+/* Labels: quiet sentence case instead of spaced uppercase. */
+.app-main-content .shipment-cc-page :is(
+    .shipment-dashboard-facts span,
+    .shipment-dashboard-metrics span,
+    .shipment-dashboard-additional > strong,
+    .shipment-delivery-facts span,
+    .shipment-delivery-step-facts span,
+    .shipment-dashboard-finance dt,
+    .shipment-cc-timeline-item dt,
+    .shipment-cc-side-header > div:first-child span
+) {
+    color: var(--muted-foreground) !important;
+    font-family: var(--font-ui) !important;
+    font-size: 0.78rem !important;
+    font-weight: 400 !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+}
+
+.app-main-content .shipment-cc-page :is(
+    .shipment-dashboard-facts strong,
+    .shipment-dashboard-metrics strong,
+    .shipment-delivery-facts strong,
+    .shipment-delivery-step-facts strong,
+    .shipment-dashboard-finance dd,
+    .shipment-cc-timeline-item dd
+) {
+    color: var(--foreground) !important;
+    font-size: 0.94rem !important;
+    font-weight: 500 !important;
+}
+
+.app-main-content .shipment-cc-page .shipment-dashboard-facts-primary > div:nth-child(-n + 2) strong {
+    font-family: var(--font-mono) !important;
+    font-size: 0.88rem !important;
+}
+
+.app-main-content .shipment-cc-page .shipment-dashboard-person-fact small {
+    font-size: 0.8rem;
+}
+
+.app-main-content .shipment-cc-page .shipment-dashboard-additional b {
+    color: var(--foreground);
+    font-weight: 500;
+}
+
+.app-main-content .shipment-cc-page .shipment-delivery-latest-step {
+    border-color: var(--border) !important;
+    border-radius: 10px !important;
+}
+
+/* Status chips: pill with a colored dot, same as the shipment list. */
+.app-main-content .shipment-cc-page .tm-status[data-ui="chip"] {
+    border: 0 !important;
+    border-radius: 999px !important;
+    font-size: 0.72rem !important;
+    font-weight: 600 !important;
+    gap: 6px;
+    letter-spacing: 0 !important;
+    min-height: 24px;
+    padding-left: 10px;
+    text-transform: none !important;
+}
+
+.app-main-content .shipment-cc-page .tm-status[data-ui="chip"]::before {
+    background: currentColor;
+    border-radius: 50%;
+    content: "";
+    flex: 0 0 auto;
+    height: 6px;
+    width: 6px;
+}
+
+/* Bottom workspace tabs: compact pills inside the card header strip, not full-height blocks. */
+.app-main-content .shipment-cc-page .shipment-workspace-tabs {
+    gap: 4px;
+    min-height: 52px;
+    padding: 8px 12px;
+}
+
+.app-main-content .shipment-cc-page .shipment-workspace-tabs button {
+    align-self: center;
+    border: 1px solid transparent !important;
+    border-radius: 999px !important;
+    color: var(--muted-foreground) !important;
+    font-size: 0.84rem !important;
+    font-weight: 500 !important;
+    gap: 7px;
+    height: 34px;
+    padding: 0 12px !important;
+}
+
+.app-main-content .shipment-cc-page .shipment-workspace-tabs button:hover,
+.app-main-content .shipment-cc-page .shipment-workspace-tabs button:focus-visible {
+    background: var(--surface) !important;
+    color: var(--foreground) !important;
+}
+
+.app-main-content .shipment-cc-page .shipment-workspace-tabs button.shipment-workspace-tab-active {
+    background: var(--surface) !important;
+    border-color: var(--border-strong) !important;
+    color: var(--foreground) !important;
+}
+
+.app-main-content .shipment-cc-page .shipment-workspace-tabs button svg {
+    color: currentColor !important;
+    font-size: 1.05rem;
+    opacity: 0.8;
+}
+
+.app-main-content .shipment-cc-page .shipment-workspace-tabs button small {
+    background: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--muted-foreground) !important;
+    font-family: var(--font-mono);
+    font-size: 0.68rem !important;
+    line-height: 1;
+    min-width: 20px;
+    padding: 2px 6px;
+    text-align: center;
+}

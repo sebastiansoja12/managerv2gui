@@ -195,7 +195,7 @@
     color: var(--brand-muted);
     font-size: 0.74rem;
     font-weight: 800;
-    text-transform: uppercase;
+    text-transform: none;
 }
 
 .shipment-history-event dd {
@@ -456,9 +456,9 @@
     color: var(--card-foreground);
     font-size: 0.78rem;
     font-weight: 850;
-    letter-spacing: 0.1em;
+    letter-spacing: 0;
     margin-bottom: 12px;
-    text-transform: uppercase;
+    text-transform: none;
 }
 
 .shipments-actions {
@@ -516,8 +516,8 @@
     color: var(--muted-foreground);
     font-size: 0.72rem;
     font-weight: 800;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
+    letter-spacing: 0;
+    text-transform: none;
 }
 
 .shipments-page input:not([type="checkbox"]),
@@ -1297,7 +1297,7 @@
     color: var(--brand-accent);
     font-size: 0.76rem;
     font-weight: 900;
-    text-transform: uppercase;
+    text-transform: none;
 }
 
 .tm-page-heading p {
@@ -3072,9 +3072,9 @@
     color: var(--brand-muted);
     font-size: 0.68rem;
     font-weight: 850;
-    letter-spacing: 0.08em;
+    letter-spacing: 0;
     line-height: 1.25;
-    text-transform: uppercase;
+    text-transform: none;
 }
 
 .shipment-cc-page .shipment-details-summary > div > strong {
@@ -3185,9 +3185,9 @@
     color: var(--brand-muted);
     font-size: 0.68rem;
     font-weight: 850;
-    letter-spacing: 0.08em;
+    letter-spacing: 0;
     margin: 0;
-    text-transform: uppercase;
+    text-transform: none;
 }
 
 .shipment-cc-page .shipment-cc-courier-copy strong {
@@ -3269,9 +3269,9 @@
 .shipment-cc-page .shipment-cc-side-header > div:first-child span {
     color: var(--brand-muted);
     font-size: 0.72rem;
-    letter-spacing: 0.06em;
+    letter-spacing: 0;
     margin-top: 5px;
-    text-transform: uppercase;
+    text-transform: none;
 }
 
 .shipment-cc-page .shipment-cc-side-header [data-ui="button"] {
@@ -3316,8 +3316,8 @@
 .shipment-cc-page .shipment-cc-timeline-top strong {
     color: var(--brand-ink);
     font-size: 0.78rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    letter-spacing: 0;
+    text-transform: none;
 }
 
 .shipment-cc-page .shipment-cc-timeline-top span {
@@ -3342,8 +3342,8 @@
 .shipment-cc-page .shipment-cc-timeline-item dt {
     color: var(--brand-muted);
     font-size: 0.68rem;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
+    letter-spacing: 0;
+    text-transform: none;
 }
 
 .shipment-cc-page .shipment-cc-timeline-item dd {
@@ -3546,14 +3546,15 @@
 
 .shipment-cc-page .shipment-destination-control {
     align-items: center;
+    /* Fact cells stretch their rows; without this the value is centred lower than its neighbours. */
+    align-self: start;
     display: flex;
     gap: 8px;
-    margin-top: 7px;
 }
 
 .shipment-cc-page .shipment-destination-control .shipment-destination-value {
     color: var(--brand-ink);
-    font-size: 0.94rem;
+    font-size: 0.88rem;
     font-weight: 850;
     margin: 0;
 }
@@ -3564,6 +3565,8 @@
     border-radius: 999px;
     color: var(--brand-accent);
     height: 24px;
+    /* The button overhangs the text line, so the value stays level with the neighbouring facts. */
+    margin-block: -4px;
     width: 24px;
 }
 
@@ -3623,8 +3626,8 @@
     color: var(--muted-foreground);
     font-size: 0.68rem;
     font-weight: 850;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
+    letter-spacing: 0;
+    text-transform: none;
 }
 
 .shipment-department-popover-details dd {
@@ -3693,10 +3696,10 @@
     color: var(--brand-muted);
     font-size: 0.64rem;
     font-weight: 850;
-    letter-spacing: 0.08em;
+    letter-spacing: 0;
     overflow: hidden;
     text-overflow: ellipsis;
-    text-transform: uppercase;
+    text-transform: none;
     white-space: nowrap;
 }
 
@@ -4057,9 +4060,9 @@
     color: var(--brand-muted);
     font-size: 0.68rem;
     font-weight: 850;
-    letter-spacing: 0.11em;
+    letter-spacing: 0;
     line-height: 1;
-    text-transform: uppercase;
+    text-transform: none;
 }
 
 .shipment-person-dialog-title strong {
@@ -4091,9 +4094,9 @@
     color: var(--brand-muted);
     font-size: 0.7rem;
     font-weight: 850;
-    letter-spacing: 0.1em;
+    letter-spacing: 0;
     line-height: 1.2;
-    text-transform: uppercase;
+    text-transform: none;
 }
 
 .shipment-person-dialog-field > input {
@@ -4248,9 +4251,9 @@
     color: var(--brand-muted);
     font-size: 0.68rem;
     font-weight: 850;
-    letter-spacing: 0.11em;
+    letter-spacing: 0;
     line-height: 1;
-    text-transform: uppercase;
+    text-transform: none;
 }
 
 .shipment-status-dialog-title strong {
@@ -4274,8 +4277,8 @@
     color: var(--brand-muted);
     font-size: 0.7rem;
     font-weight: 850;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
+    letter-spacing: 0;
+    text-transform: none;
 }
 
 .shipment-status-dialog-field > select {
@@ -4388,7 +4391,6 @@
     min-width: 0;
 }
 
-.shipment-dashboard-workflow,
 .shipment-dashboard-right-rail {
     display: grid;
     gap: 14px;
@@ -4400,12 +4402,7 @@
 }
 
 .shipment-dashboard-data-card {
-    grid-column: 1 / 8;
-    grid-row: 1;
-}
-
-.shipment-dashboard-workflow {
-    grid-column: 8 / 10;
+    grid-column: 1 / 10;
     grid-row: 1;
 }
 
@@ -4414,12 +4411,12 @@
     grid-row: 1 / span 4;
 }
 
-.shipment-dashboard-lower-grid {
+.shipment-dashboard-delivery {
     grid-column: 1 / 10;
     grid-row: 2;
 }
 
-.shipment-dashboard-delivery {
+.shipment-dashboard-lower-grid {
     grid-column: 1 / 10;
     grid-row: 3;
 }
@@ -4432,7 +4429,7 @@
 .shipment-dashboard-main > .shipment-details-person-sender,
 .shipment-dashboard-main > .shipment-details-person-recipient,
 .shipment-dashboard-main > .shipment-address-route-map-section {
-    grid-column: 1 / 8;
+    grid-column: 1 / 10;
     grid-row: 1;
 }
 
@@ -4495,19 +4492,24 @@
     border-right: 0;
 }
 
-.shipment-dashboard-facts > div:nth-last-child(-n + 4) {
+.shipment-dashboard-facts > div:nth-last-child(-n + 3) {
     border-bottom: 0;
+}
+
+/* The fact count does not fill the last row, so its last cell stretches to the card edge. */
+.shipment-dashboard-facts.shipment-dashboard-facts-primary > div:last-child {
+    border-right: 0;
+    grid-column-end: -1;
 }
 
 .shipment-dashboard-facts span,
 .shipment-dashboard-metrics span,
-.shipment-dashboard-additional > strong,
-.shipment-dashboard-next-operation > span {
+.shipment-dashboard-additional > strong {
     color: var(--brand-muted);
     font-size: 0.65rem;
     font-weight: 850;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    letter-spacing: 0;
+    text-transform: none;
 }
 
 .shipment-dashboard-facts strong,
@@ -4673,9 +4675,9 @@
     color: var(--brand-muted);
     font-size: 0.62rem;
     font-weight: 850;
-    letter-spacing: 0.07em;
+    letter-spacing: 0;
     position: sticky;
-    text-transform: uppercase;
+    text-transform: none;
     top: 0;
     z-index: 1;
 }
@@ -4783,8 +4785,8 @@
     color: var(--brand-muted);
     font-size: 0.65rem;
     font-weight: 850;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    letter-spacing: 0;
+    text-transform: none;
 }
 
 .shipment-workspace-related strong {
@@ -4833,8 +4835,8 @@
     color: var(--brand-muted);
     font-size: 0.62rem;
     font-weight: 850;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
+    letter-spacing: 0;
+    text-transform: none;
 }
 
 .shipment-delivery-facts strong {
@@ -4894,8 +4896,8 @@
     color: var(--brand-muted);
     font-size: 0.6rem;
     font-weight: 850;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
+    letter-spacing: 0;
+    text-transform: none;
 }
 
 .shipment-delivery-step-facts strong {
@@ -4981,8 +4983,8 @@
     color: var(--brand-muted);
     font-size: 0.6rem;
     font-weight: 850;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
+    letter-spacing: 0;
+    text-transform: none;
 }
 
 .shipment-delivery-history-facts strong {
@@ -5083,131 +5085,6 @@
     color: var(--brand-danger, #f04438) !important;
 }
 
-.shipment-dashboard-next-operation,
-.shipment-dashboard-warnings,
-.shipment-dashboard-route,
-.shipment-dashboard-parties {
-    padding: 16px;
-}
-
-.shipment-dashboard-next-operation {
-    border-color: color-mix(in srgb, var(--brand-success, #12b76a) 72%, var(--brand-border));
-    box-shadow: inset 0 0 26px color-mix(in srgb, var(--brand-success, #12b76a) 8%, transparent);
-    display: grid;
-    gap: 8px;
-}
-
-.shipment-dashboard-next-operation > .shipment-dashboard-card-title {
-    margin-bottom: 5px;
-}
-
-.shipment-dashboard-next-operation > strong {
-    color: var(--brand-ink);
-    font-size: 1rem;
-}
-
-.shipment-dashboard-next-operation > p,
-.shipment-dashboard-next-operation > small,
-.shipment-dashboard-route > p,
-.shipment-dashboard-warnings > p {
-    color: var(--brand-muted);
-    font-size: 0.74rem;
-    line-height: 1.45;
-    margin: 0;
-}
-
-.shipment-dashboard-next-operation > [data-ui="button"] {
-    margin-top: 4px;
-}
-
-.shipment-dashboard-warnings {
-    display: grid;
-    gap: 12px;
-}
-
-.shipment-dashboard-warnings-active {
-    border-color: color-mix(in srgb, var(--brand-warning) 64%, var(--brand-border));
-    box-shadow: inset 0 0 24px color-mix(in srgb, var(--brand-warning) 7%, transparent);
-}
-
-.shipment-dashboard-warnings ul {
-    display: grid;
-    gap: 9px;
-    list-style: none;
-    margin: 0;
-    padding: 0;
-}
-
-.shipment-dashboard-warnings li {
-    border-top: 1px solid color-mix(in srgb, var(--brand-warning) 32%, var(--brand-border));
-    color: var(--brand-ink-soft);
-    font-size: 0.75rem;
-    padding-top: 9px;
-}
-
-.shipment-dashboard-warnings > p,
-.shipment-dashboard-route > p {
-    align-items: flex-start;
-    display: flex;
-    gap: 7px;
-}
-
-.shipment-dashboard-route {
-    display: grid;
-    gap: 14px;
-}
-
-.shipment-dashboard-route ol {
-    display: grid;
-    gap: 0;
-    list-style: none;
-    margin: 0;
-    padding: 0;
-}
-
-.shipment-dashboard-route li {
-    align-items: center;
-    display: grid;
-    gap: 8px;
-    grid-template-columns: 14px minmax(0, 1fr) auto;
-    min-height: 38px;
-    position: relative;
-}
-
-.shipment-dashboard-route li:not(:last-child)::after {
-    background: var(--brand-border);
-    content: "";
-    height: calc(100% - 12px);
-    left: 6px;
-    position: absolute;
-    top: 25px;
-    width: 1px;
-}
-
-.shipment-dashboard-route li i {
-    background: var(--brand-surface);
-    border: 2px solid var(--brand-muted);
-    border-radius: 50%;
-    height: 10px;
-    width: 10px;
-}
-
-.shipment-dashboard-route li span {
-    color: var(--brand-ink);
-    font-size: 0.78rem;
-    font-weight: 800;
-}
-
-.shipment-dashboard-route li small {
-    color: var(--brand-muted);
-    font-size: 0.66rem;
-}
-
-.shipment-dashboard-route-current i {
-    border-color: var(--brand-success, #12b76a) !important;
-    box-shadow: 0 0 0 4px color-mix(in srgb, var(--brand-success, #12b76a) 13%, transparent);
-}
-
 .shipment-dashboard-right-rail .shipment-cc-side {
     max-height: 560px;
     position: static;
@@ -5220,71 +5097,6 @@
 .shipment-dashboard-right-rail .shipment-cc-timeline {
     overflow-y: auto;
     padding: 18px 16px 20px 22px;
-}
-
-.shipment-dashboard-parties {
-    display: grid;
-    gap: 14px;
-}
-
-.shipment-dashboard-party {
-    border-top: 1px solid var(--brand-border);
-    display: grid;
-    gap: 3px;
-    padding-top: 13px;
-}
-
-.shipment-dashboard-party-heading {
-    align-items: center;
-    display: flex;
-    gap: 9px;
-    margin-bottom: 4px;
-}
-
-.shipment-dashboard-party-icon {
-    align-items: center;
-    border: 1px solid var(--brand-border);
-    border-radius: 50%;
-    color: var(--brand-accent);
-    display: inline-flex;
-    height: 30px;
-    justify-content: center;
-    width: 30px;
-}
-
-.shipment-dashboard-party-heading > div {
-    display: grid;
-    min-width: 0;
-}
-
-.shipment-dashboard-party-heading span,
-.shipment-dashboard-party p {
-    color: var(--brand-muted);
-    font-size: 0.7rem;
-    margin: 0;
-}
-
-.shipment-dashboard-party-heading strong {
-    color: var(--brand-ink);
-    font-size: 0.82rem;
-}
-
-.shipment-dashboard-party button {
-    background: transparent;
-    border: 0;
-    color: var(--brand-accent);
-    cursor: pointer;
-    font-size: 0.69rem;
-    font-weight: 800;
-    justify-self: end;
-    margin-top: 4px;
-    padding: 3px 0;
-}
-
-.shipment-dashboard-party button:hover,
-.shipment-dashboard-party button:focus-visible {
-    color: var(--brand-accent-strong);
-    text-decoration: underline;
 }
 
 @media (max-width: 1480px) {
@@ -5304,11 +5116,11 @@
         border-right: 0;
     }
 
-    .shipment-dashboard-facts > div:nth-last-child(-n + 4) {
+    .shipment-dashboard-facts > div:nth-last-child(-n + 3) {
         border-bottom: 1px solid var(--brand-border);
     }
 
-    .shipment-dashboard-facts > div:nth-last-child(-n + 3) {
+    .shipment-dashboard-facts > div:nth-last-child(-n + 2) {
         border-bottom: 0;
     }
 
@@ -5338,21 +5150,16 @@
     .shipment-dashboard-main > .shipment-details-person-sender,
     .shipment-dashboard-main > .shipment-details-person-recipient,
     .shipment-dashboard-main > .shipment-address-route-map-section {
-        grid-column: 1;
+        grid-column: 1 / -1;
         grid-row: 1;
     }
 
-    .shipment-dashboard-workflow {
-        grid-column: 2;
-        grid-row: 1;
-    }
-
-    .shipment-dashboard-lower-grid {
+    .shipment-dashboard-delivery {
         grid-column: 1 / -1;
         grid-row: 2;
     }
 
-    .shipment-dashboard-delivery {
+    .shipment-dashboard-lower-grid {
         grid-column: 1 / -1;
         grid-row: 3;
     }
@@ -5367,10 +5174,6 @@
         grid-row: 5;
         grid-template-columns: minmax(0, 1fr) minmax(280px, 0.42fr);
     }
-
-    .shipment-dashboard-parties {
-        grid-column: 1 / -1;
-    }
 }
 
 @media (max-width: 820px) {
@@ -5381,7 +5184,7 @@
 
     .shipment-dashboard-right-rail {
         grid-column: auto;
-        grid-row: 6;
+        grid-row: 5;
     }
 
     .shipment-dashboard-data-card,
@@ -5392,7 +5195,7 @@
         grid-row: 1;
     }
 
-    .shipment-dashboard-workflow {
+    .shipment-dashboard-delivery {
         grid-column: 1;
         grid-row: 2;
     }
@@ -5402,14 +5205,9 @@
         grid-row: 3;
     }
 
-    .shipment-dashboard-delivery {
-        grid-column: 1;
-        grid-row: 4;
-    }
-
     .shipment-dashboard-bottom-tools {
         grid-column: 1;
-        grid-row: 5;
+        grid-row: 4;
     }
 
     .shipment-dashboard-facts {
@@ -5432,11 +5230,11 @@
         border-right: 0;
     }
 
-    .shipment-dashboard-facts > div:nth-last-child(-n + 3) {
+    .shipment-dashboard-facts > div:nth-last-child(-n + 2) {
         border-bottom: 1px solid var(--brand-border);
     }
 
-    .shipment-dashboard-facts > div:nth-last-child(-n + 2) {
+    .shipment-dashboard-facts > div:last-child {
         border-bottom: 0;
     }
 
