@@ -10,7 +10,7 @@ import {
     FiMessageCircle, FiPhone, FiPlus, FiPrinter, FiRadio, FiRefreshCw, FiRepeat, FiRotateCcw, FiRotateCw, FiSave, FiSend,
     FiSearch, FiSettings, FiShield, FiShoppingBag, FiShoppingCart, FiSliders,
     FiStar, FiTable, FiTag, FiToggleLeft, FiToggleRight, FiTool, FiTrendingUp, FiTruck,
-    FiUnlock, FiUpload, FiUser, FiUserPlus, FiUsers, FiX, FiXCircle, FiZap,
+    FiUnlock, FiUpload, FiUser, FiUserPlus, FiUsers, FiX, FiXCircle, FiZap, FiTablet, FiVolume2, FiVolumeX,
 } from "react-icons/fi";
 import {LuPin, LuPinOff} from "react-icons/lu";
 
@@ -159,3 +159,7 @@ export const WarehouseRounded = makeIcon(FiBox);
 export const WarningAmberOutlined = makeIcon(FiAlertTriangle);
 export const WebhookOutlined = makeIcon(FiZap);
 export const WorkspacePremium = makeIcon(FiStar);
+export const BookmarkAdd = makeIcon(FiStar);
+export const TabletMode = makeIcon(FiTablet);
+export const VolumeUp = makeIcon(FiVolume2);
+export const VolumeOff = makeIcon(FiVolumeX);
