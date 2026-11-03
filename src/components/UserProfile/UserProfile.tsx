@@ -92,7 +92,7 @@ export default function UserProfile() {
         setApiKeyBusy(true);
         try {
             const response = await AuthService.generateApiKey();
-            setUser((currentUser) => currentUser ? {...currentUser, apiKey: response.data.apiKey} : currentUser);
+            setUser((currentUser) => currentUser ? {...currentUser, apiKey: response.data.apiKey, hasApiKey: true} : currentUser);
             setNotice({severity: "success", message: pl.userProfile.messages.apiKeyGenerated});
         } catch (error) {
             showError(error, pl.userProfile.messages.apiKeyGenerationError);
@@ -159,14 +159,14 @@ export default function UserProfile() {
     };
 
     const deleteApiKey = async () => {
-        if (!user?.apiKey || !window.confirm(pl.userProfile.messages.apiKeyDeleteConfirmation)) {
+        if (!user?.hasApiKey || !window.confirm(pl.userProfile.messages.apiKeyDeleteConfirmation)) {
             return;
         }
 
         setApiKeyBusy(true);
         try {
             await AuthService.deleteApiKey();
-            setUser((currentUser) => currentUser ? {...currentUser, apiKey: null} : currentUser);
+            setUser((currentUser) => currentUser ? {...currentUser, apiKey: null, hasApiKey: false} : currentUser);
             setNotice({severity: "success", message: pl.userProfile.messages.apiKeyDeleted});
         } catch (error) {
             showError(error, pl.userProfile.messages.apiKeyDeleteError);
@@ -248,7 +248,7 @@ export default function UserProfile() {
                                     <Key fontSize="small" />
                                     <input
                                         aria-label={pl.userProfile.fields.apiKey}
-                                        placeholder={pl.userProfile.apiKeyMissing}
+                                        placeholder={user?.hasApiKey ? pl.userProfile.apiKeyHidden : pl.userProfile.apiKeyMissing}
                                         readOnly
                                         type="text"
                                         value={user?.apiKey || ""}
@@ -273,7 +273,7 @@ export default function UserProfile() {
                                         <IconButton
                                             aria-label={pl.userProfile.actions.deleteApiKey}
                                             className="user-profile-api-key-delete"
-                                            disabled={!user?.apiKey || apiKeyBusy}
+                                            disabled={!user?.hasApiKey || apiKeyBusy}
                                             title={pl.userProfile.actions.deleteApiKey}
                                             onClick={deleteApiKey}
                                         >
