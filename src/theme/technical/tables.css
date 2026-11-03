@@ -19,11 +19,11 @@
     background: var(--surface-secondary) !important;
     border-color: var(--border) !important;
     color: var(--muted-foreground) !important;
-    font-family: var(--font-mono) !important;
+    font-family: var(--font-ui) !important;
     font-size: 0.68rem !important;
     font-weight: 600 !important;
-    letter-spacing: 0.06em !important;
-    text-transform: uppercase;
+    letter-spacing: 0 !important;
+    text-transform: none;
 }
 
 .app-main-content table td,
