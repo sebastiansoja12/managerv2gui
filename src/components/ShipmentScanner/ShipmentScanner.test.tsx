@@ -1,11 +1,12 @@
 import React from "react";
-import {fireEvent, render, screen, waitFor} from "@testing-library/react";
+import {fireEvent, render, screen, waitFor, within} from "@testing-library/react";
 import {MemoryRouter} from "react-router-dom";
 import AuthService from "../../hooks/AuthService";
 import DeviceService from "../../hooks/DeviceService";
 import ShipmentCollectService from "../../hooks/ShipmentCollectService";
 import pl from "../../i18n/translate";
 import ShipmentScanner from "./ShipmentScanner";
+import {playScanFeedback} from "./scanFeedbackSound";
 
 jest.mock("../../hooks/AuthService", () => ({
     __esModule: true,
@@ -32,6 +33,8 @@ jest.mock("../../hooks/ShipmentCollectService", () => {
         default: {collect: jest.fn()},
     };
 });
+
+jest.mock("./scanFeedbackSound", () => ({playScanFeedback: jest.fn()}));
 
 jest.mock("../../api/errorMessage", () => ({
     getBackendErrorMessage: (_error: unknown, fallback: string) => fallback,
@@ -196,5 +199,33 @@ describe("ShipmentScanner", () => {
         expect(await screen.findByText(translations.device.credentialsRevoked)).toBeInTheDocument();
         expect(screen.getByRole("button", {name: translations.device.activateBrowser})).toBeInTheDocument();
         expect(window.localStorage.getItem("manager.browserDevice")).toBeNull();
+    });
+
+    it("switches to tablet mode, keeps it for the next visit and sounds each scan result", async () => {
+        const firstRender = renderScanner();
+        fireEvent.click(await screen.findByRole("button", {name: translations.tablet.enter}));
+
+        const tablet = screen.getByRole("region", {name: translations.tablet.title});
+        const input = within(tablet).getByLabelText(translations.scanCard.inputLabel);
+        fireEvent.change(input, {target: {value: "TRK-001"}});
+        fireEvent.submit(input.closest("form") as HTMLFormElement);
+        fireEvent.change(input, {target: {value: "TRK-001"}});
+        fireEvent.submit(input.closest("form") as HTMLFormElement);
+
+        expect(within(tablet).getByRole("status")).toHaveTextContent(translations.feedback.duplicate);
+        expect(tablet).toHaveAttribute("data-state", "warning");
+        expect(within(tablet).getByRole("listitem")).toHaveTextContent("TRK-001");
+        expect(playScanFeedback).toHaveBeenNthCalledWith(1, "success", true);
+        expect(playScanFeedback).toHaveBeenNthCalledWith(2, "warning", true);
+
+        fireEvent.click(within(tablet).getByRole("button", {name: translations.tablet.soundOn}));
+        expect(within(tablet).getByRole("button", {name: translations.tablet.soundOff})).toHaveAttribute("aria-pressed", "false");
+
+        firstRender.unmount();
+        renderScanner();
+        expect(await screen.findByRole("region", {name: translations.tablet.title})).toBeInTheDocument();
+
+        fireEvent.click(screen.getByRole("button", {name: translations.tablet.exit}));
+        expect(screen.queryByRole("region", {name: translations.tablet.title})).not.toBeInTheDocument();
     });
 });
