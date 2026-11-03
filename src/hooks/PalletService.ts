@@ -44,6 +44,13 @@ const getById = (palletId: string) => client.get<PalletDto>(`/pallets/${encodeUR
 const cancel = (palletId: string) =>
     client.put<undefined, PalletDto>(`/pallets/${encodeURIComponent(palletId)}/cancel`);
 
+const revertLoading = (palletId: string) =>
+    client.put<undefined, PalletDto>(`/pallets/${encodeURIComponent(palletId)}/revert-loading`);
+
+const unload = (palletId: string, missingShipmentIds: number[] = []) =>
+    client.put<{missingShipmentIds: number[]}, PalletDto>(`/pallets/${encodeURIComponent(palletId)}/unload`,
+        {missingShipmentIds});
+
 const addShipments = (palletId: string, shipmentIds: string[]) =>
     client.put<CreatePalletRequestApi, PalletDto>(`/pallets/${encodeURIComponent(palletId)}/shipments`, {shipmentIds});
 
@@ -146,6 +153,8 @@ const PalletService = {
     getById,
     cancel,
     scan,
+    revertLoading,
+    unload,
     addShipments,
     removeShipment,
     setMaxWeight,

@@ -83,3 +83,14 @@ test("encodes pickup point identifier in status request path", async () => {
         },
     }));
 });
+
+test("deletes a pickup point by encoded identifier", async () => {
+    (http.request as jest.Mock).mockResolvedValue({data: undefined, status: 204});
+
+    await PickupPointService.delete("point/id");
+
+    expect(http.request).toHaveBeenCalledWith(expect.objectContaining({
+        method: "DELETE",
+        url: "/pickup-points/point%2Fid",
+    }));
+});
