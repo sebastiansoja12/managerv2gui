@@ -15,8 +15,8 @@
 .super-admin-app .super-admin-module-heading h2,
 .super-admin-login-page h1 {
     font-family: var(--font-display);
-    font-weight: 400;
-    letter-spacing: -0.04em;
+    font-weight: var(--font-display-weight);
+    letter-spacing: var(--font-display-tracking);
 }
 
 .super-admin-sidebar {
@@ -186,11 +186,11 @@
     border: 1px solid color-mix(in srgb, var(--warning) 30%, var(--border)) !important;
     border-radius: 3px !important;
     color: var(--warning) !important;
-    font-family: var(--font-mono);
+    font-family: var(--font-ui);
     font-size: 0.6rem !important;
-    letter-spacing: 0.06em;
+    letter-spacing: 0;
     padding: 7px 8px !important;
-    text-transform: uppercase;
+    text-transform: none;
 }
 
 .super-admin-metrics {
@@ -239,12 +239,12 @@
 
 .super-admin-metric-card small {
     color: var(--muted-foreground) !important;
-    font-family: var(--font-mono);
+    font-family: var(--font-ui);
     font-size: 0.6rem !important;
     font-weight: 550 !important;
-    letter-spacing: 0.035em;
+    letter-spacing: 0;
     line-height: 1.35;
-    text-transform: uppercase;
+    text-transform: none;
 }
 
 .super-admin-grid {
@@ -349,12 +349,12 @@
 .super-admin-table-head {
     background: var(--surface-secondary) !important;
     color: var(--muted-foreground) !important;
-    font-family: var(--font-mono) !important;
+    font-family: var(--font-ui) !important;
     font-size: 0.58rem !important;
     font-weight: 600 !important;
-    letter-spacing: 0.055em;
+    letter-spacing: 0;
     min-height: 34px !important;
-    text-transform: uppercase;
+    text-transform: none;
 }
 
 button.super-admin-table-row:hover {
@@ -399,12 +399,12 @@ button.super-admin-table-row:hover {
     border: 1px solid var(--border) !important;
     border-radius: 3px !important;
     color: var(--muted-foreground) !important;
-    font-family: var(--font-mono);
+    font-family: var(--font-ui);
     font-size: 0.56rem !important;
     font-weight: 600 !important;
-    letter-spacing: 0.035em;
+    letter-spacing: 0;
     padding: 4px 6px !important;
-    text-transform: uppercase;
+    text-transform: none;
 }
 
 .super-admin-status.is-active,
@@ -631,11 +631,11 @@ button.super-admin-table-row:hover {
 .super-admin-announcement-panel label > span,
 .super-admin-login-card > label > span {
     color: var(--muted-foreground) !important;
-    font-family: var(--font-mono);
+    font-family: var(--font-ui);
     font-size: 0.6rem !important;
     font-weight: 600 !important;
-    letter-spacing: 0.065em !important;
-    text-transform: uppercase;
+    letter-spacing: 0 !important;
+    text-transform: none;
 }
 
 .super-admin-form-grid input,
@@ -710,17 +710,17 @@ button.super-admin-table-row:hover {
     font-family: var(--font-display);
     font-size: clamp(1.55rem, 3vw, 2.1rem) !important;
     font-weight: 500 !important;
-    letter-spacing: -0.035em;
+    letter-spacing: var(--font-display-tracking);
     line-height: 1;
 }
 
 .super-admin-operator-create-dialog .super-admin-panel-header > div:first-child > span {
     display: block;
-    font-family: var(--font-mono);
+    font-family: var(--font-ui);
     font-size: 0.62rem !important;
-    letter-spacing: 0.075em;
+    letter-spacing: 0;
     margin-top: 8px;
-    text-transform: uppercase;
+    text-transform: none;
 }
 
 .super-admin-editor-wizard-tabs {
@@ -926,10 +926,10 @@ button.super-admin-table-row:hover {
 
 .super-admin-module-state {
     color: var(--success) !important;
-    font-family: var(--font-mono);
+    font-family: var(--font-ui);
     font-size: 0.56rem !important;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
+    letter-spacing: 0;
+    text-transform: none;
 }
 
 .super-admin-access-card > svg {
@@ -1625,11 +1625,11 @@ button.super-admin-table-row:hover {
 
 .super-admin-data-section legend {
     color: var(--muted-foreground);
-    font-family: var(--font-mono);
+    font-family: var(--font-ui);
     font-size: 0.68rem;
-    letter-spacing: 0.06em;
+    letter-spacing: 0;
     padding: 0 6px;
-    text-transform: uppercase;
+    text-transform: none;
 }
 
 .super-admin-form-grid.super-admin-form-grid-3 {
@@ -1684,10 +1684,10 @@ button.super-admin-table-row:hover {
 
 .super-admin-access-card-label {
     color: var(--muted-foreground);
-    font-family: var(--font-mono);
+    font-family: var(--font-ui);
     font-size: 0.66rem;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
+    letter-spacing: 0;
+    text-transform: none;
 }
 
 .super-admin-access-card.is-active {
@@ -2062,13 +2062,13 @@ button.super-admin-table-row:hover {
 
 .super-admin-announcement-severity {
     border-radius: 4px;
-    font-family: var(--font-mono);
+    font-family: var(--font-ui);
     font-size: 0.64rem;
     font-style: normal;
     font-weight: 800;
-    letter-spacing: 0.04em;
+    letter-spacing: 0;
     padding: 2px 6px;
-    text-transform: uppercase;
+    text-transform: none;
 }
 
 .super-admin-announcement-severity-info {

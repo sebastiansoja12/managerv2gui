@@ -102,7 +102,7 @@
     font-weight: 900;
     letter-spacing: 0;
     margin-bottom: 6px;
-    text-transform: uppercase;
+    text-transform: none;
 }
 
 .super-admin-topbar h1 {
@@ -661,8 +661,8 @@ button.super-admin-table-row {
     color: var(--muted-foreground);
     font-size: 0.76rem;
     font-weight: 850;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    letter-spacing: 0;
+    text-transform: none;
 }
 
 .super-admin-login-card > label input {
@@ -1060,7 +1060,7 @@ button.super-admin-table-row {
     font-size: 0.72rem;
     font-weight: 900;
     min-height: 38px;
-    text-transform: uppercase;
+    text-transform: none;
 }
 
 .super-admin-directory-person {
