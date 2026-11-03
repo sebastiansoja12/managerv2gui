@@ -33,3 +33,4 @@
 @import "../components/Process/styles/technical-processes.css";
 @import "../components/Devices/styles/technical-devices.css";
 @import "../components/ShipmentScanner/styles/technical-scanner.css";
+@import "technical/modern.css";
