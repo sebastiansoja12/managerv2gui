@@ -169,11 +169,11 @@
     .geocoding-dialog-field > span
 ) {
     color: var(--muted-foreground) !important;
-    font-family: var(--font-mono) !important;
+    font-family: var(--font-ui) !important;
     font-size: 0.72rem !important;
     font-weight: 600 !important;
-    letter-spacing: 0.065em !important;
-    text-transform: uppercase;
+    letter-spacing: 0 !important;
+    text-transform: none;
 }
 
 :root[data-theme] [data-ui="dialog"] :is(

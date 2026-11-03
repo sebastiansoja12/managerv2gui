@@ -1,0 +1,285 @@
+/* Modern layer: the look of the shipment list and details applied to every screen.
+   Loaded last, so it settles shape and type; colors still come from the theme tokens. */
+
+/* Page titles: compact, the tab bar already names the screen. */
+:root[data-theme] .app-main-content [data-ui="typography"][data-variant="h4"],
+:root[data-theme] .app-main-content h1 {
+    font-size: clamp(1.4rem, 1.7vw, 1.85rem) !important;
+    line-height: 1.15 !important;
+}
+
+/* Buttons are pills. */
+.app-main-content :is([data-ui="button"], [data-ui="icon-button"]),
+.app-main-content :is(.users-primary-button, .users-secondary-button, .tm-icon-button, .tm-row-action-button) {
+    border-radius: 999px !important;
+}
+
+.app-main-content [data-ui="button"] {
+    font-weight: 500 !important;
+    min-height: 36px;
+    padding-inline: 14px;
+}
+
+.app-main-content :is(.departments-actions-table, .couriers-actions-table, .users-actions-table) button {
+    border-radius: 0 !important;
+}
+
+/* Cards and panels: rounder, flatter. */
+.app-main-content :is(.tm-card, [class$="-card"], [class*="-card "], [class$="-panel"], [class*="-panel "]):not([data-ui]) {
+    border-radius: 12px;
+    box-shadow: none;
+}
+
+/* Table headers: quiet sentence case. */
+.app-main-content table thead th,
+.app-main-content [data-ui="table-head"] th {
+    font-family: var(--font-ui) !important;
+    font-size: 0.74rem !important;
+    font-weight: 500 !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+}
+
+/* Labels, kickers and terms. */
+.app-main-content :is([class$="-kicker"], [class*="-kicker "], [class$="-section-kicker"], [class*="-section-kicker "], dt),
+[data-ui="input-label"] {
+    font-family: var(--font-ui) !important;
+    font-size: 0.78rem !important;
+    font-weight: 400 !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+}
+
+/* Chips: rounded pills in the UI font. */
+[data-ui="chip"],
+.couriers-status,
+.departments-status,
+.microservice-status-badge,
+.process-status,
+.shipment-history-status,
+.shipment-status-pill,
+.users-role,
+.global-configuration-category {
+    border-radius: 999px !important;
+    font-family: var(--font-ui) !important;
+    font-size: 0.72rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+}
+
+/* Status chips carry a dot in their own color. */
+:is(
+    .tm-status,
+    .couriers-status,
+    .departments-status,
+    .microservice-status-badge,
+    .process-status,
+    .shipment-history-status,
+    .shipment-status-pill
+) {
+    align-items: center;
+    border: 0 !important;
+    display: inline-flex;
+    gap: 6px;
+    padding-left: 10px !important;
+}
+
+:is(
+    .tm-status,
+    .couriers-status,
+    .departments-status,
+    .microservice-status-badge,
+    .process-status,
+    .shipment-history-status,
+    .shipment-status-pill
+)::before {
+    background: currentColor;
+    border-radius: 50%;
+    content: "";
+    flex: 0 0 auto;
+    height: 6px;
+    width: 6px;
+}
+
+/* Tabs and segmented controls: pills, the active one inverted. */
+:is(
+    .tm-tabs button,
+    .shipment-workspace-tabs button,
+    .super-admin-workspace-tabs button,
+    .super-admin-editor-wizard-tabs button,
+    .department-details-tabs button,
+    .deliveries-tabs button,
+    .courier-configuration-tabs button
+) {
+    align-items: center;
+    border-radius: 999px !important;
+    display: inline-flex;
+    justify-content: center;
+    line-height: 1;
+}
+
+:is(
+    .tm-tabs .tm-tab-active,
+    .super-admin-workspace-tabs .super-admin-workspace-tab-active,
+    .super-admin-editor-wizard-tabs [aria-selected="true"],
+    .department-details-tabs [aria-selected="true"],
+    .deliveries-tabs [aria-selected="true"],
+    .courier-configuration-tabs [aria-selected="true"]
+) {
+    background: var(--foreground) !important;
+    border-color: var(--foreground) !important;
+    color: var(--background) !important;
+}
+
+/* One page frame everywhere: full width, edges aligned with the command bar. */
+.app-main-content > :is([class$="-page"], [class*="-page "], .tm-page) {
+    margin-inline: 0 !important;
+    max-width: none !important;
+    padding: 16px 12px 24px !important;
+}
+
+/* Page headers: no brand kicker above the title, no rule underneath. */
+.app-main-content :is([class*="kicker"]:has(+ [data-variant="h4"]), [class*="kicker"]:has(+ h1), .tm-heading-kicker) {
+    display: none !important;
+}
+
+.app-main-content .tm-top-row {
+    border-bottom: 0 !important;
+    padding-bottom: 4px !important;
+}
+
+/* Inline filter actions next to fields: outlined pills, never a grey slab. */
+.app-main-content .tm-manual-load [data-ui="button"] {
+    border-radius: 999px !important;
+    justify-self: start;
+    padding-inline: 16px !important;
+    width: auto;
+}
+
+:root[data-theme] .app-main-content .tm-manual-load button[data-ui="button"][data-variant]:disabled {
+    background: transparent !important;
+    opacity: 0.55;
+}
+
+/* Toolbar button groups become one segmented pill. */
+.app-main-content .tm-toolbar-actions {
+    border-radius: 999px !important;
+}
+
+.app-main-content .tm-toolbar-actions > button {
+    border-radius: 999px !important;
+}
+
+.app-main-content :is([class$="-header"], [class$="-heading"], [class$="-title"], .tm-top-row) > :is(span, small):first-child:has(+ :is([data-variant="h4"], h1)) {
+    display: none !important;
+}
+
+.app-main-content > :is([class$="-page"], [class*="-page "]) > :is([class$="-header"], [class$="-title"]) {
+    border-bottom: 0 !important;
+    padding-bottom: 4px !important;
+}
+
+.app-main-content :is(
+    [data-ui="chip"],
+    .couriers-status,
+    .departments-status,
+    .process-status,
+    .users-role,
+    [class*="-status-badge"]
+) {
+    border-radius: 999px !important;
+    padding-inline: 10px !important;
+}
+
+.app-main-content :is([class$="-avatar"], [class*="-avatar "]) {
+    border-radius: 50% !important;
+}
+
+.app-main-content > :is([class$="-page"], [class*="-page "], .tm-page) > :is([class$="-shell"], [class*="-shell "], [class$="-content"], [class*="-content "]) {
+    margin-inline: 0 !important;
+    max-width: none !important;
+}
+
+/* Feature sheets set their own button radius with !important; this wins on specificity. */
+:root[data-theme] .App .app-main-content :is(button, a, label):is([data-ui="button"], [data-ui="icon-button"]) {
+    border-radius: 999px !important;
+}
+
+.app-main-content :is([class*="-check-good"], [class*="-check-bad"], [class*="-check-warn"], [class$="-filter-count"], [class*="-tag "], [class$="-tag"]) {
+    border-radius: 999px !important;
+    padding-inline: 10px !important;
+}
+
+/* Selects: feature button rules (e.g. .home-tracking-lookup-form button) must not restyle the trigger. */
+.App .technical-select .technical-select-trigger {
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: inherit !important;
+    color: var(--foreground) !important;
+    font-size: 0.86rem !important;
+    font-weight: 500 !important;
+    justify-content: space-between !important;
+    min-height: 38px;
+    padding: 0 12px !important;
+    text-align: left !important;
+    transform: none !important;
+}
+
+.App .technical-select:focus-within,
+.App .technical-select[data-open="true"] {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 16%, transparent) !important;
+    outline: none !important;
+}
+
+.App .technical-select-trigger:focus-visible {
+    outline: none !important;
+}
+
+/* Dropdown menus: one rounded surface, quiet selected row without the accent bar. */
+:root[data-theme] [data-ui="menu"],
+:root[data-theme] .technical-select-menu {
+    background-image: none !important;
+    border-color: var(--border) !important;
+    border-radius: 12px !important;
+    padding: 6px !important;
+}
+
+:root[data-theme] [data-ui="menu-item"],
+:root[data-theme] .technical-select-option {
+    border: 0 !important;
+    border-radius: 8px !important;
+    font-size: 0.86rem !important;
+    min-height: 38px !important;
+    padding: 8px 12px !important;
+}
+
+:root[data-theme] [data-ui="menu-item"]:hover,
+:root[data-theme] .technical-select-option:hover:not(:disabled) {
+    background: var(--surface-secondary) !important;
+}
+
+:root[data-theme] .technical-select-option[aria-selected="true"] {
+    background: var(--surface-secondary) !important;
+    box-shadow: none !important;
+    color: var(--foreground) !important;
+    font-weight: 600 !important;
+}
+
+:root[data-theme] .technical-select-check {
+    color: var(--foreground) !important;
+    font-family: var(--font-ui) !important;
+}
+
+.app-main-content .home-tracking-lookup-form button:not(.technical-select-trigger) {
+    border-radius: 999px !important;
+    font-weight: 500 !important;
+    padding-inline: 16px !important;
+}
+
+.app-main-content .home-tracking-lookup-form button:not(.technical-select-trigger):disabled {
+    background: transparent !important;
+    border-color: var(--border) !important;
+    opacity: 0.6;
+}
