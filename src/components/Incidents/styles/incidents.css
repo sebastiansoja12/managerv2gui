@@ -1,0 +1,129 @@
+.incidents-summary {
+    margin-bottom: 4px;
+}
+
+.incidents-summary-critical strong {
+    color: var(--danger);
+}
+
+.incidents-category {
+    display: block;
+    font-weight: 600;
+}
+
+.incidents-description {
+    color: var(--muted-foreground);
+    display: -webkit-box;
+    font-size: 0.75rem;
+    max-width: 320px;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+}
+
+.incidents-actions {
+    display: inline-flex;
+    gap: 6px;
+}
+
+.incidents-table th {
+    white-space: nowrap;
+}
+
+.incidents-nowrap {
+    white-space: nowrap;
+}
+
+.incidents-id {
+    font-size: 0.78rem !important;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.incidents-muted {
+    color: var(--muted-foreground);
+}
+
+.incident-details-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.incident-details-description {
+    margin: 0;
+    white-space: pre-wrap;
+}
+
+.incident-comment-form {
+    display: grid;
+    gap: 8px;
+    justify-items: end;
+}
+
+.incident-timeline {
+    display: grid;
+    gap: 0;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.incident-timeline-entry {
+    border-left: 2px solid var(--border);
+    display: grid;
+    gap: 4px;
+    padding: 0 0 14px 14px;
+    position: relative;
+}
+
+.incident-timeline-entry::before {
+    background: var(--muted-foreground);
+    border-radius: 50%;
+    content: "";
+    height: 8px;
+    left: -5px;
+    position: absolute;
+    top: 6px;
+    width: 8px;
+}
+
+.incident-timeline-reported::before,
+.incident-timeline-reopened::before {
+    background: var(--warning);
+}
+
+.incident-timeline-resolved::before {
+    background: var(--success);
+}
+
+.incident-timeline-assigned::before {
+    background: var(--primary);
+}
+
+.incident-timeline-heading {
+    align-items: baseline;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    font-size: 0.85rem;
+}
+
+.incident-timeline-heading span,
+.incident-timeline-heading time {
+    color: var(--muted-foreground);
+}
+
+.incident-timeline-heading time {
+    font-size: 0.78rem;
+    margin-left: auto;
+}
+
+.incident-timeline-entry p {
+    font-size: 0.875rem;
+    margin: 0;
+    white-space: pre-wrap;
+}
