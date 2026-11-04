@@ -306,7 +306,7 @@ function AppTabs({
     ] : [];
 
     return (
-        <nav aria-label={pl.app.tabs.openTabs} className="app-tabbar">
+        <nav aria-label={pl.app.tabs.openTabs} className="app-tabbar" data-tour="app-tabs">
             <div
                 className="app-tabbar-scroller"
                 data-overflow-end={scrollEdges.end || undefined}

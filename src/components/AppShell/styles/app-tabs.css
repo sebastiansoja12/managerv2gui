@@ -1,19 +1,20 @@
-/* Second application row: open tabs get the full width instead of sharing it with the navigation. */
+/* Second application row, tucked right under the rounded command bar and aligned with its edges. */
 .app-tabbar {
-    --tabbar-height: 42px;
-    --tab-height: 30px;
-    --tab-radius: 7px;
-    --tab-active-bg: var(--card);
+    --tabbar-height: 40px;
+    --tab-height: 32px;
+    --tab-radius: 8px;
+    --tab-hover-bg: color-mix(in srgb, var(--foreground) 8%, transparent);
+    --tab-active-bg: var(--surface-elevated, var(--card));
     align-items: center;
-    background: color-mix(in srgb, var(--background) 92%, #000 8%);
+    background: transparent;
     border-bottom: 1px solid var(--border);
-    box-shadow: inset 0 1px 0 color-mix(in srgb, var(--foreground) 4%, transparent);
     display: flex;
     flex: 0 0 auto;
     font-family: var(--font-ui);
     gap: 8px;
     height: var(--tabbar-height);
-    padding: 0 10px 0 16px;
+    margin: 4px 12px 0;
+    padding: 0 2px;
     position: relative;
     z-index: 40;
 }
@@ -22,7 +23,7 @@
     align-items: center;
     display: flex;
     flex: 1 1 auto;
-    gap: 1px;
+    gap: 2px;
     height: 100%;
     min-width: 0;
     overflow-x: auto;
@@ -68,7 +69,7 @@
     background: var(--border);
     content: "";
     height: 14px;
-    left: -1px;
+    left: -2px;
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
@@ -85,35 +86,33 @@
 
 /* Pinned tabs form their own group, separated from the rest by a stronger divider. */
 .app-tabbar-tab-pinned + .app-tabbar-tab:not(.app-tabbar-tab-pinned) {
-    margin-left: 9px;
+    margin-left: 12px;
 }
 
 .app-tabbar-tab-pinned + .app-tabbar-tab:not(.app-tabbar-tab-pinned)::before {
     background: var(--border-strong, var(--border));
     height: 18px;
-    left: -6px;
+    left: -8px;
     opacity: 1;
 }
 
 .app-tabbar-tab:hover {
-    background: color-mix(in srgb, var(--surface) 80%, transparent);
+    background: var(--tab-hover-bg);
     color: var(--foreground);
 }
 
+/* The current page sits on a raised surface with an accent underline. */
 .app-tabbar-tab-active,
 .app-tabbar-tab-active:hover {
     background: var(--tab-active-bg);
-    border-color: color-mix(in srgb, var(--foreground) 10%, var(--border));
-    box-shadow:
-        0 1px 2px color-mix(in srgb, #000 28%, transparent),
-        inset 0 1px 0 color-mix(in srgb, var(--foreground) 6%, transparent);
+    border-color: var(--border);
+    box-shadow: 0 1px 2px color-mix(in srgb, #000 18%, transparent);
     color: var(--foreground);
 }
 
-/* Accent underline marks the current page. */
 .app-tabbar-tab-active::after {
     background: var(--primary);
-    border-radius: 2px;
+    border-radius: 2px 2px 0 0;
     bottom: -1px;
     content: "";
     height: 2px;
@@ -132,13 +131,13 @@
     display: flex;
     flex: 1 1 auto;
     font: inherit;
-    font-size: 0.77rem;
+    font-size: 0.8rem;
     font-weight: 500;
-    gap: 7px;
+    gap: 8px;
     height: 100%;
     letter-spacing: -0.005em;
     min-width: 0;
-    padding: 0 2px 0 10px;
+    padding: 0 4px 0 12px;
     text-align: left;
 }
 
@@ -147,8 +146,9 @@
     outline-offset: -2px;
 }
 
-.app-tabbar-tab-pinned .app-tabbar-tab-select {
-    padding-right: 10px;
+/* Tabs without a close button (home, pinned) keep symmetric padding. */
+.app-tabbar-tab-select:last-child {
+    padding-right: 12px;
 }
 
 .app-tabbar-tab-select span {
@@ -163,8 +163,8 @@
 
 .app-tabbar-tab-icon {
     flex: 0 0 auto;
-    font-size: 0.86rem;
-    opacity: 0.75;
+    font-size: 0.95rem;
+    opacity: 0.8;
     transition: color 140ms ease, opacity 140ms ease;
 }
 
@@ -198,7 +198,7 @@
 }
 
 .app-tabbar-tab-close {
-    margin: 0 5px 0 2px;
+    margin: 0 6px 0 0;
     opacity: 0;
 }
 
@@ -216,12 +216,23 @@
 
 .app-tabbar-all {
     align-items: center;
-    border-left: 1px solid var(--border);
     display: flex;
     flex: 0 0 auto;
-    height: 22px;
-    padding-left: 8px;
+    height: 100%;
+    padding-left: 9px;
     position: relative;
+}
+
+/* Divider between the tab strip and the "all tabs" button, centred on the bar. */
+.app-tabbar-all::before {
+    background: var(--border);
+    content: "";
+    height: 20px;
+    left: 0;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1px;
 }
 
 .app-tabbar-all-trigger {
@@ -233,38 +244,47 @@
     cursor: pointer;
     display: inline-flex;
     font: inherit;
-    font-size: 0.72rem;
+    font-size: 0.75rem;
     font-weight: 600;
-    gap: 7px;
+    gap: 6px;
     height: var(--tab-height);
-    padding: 0 6px 0 9px;
+    padding: 0 6px 0 8px;
     transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease;
 }
 
 .app-tabbar-all-trigger svg {
-    font-size: 0.92rem;
+    font-size: 1.05rem;
 }
 
 .app-tabbar-all-trigger span {
     align-items: center;
     background: color-mix(in srgb, var(--primary) 16%, transparent);
     border: 1px solid color-mix(in srgb, var(--primary) 30%, transparent);
-    border-radius: 5px;
+    border-radius: 6px;
     color: var(--primary);
     display: inline-flex;
     font-family: var(--font-mono);
-    font-size: 0.68rem;
-    height: 18px;
+    font-size: 0.7rem;
+    height: 20px;
     justify-content: center;
-    min-width: 20px;
-    padding: 0 4px;
+    min-width: 22px;
+    padding: 0 5px;
 }
 
-.app-tabbar-all-trigger:hover,
+.app-tabbar-all-trigger:hover {
+    background: var(--tab-hover-bg);
+    color: var(--foreground);
+}
+
 .app-tabbar-all-trigger[aria-expanded="true"] {
-    background: var(--surface);
+    background: var(--tab-active-bg);
     border-color: var(--border);
     color: var(--foreground);
+}
+
+.app-tabbar-all-trigger:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--primary) 70%, transparent);
+    outline-offset: -2px;
 }
 
 .app-tabbar-all-panel,
@@ -496,9 +516,9 @@
     }
 }
 
-@media (max-width: 680px) {
+@media (max-width: 720px) {
     .app-tabbar {
-        padding-left: 8px;
+        margin-inline: 6px;
     }
 
     .app-tabbar-tab {
@@ -514,95 +534,6 @@
     }
 }
 
-/* Matches the rounded command bar: pill tabs on a transparent strip aligned with the bar's edges. */
-.app-tabbar {
-    --tabbar-height: 44px;
-    --tab-height: 32px;
-    --tab-radius: 999px;
-    --tab-active-bg: color-mix(in srgb, var(--surface) 72%, var(--background));
-    background: transparent;
-    border-bottom: 0;
-    box-shadow: none;
-    gap: 6px;
-    margin: 0 12px;
-    padding: 0 2px;
-}
-
-.app-tabbar-scroller {
-    gap: 4px;
-}
-
-.app-tabbar-tab + .app-tabbar-tab::before,
-.app-tabbar-tab-active::after {
-    display: none;
-}
-
-.app-tabbar-tab-pinned + .app-tabbar-tab:not(.app-tabbar-tab-pinned) {
-    margin-left: 10px;
-}
-
-.app-tabbar-tab:hover {
-    background: color-mix(in srgb, var(--surface) 55%, transparent);
-}
-
-.app-tabbar-tab-active,
-.app-tabbar-tab-active:hover {
-    border-color: var(--border);
-    box-shadow: none;
-}
-
-.app-tabbar-tab-select {
-    font-size: 0.84rem;
-    gap: 8px;
-    padding: 0 4px 0 12px;
-}
-
-.app-tabbar-tab-pinned .app-tabbar-tab-select {
-    padding-right: 12px;
-}
-
-.app-tabbar-tab-active .app-tabbar-tab-select {
-    font-weight: 500;
-}
-
-.app-tabbar-tab-icon {
-    font-size: 0.95rem;
-    opacity: 0.6;
-}
-
-.app-tabbar-tab-active .app-tabbar-tab-icon {
-    color: var(--foreground);
-}
-
-.app-tabbar-tab-close {
-    border-radius: 50%;
-    height: 22px;
-    margin: 0 5px 0 0;
-    width: 22px;
-}
-
-.app-tabbar-all {
-    border-left: 0;
-    height: auto;
-    padding-left: 0;
-}
-
-.app-tabbar-all-trigger {
-    border-color: var(--border);
-    font-size: 0.8rem;
-    font-weight: 500;
-    gap: 8px;
-    padding: 0 6px 0 12px;
-}
-
-.app-tabbar-all-trigger span {
-    background: var(--surface);
-    border-color: var(--border);
-    border-radius: 999px;
-    color: var(--foreground);
-    min-width: 22px;
-}
-
 .App .app-tabbar-all-search input[type],
 .App .app-tabbar-all-search input:not([type="checkbox"]):not([type="radio"]),
 .App .app-tabbar-all-search input:not([type="checkbox"]):not([type="radio"]):focus {
@@ -610,47 +541,4 @@
     border: 0 !important;
     border-radius: 0 !important;
     box-shadow: none !important;
-}
-
-/* Visibility: every tab is a filled pill, the active one is inverted like the primary "+" button. */
-.app-tabbar-tab {
-    background: color-mix(in srgb, var(--surface) 70%, var(--background));
-    border-color: var(--border);
-    color: color-mix(in srgb, var(--foreground) 78%, var(--muted-foreground));
-}
-
-.app-tabbar-tab:hover {
-    background: var(--surface);
-    border-color: var(--border-strong);
-    color: var(--foreground);
-}
-
-.app-tabbar-tab-active,
-.app-tabbar-tab-active:hover {
-    background: var(--foreground);
-    border-color: var(--foreground);
-    color: var(--background);
-}
-
-.app-tabbar-tab-icon {
-    opacity: 0.85;
-}
-
-.app-tabbar-tab-active .app-tabbar-tab-icon,
-.app-tabbar-tab-active.app-tabbar-tab-pinned .app-tabbar-tab-icon {
-    color: var(--background);
-    opacity: 1;
-}
-
-.app-tabbar-tab-active .app-tabbar-tab-close {
-    color: color-mix(in srgb, var(--background) 70%, var(--foreground));
-}
-
-.app-tabbar-tab-active .app-tabbar-tab-close:hover {
-    background: color-mix(in srgb, var(--background) 14%, transparent);
-    color: var(--background);
-}
-
-.app-tabbar-tab-select:focus-visible {
-    outline-offset: 2px;
 }
