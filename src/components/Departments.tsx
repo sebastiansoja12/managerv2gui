@@ -30,6 +30,8 @@ import {
     Save,
     Search,
     Tag,
+    ToggleOff,
+    ToggleOn,
     UnarchiveOutlined,
     Upload,
     WarningAmberOutlined,
@@ -38,14 +40,15 @@ import {getBackendErrorMessage} from "../api/errorMessage";
 import {useAuthState} from "../auth/AuthState";
 import Department from "../class/depots/Department";
 import DeliveryNetworkService from "../hooks/DeliveryNetworkService";
+import DepartmentLoadService from "../hooks/DepartmentLoadService";
 import departmentService, {DepartmentCreateRequest, DepartmentStatus} from "../hooks/DepartmentService";
 import UserManagementService from "../hooks/UserManagementService";
 import pl from "../i18n/translate";
-import {applyDepartmentAutomations} from "./GlobalConfiguration/departmentAutomation";
 import {useDepartmentConfiguration} from "./GlobalConfiguration/model/DepartmentConfiguration";
 import DeliveryAreasMap from "./Departments/DeliveryAreasMap";
 import {notifyDeliveryAreasChanged} from "./Departments/model/DeliveryArea";
 import DepartmentRelationsMap, {getDepartmentsMissingSortingRelation} from "./Departments/DepartmentRelationsMap";
+import {DepartmentLoad} from "./Departments/model/DepartmentLoad";
 import {DepartmentRelation, departmentRelationPairKey} from "./Departments/model/DepartmentRelation";
 import {AppTabDefinition} from "./AppShell/types";
 import {departmentDetailsTab} from "./Departments/departmentNavigation";
@@ -114,6 +117,15 @@ const formatDateTime = (value?: string | null) => {
     });
 };
 
+type PendingDepartmentStatus = "ARCHIVED" | "DELETED" | "INACTIVE";
+
+const formatDepartmentLoad = (load?: DepartmentLoad) => load
+    ? pl.departments.capacity.loadValue
+        .replace("{count}", String(load.deliveriesToday))
+        .replace("{capacity}", String(load.dailyCapacity))
+        .replace("{percent}", String(load.utilizationPercent))
+    : pl.common.dash;
+
 const formatCoordinates = (department: Department) => {
     if (!department.coordinates) {
         return pl.common.dash;
@@ -123,7 +135,9 @@ const formatCoordinates = (department: Department) => {
 };
 
 const departmentRelationsKey = (relations: DepartmentRelation[]) => relations
-    .map(departmentRelationPairKey)
+    .map((relation) => relation.bidirectional === false
+        ? `${relation.sourceDepartmentId}>${relation.targetDepartmentId}`
+        : departmentRelationPairKey(relation))
     .sort()
     .join("|");
 
@@ -158,8 +172,11 @@ const Departments: React.FC<DepartmentsProps> = ({onOpenTab}) => {
     const [selectedDepartmentId, setSelectedDepartmentId] = useState<number | null>(null);
     const [pendingStatusChange, setPendingStatusChange] = useState<{
         department: Department;
-        status: "ARCHIVED" | "DELETED";
+        status: PendingDepartmentStatus;
     } | null>(null);
+    const [statusChangeReason, setStatusChangeReason] = useState<string>("");
+    const [departmentLoads, setDepartmentLoads] = useState<Map<number, DepartmentLoad>>(new Map());
+    const [departmentLoadsError, setDepartmentLoadsError] = useState<string>("");
     const createTranslations = pl.departments.create;
     const canViewArchivedDepartments = isAdministrator(currentUser?.role);
     const canArchiveDepartments = canManageUsers(currentUser?.role);
@@ -224,6 +241,10 @@ const Departments: React.FC<DepartmentsProps> = ({onOpenTab}) => {
             || filteredDepartments[0]
             || null;
     }, [filteredDepartments, selectedDepartmentId]);
+    const selectedDepartmentConfiguration = useDepartmentConfiguration(currentUser?.operatorId?.value,
+        selectedDepartment?.departmentId ?? null);
+    const statusChangeReasonRequired = Boolean(
+        selectedDepartmentConfiguration.lifecyclePolicy?.requireStatusChangeReason);
 
     const departmentRelationsChanged = useMemo(
         () => departmentRelationsKey(departmentRelations) !== savedDepartmentRelationsKey,
@@ -260,6 +281,17 @@ const Departments: React.FC<DepartmentsProps> = ({onOpenTab}) => {
                 setLoading(false);
             });
     }, [canViewArchivedDepartments]);
+
+    const retrieveDepartmentLoads = useCallback(() => {
+        setDepartmentLoadsError("");
+        DepartmentLoadService.getAll()
+            .then((response) => {
+                setDepartmentLoads(new Map((response.data || []).map((load) => [load.departmentId, load])));
+            })
+            .catch((exception: unknown) => {
+                setDepartmentLoadsError(getBackendErrorMessage(exception, pl.departments.capacity.loadError));
+            });
+    }, []);
 
     const retrieveUsers = useCallback(() => {
         setUsersLoading(true);
@@ -312,7 +344,6 @@ const Departments: React.FC<DepartmentsProps> = ({onOpenTab}) => {
             return;
         }
 
-        const newDepartmentCode = createForm.departmentCode.trim();
         setSaving(true);
         setError("");
         setSuccess("");
@@ -323,19 +354,6 @@ const Departments: React.FC<DepartmentsProps> = ({onOpenTab}) => {
             setCreateDialogOpen(false);
             if (departmentConfiguration.autoAssignDeliveryAreas) {
                 notifyDeliveryAreasChanged();
-            }
-            if (departmentConfiguration.autoConnectDepartments) {
-                try {
-                    const allDepartments = (await departmentService.getAll()).data || [];
-                    const result = await applyDepartmentAutomations(
-                        {...departmentConfiguration, autoAssignDeliveryAreas: false}, allDepartments, newDepartmentCode);
-                    if (result.connectionSkipped) {
-                        setError(pl.globalConfiguration.departmentConfiguration.connectionSkipped);
-                    }
-                } catch (automationError) {
-                    setError(getBackendErrorMessage(automationError,
-                        pl.globalConfiguration.departmentConfiguration.automationError));
-                }
             }
             retrieveDepartments(false);
         } catch (exception) {
@@ -350,23 +368,26 @@ const Departments: React.FC<DepartmentsProps> = ({onOpenTab}) => {
         onOpenTab?.(departmentDetailsTab(department));
     };
 
-    const changeDepartmentStatus = (department: Department, status: DepartmentStatus) => {
-        if ((status === "ARCHIVED" && departmentConfiguration.preventDepartmentArchiving)
-            || (status === "DELETED" && departmentConfiguration.preventDepartmentDeletion)) {
+    const changeDepartmentStatus = (department: Department, status: DepartmentStatus, reason?: string) => {
+        if ((status === "ARCHIVED" && selectedDepartmentConfiguration.preventDepartmentArchiving)
+            || (status === "DELETED" && selectedDepartmentConfiguration.preventDepartmentDeletion)) {
             return;
         }
         const departmentCode = getDepartmentCode(department);
         setSaving(true);
         setError("");
         setSuccess("");
+        const trimmedReason = reason?.trim() || undefined;
         const statusChange = status === "ARCHIVED"
             ? departmentService.archive({
                 departmentCode: {value: departmentCode},
                 status,
+                reason: trimmedReason,
             })
             : departmentService.changeStatus({
             departmentCode: {value: departmentCode},
             status,
+            reason: trimmedReason,
         });
 
         statusChange
@@ -375,8 +396,14 @@ const Departments: React.FC<DepartmentsProps> = ({onOpenTab}) => {
                     ? pl.departments.actions.archiveSuccess
                     : status === "DELETED"
                         ? pl.departments.actions.deleteSuccess
-                        : pl.departments.actions.restoreSuccess);
+                        : status === "INACTIVE"
+                            ? pl.departments.actions.deactivateSuccess
+                            : department.status === "ARCHIVED"
+                                ? pl.departments.actions.restoreSuccess
+                                : pl.departments.actions.activateSuccess);
                 setPendingStatusChange(null);
+                setStatusChangeReason("");
+                retrieveDepartmentLoads();
                 if (status === "DELETED") {
                     notifyDeliveryAreasChanged();
                 }
@@ -390,11 +417,14 @@ const Departments: React.FC<DepartmentsProps> = ({onOpenTab}) => {
             });
     };
 
-    const requestDepartmentStatusChange = (department: Department, status: "ARCHIVED" | "DELETED") => {
-        if ((status === "ARCHIVED" && departmentConfiguration.preventDepartmentArchiving)
-            || (status === "DELETED" && departmentConfiguration.preventDepartmentDeletion)) return;
+    const requestDepartmentStatusChange = (department: Department, status: PendingDepartmentStatus) => {
+        if ((status === "ARCHIVED" && selectedDepartmentConfiguration.preventDepartmentArchiving)
+            || (status === "DELETED" && selectedDepartmentConfiguration.preventDepartmentDeletion)) return;
+        setStatusChangeReason("");
+        setError("");
         setPendingStatusChange({department, status});
     };
+
 
     const closeCreateDialog = () => {
         if (!saving) {
@@ -407,7 +437,7 @@ const Departments: React.FC<DepartmentsProps> = ({onOpenTab}) => {
             return;
         }
 
-        changeDepartmentStatus(pendingStatusChange.department, pendingStatusChange.status);
+        changeDepartmentStatus(pendingStatusChange.department, pendingStatusChange.status, statusChangeReason);
     };
 
     const openUsersDialog = (department: Department) => {
@@ -528,7 +558,8 @@ const Departments: React.FC<DepartmentsProps> = ({onOpenTab}) => {
     useEffect(() => {
         retrieveDepartments();
         retrieveUsers();
-    }, [retrieveDepartments, retrieveUsers]);
+        retrieveDepartmentLoads();
+    }, [retrieveDepartmentLoads, retrieveDepartments, retrieveUsers]);
 
     return (
         <main className="departments-page">
@@ -666,7 +697,9 @@ const Departments: React.FC<DepartmentsProps> = ({onOpenTab}) => {
                                             className={selected ? "departments-row-selected" : undefined}
                                             key={department.departmentId}
                                             tabIndex={0}
-                                            onClick={() => openDepartment(department)}
+                                            aria-selected={selected}
+                                            onClick={() => setSelectedDepartmentId(department.departmentId)}
+                                            onDoubleClick={() => openDepartment(department)}
                                             onKeyDown={(event) => {
                                                 if (event.key === "Enter") {
                                                     openDepartment(department);
@@ -686,6 +719,17 @@ const Departments: React.FC<DepartmentsProps> = ({onOpenTab}) => {
                                                 <span className={`departments-status departments-status-${(department.status || "unknown").toLowerCase()}`}>
                                                     {translateDepartmentStatus(department.status)}
                                                 </span>
+                                                {departmentLoads.get(department.departmentId)?.warning ? (
+                                                    <span
+                                                        className={`departments-load-badge${departmentLoads.get(department.departmentId)?.overloaded ? " is-overloaded" : ""}`}
+                                                        title={departmentLoads.get(department.departmentId)?.overloaded
+                                                            ? pl.departments.capacity.overloaded
+                                                            : pl.departments.capacity.warning}
+                                                    >
+                                                        <WarningAmberOutlined fontSize="small" />
+                                                        {departmentLoads.get(department.departmentId)?.utilizationPercent}%
+                                                    </span>
+                                                ) : undefined}
                                             </td>
                                             <td>
                                                 <button
@@ -737,6 +781,23 @@ const Departments: React.FC<DepartmentsProps> = ({onOpenTab}) => {
                                 <dt>{pl.departments.columns.updatedAt}</dt>
                                 <dd>{formatDateTime(selectedDepartment.updatedAt)}</dd>
                             </div>
+                            {selectedDepartment.statusChangeReason ? (
+                                <div>
+                                    <dt>{pl.departments.columns.statusReason}</dt>
+                                    <dd>
+                                        {selectedDepartment.statusChangeReason}
+                                        {selectedDepartment.statusChangedAt
+                                            ? ` (${formatDateTime(selectedDepartment.statusChangedAt)})` : ""}
+                                    </dd>
+                                </div>
+                            ) : undefined}
+                            <div>
+                                <dt>{pl.departments.columns.load}</dt>
+                                <dd className={departmentLoads.get(selectedDepartment.departmentId)?.warning
+                                    ? "departments-load-warning" : undefined}>
+                                    {departmentLoadsError || formatDepartmentLoad(departmentLoads.get(selectedDepartment.departmentId))}
+                                </dd>
+                            </div>
                         </dl>
                     ) : undefined}
                     <table className="departments-actions-table">
@@ -770,6 +831,36 @@ const Departments: React.FC<DepartmentsProps> = ({onOpenTab}) => {
                                 </td>
                             </tr>
                         ) : null}
+                        {canArchiveDepartments && selectedDepartment?.status === "ACTIVE" ? (
+                            <tr>
+                                <td>
+                                    <button
+                                        disabled={saving}
+                                        type="button"
+                                        onClick={() => requestDepartmentStatusChange(selectedDepartment, "INACTIVE")}
+                                    >
+                                        <ToggleOff fontSize="small" />
+                                        <span>{pl.departments.actions.deactivate}</span>
+                                    </button>
+                                </td>
+                            </tr>
+                        ) : null}
+                        {canArchiveDepartments && (selectedDepartment?.status === "INACTIVE"
+                            || selectedDepartment?.status === "SUSPENDED") ? (
+                            <tr>
+                                <td>
+                                    <button
+                                        className="departments-action-restore"
+                                        disabled={saving}
+                                        type="button"
+                                        onClick={() => changeDepartmentStatus(selectedDepartment, "ACTIVE")}
+                                    >
+                                        <ToggleOn fontSize="small" />
+                                        <span>{pl.departments.actions.activate}</span>
+                                    </button>
+                                </td>
+                            </tr>
+                        ) : null}
                         <tr>
                             <td>
                                 <button
@@ -782,7 +873,7 @@ const Departments: React.FC<DepartmentsProps> = ({onOpenTab}) => {
                                 </button>
                             </td>
                         </tr>
-                        {canArchiveDepartments && !departmentConfiguration.preventDepartmentArchiving ? (
+                        {canArchiveDepartments && !selectedDepartmentConfiguration.preventDepartmentArchiving ? (
                             <tr>
                                 <td>
                                     <button
@@ -796,7 +887,7 @@ const Departments: React.FC<DepartmentsProps> = ({onOpenTab}) => {
                                 </td>
                             </tr>
                         ) : null}
-                        {canViewArchivedDepartments && !departmentConfiguration.preventDepartmentDeletion ? (
+                        {canViewArchivedDepartments && !selectedDepartmentConfiguration.preventDepartmentDeletion ? (
                             <tr>
                                 <td>
                                     <button
@@ -1008,16 +1099,36 @@ const Departments: React.FC<DepartmentsProps> = ({onOpenTab}) => {
                     <span>
                         {pendingStatusChange?.status === "ARCHIVED"
                             ? pl.departments.actions.archiveDialogTitle
-                            : pl.departments.actions.deleteDialogTitle}
+                            : pendingStatusChange?.status === "INACTIVE"
+                                ? pl.departments.actions.deactivateDialogTitle
+                                : pl.departments.actions.deleteDialogTitle}
                     </span>
                 </DialogTitle>
                 <DialogContent>
                     <DialogContentText>
                         {(pendingStatusChange?.status === "ARCHIVED"
                             ? pl.departments.actions.archiveDialogDescription
-                            : pl.departments.actions.deleteDialogDescription)
+                            : pendingStatusChange?.status === "INACTIVE"
+                                ? pl.departments.actions.deactivateDialogDescription
+                                : pl.departments.actions.deleteDialogDescription)
                             .replace("{code}", pendingStatusChange ? getDepartmentCode(pendingStatusChange.department) : "")}
                     </DialogContentText>
+                    {error && pendingStatusChange ? <Alert severity="error">{error}</Alert> : undefined}
+                    <TextField
+                        fullWidth
+                        multiline
+                        disabled={saving}
+                        helperText={statusChangeReasonRequired
+                            ? pl.departments.actions.reasonRequired
+                            : pl.departments.actions.reasonOptional}
+                        inputProps={{maxLength: 500}}
+                        label={pl.departments.actions.reason}
+                        margin="normal"
+                        rows={2}
+                        required={statusChangeReasonRequired}
+                        value={statusChangeReason}
+                        onChange={(event: ChangeEvent<HTMLInputElement>) => setStatusChangeReason(event.target.value)}
+                    />
                 </DialogContent>
                 <DialogActions>
                     <Button disabled={saving} variant="outlined" onClick={() => setPendingStatusChange(null)}>
@@ -1025,14 +1136,19 @@ const Departments: React.FC<DepartmentsProps> = ({onOpenTab}) => {
                     </Button>
                     <Button
                         color={pendingStatusChange?.status === "DELETED" ? "error" : "primary"}
-                        disabled={saving || !pendingStatusChange}
-                        startIcon={pendingStatusChange?.status === "DELETED" ? <DeleteOutline /> : <ArchiveOutlined />}
+                        disabled={saving || !pendingStatusChange
+                            || (statusChangeReasonRequired && !statusChangeReason.trim())}
+                        startIcon={pendingStatusChange?.status === "DELETED"
+                            ? <DeleteOutline />
+                            : pendingStatusChange?.status === "INACTIVE" ? <ToggleOff /> : <ArchiveOutlined />}
                         variant="contained"
                         onClick={confirmDepartmentStatusChange}
                     >
                         {pendingStatusChange?.status === "ARCHIVED"
                             ? pl.departments.actions.archiveDialogConfirm
-                            : pl.departments.actions.deleteDialogConfirm}
+                            : pendingStatusChange?.status === "INACTIVE"
+                                ? pl.departments.actions.deactivateDialogConfirm
+                                : pl.departments.actions.deleteDialogConfirm}
                     </Button>
                 </DialogActions>
             </Dialog>
