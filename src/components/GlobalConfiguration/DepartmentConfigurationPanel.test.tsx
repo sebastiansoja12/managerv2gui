@@ -8,7 +8,7 @@ import {applyDepartmentAutomations} from "./departmentAutomation";
 import {defaultDepartmentPolicies} from "./model/DepartmentConfiguration";
 
 jest.mock("../../auth/AuthState", () => ({
-    useAuthState: () => ({user: {operatorId: {value: 7}}}),
+    useAuthState: () => ({user: {operatorId: {value: 7}, role: "SUPERADMIN"}}),
 }));
 jest.mock("../../hooks/DepartmentService", () => ({
     __esModule: true,
@@ -16,7 +16,12 @@ jest.mock("../../hooks/DepartmentService", () => ({
 }));
 jest.mock("../../hooks/OperatorConfigurationService", () => ({
     __esModule: true,
-    default: {getCurrentDepartmentConfiguration: jest.fn(), updateCurrentDepartmentConfiguration: jest.fn()},
+    default: {
+        getCurrentDepartmentConfiguration: jest.fn(),
+        updateCurrentDepartmentConfiguration: jest.fn(),
+        getDepartmentConfigurationOverride: jest.fn(),
+        updateDepartmentConfigurationOverride: jest.fn(),
+    },
 }));
 jest.mock("./departmentAutomation", () => ({applyDepartmentAutomations: jest.fn()}));
 
@@ -32,7 +37,7 @@ describe("DepartmentConfigurationPanel", () => {
         }, status: 200});
         configurationService.updateCurrentDepartmentConfiguration.mockImplementation(async (configuration) => (
             {data: configuration, status: 200}));
-        (applyDepartmentAutomations as jest.Mock).mockResolvedValue({assignedAreas: 0, createdConnections: 0});
+        (applyDepartmentAutomations as jest.Mock).mockResolvedValue({assignedAreas: 0});
     });
 
     it("saves all four department rules in the operator configuration", async () => {
@@ -44,13 +49,39 @@ describe("DepartmentConfigurationPanel", () => {
         }
         fireEvent.click(screen.getByRole("button", {name: pl.common.saveChanges}));
 
-        await waitFor(() => expect(applyDepartmentAutomations).toHaveBeenCalled());
-        expect(departmentService.getAll).toHaveBeenCalledTimes(1);
-        expect(configurationService.updateCurrentDepartmentConfiguration).toHaveBeenCalledWith(expect.objectContaining({
-            autoAssignDeliveryAreas: true, autoConnectDepartments: true,
-            preventDepartmentDeletion: true, preventDepartmentArchiving: true,
-            capacityPolicy: defaultDepartmentPolicies.capacityPolicy,
-        }));
+        await waitFor(() => expect(configurationService.updateCurrentDepartmentConfiguration).toHaveBeenCalledWith(
+            expect.objectContaining({
+                autoAssignDeliveryAreas: true, autoConnectDepartments: true,
+                preventDepartmentDeletion: true, preventDepartmentArchiving: true,
+                capacityPolicy: defaultDepartmentPolicies.capacityPolicy,
+            })));
+        expect(await screen.findByText(pl.globalConfiguration.departmentConfiguration.saved)).toBeInTheDocument();
+        expect(applyDepartmentAutomations).not.toHaveBeenCalled();
+    });
+
+    it("assigns delivery boundaries only from the dedicated action", async () => {
+        (applyDepartmentAutomations as jest.Mock).mockResolvedValue({assignedAreas: 62});
+        render(<DepartmentConfigurationPanel />);
+        const labels = pl.globalConfiguration.departmentConfiguration;
+        await waitFor(() => expect(configurationService.getCurrentDepartmentConfiguration).toHaveBeenCalled());
+
+        fireEvent.click(screen.getByRole("button", {name: labels.assignAreas}));
+
+        expect(await screen.findByText(labels.areasAssigned.replace("{areas}", "62"))).toBeInTheDocument();
+        expect(applyDepartmentAutomations).toHaveBeenCalledWith(
+            expect.objectContaining({autoAssignDeliveryAreas: true}), []);
+        expect(configurationService.updateCurrentDepartmentConfiguration).not.toHaveBeenCalled();
+    });
+
+    it("shows deletion and archiving rules in their own section", async () => {
+        render(<DepartmentConfigurationPanel />);
+        const labels = pl.globalConfiguration.departmentConfiguration;
+
+        const section = (await screen.findByText(labels.protection.title)).closest("section") as HTMLElement;
+
+        expect(section).toHaveTextContent(labels.settings.preventDepartmentDeletion.label);
+        expect(section).toHaveTextContent(labels.settings.preventDepartmentArchiving.label);
+        expect(section).not.toHaveTextContent(labels.settings.autoAssignDeliveryAreas.label);
     });
 
     const renderLoadedPanel = async () => {
@@ -95,5 +126,33 @@ describe("DepartmentConfigurationPanel", () => {
         expect(screen.getByText(labels.validation.range.replace("{min}", "1").replace("{max}", "100")))
             .toBeInTheDocument();
         expect(screen.getByRole("button", {name: pl.common.saveChanges})).toBeDisabled();
+    });
+
+    it("stores only overridden values for the selected department", async () => {
+        (departmentService.getAll as jest.Mock).mockResolvedValue({data: [{
+            departmentId: 9, departmentCode: {value: "KT1"}, address: {city: "Katowice"},
+        }]});
+        configurationService.getDepartmentConfigurationOverride.mockResolvedValue({
+            data: {capacityPolicy: {defaultDailyCapacity: 250}}, status: 200,
+        });
+        configurationService.updateDepartmentConfigurationOverride.mockImplementation(async (departmentId, override) => (
+            {data: override, status: 200}));
+        const labels = pl.globalConfiguration.departmentConfiguration;
+        await renderLoadedPanel();
+
+        fireEvent.change(screen.getByRole("combobox", {name: labels.scope.label}), {target: {value: "9"}});
+
+        const capacity = await screen.findByRole("spinbutton", {name: labels.scope.dailyCapacity.label});
+        await waitFor(() => expect(capacity).toHaveValue(250));
+        fireEvent.click(screen.getByRole("checkbox", {
+            name: labels.policies.lifecyclePolicy.fields.requireStatusChangeReason.label,
+        }));
+        fireEvent.click(screen.getByRole("button", {name: pl.common.saveChanges}));
+
+        await waitFor(() => expect(configurationService.updateDepartmentConfigurationOverride).toHaveBeenCalledWith("9", {
+            capacityPolicy: {defaultDailyCapacity: 250},
+            lifecyclePolicy: {requireStatusChangeReason: true},
+        }));
+        expect(configurationService.updateCurrentDepartmentConfiguration).not.toHaveBeenCalled();
     });
 });
