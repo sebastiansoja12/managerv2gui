@@ -4,6 +4,7 @@ export interface DeviceInformationDto {
     deviceId?: string | null;
     departmentCode?: ValueObject<string>;
     userId?: number | null;
+    username?: string | null;
     deviceType?: string | null;
     deviceUserType?: string | null;
     version?: string | null;
@@ -16,6 +17,8 @@ export interface CommunicationLogDto {
     serviceType?: string | null;
     createdBy?: number | null;
     updatedBy?: number | null;
+    createdByUsername?: string | null;
+    updatedByUsername?: string | null;
     departmentCode?: ValueObject<string>;
     sourceService?: string | null;
     targetService?: string | null;

@@ -60,6 +60,8 @@ const statusLabel = (status?: string | null) =>
 
 const userLabel = (processLog?: ProcessLogDto | null) => {
     const firstCommunication = processLog?.communicationLogs?.[0];
+    const username = firstCommunication?.createdByUsername || firstCommunication?.updatedByUsername || processLog?.deviceInformation?.username;
+    if (username) return username;
     const userId = firstCommunication?.createdBy || firstCommunication?.updatedBy || processLog?.deviceInformation?.userId;
     return userId ? `#${userId}` : pl.common.dash;
 };
@@ -176,7 +178,7 @@ const ProcessDetails: React.FC = () => {
                                                         {subtitle ? <p>{subtitle}</p> : null}
                                                         <dl className="process-communication-meta">
                                                             {communication.createdBy ? (
-                                                                <div><dt>{pl.processes.details.fields.user}</dt><dd>#{communication.createdBy}</dd></div>
+                                                                <div><dt>{pl.processes.details.fields.user}</dt><dd>{communication.createdByUsername || `#${communication.createdBy}`}</dd></div>
                                                             ) : null}
                                                             {department ? (
                                                                 <div><dt>{pl.processes.details.fields.department}</dt><dd>{department}</dd></div>

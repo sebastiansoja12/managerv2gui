@@ -44,6 +44,8 @@ const serviceName = (processLog: ProcessLogDto) => {
 
 const userLabel = (processLog: ProcessLogDto) => {
     const communication = primaryCommunication(processLog);
+    const username = communication?.createdByUsername || communication?.updatedByUsername || processLog.deviceInformation?.username;
+    if (username) return username;
     const userId = communication?.createdBy || communication?.updatedBy || processLog.deviceInformation?.userId;
     return userId ? `#${userId}` : pl.common.dash;
 };
