@@ -14,6 +14,7 @@ jest.mock("../Impersonation/ImpersonationBanner", () => () => null);
 jest.mock("../Impersonation/ImpersonationConsentBanner", () => () => null);
 jest.mock("./AppFooter", () => () => null);
 jest.mock("../Chat/OrganizationChatDock", () => () => null);
+jest.mock("../Onboarding/UserOnboardingFlow", () => () => null);
 jest.mock("../Chat/ChatDockContext", () => ({
     OrganizationChatDockProvider: ({children}: {children: React.ReactNode}) => <>{children}</>,
 }));
