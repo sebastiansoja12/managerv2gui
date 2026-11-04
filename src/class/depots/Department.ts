@@ -25,4 +25,6 @@ export default interface Department {
     status: string;
     createdAt: string;
     updatedAt: string;
+    statusChangeReason?: string | null;
+    statusChangedAt?: string | null;
 }
