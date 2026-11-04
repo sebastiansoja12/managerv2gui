@@ -57,7 +57,8 @@ export function useBrowserDevice() {
                 return;
             }
             setStatus("error");
-            setError(getBackendErrorMessage(exception, translations.sessionError));
+            const reason = getBackendErrorMessage(exception, "");
+            setError(reason ? `${translations.sessionError}: ${reason}` : translations.sessionError);
         }
     }, [forget, translations.credentialsRevoked, translations.sessionError]);
 
