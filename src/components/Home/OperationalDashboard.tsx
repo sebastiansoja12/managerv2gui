@@ -28,6 +28,8 @@ import {DepartmentRelation} from "../Departments/model/DepartmentRelation";
 import {ReturnPackageDto} from "../Returns/model/ReturnPackage";
 import {ShipmentDto, ShipmentStatusDto} from "../Shipment/dto/ShipmentDto";
 import DepartmentNetworkMap from "./DepartmentNetworkMap";
+import ActingDepartmentSwitcher from "./ActingDepartmentSwitcher";
+import {canActOnBehalfOfAnyDepartment} from "../../config/roleAccess";
 import {
     buildTurnoverSeries,
     calculateMoneyTotals,
@@ -406,7 +408,7 @@ function OperationalDashboard({onOpenTab}: OperationalDashboardProps) {
     const firstName = user?.firstName || user?.username || pl.navigation.defaultUserName;
 
     return (
-        <main className="home-dashboard-page">
+        <main className="home-dashboard-page" data-tour="dashboard">
             <header className="home-dashboard-header">
                 <div>
                     <span className="home-dashboard-kicker">{pl.home.dashboard.kicker}</span>
@@ -415,7 +417,15 @@ function OperationalDashboard({onOpenTab}: OperationalDashboardProps) {
                 </div>
                 <div className="home-dashboard-context">
                     <span>{pl.home.dashboard.department}</span>
-                    <strong><Business fontSize="small" />{departmentCode || pl.common.dash}</strong>
+                    {canActOnBehalfOfAnyDepartment(user?.role) && departmentCode ? (
+                        <ActingDepartmentSwitcher
+                            departmentCode={departmentCode}
+                            departments={departments}
+                            homeDepartmentCode={user?.homeDepartmentCode || departmentCode}
+                        />
+                    ) : (
+                        <strong><Business fontSize="small" />{departmentCode || pl.common.dash}</strong>
+                    )}
                     <small>{lastUpdated
                         ? pl.home.dashboard.updatedAt.replace("{time}", lastUpdated.toLocaleTimeString(pl.common.locale, {hour: "2-digit", minute: "2-digit"}))
                         : pl.home.dashboard.waitingForData}</small>
