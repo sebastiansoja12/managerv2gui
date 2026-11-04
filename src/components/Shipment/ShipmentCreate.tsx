@@ -33,6 +33,7 @@ import pl from "../../i18n/translate";
 import {PickupPointSummary} from "../PickupPoints/model/PickupPoint";
 import ShipmentDeliveryPointMapDialog from "./ShipmentDeliveryPointMapDialog";
 import ShipmentPostalCodeField from "./ShipmentPostalCodeField";
+import {emitOnboardingEvent} from "../Onboarding/onboardingEvents";
 import "./styles/shipments.css";
 
 type Notice = {
@@ -317,6 +318,7 @@ const ShipmentCreate: React.FC = () => {
                     .replace("{trackingNumber}", String(response.data.trackingNumber)),
             });
             resetForm();
+            emitOnboardingEvent({type: "shipmentCreated", trackingNumber: String(response.data.trackingNumber)});
             navigate(`/shipments/tracking/${encodeURIComponent(response.data.trackingNumber)}/edit`);
         } catch (error) {
             showError(error);

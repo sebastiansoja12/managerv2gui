@@ -75,11 +75,13 @@ import {valueObjectValue} from "../../utils/valueObject";
 import {shipmentEventDescription} from "./shipmentEventDescription";
 import "./styles/shipments.css";
 import ShipmentReturnSummary from "./ShipmentReturnSummary";
+import IncidentReportDialog from "../Incidents/IncidentReportDialog";
 import ShipmentAddressRouteMap from "./ShipmentAddressRouteMap";
 import {ReturnPackageDto} from "../Returns/model/ReturnPackage";
 import {Delivery} from "../Deliveries/model/Delivery";
 import {useDeliveryPeople} from "../Deliveries/details/useDeliveryPeople";
 import {ShipmentDocument, ShipmentNote} from "./dto/ShipmentContentDto";
+import {emitOnboardingEvent} from "../Onboarding/onboardingEvents";
 import {
     deliveryLifecycleLabel,
     deliveryMethodLabel,
@@ -264,6 +266,7 @@ const ShipmentDetails: React.FC = () => {
     const [deliveryHistoryOpen, setDeliveryHistoryOpen] = useState<boolean>(false);
     const [deliveryPickupPointCode, setDeliveryPickupPointCode] = useState<string | null>(null);
     const [returnPackage, setReturnPackage] = useState<ReturnPackageDto | null>(null);
+    const [returnPackageUnavailable, setReturnPackageUnavailable] = useState<boolean>(false);
     const [activeDetailTab, setActiveDetailTab] = useState<ShipmentDetailsTab>("overview");
     const [activeWorkspaceTab, setActiveWorkspaceTab] = useState<ShipmentWorkspaceTab>("history");
     const [departments, setDepartments] = useState<Department[]>([]);
@@ -283,6 +286,7 @@ const ShipmentDetails: React.FC = () => {
     const [personDraft, setPersonDraft] = useState<PersonApi>({...emptyPerson});
     const [statusDialogOpen, setStatusDialogOpen] = useState<boolean>(false);
     const [cancelShipmentDialogOpen, setCancelShipmentDialogOpen] = useState<boolean>(false);
+    const [incidentReportOpen, setIncidentReportOpen] = useState<boolean>(false);
     const [downloadingDocument, setDownloadingDocument] = useState<DocumentAction | null>(null);
     const [shipmentNotes, setShipmentNotes] = useState<ShipmentNote[]>([]);
     const [shipmentDocuments, setShipmentDocuments] = useState<ShipmentDocument[]>([]);
@@ -536,6 +540,7 @@ const ShipmentDetails: React.FC = () => {
         setLoadingShipment(true);
         setLoadingRouteLog(true);
         setReturnPackage(null);
+        setReturnPackageUnavailable(false);
         try {
             const response = decodedTrackingNumber
                 ? await ShipmentService.getControlCenterByTrackingNumber(decodedTrackingNumber)
@@ -544,6 +549,7 @@ const ShipmentDetails: React.FC = () => {
             setDeliveryReloadKey((current) => current + 1);
             setRouteLog(response.data.routeLog);
             setReturnPackage(response.data.returnPackage ?? null);
+            setReturnPackageUnavailable(Boolean(response.data.returnPackageUnavailable));
         } catch (error) {
             showError(error, pl.shipments.messages.loadError);
         } finally {
@@ -772,6 +778,7 @@ const ShipmentDetails: React.FC = () => {
             applyShipment(response.data.shipment);
             setRouteLog(response.data.routeLog);
             setReturnPackage(response.data.returnPackage ?? null);
+            setReturnPackageUnavailable(Boolean(response.data.returnPackageUnavailable));
             setStatusDialogOpen(false);
             setNotice({severity: "success", message: pl.shipments.messages.statusSaveSuccess});
         } catch (error) {
@@ -806,6 +813,7 @@ const ShipmentDetails: React.FC = () => {
             await loadShipment();
             setCancelShipmentDialogOpen(false);
             setNotice({severity: "success", message: pl.shipments.messages.cancelSuccess});
+            emitOnboardingEvent({type: "shipmentCancelled"});
         } catch (error) {
             showError(error, pl.shipments.messages.cancelError);
         } finally {
@@ -863,6 +871,7 @@ const ShipmentDetails: React.FC = () => {
             applyShipment(response.data.shipment);
             setRouteLog(response.data.routeLog);
             setReturnPackage(response.data.returnPackage ?? null);
+            setReturnPackageUnavailable(Boolean(response.data.returnPackageUnavailable));
             setNotice({
                 severity: "success",
                 message: personType === "SENDER"
@@ -1207,6 +1216,7 @@ const ShipmentDetails: React.FC = () => {
                             {pl.shipments.actions.exportToExcel}
                         </Button>
                         <Button
+                            data-tour="shipment-operations"
                             disabled={loadingShipment || cancelingShipment || !shipment}
                             startIcon={<MoreVert />}
                             endIcon={<ArrowDropDown />}
@@ -1251,7 +1261,14 @@ const ShipmentDetails: React.FC = () => {
                                 <DocumentScanner fontSize="small" />
                                 {pl.shipments.actions.addDocument}
                             </MenuItem>
-                            <MenuItem className="shipment-document-menu-item shipment-operation-danger" disabled>
+                            <MenuItem
+                                className="shipment-document-menu-item shipment-operation-danger"
+                                disabled={!shipmentStatusMutable}
+                                onClick={() => {
+                                    setOperationMenuAnchor(null);
+                                    setIncidentReportOpen(true);
+                                }}
+                            >
                                 <ReportProblemOutlined fontSize="small" />
                                 {pl.shipments.actions.markProblematic}
                             </MenuItem>
@@ -1303,7 +1320,7 @@ const ShipmentDetails: React.FC = () => {
                     </button>
                 </nav>
 
-                {!loadingShipment && shipment ? <ShipmentReturnSummary returnPackage={returnPackage} /> : null}
+                {!loadingShipment && shipment ? <ShipmentReturnSummary returnPackage={returnPackage} unavailable={returnPackageUnavailable} /> : null}
 
                 {loadingShipment ? (
                     <div className="shipments-panel shipment-edit-loader">
@@ -1833,6 +1850,16 @@ const ShipmentDetails: React.FC = () => {
                     </Button>
                 </DialogActions>
             </Dialog>
+
+            <IncidentReportDialog
+                open={incidentReportOpen}
+                shipmentId={shipment ? shipment.shipmentId.value : null}
+                onClose={() => setIncidentReportOpen(false)}
+                onReported={(incidentId) => {
+                    setIncidentReportOpen(false);
+                    setNotice({severity: "success", message: pl.incidents.report.success.replace("{incidentId}", incidentId)});
+                }}
+            />
 
             <Snackbar open={Boolean(notice)} autoHideDuration={4500} onClose={() => setNotice(null)}>
                 {notice ? <Alert severity={notice.severity} onClose={() => setNotice(null)}>{notice.message}</Alert> : undefined}
