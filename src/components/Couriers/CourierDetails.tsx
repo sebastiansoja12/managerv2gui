@@ -34,6 +34,8 @@ import pl from "../../i18n/translate";
 import {CarrierDto} from "../Carriers/model/Carrier";
 import {DeviceDto} from "../Devices/dto/DeviceDto";
 import CourierConfigurationDialog from "./CourierConfigurationDialog";
+import {useAuthState} from "../../auth/AuthState";
+import {canManageCourierConfiguration} from "../../config/roleAccess";
 import {CourierDto, DangerousGoodCertificationDto, DriverLicenseDto} from "./dto/CourierDto";
 import {
     courierDeviceOptions, courierVehicleOptions, deviceLabel, packageTypeLabel, PACKAGE_TYPES, vehicleLabel,
@@ -144,6 +146,7 @@ const CourierDetails: React.FC = () => {
     const [error, setError] = useState<string>("");
     const [success, setSuccess] = useState<string>("");
     const [configurationDialogOpen, setConfigurationDialogOpen] = useState<boolean>(false);
+    const courierConfigurationAllowed = canManageCourierConfiguration(useAuthState().user?.role);
     const [basicForm, setBasicForm] = useState({firstName: "", lastName: "", telephoneNumber: ""});
     const [driverLicenseForm, setDriverLicenseForm] = useState<DriverLicenseDto>(emptyDriverLicenseForm);
     const [certificationForm, setCertificationForm] = useState<DangerousGoodCertificationDto>(emptyCertificationForm);
@@ -606,9 +609,11 @@ const CourierDetails: React.FC = () => {
                     <Button startIcon={<ArrowBack />} variant="outlined" onClick={() => navigate("/couriers")}>
                         {pl.couriers.actions.backToList}
                     </Button>
-                    <Button disabled={loading} startIcon={<Settings />} variant="outlined" onClick={() => setConfigurationDialogOpen(true)}>
-                        {pl.globalConfiguration.courierConfiguration.title}
-                    </Button>
+                    {courierConfigurationAllowed ? (
+                        <Button disabled={loading} startIcon={<Settings />} variant="outlined" onClick={() => setConfigurationDialogOpen(true)}>
+                            {pl.globalConfiguration.courierConfiguration.title}
+                        </Button>
+                    ) : null}
                     <Button disabled={loading} startIcon={<Refresh />} variant="outlined" onClick={loadCourier}>
                         {pl.couriers.actions.refresh}
                     </Button>

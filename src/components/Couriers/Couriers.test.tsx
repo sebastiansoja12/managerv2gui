@@ -23,6 +23,25 @@ jest.mock("../../hooks/DepartmentService", () => ({
     },
 }));
 
+jest.mock("../../auth/AuthState", () => ({
+    ...jest.requireActual("../../auth/AuthState"),
+    useAuthState: () => ({user: {role: "MANAGER", departmentCode: "WAW01"}}),
+}));
+
+const department = (departmentId: number, departmentCode: string, city: string) => ({
+    departmentId,
+    departmentCode: {value: departmentCode},
+    address: {city, street: "Prosta 1", postalCode: "00-001", countryCode: "PL"},
+    taxId: "",
+    telephoneNumber: "",
+    openingHours: "",
+    email: "",
+    departmentType: "BRANCH",
+    status: "ACTIVE",
+    createdAt: "",
+    updatedAt: "",
+});
+
 const mockedCourierService = CourierService as jest.Mocked<typeof CourierService>;
 const mockedDepartmentService = DepartmentService as jest.Mocked<typeof DepartmentService>;
 
@@ -32,23 +51,11 @@ describe("Couriers", () => {
         mockedCourierService.getAll.mockResolvedValue({data: []} as any);
         mockedCourierService.create.mockResolvedValue({data: {supplierCode: "KUR-01"}} as any);
         mockedDepartmentService.getAll.mockResolvedValue({
-            data: [{
-                departmentId: 1,
-                departmentCode: {value: "WAW01"},
-                address: {city: "Warszawa", street: "Prosta 1", postalCode: "00-001", countryCode: "PL"},
-                taxId: "",
-                telephoneNumber: "",
-                openingHours: "",
-                email: "",
-                departmentType: "BRANCH",
-                status: "ACTIVE",
-                createdAt: "",
-                updatedAt: "",
-            }],
+            data: [department(2, "KRA01", "Kraków"), department(1, "WAW01", "Warszawa")],
         } as any);
     });
 
-    it("uses a real department value and submits a completed create form", async () => {
+    it("locks the create form to the current user's department and submits it", async () => {
         render(<MemoryRouter><Couriers/></MemoryRouter>);
 
         await waitFor(() => expect(mockedCourierService.getAll).toHaveBeenCalledTimes(1));
@@ -57,9 +64,9 @@ describe("Couriers", () => {
         fireEvent.click(screen.getByRole("button", {name: pl.couriers.create.title}));
         const dialog = screen.getByRole("dialog");
 
-        await waitFor(() => expect(
-            within(dialog).getByRole("combobox", {name: pl.couriers.fields.department}),
-        ).toHaveTextContent("WAW01 - Warszawa"));
+        const departmentField = within(dialog).getByRole("combobox", {name: pl.couriers.fields.department});
+        await waitFor(() => expect(departmentField).toHaveTextContent("WAW01 - Warszawa"));
+        expect(departmentField).toBeDisabled();
 
         fireEvent.change(within(dialog).getByRole("textbox", {name: pl.couriers.create.fields.supplierCode}), {
             target: {value: "KUR-01"},

@@ -33,6 +33,10 @@ import DepartmentService from "../../hooks/DepartmentService";
 import pl from "../../i18n/translate";
 import CourierConfigurationDialog from "./CourierConfigurationDialog";
 import {CourierCreateRequest, CourierDto} from "./dto/CourierDto";
+import {emitOnboardingEvent} from "../Onboarding/onboardingEvents";
+import {useAuthState} from "../../auth/AuthState";
+import {canManageCourierConfiguration} from "../../config/roleAccess";
+import {canAccessDepartment, isSuperadministrator} from "../Users/model/UserRoleAccess";
 import "./styles/couriers.css";
 
 const valueOrDash = (value?: string | number | null) => value || pl.common.dash;
@@ -89,6 +93,9 @@ function Couriers() {
     const [createForm, setCreateForm] = useState({...emptyCreateForm});
     const [createDialogOpen, setCreateDialogOpen] = useState<boolean>(false);
     const [configurationDialogOpen, setConfigurationDialogOpen] = useState<boolean>(false);
+    const {user: currentUser} = useAuthState();
+    const courierConfigurationAllowed = canManageCourierConfiguration(currentUser?.role);
+    const departmentLocked = !isSuperadministrator(currentUser?.role);
     const [filters, setFilters] = useState({...emptyFilters});
     const createTranslations = pl.couriers.create;
 
@@ -129,6 +136,8 @@ function Couriers() {
     const validLicenseCount = useMemo(() => couriers.filter(hasValidLicense).length, [couriers]);
     const availableDepartments = useMemo(() => departments
         .filter((department) => department.status === "ACTIVE")
+        .filter((department) => canAccessDepartment(currentUser?.role, currentUser?.departmentCode,
+            departmentCodeValue(department)))
         .map((department) => {
             const code = departmentCodeValue(department);
             const city = department.address?.city || pl.common.dash;
@@ -138,7 +147,7 @@ function Couriers() {
             };
         })
         .filter((department) => Boolean(department.code))
-        .sort((left, right) => left.label.localeCompare(right.label, pl.common.locale)), [departments]);
+        .sort((left, right) => left.label.localeCompare(right.label, pl.common.locale)), [currentUser, departments]);
 
     const selectCourier = (courier: CourierDto) => {
         setSelectedCode(courier.supplierCode.value);
@@ -298,6 +307,7 @@ function Couriers() {
             .then((response) => {
                 const createdCode = response.data.supplierCode || createForm.supplierCode.trim();
                 setSuccess(createTranslations.success);
+                emitOnboardingEvent({type: "courierCreated"});
                 setCreateForm({...emptyCreateForm});
                 setCreateDialogOpen(false);
                 setSelectedCode(createdCode);
@@ -366,7 +376,7 @@ function Couriers() {
                     <div className="couriers-panel-header">
                         <Typography variant="h5">{pl.couriers.page.listTitle}</Typography>
                         <div className="couriers-table-actions">
-                            <Button disabled={saving} startIcon={<PersonAdd />} variant="contained" onClick={openCreateDialog}>
+                            <Button data-tour="courier-create" disabled={saving} startIcon={<PersonAdd />} variant="contained" onClick={openCreateDialog}>
                                 {createTranslations.title}
                             </Button>
                             <Button disabled={loading} startIcon={<Refresh />} variant="outlined" onClick={() => retrieveCouriers()}>
@@ -511,14 +521,16 @@ function Couriers() {
                                         </button>
                                     </td>
                                 </tr>
-                                <tr>
-                                    <td>
-                                        <button type="button" onClick={() => setConfigurationDialogOpen(true)}>
-                                            <Settings fontSize="small" />
-                                            <span>{pl.globalConfiguration.courierConfiguration.title}</span>
-                                        </button>
-                                    </td>
-                                </tr>
+                                {courierConfigurationAllowed ? (
+                                    <tr>
+                                        <td>
+                                            <button type="button" onClick={() => setConfigurationDialogOpen(true)}>
+                                                <Settings fontSize="small" />
+                                                <span>{pl.globalConfiguration.courierConfiguration.title}</span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ) : null}
                                 <tr>
                                     <td>
                                         {selectedCourier.status === "ACTIVE" ? (
@@ -604,7 +616,7 @@ function Couriers() {
                             onChange={(event) => updateCreateField("email", event.target.value)}
                         />
                         <TextField
-                            disabled={saving || departmentsLoading || !availableDepartments.length}
+                            disabled={saving || departmentsLoading || !availableDepartments.length || departmentLocked}
                             label={pl.couriers.fields.department}
                             required
                             select
