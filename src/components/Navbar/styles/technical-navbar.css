@@ -838,6 +838,11 @@
     padding: 0 12px;
 }
 
+.top-nav-department-acting {
+    border-color: var(--warning);
+    color: var(--warning);
+}
+
 .top-nav-department > span {
     font-family: var(--font-mono);
     font-size: 0.82rem;
