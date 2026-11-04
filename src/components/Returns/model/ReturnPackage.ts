@@ -21,6 +21,9 @@ export type StringValue = {
 export interface ReturnPackageDto {
     returnPackageId: StringValue;
     shipmentId: StringValue;
+    trackingNumber?: StringValue | null;
+    returnShipmentId?: StringValue | null;
+    returnTrackingNumber?: StringValue | null;
     reason: string;
     returnStatus: ReturnStatus;
     returnToken: StringValue;
@@ -45,7 +48,7 @@ export interface ReturnPageDto {
 }
 
 export interface ReturnCreateRequest {
-    shipmentId: StringValue;
+    trackingNumber: StringValue;
     reason: string;
     reasonCode: StringValue;
     departmentId: StringValue;
@@ -63,6 +66,7 @@ export interface ReturnTokenValidationResponse {
 
 export interface CreatedReturnDto {
     shipmentId: StringValue;
+    returnShipmentId: StringValue | null;
     returnId: StringValue;
     status: ReturnStatus;
 }
