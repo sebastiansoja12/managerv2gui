@@ -2,6 +2,7 @@ import React from "react";
 import {fireEvent, render, screen, waitFor} from "@testing-library/react";
 import departmentService from "../../hooks/DepartmentService";
 import OperatorConfigurationService from "../../hooks/OperatorConfigurationService";
+import DepartmentLoadService from "../../hooks/DepartmentLoadService";
 import UserManagementService from "../../hooks/UserManagementService";
 import pl from "../../i18n/translate";
 import Departments from "../Departments";
@@ -21,9 +22,13 @@ jest.mock("../../hooks/UserManagementService", () => ({
     default: {getAll: jest.fn()},
 }));
 jest.mock("../../hooks/DeliveryNetworkService", () => ({__esModule: true, default: {}}));
+jest.mock("../../hooks/DepartmentLoadService", () => ({
+    __esModule: true,
+    default: {getAll: jest.fn()},
+}));
 jest.mock("../../hooks/OperatorConfigurationService", () => ({
     __esModule: true,
-    default: {getCurrentDepartmentConfiguration: jest.fn()},
+    default: {getCurrentDepartmentConfiguration: jest.fn(), getDepartmentConfiguration: jest.fn()},
 }));
 jest.mock("./DepartmentRelationsMap", () => ({
     __esModule: true,
@@ -38,6 +43,7 @@ jest.mock("./DeliveryAreasMap", () => ({
 const departments = departmentService as jest.Mocked<typeof departmentService>;
 const usersService = UserManagementService as jest.Mocked<typeof UserManagementService>;
 const configurationService = OperatorConfigurationService as jest.Mocked<typeof OperatorConfigurationService>;
+const loadService = DepartmentLoadService as jest.Mocked<typeof DepartmentLoadService>;
 const departmentConfiguration = {
     autoAssignDeliveryAreas: false, autoConnectDepartments: false,
     preventDepartmentDeletion: false, preventDepartmentArchiving: false,
@@ -49,6 +55,8 @@ describe("Departments", () => {
         window.localStorage.clear();
         configurationService.getCurrentDepartmentConfiguration.mockResolvedValue(
             {data: departmentConfiguration, status: 200});
+        configurationService.getDepartmentConfiguration.mockResolvedValue(
+            {data: departmentConfiguration, status: 200});
         departments.getAll.mockResolvedValue({data: [{
             departmentId: "9007199254740993",
             departmentCode: {value: "KT1"},
@@ -57,13 +65,20 @@ describe("Departments", () => {
             createdAt: "", updatedAt: "",
         }]} as never);
         usersService.getAll.mockResolvedValue({data: []} as never);
+        loadService.getAll.mockResolvedValue({data: []} as never);
     });
 
-    it("opens the department component in a new tab when a row is clicked", async () => {
+    it("selects a row on click and opens the department only on double click", async () => {
         const onOpenTab = jest.fn();
         render(<Departments onOpenTab={onOpenTab} />);
+        const row = (await screen.findAllByText("KT1", {selector: "td strong"}))[0].closest("tr") as HTMLElement;
 
-        fireEvent.click((await screen.findAllByText("KT1", {selector: "td strong"}))[0]);
+        fireEvent.click(row);
+
+        expect(onOpenTab).not.toHaveBeenCalled();
+        expect(row).toHaveClass("departments-row-selected");
+
+        fireEvent.doubleClick(row);
 
         expect(onOpenTab).toHaveBeenCalledWith({
             label: expect.stringContaining("KT1"),
@@ -96,11 +111,49 @@ describe("Departments", () => {
         window.removeEventListener(deliveryAreasChangedEvent, deliveryAreasChanged);
     });
 
-    it("hides archiving when department settings disallow it", async () => {
-        configurationService.getCurrentDepartmentConfiguration.mockResolvedValue(
+    it("requires a status change reason before deactivating when the department demands it", async () => {
+        configurationService.getDepartmentConfiguration.mockResolvedValue({data: {
+            ...departmentConfiguration,
+            lifecyclePolicy: {
+                requireStatusChangeReason: true, blockDeactivationWithActiveWork: true,
+                workTransferOnDeactivation: "MANUAL", autoArchiveInactiveAfterDays: 0,
+            },
+        }, status: 200});
+        departments.changeStatus.mockResolvedValue({data: undefined} as never);
+        render(<Departments />);
+        await screen.findAllByText("KT1", {selector: "td strong"});
+
+        fireEvent.click(screen.getByRole("button", {name: pl.departments.actions.deactivate}));
+        const confirm = await screen.findByRole("button", {name: pl.departments.actions.deactivateDialogConfirm});
+        await waitFor(() => expect(confirm).toBeDisabled());
+
+        fireEvent.change(screen.getByLabelText(new RegExp(pl.departments.actions.reason)),
+            {target: {value: "Remont"}});
+        fireEvent.click(confirm);
+
+        await waitFor(() => expect(departments.changeStatus).toHaveBeenCalledWith({
+            departmentCode: {value: "KT1"}, status: "INACTIVE", reason: "Remont",
+        }));
+    });
+
+    it("shows today's load and warns when the threshold is exceeded", async () => {
+        loadService.getAll.mockResolvedValue({data: [{
+            departmentId: "9007199254740993", deliveriesToday: 90, dailyCapacity: 100,
+            utilizationPercent: 90, warning: true, overloaded: false,
+        }]} as never);
+        render(<Departments />);
+
+        expect(await screen.findByText("90 / 100 (90%)")).toBeInTheDocument();
+        expect(screen.getByTitle(pl.departments.capacity.warning)).toBeInTheDocument();
+    });
+
+    it("hides archiving when the selected department disallows it", async () => {
+        configurationService.getDepartmentConfiguration.mockResolvedValue(
             {data: {...departmentConfiguration, preventDepartmentArchiving: true}, status: 200});
         render(<Departments />);
         await screen.findAllByText("KT1", {selector: "td strong"});
-        expect(screen.queryByRole("button", {name: "Archiwizuj"})).not.toBeInTheDocument();
+        await waitFor(() => expect(configurationService.getDepartmentConfiguration)
+            .toHaveBeenCalledWith("9007199254740993"));
+        await waitFor(() => expect(screen.queryByRole("button", {name: "Archiwizuj"})).not.toBeInTheDocument());
     });
 });
