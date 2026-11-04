@@ -12,11 +12,11 @@ const returnPackage = {
     returnStatus: "CREATED",
 } as ReturnPackageDto;
 const Destination = () => <div>{useLocation().pathname}</div>;
-const view = (value: ReturnPackageDto | null = returnPackage, returnsAvailable = true) => (
+const view = (value: ReturnPackageDto | null = returnPackage, returnsAvailable = true, unavailable = false) => (
     <OperatorCapabilitiesContext.Provider value={{returnsStatus: returnsAvailable ? "available" : "unavailable"}}>
         <MemoryRouter>
             <Routes>
-                <Route path="/" element={<ShipmentReturnSummary returnPackage={value} />} />
+                <Route path="/" element={<ShipmentReturnSummary returnPackage={value} unavailable={unavailable} />} />
                 <Route path="/returns/:returnId" element={<Destination />} />
             </Routes>
         </MemoryRouter>
@@ -49,6 +49,13 @@ describe("ShipmentReturnSummary", () => {
         render(view(returnPackage, false));
 
         expect(screen.getByText(pl.returns.status.CREATED)).toBeInTheDocument();
+        expect(screen.queryByRole("button", {name: pl.shipments.returnSummary.open})).not.toBeInTheDocument();
+    });
+
+    it("shows a warning instead of the return panel when return details are unavailable", () => {
+        render(view(null, true, true));
+
+        expect(screen.getByText(pl.shipments.returnSummary.loadError)).toBeInTheDocument();
         expect(screen.queryByRole("button", {name: pl.shipments.returnSummary.open})).not.toBeInTheDocument();
     });
 });

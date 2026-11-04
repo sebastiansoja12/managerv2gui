@@ -109,6 +109,7 @@ export interface ShipmentDetailsDto {
     shipment: ShipmentDto;
     routeLog: RouteLogRecord | null;
     returnPackage?: ReturnPackageDto | null;
+    returnPackageUnavailable?: boolean;
 }
 
 export interface TrackingNumberDto {
