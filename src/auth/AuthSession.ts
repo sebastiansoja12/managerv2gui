@@ -1,4 +1,5 @@
 import AuthService from "../hooks/AuthService";
+import {getActingDepartment, setActingDepartment} from "./actingDepartment";
 import {setAuthenticated, setUnauthenticated} from "./AuthState";
 import DeviceService from "../hooks/DeviceService";
 import {readBrowserDevice, removeLegacyPairKeys} from "../components/Devices/browserDeviceStore";
@@ -18,8 +19,16 @@ export const refreshCsrfToken = async () => {
 
 export const loadCurrentUser = async () => {
     const response = await AuthService.me();
+    if (getActingDepartment() && response.data.departmentCode !== getActingDepartment()) {
+        setActingDepartment(null);
+    }
     setAuthenticated(response.data);
     return response.data;
+};
+
+export const switchActingDepartment = async (departmentCode: string | null) => {
+    setActingDepartment(departmentCode);
+    return loadCurrentUser();
 };
 
 export const initializeAuthSession = () => {
@@ -52,6 +61,7 @@ export const logoutAuthSession = async () => {
         await AuthService.logout();
     } finally {
         removeLegacyPairKeys();
+        setActingDepartment(null);
         setUnauthenticated();
         await refreshCsrfToken();
     }

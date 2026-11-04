@@ -1,4 +1,5 @@
 import axios, {AxiosError, AxiosHeaders, AxiosInstance, AxiosRequestConfig} from "axios";
+import {ACTING_DEPARTMENT_HEADER, getActingDepartment} from "./actingDepartment";
 import {setUnauthenticated} from "./AuthState";
 
 type RetryableRequestConfig = AxiosRequestConfig & {
@@ -57,6 +58,26 @@ const rememberCsrfToken = (data: unknown) => {
     if (token) {
         csrfToken = token;
     }
+};
+
+const setActingDepartmentHeader = (config: AxiosRequestConfig, departmentCode: string | null) => {
+    if (!departmentCode) {
+        return;
+    }
+
+    if (!config.headers) {
+        config.headers = new AxiosHeaders();
+    }
+
+    if (config.headers instanceof AxiosHeaders) {
+        config.headers.set(ACTING_DEPARTMENT_HEADER, departmentCode);
+        return;
+    }
+
+    config.headers = {
+        ...config.headers,
+        [ACTING_DEPARTMENT_HEADER]: departmentCode,
+    };
 };
 
 const setXsrfHeader = (config: AxiosRequestConfig, token: string | null) => {
@@ -180,6 +201,7 @@ export const configureAuthenticatedClient = (
             const token = await ensureCsrfToken();
             setXsrfHeader(config, token);
         }
+        setActingDepartmentHeader(config, getActingDepartment());
 
         return config;
     });
