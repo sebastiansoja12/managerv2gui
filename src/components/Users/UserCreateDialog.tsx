@@ -8,7 +8,6 @@ const emptyRequest = (): CreateUserRequest => ({
     firstName: "",
     lastName: "",
     username: "",
-    password: "",
     email: "",
     departmentCode: "",
     language: "pl",
@@ -69,10 +68,10 @@ function UserCreateDialog({departments, departmentsLoading, open, roles, saving,
                 </DialogTitle>
                 <DialogContent className="users-dialog-grid users-create-dialog-content">
                     {error ? <Alert className="users-dialog-alert" severity="error">{error}</Alert> : null}
+                    <Alert className="users-dialog-alert" severity="info">{pl.usersManagement.create.invitationHint}</Alert>
                     <TextField autoFocus label={pl.usersManagement.fields.firstName} required value={request.firstName} onChange={(event) => updateField("firstName", event.target.value)}/>
                     <TextField label={pl.usersManagement.fields.lastName} required value={request.lastName} onChange={(event) => updateField("lastName", event.target.value)}/>
                     <TextField label={pl.usersManagement.fields.username} required value={request.username} onChange={(event) => updateField("username", event.target.value)}/>
-                    <TextField autoComplete="new-password" label={pl.usersManagement.fields.password} required type="password" value={request.password} onChange={(event) => updateField("password", event.target.value)}/>
                     <TextField label={pl.usersManagement.fields.email} required type="email" value={request.email} onChange={(event) => updateField("email", event.target.value)}/>
                     <TextField
                         disabled={departmentsLoading || !departments.length}

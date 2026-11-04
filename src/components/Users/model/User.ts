@@ -50,7 +50,6 @@ export type User = {
 };
 
 export type CreateUserRequest = UpdateUserRequest & {
-    password: string;
     role: UserRole;
 };
 
