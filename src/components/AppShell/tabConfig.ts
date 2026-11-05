@@ -13,6 +13,8 @@ export const tabTitles = (): Record<string, string> => ({
     "/analytics": pl.navigation.analytics,
     "/processes": pl.navigation.processes,
     "/returns": pl.navigation.returns,
+    "/incidents": pl.navigation.incidents,
+    "/fleet-map": pl.navigation.fleetMap,
     "/deliveries": pl.navigation.allDeliveries,
     "/deliveries/incomplete": pl.navigation.incompleteDeliveries,
     "/couriers": pl.navigation.couriers,
@@ -92,6 +94,11 @@ export const getTabTitle = (path: string) => {
     const processMatch = normalizedPath.match(/^\/processes\/([^/]+)$/);
     if (processMatch) {
         return `${pl.processes.details.title} ${decodeURIComponent(processMatch[1])}`;
+    }
+
+    const incidentMatch = normalizedPath.match(/^\/incidents\/([^/]+)$/);
+    if (incidentMatch) {
+        return `${pl.incidents.details.tabTitle} #${decodeURIComponent(incidentMatch[1])}`;
     }
 
     const returnMatch = normalizedPath.match(/^\/returns\/([^/]+)$/);

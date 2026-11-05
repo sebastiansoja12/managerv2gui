@@ -32,6 +32,8 @@ const tabIconsByPathPrefix: Array<[string, React.ElementType]> = [
     ["/shipment-control-center", LocalShipping],
     ["/parcels", ShoppingCart],
     ["/returns", Loop],
+    ["/incidents", ReportProblemOutlined],
+    ["/fleet-map", LocationOn],
     ["/deliveries/incomplete", ReportProblemOutlined],
     ["/deliveries", LocalShipping],
     ["/courier-deliveries", LocalShipping],

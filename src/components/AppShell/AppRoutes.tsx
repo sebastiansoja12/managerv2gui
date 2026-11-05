@@ -12,6 +12,9 @@ import DevicePairing from "../Devices/DevicePairing";
 import GlobalConfiguration from "../GlobalConfiguration/GlobalConfiguration";
 import OperationalDashboard from "../Home/OperationalDashboard";
 import ModulePlaceholder from "../Home/ModulePlaceholder";
+import IncidentDetails from "../Incidents/IncidentDetails";
+import IncidentList from "../Incidents/IncidentList";
+import FleetTrackingMap from "../FleetTracking/FleetTrackingMap";
 import LoginPage from "../LoginPage/LoginPage";
 import ProcessDetails from "../Process/ProcessDetails";
 import Processes from "../Process/Processes";
@@ -36,6 +39,8 @@ import ShipmentScanner from "../ShipmentScanner/ShipmentScanner";
 import UserProfile from "../UserProfile/UserProfile";
 import UsersPage from "../Users/UsersPage";
 import {isPathAllowedForProfile, OperationalProfile} from "../../config/operationalProfile";
+import {isPathAllowedForRole} from "../../config/roleAccess";
+import {useAuthState} from "../../auth/AuthState";
 import pl from "../../i18n/translate";
 import {AppTabDefinition} from "./types";
 import {useOperatorCapabilities} from "./OperatorCapabilitiesContext";
@@ -48,8 +53,9 @@ type AppRoutesProps = {
 
 function AppRoutes({onOpenTab, operationalProfile = "warehouse", location}: AppRoutesProps) {
     const {returnsStatus} = useOperatorCapabilities();
+    const {user} = useAuthState();
     const guarded = (path: string, element: React.ReactElement) => (
-        isPathAllowedForProfile(path, operationalProfile)
+        isPathAllowedForProfile(path, operationalProfile) && isPathAllowedForRole(path, user?.role)
             ? element
             : <ModulePlaceholder forbidden title={pl.modules.placeholder.forbiddenTitle}/>
     );
@@ -80,6 +86,9 @@ function AppRoutes({onOpenTab, operationalProfile = "warehouse", location}: AppR
             <Route path="processes" element={guarded("/processes", <Processes/>)}/>
             <Route path="processes/:processId" element={guarded("/processes/1", <ProcessDetails/>)}/>
             <Route path="returns" element={guardedReturns(<Returns onOpenTab={onOpenTab}/>)}/>
+            <Route path="incidents" element={guarded("/incidents", <IncidentList onOpenTab={onOpenTab}/>)}/>
+            <Route path="incidents/:incidentId" element={guarded("/incidents/1", <IncidentDetails onOpenTab={onOpenTab}/>)}/>
+            <Route path="fleet-map" element={guarded("/fleet-map", <FleetTrackingMap/>)}/>
             <Route path="deliveries" element={guarded("/deliveries", <Deliveries key="all"/>)}/>
             <Route path="deliveries/incomplete" element={guarded("/deliveries/incomplete", <Deliveries key="incomplete" variant="incomplete"/>)}/>
             <Route path="deliveries/:deliveryId/edit" element={guarded("/deliveries/1/edit", <DeliveryEdit/>)}/>
