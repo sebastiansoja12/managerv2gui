@@ -4925,6 +4925,7 @@ export const de: typeof pl = {
             PALLET_LOCKED: "Die Palette ist im Lager gesperrt.",
             PALLET_OVERWEIGHT: "Die Palette überschreitet das Maximalgewicht.",
             PALLET_INVALID_STATUS: "Die Palette kann im aktuellen Status nicht verladen werden.",
+            SHIPMENT_DESTINATION_MISMATCH: "Mindestens eine Sendung hat eine andere Zielabteilung als die Palette. Die Palette wurde nicht verladen.",
             SHIPMENT_STATUS_UPDATE_FAILED: "Einige Sendungen konnten nicht aktualisiert werden. Die Palette wurde nicht verladen.",
             PALLET_SERVICE_UNAVAILABLE: "Der Palettendienst ist vorübergehend nicht verfügbar. Bitte gleich erneut versuchen.",
             PALLET_INVALID_REQUEST: "Ungültige Anfrage.",

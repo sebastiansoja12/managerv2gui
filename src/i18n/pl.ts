@@ -4930,6 +4930,7 @@ export const pl = {
             PALLET_LOCKED: "Paleta jest zablokowana w magazynie.",
             PALLET_OVERWEIGHT: "Paleta przekracza maksymalną wagę.",
             PALLET_INVALID_STATUS: "Paleta nie może zostać załadowana w obecnym statusie.",
+            SHIPMENT_DESTINATION_MISMATCH: "Co najmniej jedna przesyłka ma inny oddział docelowy niż paleta. Paleta nie została załadowana.",
             SHIPMENT_STATUS_UPDATE_FAILED: "Części przesyłek nie udało się zaktualizować. Paleta nie została załadowana.",
             PALLET_SERVICE_UNAVAILABLE: "Serwis palet jest chwilowo niedostępny. Spróbuj ponownie za chwilę.",
             PALLET_INVALID_REQUEST: "Nieprawidłowe żądanie.",
