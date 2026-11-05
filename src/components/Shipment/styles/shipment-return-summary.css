@@ -84,3 +84,7 @@
         width: 100%;
     }
 }
+
+.shipment-return-summary-unavailable {
+    margin-bottom: 16px;
+}
