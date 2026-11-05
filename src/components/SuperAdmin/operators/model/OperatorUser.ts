@@ -4,7 +4,6 @@ export type CreateOperatorUserRequest = {
     firstName: string;
     lastName: string;
     username: string;
-    password: string;
     email: string;
     role: OperatorUserRole;
     departmentCode: string;
@@ -19,7 +18,6 @@ export const createEmptyOperatorUserRequest = (): CreateOperatorUserRequest => (
     firstName: "",
     lastName: "",
     username: "",
-    password: "",
     email: "",
     role: "USER",
     departmentCode: "",

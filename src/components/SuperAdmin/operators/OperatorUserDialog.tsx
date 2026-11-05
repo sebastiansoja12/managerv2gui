@@ -62,7 +62,6 @@ function OperatorUserDialog({open, operatorId, operatorName, departments = noDep
     const requiredFieldsMissing = !request.firstName
         || !request.lastName
         || !request.username
-        || !request.password
         || !request.email
         || !request.departmentCode;
 
@@ -76,6 +75,7 @@ function OperatorUserDialog({open, operatorId, operatorName, departments = noDep
                     </p>
 
                     {error ? <Alert severity="error" sx={{mb: 2}}>{error}</Alert> : null}
+                    <Alert severity="info" sx={{mb: 2}}>{pl.superAdmin.userDialog.invitationHint}</Alert>
                     {!departments.length ? <Alert severity="warning" sx={{mb: 2}}>{pl.superAdmin.workspace.departmentEmpty}</Alert> : null}
 
                     <div className="super-admin-form-grid">
@@ -103,16 +103,6 @@ function OperatorUserDialog({open, operatorId, operatorName, departments = noDep
                                 required
                                 value={request.username}
                                 onChange={(event) => updateRequest("username", event.target.value)}
-                            />
-                        </label>
-                        <label>
-                            <span>{pl.superAdmin.userDialog.fields.password}</span>
-                            <input
-                                autoComplete="new-password"
-                                required
-                                type="password"
-                                value={request.password}
-                                onChange={(event) => updateRequest("password", event.target.value)}
                             />
                         </label>
                         <label>
