@@ -12,6 +12,7 @@ import {
     Dashboard,
     DevicesOther,
     ExpandMore,
+    InfoOutlined,
     Inventory2,
     Logout,
     LocalOffer,
@@ -34,6 +35,7 @@ import {
 } from "components/ui/icons";
 import {isPathAllowedForProfile, isReturnPath, operationalProfiles as allOperationalProfiles, OperationalProfile} from "../../config/operationalProfile";
 import {getAppEnvironment} from "../../config/appEnvironment";
+import {isPathAllowedForRole} from "../../config/roleAccess";
 import {AppTabDefinition} from "../AppShell/types";
 import './styles/main.css';
 import {logoutAuthSession} from "../../auth/AuthSession";
@@ -47,6 +49,7 @@ import {AppTheme, useAppTheme} from "../../theme/ThemeProvider";
 import {useOperatorCapabilities} from "../AppShell/OperatorCapabilitiesContext";
 import PalletCreateDialog from "../Pallets/PalletCreateDialog";
 import HomeModuleTiles from "../Home/HomeModuleTiles";
+import {emitOnboardingEvent} from "../Onboarding/onboardingEvents";
 
 type NavbarItem = AppTabDefinition & {
     icon: React.ElementType;
@@ -185,6 +188,7 @@ function Navbar({
     const {theme, setTheme} = useAppTheme();
 
     const environment = getAppEnvironment();
+    const actingOnBehalf = Boolean(user?.homeDepartmentCode && user.homeDepartmentCode !== user.departmentCode);
     const userName = [user?.firstName, user?.lastName].filter(Boolean).join(" ") || user?.username || pl.common.dash;
     const userRole = user?.role
         ? pl.usersManagement.roles[user.role as keyof typeof pl.usersManagement.roles] || user.role
@@ -198,8 +202,9 @@ function Navbar({
     const mainItems: NavbarItem[] = [
         {label: pl.navigation.home, path: '/', icon: Dashboard},
         {label: pl.navigation.processes, path: '/processes', icon: TaskAlt},
+        {label: pl.navigation.incidents, path: '/incidents', icon: ReportProblemOutlined},
         {label: pl.navigation.chat, path: '/chat', icon: ChatBubbleOutline},
-    ];
+    ].filter((item) => isPathAllowedForProfile(item.path, operationalProfile));
     const menus: NavbarMenu[] = [
         {
             label: pl.navigation.warehouse,
@@ -248,6 +253,7 @@ function Navbar({
                     items: [
                         {label: pl.navigation.carriers, path: '/carriers', icon: LocalShipping},
                         {label: pl.navigation.drivers, path: '/drivers', icon: Person},
+                        {label: pl.navigation.fleetMap, path: '/fleet-map', icon: LocationOn},
                     ],
                 },
                 {
@@ -299,6 +305,7 @@ function Navbar({
         {label: pl.navigation.palletFromShipments, path: '/pallets/create-from-shipments', icon: ViewList},
     ].filter((item) => isPathAllowedForProfile(item.path, operationalProfile));
     const isVisiblePath = (path: string) => isPathAllowedForProfile(path, operationalProfile)
+        && isPathAllowedForRole(path, user?.role)
         && (!isReturnPath(path) || returnsStatus === "available");
     const visibleGroups = (menu: NavbarMenu): NavbarGroup[] => (menu.groups || [])
         .map((group) => ({...group, items: group.items.filter((item) => isVisiblePath(item.path))}))
@@ -668,6 +675,18 @@ function Navbar({
                 <span>{pl.navigation.profile}</span>
             </button>
 
+            <button
+                className="top-nav-dropdown-item"
+                onClick={() => {
+                    setProfileMenuOpen(false);
+                    emitOnboardingEvent({type: "tutorialRestartRequested"});
+                }}
+                type="button"
+            >
+                <InfoOutlined fontSize="small" />
+                <span>{pl.onboarding.tutorial.restart}</span>
+            </button>
+
             <button className="top-nav-dropdown-item top-nav-logout-item" onClick={logout} type="button">
                 <Logout fontSize="small" />
                 <span>{pl.navigation.logout}</span>
@@ -701,7 +720,7 @@ function Navbar({
             ref={navbarRef}
         >
             <div className={islandClassName} ref={islandRef} style={islandStyle}>
-                <div className="top-nav-left">
+                <div className="top-nav-left" data-tour="main-menu">
                     <button
                         aria-controls="top-nav-island-panel"
                         aria-expanded={expandedPanel === NAVIGATION_PANEL}
@@ -720,7 +739,7 @@ function Navbar({
                     </button>
                 </div>
 
-                <div className="top-nav-dock">
+                <div className="top-nav-dock" data-tour="quick-nav">
                     <nav aria-label={pl.navigation.mainAriaLabel} className="top-nav-quick-nav" ref={quickNavRef}>
                         <span aria-hidden="true" className="top-nav-dock-active-indicator" />
                         {mainItems.map(renderDockItem)}
@@ -765,16 +784,16 @@ function Navbar({
                 <NavbarTrackingSearch onOpenTab={onOpenTab} />
                 {user?.departmentCode ? (
                     <span
-                        aria-label={`${pl.navigation.currentDepartment}: ${user.departmentCode}`}
-                        className="top-nav-department"
-                        title={pl.navigation.currentDepartment}
+                        aria-label={`${actingOnBehalf ? pl.navigation.actingDepartment : pl.navigation.currentDepartment}: ${user.departmentCode}`}
+                        className={`top-nav-department${actingOnBehalf ? " top-nav-department-acting" : ""}`}
+                        title={actingOnBehalf ? pl.navigation.actingDepartment : pl.navigation.currentDepartment}
                     >
                         <WarehouseRounded aria-hidden="true" fontSize="small" />
                         <span>{user.departmentCode}</span>
                     </span>
                 ) : null}
                 {operationalProfile === "warehouse" ? (
-                    <div className="top-nav-create-control">
+                    <div className="top-nav-create-control" data-tour="create-menu">
                         <button
                             aria-controls="top-nav-create-menu"
                             aria-expanded={createMenuOpen}
@@ -813,7 +832,7 @@ function Navbar({
                 ) : null}
                 <HomeModuleTiles onOpenTab={onOpenTab} operationalProfile={operationalProfile} />
                 <ImpersonationConsentNotifications />
-                <div className="top-nav-profile-control">
+                <div className="top-nav-profile-control" data-tour="user-menu">
                     <button
                         aria-controls="top-nav-profile-panel"
                         aria-expanded={profileMenuOpen}
