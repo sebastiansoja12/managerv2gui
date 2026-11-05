@@ -1,5 +1,5 @@
 import React, {useEffect, useMemo, useState} from "react";
-import {Add, AdminPanelSettings, Edit, ManageAccounts, PeopleAlt, Refresh, Search, VpnKey} from "components/ui/icons";
+import {Add, AdminPanelSettings, Delete, Edit, ManageAccounts, PeopleAlt, Refresh, Search, VpnKey} from "components/ui/icons";
 import {Alert, CircularProgress, Typography} from "components/ui";
 import {useAuthState} from "../../auth/AuthState";
 import pl from "../../i18n/translate";
@@ -216,9 +216,28 @@ function UsersPage() {
             .finally(() => setSaving(false));
     };
 
+    const deleteUser = (user?: User) => {
+        if (!user || !window.confirm(pl.usersManagement.messages.deleteConfirm
+            .replace("{name}", `${user.firstName} ${user.lastName}`))) {
+            return;
+        }
+        setSaving(true);
+        setError("");
+        UserManagementService.remove(userIdValue(user))
+            .then(() => {
+                setSuccess(pl.usersManagement.messages.deleteSuccess);
+                loadUsers(false);
+            })
+            .catch(() => setError(pl.usersManagement.messages.deleteError))
+            .finally(() => setSaving(false));
+    };
+
     const adminCount = users.filter((user) => isAdministratorRole(user.role)).length;
     const canManageSelectedUser = canManageUsers && canManageUser(currentUser, selectedUser);
     const managerCount = users.filter((user) => user.role === "MANAGER").length;
+    const isSelectedUserCurrentUser = Boolean(selectedUser && currentUser?.userId
+        && String(currentUser.userId.value) === String(userIdValue(selectedUser)));
+    const canDeleteSelectedUser = isAdministrator && canManageSelectedUser && !isSelectedUserCurrentUser;
 
     return (
         <main className="users-page">
@@ -354,6 +373,14 @@ function UsersPage() {
                                 <button disabled={!selectedUser || !canManageSelectedUser} onClick={() => openPermissionsUser(selectedUser)} type="button">
                                     <VpnKey fontSize="small"/>
                                     <span>{pl.usersManagement.actions.permissions}</span>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <button disabled={!selectedUser || !canDeleteSelectedUser || saving} onClick={() => deleteUser(selectedUser)} type="button">
+                                    <Delete fontSize="small"/>
+                                    <span>{pl.usersManagement.actions.delete}</span>
                                 </button>
                             </td>
                         </tr>
