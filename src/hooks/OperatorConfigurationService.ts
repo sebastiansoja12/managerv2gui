@@ -1,6 +1,9 @@
 import BackendClient from "../api/BackendClient";
 import http from "../http-common";
-import {DepartmentConfiguration} from "../components/GlobalConfiguration/model/DepartmentConfiguration";
+import {
+    DepartmentConfiguration,
+    DepartmentConfigurationOverride,
+} from "../components/GlobalConfiguration/model/DepartmentConfiguration";
 import {
     CommunicationConfigurationApi,
     FleetConfigurationApi,
@@ -61,6 +64,21 @@ const getCurrentDepartmentConfiguration = () => (
     client.get<DepartmentConfiguration>("/operator-configurations/departments")
 );
 
+const getDepartmentConfiguration = (departmentId: number | string) => (
+    client.get<DepartmentConfiguration>(`/operator-configurations/departments/${encodeURIComponent(String(departmentId))}`)
+);
+
+const getDepartmentConfigurationOverride = (departmentId: number | string) => (
+    client.get<DepartmentConfigurationOverride>(
+        `/operator-configurations/departments/${encodeURIComponent(String(departmentId))}/override`)
+);
+
+const updateDepartmentConfigurationOverride = (departmentId: number | string,
+                                               override: DepartmentConfigurationOverride) => (
+    client.put<DepartmentConfigurationOverride, DepartmentConfigurationOverride>(
+        `/operator-configurations/departments/${encodeURIComponent(String(departmentId))}/override`, override)
+);
+
 const updateCurrentDepartmentConfiguration = (configuration: DepartmentConfiguration) => (
     client.put<DepartmentConfiguration, DepartmentConfiguration>("/operator-configurations/departments", configuration)
 );
@@ -115,6 +133,9 @@ const OperatorConfigurationService = {
     updateCurrentShipmentConfigurationSection,
     getCurrentDepartmentConfiguration,
     updateCurrentDepartmentConfiguration,
+    getDepartmentConfiguration,
+    getDepartmentConfigurationOverride,
+    updateDepartmentConfigurationOverride,
     getCurrentFleetConfiguration,
     updateCurrentFleetConfiguration,
     getCurrentCommunicationConfiguration,

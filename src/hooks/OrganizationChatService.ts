@@ -6,12 +6,10 @@ import {
 } from "../components/Chat/model/OrganizationChat";
 import {Client, IMessage, StompSubscription} from "@stomp/stompjs";
 import JSONBig from "json-bigint";
-import {User} from "../components/Users/model/User";
 import {getAuthState} from "../auth/AuthState";
 import http from "../http-common";
 import {createChatClientId} from "../components/Chat/model/chatClientId";
 import {realtimeWebSocketUrl} from "./RealtimeService";
-import UserManagementService from "./UserManagementService";
 
 type ApiIdentifier = number | string | {value: number | string};
 
@@ -45,16 +43,28 @@ const websocketJson = JSONBig({storeAsString: true});
 const identifierValue = (identifier: ApiIdentifier): number | string =>
     typeof identifier === "object" ? identifier.value : identifier;
 
-const mapUser = (user: User): OrganizationChatUser => ({
-    id: String(user.userId.value),
-    username: user.username,
-    firstName: user.firstName,
-    lastName: user.lastName,
-    departmentCode: user.departmentCode || "",
-    departmentName: user.departmentCode || "",
-    organizationId: user.operatorId?.value === undefined ? undefined : String(user.operatorId.value),
-    role: user.role,
-    active: !user.deleted,
+type ChatParticipantApi = {
+    userId: ApiIdentifier;
+    username: string;
+    firstName: string;
+    lastName: string;
+    departmentCode?: string;
+    role: OrganizationChatUser["role"];
+    operatorId?: ApiIdentifier;
+};
+
+const mapParticipant = (participant: ChatParticipantApi): OrganizationChatUser => ({
+    id: String(identifierValue(participant.userId)),
+    username: participant.username,
+    firstName: participant.firstName,
+    lastName: participant.lastName,
+    departmentCode: participant.departmentCode || "",
+    departmentName: participant.departmentCode || "",
+    organizationId: participant.operatorId === undefined || participant.operatorId === null
+        ? undefined
+        : String(identifierValue(participant.operatorId)),
+    role: participant.role,
+    active: true,
     availability: "OFFLINE",
     unreadCount: 0,
 });
@@ -70,9 +80,9 @@ class OrganizationChatServiceAdapter implements OrganizationChatGateway {
     private presenceSubscription?: StompSubscription;
 
     async listActiveUsers(): Promise<OrganizationChatUser[]> {
-        const response = await UserManagementService.getAll();
-        const users = Array.isArray(response.data) ? response.data : [];
-        return users.filter((user) => !user.deleted).map(mapUser);
+        const response = await http.get<ChatParticipantApi[]>("/chat/participants");
+        const participants = Array.isArray(response.data) ? response.data : [];
+        return participants.map(mapParticipant);
     }
 
     async getConversation(participantId: string): Promise<OrganizationChatMessage[]> {
