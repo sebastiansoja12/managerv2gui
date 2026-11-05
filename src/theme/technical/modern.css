@@ -132,11 +132,31 @@
     color: var(--background) !important;
 }
 
-/* One page frame everywhere: full width, edges aligned with the command bar. */
+/* One page frame everywhere: capped width, centred in the content area. */
+.app-main-content {
+    --page-max-width: 1280px;
+}
+
 .app-main-content > :is([class$="-page"], [class*="-page "], .tm-page) {
-    margin-inline: 0 !important;
-    max-width: none !important;
+    margin-inline: auto !important;
+    max-width: var(--page-max-width) !important;
     padding: 16px 12px 24px !important;
+}
+
+/* List views and settings hold wide tables or tab bars, so they use the full width to fit everything. */
+.app-main-content > :is(
+    .tm-page-shipment-list,
+    .dlv-page,
+    .returns-page,
+    .incidents-page,
+    .global-configuration-page,
+    .deliveries-page,
+    .users-page,
+    .departments-page,
+    .couriers-page:not(.courier-settings-page, .courier-details-page),
+    .processes-page:not(.process-details-page)
+) {
+    --page-max-width: none;
 }
 
 /* Page headers: no brand kicker above the title, no rule underneath. */
@@ -198,7 +218,7 @@
 
 .app-main-content > :is([class$="-page"], [class*="-page "], .tm-page) > :is([class$="-shell"], [class*="-shell "], [class$="-content"], [class*="-content "]) {
     margin-inline: 0 !important;
-    max-width: none !important;
+    max-width: 100% !important;
 }
 
 /* Feature sheets set their own button radius with !important; this wins on specificity. */
