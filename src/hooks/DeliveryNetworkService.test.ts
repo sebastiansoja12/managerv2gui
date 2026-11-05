@@ -30,6 +30,7 @@ describe("DeliveryNetworkService", () => {
         expect(response.data).toEqual([{
             sourceDepartmentId: "1",
             targetDepartmentId: "7037389207610229000",
+            bidirectional: true,
         }]);
         expect(mockManagerRequest).toHaveBeenCalledWith({
             method: "GET",
@@ -37,6 +38,27 @@ describe("DeliveryNetworkService", () => {
             params: undefined,
             headers: undefined,
         });
+    });
+
+    it("keeps the direction of one-way connections", async () => {
+        mockManagerRequest.mockResolvedValue({data: {connections: []}, status: 200});
+
+        await DeliveryNetworkService.replaceCurrentNetwork([{
+            sourceDepartmentId: "7",
+            targetDepartmentId: "1",
+            bidirectional: false,
+        }]);
+
+        expect(mockManagerRequest).toHaveBeenCalledWith(expect.objectContaining({
+            method: "PUT",
+            data: {
+                connections: [{
+                    firstDepartmentId: {value: "7"},
+                    secondDepartmentId: {value: "1"},
+                    bidirectional: false,
+                }],
+            },
+        }));
     });
 
     it("replaces the whole network with canonical typed department pairs", async () => {
@@ -107,6 +129,7 @@ describe("DeliveryNetworkService", () => {
         expect(response.data).toEqual([{
             sourceDepartmentId: "1",
             targetDepartmentId: "7037389207610229000",
+            bidirectional: true,
         }]);
         const request = mockManagerRequest.mock.calls[0][0];
         expect(request).toMatchObject({

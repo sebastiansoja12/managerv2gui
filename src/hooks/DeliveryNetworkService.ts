@@ -3,6 +3,7 @@ import {ApiResult} from "../api/ApiResult";
 import {
     DepartmentRelation,
     canonicalDepartmentRelation,
+    isOneWayRelation,
 } from "../components/Departments/model/DepartmentRelation";
 import {ShipmentRoute} from "../components/ShipmentRoute/model/ShipmentRoute";
 import http from "../http-common";
@@ -22,6 +23,7 @@ type DepartmentIdApi = {
 type DepartmentConnectionApi = {
     firstDepartmentId: DepartmentIdApi;
     secondDepartmentId: DepartmentIdApi;
+    bidirectional?: boolean | null;
 };
 
 type DeliveryNetworkApi = {
@@ -67,19 +69,21 @@ export const mapDeliveryNetworkFromApi = (deliveryNetwork: DeliveryNetworkApi): 
     deliveryNetwork.connections.map((connection) => ({
         sourceDepartmentId: String(connection.firstDepartmentId.value),
         targetDepartmentId: String(connection.secondDepartmentId.value),
+        bidirectional: connection.bidirectional !== false,
     }))
 );
 
 export const mapDeliveryNetworkToApi = (relations: DepartmentRelation[]): DeliveryNetworkApi => ({
     connections: relations.map((relation) => {
-        const canonicalRelation = canonicalDepartmentRelation(relation);
+        const directedRelation = isOneWayRelation(relation) ? relation : canonicalDepartmentRelation(relation);
         return {
             firstDepartmentId: {
-                value: canonicalRelation.sourceDepartmentId,
+                value: directedRelation.sourceDepartmentId,
             },
             secondDepartmentId: {
-                value: canonicalRelation.targetDepartmentId,
+                value: directedRelation.targetDepartmentId,
             },
+            ...(relation.bidirectional === undefined ? {} : {bidirectional: relation.bidirectional}),
         };
     }),
 });
