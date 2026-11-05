@@ -38,6 +38,9 @@ const mockedDepartmentService = DepartmentService as jest.Mocked<typeof Departme
 const returnPackage: ReturnPackageDto = {
     returnPackageId: {value: "9223372036854775001"},
     shipmentId: {value: "582104"},
+    trackingNumber: {value: "PL582104TRK"},
+    returnShipmentId: {value: "582200"},
+    returnTrackingNumber: {value: "PL582200RET"},
     reason: "Damaged parcel corner",
     returnStatus: "CREATED" as const,
     returnToken: {value: "RETURN-ABC-123"},
@@ -223,6 +226,8 @@ describe("Returns", () => {
 
         await screen.findByRole("rowheader", {name: returnPackage.returnPackageId.value});
         await waitFor(() => expect(screen.queryByRole("progressbar")).not.toBeInTheDocument());
+        expect(screen.getByRole("cell", {name: "PL582104TRK"})).toBeInTheDocument();
+        expect(screen.getByRole("cell", {name: "PL582200RET"})).toBeInTheDocument();
 
         fireEvent.click(screen.getByRole("button", {name: pl.returns.actions.create}));
         const dialog = screen.getByRole("dialog");
@@ -230,7 +235,7 @@ describe("Returns", () => {
         fireEvent.mouseDown(departmentSelect);
         const warsawOption = await screen.findByRole("option", {name: "WAW01 — Warszawa"});
         expect(screen.queryByRole("option", {name: /KT1/})).not.toBeInTheDocument();
-        fireEvent.change(within(dialog).getByRole("textbox", {name: /ID przesyłki/}), {target: {value: "582104"}});
+        fireEvent.change(within(dialog).getByRole("textbox", {name: /Numer przesyłki/}), {target: {value: "PL582104TRK"}});
         fireEvent.click(warsawOption);
         fireEvent.mouseDown(within(dialog).getByRole("combobox", {name: pl.returns.fields.reasonCode}));
         fireEvent.click(await screen.findByRole("option", {name: pl.returns.reasonCodes.RECIPIENT_REFUSED}));
@@ -238,7 +243,7 @@ describe("Returns", () => {
         fireEvent.click(within(dialog).getByRole("button", {name: pl.returns.actions.create}));
 
         await waitFor(() => expect(mockedReturnService.create).toHaveBeenCalledWith({
-            shipmentId: {value: "582104"},
+            trackingNumber: {value: "PL582104TRK"},
             reason: "Recipient refused delivery",
             reasonCode: {value: "RECIPIENT_REFUSED"},
             departmentId: {value: "1"},

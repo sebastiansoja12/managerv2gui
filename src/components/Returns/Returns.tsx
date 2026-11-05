@@ -38,6 +38,7 @@ import {useAuthState} from "../../auth/AuthState";
 import Department from "../../class/depots/Department";
 import DepartmentService from "../../hooks/DepartmentService";
 import ReturnService from "../../hooks/ReturnService";
+import {canAccessDepartment} from "../Users/model/UserRoleAccess";
 import pl from "../../i18n/translate";
 import {
     ReturnPackageDto,
@@ -53,14 +54,14 @@ type Notice = {
 };
 
 type CreateForm = {
-    shipmentId: string;
+    trackingNumber: string;
     departmentCode: string;
     reasonCode: ReturnReasonCode;
     reason: string;
 };
 
 const emptyCreateForm = (departmentCode = ""): CreateForm => ({
-    shipmentId: "",
+    trackingNumber: "",
     departmentCode,
     reasonCode: "DAMAGED",
     reason: "",
@@ -136,14 +137,15 @@ function Returns({onOpenTab}: ReturnsProps) {
 
     const availableDepartments = useMemo(() => departments
         .filter((department) => department.status === "ACTIVE")
-        .sort((left, right) => departmentCode(left).localeCompare(departmentCode(right), pl.common.locale)), [departments]);
+        .filter((department) => canAccessDepartment(user?.role, user?.departmentCode, departmentCode(department)))
+        .sort((left, right) => departmentCode(left).localeCompare(departmentCode(right), pl.common.locale)), [departments, user]);
     const availableDepartmentCodes = useMemo(
         () => new Set(availableDepartments.map(departmentCode)),
         [availableDepartments],
     );
     const terminal = returnPackage?.returnStatus === "COMPLETED" || returnPackage?.returnStatus === "CANCELLED";
     const validLookupId = /^\d+$/.test(lookupId.trim());
-    const validCreateForm = /^\d+$/.test(createForm.shipmentId.trim())
+    const validCreateForm = Boolean(createForm.trackingNumber.trim())
         && availableDepartmentCodes.has(createForm.departmentCode)
         && Boolean(createForm.reason.trim());
     const validTokenForm = /^\d+$/.test(tokenShipmentId.trim()) && Boolean(token.trim());
@@ -333,7 +335,7 @@ function Returns({onOpenTab}: ReturnsProps) {
         setNotice(null);
         try {
             await ReturnService.create({
-                shipmentId: {value: createForm.shipmentId.trim()},
+                trackingNumber: {value: createForm.trackingNumber.trim()},
                 reason: createForm.reason.trim(),
                 reasonCode: {value: createForm.reasonCode},
                 departmentId: {value: String(selectedDepartment.departmentId)},
@@ -530,7 +532,8 @@ function Returns({onOpenTab}: ReturnsProps) {
                                 <TableHead>
                                     <TableRow>
                                         <TableCell component="th">{pl.returns.fields.returnId}</TableCell>
-                                        <TableCell component="th">{pl.returns.fields.shipmentId}</TableCell>
+                                        <TableCell component="th">{pl.returns.fields.trackingNumber}</TableCell>
+                                        <TableCell component="th">{pl.returns.fields.returnTrackingNumber}</TableCell>
                                         <TableCell component="th">{pl.returns.list.status}</TableCell>
                                         <TableCell component="th">{pl.returns.fields.assignedDepartment}</TableCell>
                                         <TableCell component="th">{pl.returns.fields.reasonCode}</TableCell>
@@ -541,7 +544,7 @@ function Returns({onOpenTab}: ReturnsProps) {
                                 <TableBody>
                                     {listLoading ? (
                                         <TableRow>
-                                            <TableCell colSpan={7}>
+                                            <TableCell colSpan={8}>
                                                 <div className="returns-table-state" role="status">
                                                     <CircularProgress size={20} />
                                                     {pl.returns.list.loading}
@@ -550,7 +553,7 @@ function Returns({onOpenTab}: ReturnsProps) {
                                         </TableRow>
                                     ) : listError ? (
                                         <TableRow>
-                                            <TableCell colSpan={7}>
+                                            <TableCell colSpan={8}>
                                                 <div className="returns-table-state returns-table-error" role="alert">
                                                     <span>{listError}</span>
                                                     <Button variant="outlined" onClick={() => setListReloadKey((key) => key + 1)}>
@@ -565,7 +568,8 @@ function Returns({onOpenTab}: ReturnsProps) {
                                             selected={item.returnPackageId.value === returnPackage?.returnPackageId.value}
                                         >
                                             <TableCell component="th" scope="row">{item.returnPackageId.value}</TableCell>
-                                            <TableCell>{item.shipmentId.value}</TableCell>
+                                            <TableCell>{item.trackingNumber?.value || item.shipmentId.value}</TableCell>
+                                            <TableCell>{valueOrDash(item.returnTrackingNumber?.value || item.returnShipmentId?.value)}</TableCell>
                                             <TableCell>
                                                 <Chip
                                                     className={`return-status return-status-${item.returnStatus.toLowerCase()}`}
@@ -584,7 +588,7 @@ function Returns({onOpenTab}: ReturnsProps) {
                                         </TableRow>
                                     )) : (
                                         <TableRow>
-                                            <TableCell colSpan={7}>
+                                            <TableCell colSpan={8}>
                                                 <div className="returns-table-empty">{pl.returns.list.noDepartmentResults}</div>
                                             </TableCell>
                                         </TableRow>
@@ -618,7 +622,10 @@ function Returns({onOpenTab}: ReturnsProps) {
                                             size="small"
                                         />
                                     </div>
-                                    <p>{pl.returns.fields.shipmentId}: #{returnPackage.shipmentId.value}</p>
+                                    <p>{pl.returns.fields.trackingNumber}: {returnPackage.trackingNumber?.value || `#${returnPackage.shipmentId.value}`}</p>
+                                    {returnPackage.returnShipmentId ? (
+                                        <p>{pl.returns.fields.returnTrackingNumber}: {returnPackage.returnTrackingNumber?.value || `#${returnPackage.returnShipmentId.value}`}</p>
+                                    ) : null}
                                 </div>
                                 <div className="returns-actions">
                                     <Button disabled={loading} startIcon={<Refresh />} variant="outlined" onClick={() => loadReturn(returnId)}>
@@ -749,10 +756,9 @@ function Returns({onOpenTab}: ReturnsProps) {
                         <div className="returns-form-grid">
                             <TextField
                                 required
-                                label={pl.returns.fields.shipmentId}
-                                inputMode="numeric"
-                                value={createForm.shipmentId}
-                                onChange={(event) => setCreateForm({...createForm, shipmentId: event.target.value})}
+                                label={pl.returns.fields.trackingNumber}
+                                value={createForm.trackingNumber}
+                                onChange={(event) => setCreateForm({...createForm, trackingNumber: event.target.value})}
                             />
                             <TextField
                                 select
