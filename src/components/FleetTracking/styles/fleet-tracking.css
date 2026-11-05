@@ -1,0 +1,104 @@
+.fleet-tracking-layout {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: minmax(16rem, 22rem) 1fr;
+}
+
+@media (max-width: 900px) {
+    .fleet-tracking-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+.fleet-tracking-list {
+    border: 1px solid var(--border);
+    border-radius: 0.875rem;
+    display: flex;
+    flex-direction: column;
+    max-height: 36rem;
+    overflow-y: auto;
+}
+
+.fleet-tracking-item {
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--border);
+    color: var(--foreground);
+    cursor: pointer;
+    display: grid;
+    gap: 0.2rem;
+    padding: 0.75rem 1rem;
+    text-align: left;
+}
+
+.fleet-tracking-item:last-child {
+    border-bottom: 0;
+}
+
+.fleet-tracking-item.is-selected {
+    background: color-mix(in srgb, var(--primary) 8%, transparent);
+}
+
+.fleet-tracking-item span {
+    color: var(--muted-foreground);
+    font-size: 0.78rem;
+}
+
+.fleet-tracking-signal {
+    align-items: center;
+    display: inline-flex;
+    gap: 0.35rem;
+}
+
+.fleet-tracking-signal::before,
+.fleet-tracking-marker {
+    background: #94a3b8;
+    border-radius: 999px;
+    content: "";
+    display: inline-block;
+    height: 0.6rem;
+    width: 0.6rem;
+}
+
+.fleet-tracking-signal.is-fresh::before,
+.fleet-tracking-marker.is-fresh {
+    background: #16a34a;
+}
+
+.fleet-tracking-signal.is-stale::before,
+.fleet-tracking-marker.is-stale {
+    background: #f59e0b;
+}
+
+.fleet-tracking-marker {
+    border: 3px solid #fff;
+    box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.35);
+    height: 1.1rem;
+    width: 1.1rem;
+}
+
+.fleet-tracking-marker.is-selected {
+    box-shadow: 0 0 0 3px var(--primary);
+}
+
+.fleet-tracking-map,
+.fleet-tracking-empty {
+    border: 1px solid var(--border);
+    border-radius: 0.875rem;
+    height: 36rem;
+    width: 100%;
+}
+
+.fleet-tracking-map {
+    background: var(--surface-secondary);
+    z-index: 0;
+}
+
+.fleet-tracking-empty {
+    align-items: center;
+    color: var(--muted-foreground);
+    display: flex;
+    justify-content: center;
+    padding: 2rem;
+    text-align: center;
+}
