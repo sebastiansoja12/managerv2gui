@@ -51,7 +51,9 @@ export type DepartmentStatusUpdateRequest = {
         value: string;
     };
     status: DepartmentStatus;
+    reason?: string;
 };
+
 
 const getAll = () => {
     return http.get<Array<Department>>("/departments");
