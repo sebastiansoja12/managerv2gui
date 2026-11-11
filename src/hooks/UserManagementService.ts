@@ -27,6 +27,8 @@ const removePermission = (userId: string | number, permission: UserPermission) =
     http.delete<void>(`/users/permissions/${userId}`, {params: {permission}})
 );
 
+const remove = (userId: string | number) => http.delete<void>(`/users/${userId}`);
+
 const UserManagementService = {
     getAll,
     create,
@@ -34,6 +36,7 @@ const UserManagementService = {
     changeRole,
     addPermission,
     removePermission,
+    remove,
 };
 
 export default UserManagementService;
