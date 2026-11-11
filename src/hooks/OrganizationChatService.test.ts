@@ -1,6 +1,4 @@
 import OrganizationChatService from "./OrganizationChatService";
-import UserManagementService from "./UserManagementService";
-import {User} from "../components/Users/model/User";
 import http from "../http-common";
 
 jest.mock("../http-common", () => ({
@@ -16,40 +14,28 @@ jest.mock("../auth/AuthState", () => ({
     getAuthState: () => ({user: {userId: {value: 1}}}),
 }));
 
-jest.mock("./UserManagementService", () => ({
-    __esModule: true,
-    default: {
-        getAll: jest.fn(),
-    },
-}));
-
-const user = (id: number, deleted = false): User => ({
-    userId: {value: id},
-    username: `user.${id}`,
-    firstName: "Jan",
-    lastName: `Testowy ${id}`,
-    email: `user.${id}@example.com`,
-    role: "USER",
-    departmentCode: "WAW-01",
-    language: "pl",
-    deleted,
-    operatorId: {value: 42},
-    rolePermissions: [],
-});
-test("loads real active users from the organization user API", async () => {
-    (UserManagementService.getAll as jest.Mock).mockResolvedValue({
-        data: [user(1), user(2, true)],
+test("loads organization-wide chat participants from the chat API", async () => {
+    (http.get as jest.Mock).mockResolvedValueOnce({
+        data: [{
+            userId: {value: 2},
+            username: "user.2",
+            firstName: "Jan",
+            lastName: "Testowy 2",
+            departmentCode: "KRA-01",
+            role: "USER",
+            operatorId: {value: 42},
+        }],
     });
 
     const result = await OrganizationChatService.listActiveUsers();
 
-    expect(UserManagementService.getAll).toHaveBeenCalledTimes(1);
+    expect(http.get).toHaveBeenCalledWith("/chat/participants");
     expect(result).toEqual([
         expect.objectContaining({
-            id: "1",
-            username: "user.1",
+            id: "2",
+            username: "user.2",
             organizationId: "42",
-            departmentCode: "WAW-01",
+            departmentCode: "KRA-01",
             active: true,
             availability: "OFFLINE",
         }),
