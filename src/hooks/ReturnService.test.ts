@@ -70,13 +70,13 @@ describe("ReturnService", () => {
         mockManagerRequest.mockResolvedValue({data: [], status: 201});
 
         await ReturnService.create({
-            shipmentId: {value: "456"}, departmentId: {value: "2"},
+            trackingNumber: {value: "TRK456"}, departmentId: {value: "2"},
             reason: "Damaged parcel", reasonCode: {value: "DAMAGED"}, returnStatus: "CREATED",
         });
 
         expect(mockManagerRequest).toHaveBeenCalledWith({
             method: "POST", url: "/returns/packages",
-            data: {shipmentId: {value: "456"}, departmentId: {value: "2"},
+            data: {trackingNumber: {value: "TRK456"}, departmentId: {value: "2"},
                 reason: "Damaged parcel", reasonCode: "DAMAGED"},
             params: undefined, headers: undefined,
         });

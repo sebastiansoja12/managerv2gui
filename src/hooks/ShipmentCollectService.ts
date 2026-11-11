@@ -20,13 +20,13 @@ const xmlElement = (name: string, value: string) => `<${name}>${escapeXml(value)
 export const buildCollectRequestEnvelope = (request: CollectRequest) => {
     const device = request.deviceInformation;
     const collectDetails = request.trackingNumbers
-        .map((trackingNumber) => `<CollectDetail>${xmlElement("TrackingNumber", trackingNumber)}</CollectDetail>`)
+        .map((trackingNumber) => `<AcceptDetail>${xmlElement("TrackingNumber", trackingNumber)}</AcceptDetail>`)
         .join("");
 
     return `<?xml version="1.0" encoding="UTF-8"?>`
         + `<soapenv:Envelope xmlns:soapenv="${SOAP_ENVELOPE_NAMESPACE}">`
         + `<soapenv:Body>`
-        + `<CollectRequest xmlns="${TERMINAL_NAMESPACE}">`
+        + `<AcceptRequest xmlns="${TERMINAL_NAMESPACE}">`
         + `<DeviceInformation>`
         + xmlElement("Version", device.version)
         + xmlElement("DeviceID", device.deviceId)
@@ -36,8 +36,8 @@ export const buildCollectRequestEnvelope = (request: CollectRequest) => {
         + xmlElement("DeviceUserType", device.deviceUserType)
         + xmlElement("DeviceType", device.deviceType)
         + `</DeviceInformation>`
-        + `<CollectDetails>${collectDetails}</CollectDetails>`
-        + `</CollectRequest>`
+        + `<AcceptDetails>${collectDetails}</AcceptDetails>`
+        + `</AcceptRequest>`
         + `</soapenv:Body>`
         + `</soapenv:Envelope>`;
 };
@@ -65,13 +65,13 @@ export const parseCollectResponseEnvelope = (xml: string): CollectResponse => {
         throw new CollectFaultError(faultMessage);
     }
 
-    const collectResponse = document.getElementsByTagNameNS(TERMINAL_NAMESPACE, "CollectResponse")[0];
+    const collectResponse = document.getElementsByTagNameNS(TERMINAL_NAMESPACE, "AcceptResponse")[0];
     if (!collectResponse) {
-        throw new CollectFaultError("Missing CollectResponse");
+        throw new CollectFaultError("Missing AcceptResponse");
     }
 
     const details: CollectResponseDetail[] = Array.from(
-        collectResponse.getElementsByTagNameNS(TERMINAL_NAMESPACE, "CollectResponseDetail"))
+        collectResponse.getElementsByTagNameNS(TERMINAL_NAMESPACE, "AcceptResponseDetail"))
         .map((detail) => ({
             trackingNumber: childText(detail, "TrackingNumber") || "",
             shipmentId: childText(detail, "ShipmentID"),

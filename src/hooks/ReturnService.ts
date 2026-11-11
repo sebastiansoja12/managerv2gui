@@ -14,12 +14,12 @@ const managerClient = new BackendClient(http);
 
 const create = (request: ReturnCreateRequest) =>
     managerClient.post<{
-        shipmentId: ReturnCreateRequest["shipmentId"];
+        trackingNumber: ReturnCreateRequest["trackingNumber"];
         departmentId: ReturnCreateRequest["departmentId"];
         reason: string;
         reasonCode: string;
     }, CreatedReturnDto[]>("/returns/packages", {
-        shipmentId: request.shipmentId,
+        trackingNumber: request.trackingNumber,
         departmentId: request.departmentId,
         reason: request.reason,
         reasonCode: request.reasonCode.value,
