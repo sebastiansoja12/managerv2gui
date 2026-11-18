@@ -1,3 +1,43 @@
+## [2026.4] - Unreleased
+
+### Added
+- Fleet map with vehicles on active routes, signal freshness, speed, carrier registration numbers and the travelled route of the selected vehicle, refreshed every 15 seconds.
+- Incident list, details, report and resolve dialogs with statistics, filters and assignment.
+- User onboarding flow with consent dialog and guided tutorial.
+- Acting department switcher on the home dashboard and role-based route access.
+- Department load view and capacity data in department screens.
+- Delivery list with filters, server-side sorting, bulk actions and row actions, and delivery details with lifecycle stages, proof of delivery, route map, related deliveries, attempt and change history.
+- Pallet list, details, documents, carrier assignment and shipment scanning.
+- Carriers and drivers modules with details in separate tabs.
+- Department map editor with automatic layout and an operational mode for placing, moving and reserving pallets.
+- Department details in a separate tab with editable data, users, map, delivery area boundaries and relations map.
+- Postal code lookup and a sender-to-recipient route map in shipment forms and details.
+- Shipment selection with Excel export, delivery, notes and documents in shipment details.
+- Courier configuration editor with tabs, policy locks, substitutes and history, a My settings page for couriers and a public set-password page for courier invitations.
+- Browser device activation with QR activation codes.
+- Audit log view.
+- Super-admin workspace for operator subscriptions, users, departments, couriers, devices, API keys, sessions, read-model rebuilds, data export and erasure, announcements, system status, maintenance mode, platform audit log and platform owner accounts.
+- Impersonation with operator consent and an impersonation banner.
+- Maintenance and inactive-subscription screens.
+- OpenCage geocoding provider and footer.
+- Translations for all new screens in Polish, English and German.
+
+### Changed
+- Moved open tabs from the navbar into a tab bar with pinning, previews, a searchable tab list and close actions.
+- Shipment details read routing data from deliveries; the dashboard filters by department deliveries.
+- Couriers get real carrier vehicles and devices, with a read-only courier department.
+- Delivery signatures and comment codes are shown on deliveries instead of editing shipment signatures.
+- Restyled process details, global configuration, departments, home dashboard and navbar.
+- SUPPLIER users are restricted to the courier profile.
+
+### Fixed
+- Courier, vehicle, signature and incident identifiers are kept as exact strings so 63-bit ids are not corrupted.
+- Select menus open above their field when there is no room below.
+- Department codes are shown instead of ids in the latest delivery attempt.
+
+### Deprecated
+- Removed the deprecated software configuration screens and the old shipment signature editing.
+
 ## [2026.3] - 2026-09-10
 
 ### Added
