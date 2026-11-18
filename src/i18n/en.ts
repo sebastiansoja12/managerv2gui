@@ -4917,6 +4917,7 @@ export const en: typeof pl = {
             PALLET_LOCKED: "The pallet is locked in the warehouse.",
             PALLET_OVERWEIGHT: "The pallet exceeds its maximum weight.",
             PALLET_INVALID_STATUS: "The pallet cannot be loaded in its current status.",
+            SHIPMENT_DESTINATION_MISMATCH: "At least one shipment has a different destination department than the pallet. The pallet was not loaded.",
             SHIPMENT_STATUS_UPDATE_FAILED: "Some shipments could not be updated. The pallet was not loaded.",
             PALLET_SERVICE_UNAVAILABLE: "The pallet service is temporarily unavailable. Try again shortly.",
             PALLET_INVALID_REQUEST: "Invalid request.",
