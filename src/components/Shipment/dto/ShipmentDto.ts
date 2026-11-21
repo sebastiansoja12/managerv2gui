@@ -92,6 +92,12 @@ export interface ShipmentDto {
     createdAt?: string | null;
     updatedAt?: string | null;
     delivery?: ShipmentDeliveryDto | null;
+    incidentReported?: boolean | null;
+    palletTrackingNumber?: PalletTrackingNumberDto | null;
+}
+
+export interface PalletTrackingNumberDto {
+    value: string;
 }
 
 export interface DepartmentIdDto {
@@ -101,6 +107,7 @@ export interface DepartmentIdDto {
 export interface ShipmentDeliveryDto {
     originDepartmentId: DepartmentIdDto | null;
     destinationDepartmentId: DepartmentIdDto | null;
+    currentDepartmentId: DepartmentIdDto | null;
     plannedDeliveryAt: string | null;
     deliveredAt: string | null;
 }
@@ -240,7 +247,7 @@ export type ShipmentSizeDto = "TINY" | "SMALL" | "MEDIUM" | "AVERAGE" | "BIG" | 
 
 export type CountryCodeDto = typeof countryCodes[number];
 
-export type ShipmentStatusDto = "PLANNED" | "CREATED" | "PREPARED" | "COLLECTED" | "ACCEPTED" | "REROUTE" | "SENT" | "DELIVERY" | "RETURN" | "REDIRECT" | "CANCELED";
+export type ShipmentStatusDto = "PLANNED" | "CREATED" | "PREPARED" | "COLLECTED" | "ACCEPTED" | "REROUTE" | "SENT" | "HANDOVER" | "UNDELIVERABLE" | "DELIVERY" | "RETURN" | "REDIRECT" | "CANCELED" | "LOST";
 
 export type PickupMethodDto = "DEPARTMENT" | "COURIER" | "PICKUP_POINT" | "LOCKER";
 
@@ -250,7 +257,7 @@ export type ShipmentTypeDto = "PARENT" | "CHILD";
 
 export const shipmentPriorities: ShipmentPriorityDto[] = ["LOW", "MEDIUM", "HIGH", "EXPRESS"];
 
-export const shipmentStatuses: ShipmentStatusDto[] = ["PLANNED", "CREATED", "PREPARED", "COLLECTED", "ACCEPTED", "REROUTE", "SENT", "DELIVERY", "RETURN", "REDIRECT", "CANCELED"];
+export const shipmentStatuses: ShipmentStatusDto[] = ["PLANNED", "CREATED", "PREPARED", "COLLECTED", "ACCEPTED", "REROUTE", "SENT", "HANDOVER", "DELIVERY", "RETURN", "REDIRECT", "CANCELED", "LOST"];
 
 export const pickupMethods: PickupMethodDto[] = ["DEPARTMENT", "COURIER", "PICKUP_POINT", "LOCKER"];
 

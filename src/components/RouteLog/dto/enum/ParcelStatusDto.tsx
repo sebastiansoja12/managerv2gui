@@ -6,6 +6,7 @@ enum ParcelStatusDto {
     REROUTE = "REROUTE",
     REDIRECT = "REDIRECT",
     SENT = "SENT",
+    HANDOVER = "HANDOVER",
     DELIVERY = "DELIVERY",
 }
 

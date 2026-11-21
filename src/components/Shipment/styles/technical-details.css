@@ -358,7 +358,7 @@
     padding: 0 14px !important;
 }
 
-.app-main-content .shipment-cc-page .shipment-detail-tabs :is(a, button):hover {
+.app-main-content .shipment-cc-page .shipment-detail-tabs :is(a, button):not(.shipment-detail-tab-active):hover {
     color: var(--foreground) !important;
 }
 
@@ -430,7 +430,7 @@
     font-weight: 500 !important;
 }
 
-.app-main-content .shipment-cc-page .shipment-dashboard-facts-primary > div:nth-child(-n + 2) strong {
+.app-main-content .shipment-cc-page .shipment-dashboard-facts-primary > div:first-child strong {
     font-family: var(--font-mono) !important;
     font-size: 0.88rem !important;
 }

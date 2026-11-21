@@ -25,6 +25,7 @@ export const exportShipmentExcel = async (shipment: ShipmentDto) => {
         [pl.shipments.table.columns.user, shipment.operatorId?.value?.toString() || pl.shipments.table.unassigned],
         [pl.shipments.table.columns.status, pl.shipments.status[shipment.shipmentStatus]],
         [pl.shipments.table.columns.relatedShipment, shipment.shipmentRelatedId?.value || pl.common.dash],
+        [pl.shipments.table.columns.pallet, shipment.palletTrackingNumber?.value || pl.common.dash],
     ]);
     sheet.getColumn(1).font = {bold: true};
 

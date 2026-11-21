@@ -49,7 +49,7 @@ describe("shipment list selection", () => {
         jest.clearAllMocks();
         (ShipmentService.search as jest.Mock).mockResolvedValue({data: {content: [
             shipment,
-            {...shipment, shipmentId: {value: "303"}, createdAt: null},
+            {...shipment, shipmentId: {value: "303"}, trackingNumber: {value: "TRACK-303"}, createdAt: null},
         ], page: 0, size: 25, totalElements: 60, totalPages: 3}, status: 200});
         (DepartmentService.getAll as jest.Mock).mockResolvedValue({data: [
             {departmentId: 3, departmentCode: {value: "KAT1"}},
@@ -61,20 +61,36 @@ describe("shipment list selection", () => {
         URL.revokeObjectURL = jest.fn();
     });
 
+    it("shows the pallet number as a link and a dash when the shipment is not on a pallet", async () => {
+        (ShipmentService.search as jest.Mock).mockResolvedValue({data: {content: [
+            {...shipment, palletTrackingNumber: {value: "PAL000000000001"}},
+            {...shipment, shipmentId: {value: "303"}, trackingNumber: {value: "TRACK-303"}},
+        ], page: 0, size: 25, totalElements: 2, totalPages: 1}, status: 200});
+        const onOpenTab = jest.fn();
+        render(<MemoryRouter><ShipmentList onOpenTab={onOpenTab}/></MemoryRouter>);
+
+        expect(screen.getByRole("columnheader", {name: pl.shipments.table.columns.pallet})).toBeInTheDocument();
+        const row = await screen.findByRole("row", {name: /TRACK-101(?!\d)/});
+        fireEvent.click(within(row).getByRole("link", {name: "PAL000000000001"}));
+        expect(onOpenTab).toHaveBeenCalledWith(expect.objectContaining({path: "/pallets/tracking/PAL000000000001"}));
+        const rowWithoutPallet = screen.getByRole("row", {name: /TRACK-303/});
+        expect(within(rowWithoutPallet).getAllByRole("cell")[12]).toHaveTextContent(pl.common.dash);
+    });
+
     it("shows the creation date with hours and minutes and a dash when it is missing", async () => {
         render(<MemoryRouter><ShipmentList/></MemoryRouter>);
 
         expect(screen.getByRole("columnheader", {name: pl.shipments.summary.createdAt})).toBeInTheDocument();
-        const row = await screen.findByRole("row", {name: /#101/});
+        const row = await screen.findByRole("row", {name: /TRACK-101(?!\d)/});
         expect(within(row).getAllByRole("cell")[4]).toHaveTextContent("12.08.2026, 10:37");
-        const undatedRow = screen.getByRole("row", {name: /#303/});
+        const undatedRow = screen.getByRole("row", {name: /TRACK-303/});
         expect(within(undatedRow).getAllByRole("cell")[4]).toHaveTextContent(pl.common.dash);
     });
 
     it("shows origin and destination department codes and the delivery date from the shipment read model", async () => {
         render(<MemoryRouter><ShipmentList variant="details" onOpenTab={jest.fn()}/></MemoryRouter>);
 
-        const row = await screen.findByRole("row", {name: /#101/});
+        const row = await screen.findByRole("row", {name: /TRACK-101(?!\d)/});
         expect(await within(row).findByText("POZ1")).toBeInTheDocument();
         expect(within(row).getByText("KAT1")).toBeInTheDocument();
         expect(within(row).getAllByRole("cell")[5]).not.toHaveTextContent(pl.common.dash);
@@ -82,7 +98,7 @@ describe("shipment list selection", () => {
 
     it("loads the selected page from the server", async () => {
         render(<MemoryRouter><ShipmentList/></MemoryRouter>);
-        await screen.findByRole("row", {name: /#101/});
+        await screen.findByRole("row", {name: /TRACK-101(?!\d)/});
 
         fireEvent.click(screen.getByRole("button", {name: "2"}));
 
@@ -93,7 +109,7 @@ describe("shipment list selection", () => {
 
     it("passes the status tab to the server search", async () => {
         render(<MemoryRouter><ShipmentList/></MemoryRouter>);
-        await screen.findByRole("row", {name: /#101/});
+        await screen.findByRole("row", {name: /TRACK-101(?!\d)/});
 
         fireEvent.click(screen.getByRole("button", {name: pl.shipments.status.DELIVERY}));
 
@@ -113,7 +129,7 @@ describe("shipment list selection", () => {
         expect(displayButton).toBeDisabled();
         expect(screen.queryByText(pl.shipments.metrics.summaryTitle)).not.toBeInTheDocument();
 
-        const row = await screen.findByRole("row", {name: /#101/});
+        const row = await screen.findByRole("row", {name: /TRACK-101(?!\d)/});
         fireEvent.click(row);
         expect(row).toHaveAttribute("aria-selected", "true");
         expect(exportButton).toBeEnabled();

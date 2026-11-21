@@ -21,9 +21,11 @@ describe("getConfiguredDraftShipmentStatus", () => {
             "ACCEPTED",
             "REROUTE",
             "SENT",
+            "HANDOVER",
             "DELIVERY",
             "RETURN",
             "REDIRECT",
+            "LOST",
         ]);
     });
 });

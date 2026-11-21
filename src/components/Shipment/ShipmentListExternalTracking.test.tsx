@@ -71,7 +71,7 @@ describe("external tracking search", () => {
         expect(screen.getByLabelText(pl.shipments.externalSearch.source)).toHaveTextContent(
             pl.shipments.externalSearch.system);
         expect(screen.queryByLabelText(pl.shipments.externalSearch.provider)).not.toBeInTheDocument();
-        expect(await screen.findByRole("cell", {name: pl.shipments.table.empty})).toHaveAttribute("colspan", "12");
+        expect(await screen.findByRole("cell", {name: pl.shipments.table.empty})).toHaveAttribute("colspan", "14");
 
         await selectExternalSource();
         expect(TrackingService.getAvailableProviders).toHaveBeenCalledTimes(1);

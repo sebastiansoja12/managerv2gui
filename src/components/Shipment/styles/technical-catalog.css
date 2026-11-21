@@ -960,3 +960,124 @@
     margin-top: 0;
     white-space: nowrap;
 }
+
+/* Shipment list lookup bar: compact pill input groups in the table's scale (tabs, saved views, 0.72rem headers). */
+:root[data-theme] .app-main-content .tm-page-shipment-list .tm-manual-load {
+    align-items: flex-end;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 14px;
+    padding: 10px 18px;
+}
+
+:root[data-theme] .app-main-content .tm-page-shipment-list .tm-manual-load [data-ui="input-label"] {
+    color: var(--muted-foreground) !important;
+    font-size: 0.72rem !important;
+    font-weight: 500 !important;
+    margin-bottom: 4px;
+    min-height: 0;
+    padding-left: 12px;
+}
+
+:root[data-theme] .app-main-content .tm-page-shipment-list .tm-manual-load > [data-ui="text-field"] {
+    flex: 0 0 150px;
+    min-width: 0;
+    width: 150px;
+}
+
+:root[data-theme] .app-main-content .tm-page-shipment-list .tm-filter-cluster {
+    align-items: flex-end;
+    display: flex;
+    flex: 0 0 auto;
+    gap: 0;
+    min-width: 0;
+    width: auto;
+}
+
+:root[data-theme] .app-main-content .tm-page-shipment-list .tm-filter-cluster [data-ui="text-field"] {
+    flex: 0 0 170px;
+    width: 170px;
+}
+
+:root[data-theme] .app-main-content .tm-page-shipment-list .tm-filter-cluster-wide [data-ui="text-field"] {
+    flex-basis: 210px;
+    width: 210px;
+}
+
+:root[data-theme] .app-main-content .tm-page-shipment-list .tm-manual-load :is([data-ui="input"], [data-ui="select"], .technical-select) {
+    border-radius: 999px !important;
+    font-size: 0.78rem !important;
+    height: 32px;
+    min-height: 32px !important;
+    padding-block: 0 !important;
+    padding-inline: 12px !important;
+}
+
+/* The select trigger already pads its value by 12px; padding the wrapper too would push it past the label. */
+:root[data-theme] .app-main-content .tm-page-shipment-list .tm-manual-load .technical-select {
+    padding-inline: 0 !important;
+}
+
+:root[data-theme] .app-main-content .tm-page-shipment-list .tm-manual-load .technical-select .technical-select-trigger {
+    height: 100%;
+    min-height: 0;
+}
+
+:root[data-theme] .app-main-content .tm-page-shipment-list .tm-filter-cluster [data-ui="input"] {
+    border-bottom-right-radius: 0 !important;
+    border-top-right-radius: 0 !important;
+}
+
+:root[data-theme] .app-main-content .tm-page-shipment-list .tm-manual-load button[data-ui="button"][data-variant] {
+    font-size: 0.76rem;
+    font-weight: 600 !important;
+    height: 32px;
+    min-height: 32px;
+    white-space: nowrap;
+}
+
+:root[data-theme] .app-main-content .tm-page-shipment-list .tm-filter-cluster > button[data-ui="button"][data-variant] {
+    background: color-mix(in srgb, var(--surface) 70%, var(--background)) !important;
+    border: 1px solid var(--border) !important;
+    border-left: 0 !important;
+    border-radius: 0 999px 999px 0 !important;
+    color: var(--foreground) !important;
+    flex: 0 0 auto;
+    padding-inline: 12px 14px !important;
+}
+
+:root[data-theme] .app-main-content .tm-page-shipment-list .tm-filter-cluster > button[data-ui="button"][data-variant]:hover:not(:disabled) {
+    background: var(--primary) !important;
+    border-color: var(--primary) !important;
+    color: var(--primary-foreground) !important;
+}
+
+:root[data-theme] .app-main-content .tm-page-shipment-list .tm-filter-cluster > button[data-ui="button"][data-variant]:disabled {
+    color: var(--muted-foreground) !important;
+    opacity: 1;
+}
+
+:root[data-theme] .app-main-content .tm-page-shipment-list .tm-manual-load > button[data-ui="button"][data-variant="text"] {
+    background: transparent !important;
+    border: 0 !important;
+    color: var(--primary) !important;
+    padding-inline: 4px !important;
+}
+
+:root[data-theme] .app-main-content .tm-page-shipment-list .tm-manual-load > button[data-ui="button"][data-variant="text"]:hover:not(:disabled) {
+    text-decoration: underline;
+}
+
+:root[data-theme] .app-main-content .tm-page-shipment-list .tm-manual-load > button[data-ui="button"][data-variant="text"]:disabled {
+    color: var(--muted-foreground) !important;
+    opacity: 0.6;
+}
+
+@media (max-width: 640px) {
+    :root[data-theme] .app-main-content .tm-page-shipment-list .tm-manual-load > [data-ui="text-field"],
+    :root[data-theme] .app-main-content .tm-page-shipment-list .tm-filter-cluster,
+    :root[data-theme] .app-main-content .tm-page-shipment-list .tm-filter-cluster [data-ui="text-field"] {
+        flex: 1 1 100%;
+        width: 100%;
+    }
+}

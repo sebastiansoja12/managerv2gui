@@ -57,8 +57,8 @@ describe("shipment list bulk actions and saved views", () => {
     it("exports only the checked shipments", async () => {
         render(<MemoryRouter><ShipmentList/></MemoryRouter>);
 
-        fireEvent.click(await screen.findByRole("checkbox", {name: bulk.selectRow.replace("{value}", "#101")}));
-        fireEvent.click(screen.getByRole("checkbox", {name: bulk.selectRow.replace("{value}", "#303")}));
+        fireEvent.click(await screen.findByRole("checkbox", {name: bulk.selectRow.replace("{value}", "TRACK-101")}));
+        fireEvent.click(screen.getByRole("checkbox", {name: bulk.selectRow.replace("{value}", "TRACK-303")}));
 
         const bar = screen.getByRole("region", {name: bulk.selected.replace("{count}", "2")});
         fireEvent.click(within(bar).getByRole("button", {name: bulk.exportExcel}));
@@ -73,7 +73,7 @@ describe("shipment list bulk actions and saved views", () => {
         (PalletService.createFromShipments as jest.Mock).mockResolvedValue({data: {trackingNumber: "PAL-1"}});
         render(<MemoryRouter><ShipmentList onOpenTab={onOpenTab}/></MemoryRouter>);
 
-        await screen.findByRole("row", {name: /#202/});
+        await screen.findByRole("row", {name: /TRACK-202/});
         fireEvent.click(screen.getByRole("checkbox", {name: bulk.selectPage}));
         fireEvent.click(screen.getByRole("button", {name: bulk.createPallet}));
 
@@ -84,7 +84,7 @@ describe("shipment list bulk actions and saved views", () => {
 
     it("saves the current status as a view and applies it later", async () => {
         render(<MemoryRouter><ShipmentList/></MemoryRouter>);
-        await screen.findByRole("row", {name: /#101/});
+        await screen.findByRole("row", {name: /TRACK-101(?!\d)/});
 
         fireEvent.click(screen.getByRole("button", {name: pl.shipments.status.PREPARED}));
         fireEvent.click(screen.getByRole("button", {name: savedViews.save}));

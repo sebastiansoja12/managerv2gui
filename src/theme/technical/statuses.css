@@ -74,6 +74,7 @@
     .tm-status-created,
     .tm-status-reroute,
     .tm-status-sent,
+    .tm-status-handover,
     .tm-status-delivery,
     .tm-status-return,
     .tm-status-redirect,

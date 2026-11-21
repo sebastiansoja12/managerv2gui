@@ -58,7 +58,7 @@ import {
     ShipmentSavedView,
     storeShipmentSavedViews,
 } from "./shipmentSavedViews";
-import {palletDetailsTab} from "../Pallets/palletNavigation";
+import {palletDetailsPath, palletDetailsTab} from "../Pallets/palletNavigation";
 import {palletErrorMessage} from "../Pallets/palletLabels";
 import "./styles/shipments.css";
 
@@ -75,10 +75,12 @@ type ShipmentRow = {
     createdDate: string;
     deliveryDate: string;
     origin: string;
+    currentDepartment: string;
     price: string;
     user: string;
     destination: string;
     relatedShipmentId: string | null;
+    palletTrackingNumber: string | null;
     status: ShipmentStatusDto;
 };
 
@@ -152,8 +154,9 @@ const deliveryDateLabel = (shipment: ShipmentDto) => {
         : pl.common.dash;
 };
 
-const mapShipmentToRow = (shipment: ShipmentDto, origin: string, destination: string): ShipmentRow => ({
-    id: `#${shipment.shipmentId.value}`,
+const mapShipmentToRow = (shipment: ShipmentDto, origin: string, currentDepartment: string,
+                          destination: string): ShipmentRow => ({
+    id: shipment.trackingNumber?.value || `#${shipment.shipmentId.value}`,
     dimensions: shipment.dimensions
         ? `${shipment.dimensions.length} × ${shipment.dimensions.width} × ${shipment.dimensions.height} ${shipment.dimensions.unit}`
         : pl.common.dash,
@@ -162,14 +165,23 @@ const mapShipmentToRow = (shipment: ShipmentDto, origin: string, destination: st
     createdDate: formatDeliveryDateTime(shipment.createdAt),
     deliveryDate: deliveryDateLabel(shipment),
     origin,
+    currentDepartment,
     price: formatPrice(shipment),
     user: shipmentTranslations.table.unassigned,
     destination,
     relatedShipmentId: shipment.shipmentRelatedId?.value || null,
+    palletTrackingNumber: shipment.palletTrackingNumber?.value || null,
     status: shipment.shipmentStatus,
 });
 
 const statusClassName = (status: ShipmentStatusDto) => `tm-status tm-status-${status.toLowerCase()}`;
+
+const shipmentRowClassName = (shipment: ShipmentDto) => {
+    if (shipment.shipmentStatus === "LOST") {
+        return "tm-clickable-row tm-row-lost";
+    }
+    return shipment.incidentReported ? "tm-clickable-row tm-row-incident" : "tm-clickable-row";
+};
 
 const avatarFor = (name: string) => name.trim().slice(0, 1).toUpperCase() || "?";
 
@@ -230,6 +242,7 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
             departmentCodeLabel(departments, departmentId ? String(departmentId.value) : null);
         return shipments.map((shipment) => mapShipmentToRow(shipment,
             departmentLabel(shipment.delivery?.originDepartmentId),
+            departmentLabel(shipment.delivery?.currentDepartmentId),
             departmentLabel(shipment.delivery?.destinationDepartmentId)));
     }, [shipments, departments]);
     const selectedShipment = shipments.find((shipment) => shipment.shipmentId.value === selectedShipmentId) || null;
@@ -568,6 +581,15 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
         }
 
         navigate(tab.path);
+    };
+
+    const openPallet = (palletTrackingNumber: string) => {
+        const tab = palletDetailsTab(palletTrackingNumber);
+        if (onOpenTab) {
+            onOpenTab(tab);
+        } else {
+            navigate(tab.path);
+        }
     };
 
     const openRelatedShipment = (shipmentId: string) => {
@@ -976,8 +998,10 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
                                     <th>{shipmentTranslations.table.columns.price}</th>
                                     <th>{shipmentTranslations.table.columns.user}</th>
                                     <th>{shipmentTranslations.table.columns.origin}</th>
+                                    <th>{shipmentTranslations.table.columns.currentDepartment}</th>
                                     <th className="tm-destination-heading">{shipmentTranslations.table.columns.destination}</th>
                                     <th>{shipmentTranslations.table.columns.status}</th>
+                                    <th>{shipmentTranslations.table.columns.pallet}</th>
                                     <th>{shipmentTranslations.table.columns.relatedShipment}</th>
                                 </tr>
                                 </thead>
@@ -987,8 +1011,8 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
                                     return (
                                         <tr
                                             aria-selected={selectedShipmentId === shipment.shipmentId.value}
-                                            className="tm-clickable-row"
-                                            key={row.id}
+                                            className={shipmentRowClassName(shipment)}
+                                            key={shipment.shipmentId.value}
                                             onClick={() => setSelectedShipmentId(shipment.shipmentId.value)}
                                             onKeyDown={(event) => {
                                                 if (event.key === "Enter" || event.key === " ") {
@@ -1034,6 +1058,7 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
                                                 </span>
                                             </td>
                                             <td>{row.origin}</td>
+                                            <td>{row.currentDepartment}</td>
                                             <td className="tm-destination-cell">{row.destination}</td>
                                             <td>
                                                 <Chip
@@ -1041,6 +1066,21 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
                                                     label={shipmentTranslations.status[row.status]}
                                                     size="small"
                                                 />
+                                            </td>
+                                            <td>
+                                                {row.palletTrackingNumber ? (
+                                                    <Link
+                                                        className="tm-related-shipment-link"
+                                                        onClick={(event) => {
+                                                            event.preventDefault();
+                                                            event.stopPropagation();
+                                                            openPallet(row.palletTrackingNumber!);
+                                                        }}
+                                                        to={palletDetailsPath(row.palletTrackingNumber)}
+                                                    >
+                                                        {row.palletTrackingNumber}
+                                                    </Link>
+                                                ) : pl.common.dash}
                                             </td>
                                             <td>
                                                 {row.relatedShipmentId ? (
@@ -1062,7 +1102,7 @@ const ShipmentList: React.FC<ShipmentListProps> = ({onOpenTab, variant = "list"}
                                 })}
                                 {!loading && shipmentRows.length === 0 ? (
                                     <tr>
-                                        <td className="tm-empty-row" colSpan={12}>{shipmentTranslations.table.empty}</td>
+                                        <td className="tm-empty-row" colSpan={14}>{shipmentTranslations.table.empty}</td>
                                     </tr>
                                 ) : undefined}
                                 </tbody>
