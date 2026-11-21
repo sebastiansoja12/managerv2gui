@@ -20,6 +20,7 @@ import {
     writeDepartmentConfiguration,
     writeDepartmentConfigurationOverride,
 } from "./model/DepartmentConfiguration";
+import DepartmentPicker from "../Departments/DepartmentPicker";
 
 type SettingKey = DepartmentSettingKey;
 
@@ -395,22 +396,17 @@ function DepartmentConfigurationPanel() {
         </div>
         <Alert severity="info">{labels.serverNote}</Alert>
         <div className="department-configuration-scope">
-            <TextField
+            <DepartmentPicker
+                floating
                 className="department-configuration-scope-select"
+                clearable={operatorScopeAllowed}
+                departments={scopeDepartments}
                 disabled={saving}
                 label={labels.scope.label}
-                select
-                size="small"
+                placeholder={operatorScopeAllowed ? labels.scope.defaults : undefined}
                 value={scope}
-                onChange={(event) => setScope(event.target.value)}
-            >
-                {operatorScopeAllowed ? <MenuItem value="">{labels.scope.defaults}</MenuItem> : null}
-                {scopeDepartments.map((department) => (
-                    <MenuItem key={department.departmentId} value={String(department.departmentId)}>
-                        {departmentLabel(department)}
-                    </MenuItem>
-                ))}
-            </TextField>
+                onChange={setScope}
+            />
             {departmentScope ? (
                 <>
                     <span>{labels.scope.departmentNote}</span>

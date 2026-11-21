@@ -9,6 +9,7 @@ import {
     createEmptyOperatorUserRequest,
     OperatorUserRole,
 } from "./model/OperatorUser";
+import DepartmentPicker from "../../Departments/DepartmentPicker";
 
 type OperatorUserDialogProps = {
     open: boolean;
@@ -114,21 +115,16 @@ function OperatorUserDialog({open, operatorId, operatorName, departments = noDep
                                 onChange={(event) => updateRequest("email", event.target.value)}
                             />
                         </label>
-                        <label>
-                            <span>{pl.superAdmin.userDialog.fields.departmentCode}</span>
-                            <Select
-                                aria-label={pl.superAdmin.userDialog.fields.departmentCode}
-                                disabled={!departments.length}
-                                value={request.departmentCode}
-                                onChange={(event) => updateRequest("departmentCode", event.target.value)}
-                            >
-                                {departments.map((department) => (
-                                    <option key={departmentCodeValue(department)} value={departmentCodeValue(department)}>
-                                        {departmentCodeValue(department)} · {department.address?.city || pl.common.dash}
-                                    </option>
-                                ))}
-                            </Select>
-                        </label>
+                        <DepartmentPicker
+                            floating
+                            clearable={false}
+                            departments={departments}
+                            disabled={!departments.length}
+                            label={pl.superAdmin.userDialog.fields.departmentCode}
+                            value={request.departmentCode}
+                            valueBy="code"
+                            onChange={(departmentCode) => updateRequest("departmentCode", departmentCode)}
+                        />
                         <label>
                             <span>{pl.superAdmin.userDialog.fields.role}</span>
                             <Select

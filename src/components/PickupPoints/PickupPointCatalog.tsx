@@ -39,6 +39,7 @@ import {
 } from "./model/PickupPoint";
 import PickupPointMap from "./PickupPointMap";
 import "./styles/pickup-point-catalog.css";
+import DepartmentPicker from "../Departments/DepartmentPicker";
 
 type Filters = {
     query: string;
@@ -717,22 +718,15 @@ function PickupPointCatalog() {
                                 value={createForm.unitNumber}
                             />
                         </div>
-                        <TextField
-                            fullWidth
-                            label={pl.pickupPoints.create.department}
-                            onChange={(event: React.ChangeEvent<HTMLSelectElement>) =>
-                                setCreateForm((current) => ({...current, departmentId: event.target.value}))}
+                        <DepartmentPicker
+                            floating
                             required
-                            select
+                            departments={departments}
+                            label={pl.pickupPoints.create.department}
+                            placeholder={pl.pickupPoints.create.selectDepartment}
                             value={createForm.departmentId}
-                        >
-                            <MenuItem disabled value="">{pl.pickupPoints.create.selectDepartment}</MenuItem>
-                            {departments.map((department) => (
-                                <MenuItem key={String(department.departmentId)} value={String(department.departmentId)}>
-                                    {department.departmentCode?.value || String(department.departmentId)}
-                                </MenuItem>
-                            ))}
-                        </TextField>
+                            onChange={(departmentId) => setCreateForm((current) => ({...current, departmentId}))}
+                        />
                         <div>
                             <Typography className="pickup-point-field-label" variant="body2">
                                 {pl.pickupPoints.create.capabilities}

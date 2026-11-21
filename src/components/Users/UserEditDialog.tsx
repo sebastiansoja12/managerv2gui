@@ -3,9 +3,11 @@ import {Close, ManageAccounts} from "components/ui/icons";
 import {Alert, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, MenuItem, TextField} from "components/ui";
 import pl from "../../i18n/translate";
 import {UpdateUserRequest, User, userToUpdateRequest} from "./model/User";
+import Department from "../../class/depots/Department";
+import DepartmentPicker from "../Departments/DepartmentPicker";
 
 type UserEditDialogProps = {
-    departments: Array<{code: string; label: string}>;
+    departments: Array<{code: string; label: string; department: Department}>;
     departmentsLoading: boolean;
     open: boolean;
     saving: boolean;
@@ -86,28 +88,20 @@ function UserEditDialog({departments, departmentsLoading, open, saving, error, u
                         type="email"
                         value={request.email}
                     />
-                    <TextField
+                    <DepartmentPicker
+                        floating
+                        required
+                        clearable={false}
+                        departments={departments.map((option) => option.department)}
                         disabled={departmentsLoading || !departments.length}
                         label={pl.usersManagement.fields.departmentCode}
-                        onChange={(event) => updateField("departmentCode", event.target.value)}
-                        required
-                        select
+                        placeholder={departments.length ? undefined : departmentsLoading
+                            ? pl.usersManagement.create.departmentLoading
+                            : pl.usersManagement.create.departmentEmpty}
                         value={request.departmentCode}
-                    >
-                        {!departments.some((department) => department.code === request.departmentCode) && request.departmentCode ? (
-                            <MenuItem value={request.departmentCode}>{request.departmentCode}</MenuItem>
-                        ) : null}
-                        {departmentsLoading || !departments.length ? (
-                            <MenuItem disabled value="">
-                                {departmentsLoading
-                                    ? pl.usersManagement.create.departmentLoading
-                                    : pl.usersManagement.create.departmentEmpty}
-                            </MenuItem>
-                        ) : null}
-                        {departments.map((department) => (
-                            <MenuItem key={department.code} value={department.code}>{department.label}</MenuItem>
-                        ))}
-                    </TextField>
+                        valueBy="code"
+                        onChange={(departmentCode) => updateField("departmentCode", departmentCode)}
+                    />
                     <TextField
                         label={pl.usersManagement.fields.language}
                         onChange={(event) => updateField("language", event.target.value)}

@@ -68,3 +68,16 @@
     padding: 10px;
     text-align: center;
 }
+
+.department-picker.is-floating {
+    position: relative;
+}
+
+.department-picker.is-floating .department-picker-options {
+    left: 0;
+    min-width: 260px;
+    position: absolute;
+    right: 0;
+    top: calc(100% + 4px);
+    z-index: 30;
+}

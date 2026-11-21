@@ -3,6 +3,8 @@ import {Close, PersonAdd} from "components/ui/icons";
 import {Alert, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, MenuItem, TextField} from "components/ui";
 import pl from "../../i18n/translate";
 import {CreateUserRequest, UserRole} from "./model/User";
+import Department from "../../class/depots/Department";
+import DepartmentPicker from "../Departments/DepartmentPicker";
 
 const emptyRequest = (): CreateUserRequest => ({
     firstName: "",
@@ -15,7 +17,7 @@ const emptyRequest = (): CreateUserRequest => ({
 });
 
 type UserCreateDialogProps = {
-    departments: Array<{code: string; label: string}>;
+    departments: Array<{code: string; label: string; department: Department}>;
     departmentsLoading: boolean;
     open: boolean;
     roles: UserRole[];
@@ -73,25 +75,20 @@ function UserCreateDialog({departments, departmentsLoading, open, roles, saving,
                     <TextField label={pl.usersManagement.fields.lastName} required value={request.lastName} onChange={(event) => updateField("lastName", event.target.value)}/>
                     <TextField label={pl.usersManagement.fields.username} required value={request.username} onChange={(event) => updateField("username", event.target.value)}/>
                     <TextField label={pl.usersManagement.fields.email} required type="email" value={request.email} onChange={(event) => updateField("email", event.target.value)}/>
-                    <TextField
+                    <DepartmentPicker
+                        floating
+                        required
+                        clearable={false}
+                        departments={departments.map((option) => option.department)}
                         disabled={departmentsLoading || !departments.length}
                         label={pl.usersManagement.fields.departmentCode}
-                        required
-                        select
+                        placeholder={departments.length ? undefined : departmentsLoading
+                            ? pl.usersManagement.create.departmentLoading
+                            : pl.usersManagement.create.departmentEmpty}
                         value={request.departmentCode}
-                        onChange={(event) => updateField("departmentCode", event.target.value)}
-                    >
-                        {departmentsLoading || !departments.length ? (
-                            <MenuItem disabled value="">
-                                {departmentsLoading
-                                    ? pl.usersManagement.create.departmentLoading
-                                    : pl.usersManagement.create.departmentEmpty}
-                            </MenuItem>
-                        ) : null}
-                        {departments.map((department) => (
-                            <MenuItem key={department.code} value={department.code}>{department.label}</MenuItem>
-                        ))}
-                    </TextField>
+                        valueBy="code"
+                        onChange={(departmentCode) => updateField("departmentCode", departmentCode)}
+                    />
                     <TextField label={pl.usersManagement.fields.role} select value={request.role} onChange={(event) => updateField("role", event.target.value as UserRole)}>
                         {roles.map((role) => <MenuItem key={role} value={role}>{pl.usersManagement.roles[role]}</MenuItem>)}
                     </TextField>

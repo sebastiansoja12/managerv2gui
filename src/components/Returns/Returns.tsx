@@ -47,6 +47,7 @@ import {
 } from "./model/ReturnPackage";
 import {AppTabDefinition} from "../AppShell/types";
 import "./styles/returns.css";
+import DepartmentPicker from "../Departments/DepartmentPicker";
 
 type Notice = {
     severity: "success" | "error" | "info";
@@ -96,12 +97,6 @@ const returnReasonLabel = (reasonCode?: string | null) => reasonCode
     : pl.common.dash;
 
 const departmentCode = (department?: Department) => department?.departmentCode?.value || "";
-
-const departmentLabel = (department: Department) => {
-    const code = departmentCode(department);
-    const city = department.address?.city;
-    return city ? `${code} — ${city}` : code;
-};
 
 type ReturnsProps = {
     onOpenTab?: (tab: AppTabDefinition) => void;
@@ -509,22 +504,19 @@ function Returns({onOpenTab}: ReturnsProps) {
                             <Typography id="returns-list-title" variant="h6">{pl.returns.list.title}</Typography>
                             <p>{pl.returns.list.description}</p>
                         </div>
-                        <TextField
-                            select
+                        <DepartmentPicker
+                            floating
                             className="returns-department-filter"
+                            clearable={false}
+                            departments={availableDepartments}
                             label={pl.returns.list.departmentFilter}
                             value={departmentFilter}
-                            onChange={(event) => {
-                                setDepartmentFilter(event.target.value);
+                            valueBy="code"
+                            onChange={(nextDepartmentCode) => {
+                                setDepartmentFilter(nextDepartmentCode);
                                 setReturnPackage(null);
                             }}
-                        >
-                            {availableDepartments.map((department) => (
-                                <MenuItem key={department.departmentId} value={departmentCode(department)}>
-                                    {departmentLabel(department)}
-                                </MenuItem>
-                            ))}
-                        </TextField>
+                        />
                     </div>
 
                     <TableContainer className="returns-table-container">
@@ -760,27 +752,20 @@ function Returns({onOpenTab}: ReturnsProps) {
                                 value={createForm.trackingNumber}
                                 onChange={(event) => setCreateForm({...createForm, trackingNumber: event.target.value})}
                             />
-                            <TextField
-                                select
+                            <DepartmentPicker
+                                floating
                                 required
+                                clearable={false}
+                                departments={availableDepartments}
                                 disabled={departmentsLoading || !availableDepartments.length}
                                 label={pl.returns.fields.assignedDepartment}
+                                placeholder={availableDepartments.length ? undefined : departmentsLoading
+                                    ? pl.returns.create.departmentsLoading
+                                    : pl.returns.create.noAvailableDepartments}
                                 value={createForm.departmentCode}
-                                onChange={(event) => setCreateForm({...createForm, departmentCode: event.target.value})}
-                            >
-                                {!availableDepartments.length ? (
-                                    <MenuItem disabled value="">
-                                        {departmentsLoading
-                                            ? pl.returns.create.departmentsLoading
-                                            : pl.returns.create.noAvailableDepartments}
-                                    </MenuItem>
-                                ) : null}
-                                {availableDepartments.map((department) => (
-                                    <MenuItem key={department.departmentId} value={departmentCode(department)}>
-                                        {departmentLabel(department)}
-                                    </MenuItem>
-                                ))}
-                            </TextField>
+                                valueBy="code"
+                                onChange={(nextDepartmentCode) => setCreateForm({...createForm, departmentCode: nextDepartmentCode})}
+                            />
                             <TextField
                                 select
                                 required

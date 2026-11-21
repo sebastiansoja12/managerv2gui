@@ -11,6 +11,12 @@ type DepartmentPickerProps = {
     onChange: (departmentId: string) => void;
     disabledDepartmentIds?: Set<string>;
     disabled?: boolean;
+    valueBy?: "id" | "code";
+    clearable?: boolean;
+    floating?: boolean;
+    required?: boolean;
+    placeholder?: string;
+    className?: string;
 };
 
 const MAX_VISIBLE_OPTIONS = 50;
@@ -61,10 +67,18 @@ const DepartmentPicker: React.FC<DepartmentPickerProps> = ({
     onChange,
     disabledDepartmentIds,
     disabled,
+    valueBy = "id",
+    clearable = true,
+    floating = false,
+    required,
+    placeholder,
+    className,
 }) => {
+    const departmentValue = valueBy === "code" ? departmentCode : departmentId;
     const listboxId = `department-picker-${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
-    const selectedDepartment = departments.find((department) => departmentId(department) === value);
-    const [query, setQuery] = useState(selectedDepartment ? departmentLabel(selectedDepartment) : "");
+    const selectedDepartment = departments.find((department) => departmentValue(department) === value);
+    const selectedLabel = selectedDepartment ? departmentLabel(selectedDepartment) : value;
+    const [query, setQuery] = useState(selectedLabel);
     const [open, setOpen] = useState(false);
     const [highlightedIndex, setHighlightedIndex] = useState(0);
     const clearedByTypingRef = useRef(false);
@@ -74,12 +88,12 @@ const DepartmentPicker: React.FC<DepartmentPickerProps> = ({
             clearedByTypingRef.current = false;
             return;
         }
-        setQuery(selectedDepartment ? departmentLabel(selectedDepartment) : "");
-    }, [selectedDepartment]);
+        setQuery(selectedLabel);
+    }, [selectedLabel]);
 
     const options = useMemo(() => {
         const normalizedQuery = normalize(query);
-        const showAll = !normalizedQuery || (selectedDepartment && query === departmentLabel(selectedDepartment));
+        const showAll = !normalizedQuery || query === selectedLabel;
         return departments
             .filter((department) => showAll || searchableText(department).includes(normalizedQuery))
             .sort((first, second) => showAll
@@ -87,7 +101,7 @@ const DepartmentPicker: React.FC<DepartmentPickerProps> = ({
                 : matchRank(first, normalizedQuery) - matchRank(second, normalizedQuery)
                     || departmentCode(first).localeCompare(departmentCode(second)))
             .slice(0, MAX_VISIBLE_OPTIONS);
-    }, [departments, query, selectedDepartment]);
+    }, [departments, query, selectedLabel]);
 
     const isDisabledOption = (department: Department) => Boolean(disabledDepartmentIds?.has(departmentId(department)));
 
@@ -95,7 +109,7 @@ const DepartmentPicker: React.FC<DepartmentPickerProps> = ({
         if (isDisabledOption(department)) {
             return;
         }
-        onChange(departmentId(department));
+        onChange(departmentValue(department));
         setQuery(departmentLabel(department));
         setOpen(false);
     };
@@ -124,7 +138,7 @@ const DepartmentPicker: React.FC<DepartmentPickerProps> = ({
     };
 
     return (
-        <div className="department-picker">
+        <div className={["department-picker", floating ? "is-floating" : "", className || ""].filter(Boolean).join(" ")}>
             <TextField
                 aria-activedescendant={open && options[highlightedIndex]
                     ? `${listboxId}-${departmentId(options[highlightedIndex])}`
@@ -135,19 +149,20 @@ const DepartmentPicker: React.FC<DepartmentPickerProps> = ({
                 autoComplete="off"
                 disabled={disabled}
                 label={label}
-                placeholder={pl.departments.picker.placeholder}
+                placeholder={placeholder || pl.departments.picker.placeholder}
+                required={required}
                 role="combobox"
                 size="small"
                 value={query}
                 onBlur={() => {
                     setOpen(false);
-                    setQuery(selectedDepartment ? departmentLabel(selectedDepartment) : "");
+                    setQuery(selectedLabel);
                 }}
                 onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                     setQuery(event.target.value);
                     setHighlightedIndex(0);
                     setOpen(true);
-                    if (value) {
+                    if (value && clearable) {
                         clearedByTypingRef.current = true;
                         onChange("");
                     }
@@ -163,7 +178,7 @@ const DepartmentPicker: React.FC<DepartmentPickerProps> = ({
                     {options.length ? options.map((department, index) => (
                         <li
                             aria-disabled={isDisabledOption(department)}
-                            aria-selected={departmentId(department) === value}
+                            aria-selected={departmentValue(department) === value}
                             className={[
                                 "department-picker-option",
                                 index === highlightedIndex ? "is-highlighted" : "",

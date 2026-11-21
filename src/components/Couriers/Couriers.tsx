@@ -38,6 +38,7 @@ import {useAuthState} from "../../auth/AuthState";
 import {canManageCourierConfiguration} from "../../config/roleAccess";
 import {canAccessDepartment, isSuperadministrator} from "../Users/model/UserRoleAccess";
 import "./styles/couriers.css";
+import DepartmentPicker from "../Departments/DepartmentPicker";
 
 const valueOrDash = (value?: string | number | null) => value || pl.common.dash;
 
@@ -144,6 +145,7 @@ function Couriers() {
             return {
                 code,
                 label: `${code} - ${city}`,
+                department,
             };
         })
         .filter((department) => Boolean(department.code))
@@ -615,28 +617,20 @@ function Couriers() {
                             value={createForm.email}
                             onChange={(event) => updateCreateField("email", event.target.value)}
                         />
-                        <TextField
+                        <DepartmentPicker
+                            floating
+                            required
+                            clearable={false}
+                            departments={availableDepartments.map((option) => option.department)}
                             disabled={saving || departmentsLoading || !availableDepartments.length || departmentLocked}
                             label={pl.couriers.fields.department}
-                            required
-                            select
-                            size="small"
+                            placeholder={availableDepartments.length ? undefined : departmentsLoading
+                                ? createTranslations.departmentLoading
+                                : createTranslations.departmentEmpty}
                             value={createForm.departmentCode}
-                            onChange={(event) => updateCreateField("departmentCode", event.target.value)}
-                        >
-                            {departmentsLoading || !availableDepartments.length ? (
-                                <MenuItem disabled value="">
-                                    {departmentsLoading
-                                        ? createTranslations.departmentLoading
-                                        : createTranslations.departmentEmpty}
-                                </MenuItem>
-                            ) : undefined}
-                            {availableDepartments.map((department) => (
-                                <MenuItem key={department.code} value={department.code}>
-                                    {department.label}
-                                </MenuItem>
-                            ))}
-                        </TextField>
+                            valueBy="code"
+                            onChange={(departmentCode) => updateCreateField("departmentCode", departmentCode)}
+                        />
                     </div>
                 </DialogContent>
                 <DialogActions className="couriers-create-dialog-actions">

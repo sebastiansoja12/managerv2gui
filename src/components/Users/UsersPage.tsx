@@ -79,6 +79,7 @@ function UsersPage() {
         .map((department) => ({
             code: department.departmentCode?.value || "",
             label: `${department.departmentCode?.value || ""} - ${department.address?.city || pl.common.dash}`,
+            department,
         }))
         .filter((department) => Boolean(department.code))
         .sort((left, right) => left.label.localeCompare(right.label, pl.common.locale)), [currentUser, departments]);

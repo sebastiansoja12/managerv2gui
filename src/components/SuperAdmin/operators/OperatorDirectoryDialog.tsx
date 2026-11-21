@@ -8,6 +8,7 @@ import OperatorDirectoryService, {
     CreateOperatorDepartmentRequest,
 } from "../../../hooks/OperatorDirectoryService";
 import pl from "../../../i18n/translate";
+import DepartmentPicker from "../../Departments/DepartmentPicker";
 
 type DirectoryDialogMode = "department" | "courier";
 
@@ -156,21 +157,16 @@ function OperatorDirectoryDialog({mode, operatorId, operatorName, departments, o
                                     />
                                 </label>
                             ))}
-                            <label>
-                                <span>{pl.couriers.fields.department}</span>
-                                <Select
-                                    aria-label={pl.couriers.fields.department}
-                                    disabled={!departments.length}
-                                    value={courier.departmentCode}
-                                    onChange={(event) => setCourier((current) => ({...current, departmentCode: event.target.value}))}
-                                >
-                                    {departments.map((operatorDepartment) => (
-                                        <option key={departmentCodeValue(operatorDepartment)} value={departmentCodeValue(operatorDepartment)}>
-                                            {departmentCodeValue(operatorDepartment)} · {operatorDepartment.address?.city || pl.common.dash}
-                                        </option>
-                                    ))}
-                                </Select>
-                            </label>
+                            <DepartmentPicker
+                                floating
+                                clearable={false}
+                                departments={departments}
+                                disabled={!departments.length}
+                                label={pl.couriers.fields.department}
+                                value={courier.departmentCode}
+                                valueBy="code"
+                                onChange={(departmentCode) => setCourier((current) => ({...current, departmentCode}))}
+                            />
                         </div>
                     ) : null}
                 </DialogContent>
