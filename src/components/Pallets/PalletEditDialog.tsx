@@ -7,6 +7,7 @@ import pl from "../../i18n/translate";
 import Department from "../../class/depots/Department";
 import {PALLET_PRIORITIES, PALLET_TYPES, PalletDto, PalletHandlingPriorityDto, PalletTypeDto} from "./model/Pallet";
 import {palletErrorMessage} from "./palletLabels";
+import DepartmentPicker from "../Departments/DepartmentPicker";
 
 type PalletEditDialogProps = {
     open: boolean;
@@ -32,6 +33,7 @@ const initialForm = (pallet: PalletDto) => ({
     palletType: (pallet.palletType || "PARENT") as PalletTypeDto,
     handlingPriority: (pallet.handlingPriority || "LOW") as PalletHandlingPriorityDto,
     refrigerated: Boolean(pallet.refrigerated),
+    mixedDestinationsAllowed: Boolean(pallet.mixedDestinationsAllowed),
     length: text(pallet.dimension?.length),
     width: text(pallet.dimension?.width),
     height: text(pallet.dimension?.height),
@@ -88,6 +90,7 @@ function PalletEditDialog({open, pallet, departments, departmentLabel, onClose, 
                 palletType: form.palletType,
                 handlingPriority: form.handlingPriority,
                 refrigerated: form.refrigerated,
+                mixedDestinationsAllowed: form.mixedDestinationsAllowed,
                 length: dimensions[0],
                 width: dimensions[1],
                 height: dimensions[2],
@@ -96,8 +99,8 @@ function PalletEditDialog({open, pallet, departments, departmentLabel, onClose, 
             if (form.originDepartmentId !== text(pallet.originDepartmentId)
                 || form.destinationDepartmentId !== text(pallet.destinationDepartmentId)) {
                 updated = (await PalletService.changeDepartments(pallet.palletId, {
-                    originDepartmentId: form.originDepartmentId ? Number(form.originDepartmentId) : null,
-                    destinationDepartmentId: form.destinationDepartmentId ? Number(form.destinationDepartmentId) : null,
+                    originDepartmentId: form.originDepartmentId || null,
+                    destinationDepartmentId: form.destinationDepartmentId || null,
                 })).data;
             }
             if (!maxWeightLocked && maxWeight !== null) {
@@ -110,10 +113,6 @@ function PalletEditDialog({open, pallet, departments, departmentLabel, onClose, 
             setSaving(false);
         }
     };
-
-    const departmentOptions = departments.map((department) => (
-        <MenuItem key={department.departmentId} value={String(department.departmentId)}>{departmentLabel(department)}</MenuItem>
-    ));
 
     return createPortal(
         <Dialog fullWidth maxWidth="md" open={open} onClose={() => !saving && onClose()}>
@@ -131,24 +130,24 @@ function PalletEditDialog({open, pallet, departments, departmentLabel, onClose, 
                         <TextField disabled={saving} inputMode="decimal" label={translations.length} size="small" value={form.length} onChange={update("length")} />
                         <TextField disabled={saving} inputMode="decimal" label={translations.width} size="small" value={form.width} onChange={update("width")} />
                         <TextField disabled={saving} inputMode="decimal" label={translations.height} size="small" value={form.height} onChange={update("height")} />
-                        <TextField select disabled={saving} label={pl.pallets.details.departments.origin} size="small" value={form.originDepartmentId} onChange={update("originDepartmentId")}>
-                            <MenuItem value="">{pl.pallets.details.departments.none}</MenuItem>
-                            {departmentOptions}
-                        </TextField>
-                        <TextField select disabled={saving} label={pl.pallets.details.departments.destination} size="small" value={form.destinationDepartmentId} onChange={update("destinationDepartmentId")}>
-                            <MenuItem value="">{pl.pallets.details.departments.none}</MenuItem>
-                            {departmentOptions}
-                        </TextField>
+                        <DepartmentPicker floating departments={departments} disabled={saving} label={pl.pallets.details.departments.origin} placeholder={pl.pallets.details.departments.none} value={form.originDepartmentId} onChange={(value) => setForm((current) => ({...current, originDepartmentId: value}))} />
+                        <DepartmentPicker floating departments={departments} disabled={saving} label={pl.pallets.details.departments.destination} placeholder={pl.pallets.details.departments.none} value={form.destinationDepartmentId} onChange={(value) => setForm((current) => ({...current, destinationDepartmentId: value}))} />
                         {maxWeightLocked ? (
                             <TextField disabled label={pl.pallets.details.weight.max} size="small" value={text(pallet.maxGrossWeight)} helperText={pl.pallets.details.weight.maxLocked} />
                         ) : (
                             <TextField disabled={saving} inputMode="decimal" label={pl.pallets.details.weight.max} size="small" value={form.maxGrossWeight} onChange={update("maxGrossWeight")} helperText={translations.maxWeightOnce} />
                         )}
                     </div>
-                    <FormControlLabel
-                        control={<Checkbox checked={form.refrigerated} disabled={saving} onChange={(event: React.ChangeEvent<HTMLInputElement>) => setForm((current) => ({...current, refrigerated: event.target.checked}))} />}
-                        label={translations.refrigerated}
-                    />
+                    <div className="pallet-form-options">
+                        <FormControlLabel
+                            control={<Checkbox checked={form.refrigerated} disabled={saving} onChange={(event: React.ChangeEvent<HTMLInputElement>) => setForm((current) => ({...current, refrigerated: event.target.checked}))} />}
+                            label={translations.refrigerated}
+                        />
+                        <FormControlLabel
+                            control={<Checkbox checked={form.mixedDestinationsAllowed} disabled={saving} onChange={(event: React.ChangeEvent<HTMLInputElement>) => setForm((current) => ({...current, mixedDestinationsAllowed: event.target.checked}))} />}
+                            label={translations.mixedDestinationsAllowed}
+                        />
+                    </div>
                     {error ? <Alert severity="error">{error}</Alert> : null}
                 </DialogContent>
                 <DialogActions>

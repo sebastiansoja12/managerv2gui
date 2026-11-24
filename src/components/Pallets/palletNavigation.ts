@@ -8,6 +8,11 @@ export const palletDetailsTab = (trackingNumber: string): AppTabDefinition => ({
     path: palletDetailsPath(trackingNumber),
 });
 
+export const palletUnloadTab = (trackingNumber: string): AppTabDefinition => ({
+    label: `${pl.pallets.unload.title} ${trackingNumber}`,
+    path: `/pallets/unload/${encodeURIComponent(trackingNumber)}`,
+});
+
 export const palletCreateFromShipmentsTab = (): AppTabDefinition => ({
     label: pl.pallets.createFromShipments.title,
     path: "/pallets/create-from-shipments",

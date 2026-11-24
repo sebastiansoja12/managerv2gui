@@ -82,6 +82,10 @@
     grid-template-columns: minmax(0, 1fr) auto;
 }
 
+.pallet-scan-form-option {
+    grid-column: 1 / -1;
+}
+
 .pallet-scan-form [data-ui="input"],
 .pallet-code {
     font-family: var(--font-mono);
@@ -445,12 +449,32 @@
 }
 
 .pallet-form-grid {
-    /* A wrapped label (e.g. required "*") must not push its input below the neighbours. */
-    align-items: end;
+    /* Each field spans label / control / helper rows, so helpers and wrapped labels never shift neighbours. */
+    column-gap: 12px;
     display: grid;
-    gap: 12px;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     margin: 12px 0;
+    row-gap: 0;
+}
+
+.pallet-form-grid > [data-ui="text-field"] {
+    display: grid;
+    grid-row: span 3;
+    grid-template-rows: subgrid;
+    padding-bottom: 12px;
+    row-gap: 0;
+}
+
+.pallet-form-grid > [data-ui="text-field"] > [data-ui="input-label"] {
+    align-self: end;
+}
+
+.pallet-form-options {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 24px;
+    margin-bottom: 12px;
 }
 
 .pallet-carrier-form {
@@ -602,4 +626,24 @@
         border-left: 1px solid var(--border);
         border-top: 0;
     }
+}
+
+.pallet-unload-row-scanned td {
+    background: color-mix(in srgb, var(--success) 8%, transparent);
+}
+
+.pallet-unload-progress {
+    accent-color: var(--success);
+    height: 10px;
+    margin-bottom: 12px;
+    width: 100%;
+}
+
+.pallet-unload-missing-list {
+    display: grid;
+    gap: 4px;
+    margin: 12px 0 0;
+    max-height: 240px;
+    overflow-y: auto;
+    padding-left: 20px;
 }

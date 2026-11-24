@@ -231,27 +231,31 @@ describe("PalletDetailsView", () => {
         fireEvent.click(within(dialog).getByRole("button", {name: pl.pallets.details.statusActions.dispatch}));
 
         await waitFor(() => expect(palletService.changeStatus).toHaveBeenCalledWith("pallet-1", "IN_TRANSIT"));
-        expect(await screen.findByRole("button", {name: pl.pallets.details.statusActions.markDelivered})).toBeInTheDocument();
+        expect(await screen.findByRole("button", {name: pl.pallets.details.statusActions.unload})).toBeInTheDocument();
         expect(screen.getByText(pl.pallets.carrier.locked)).toBeInTheDocument();
         expect(screen.getAllByRole("button", {name: pl.pallets.details.actions.edit})).toHaveLength(2);
         screen.getAllByRole("button", {name: pl.pallets.details.actions.edit}).forEach((button) => expect(button).toBeDisabled());
     });
 
-    it("unloads a pallet in transit", async () => {
+    it("opens pallet unloading for a pallet in transit", async () => {
         const inTransit = {...pallet, palletStatus: "IN_TRANSIT", loadable: false, carrier: {
             carrierId: "c-1", carrierName: "Trans-Pol", transportType: "OWN_FLEET", vehicleRegistrationNumber: "SK 1",
         }};
         palletService.getByTrackingNumber.mockResolvedValue({status: 200, data: inTransit} as never);
-        palletService.unload.mockResolvedValue({status: 200, data: {...inTransit, palletStatus: "DELIVERED"}} as never);
-        renderView();
+        const onOpenTab = jest.fn();
+        render(
+            <MemoryRouter initialEntries={["/pallets/tracking/PAL000000000001"]}>
+                <Routes>
+                    <Route path="/pallets/tracking/:trackingNumber" element={<PalletDetailsView onOpenTab={onOpenTab} />} />
+                </Routes>
+            </MemoryRouter>
+        );
         await screen.findByText("FTM-1");
 
-        fireEvent.click(screen.getByRole("button", {name: pl.pallets.details.statusActions.markDelivered}));
-        const dialog = await screen.findByRole("dialog");
-        fireEvent.click(within(dialog).getByRole("button", {name: pl.pallets.details.statusActions.markDelivered}));
+        fireEvent.click(screen.getByRole("button", {name: pl.pallets.details.statusActions.unload}));
 
-        await waitFor(() => expect(palletService.unload).toHaveBeenCalledWith("pallet-1"));
-        expect(palletService.changeStatus).not.toHaveBeenCalled();
+        expect(onOpenTab).toHaveBeenCalledWith(expect.objectContaining({path: "/pallets/unload/PAL000000000001"}));
+        expect(palletService.unload).not.toHaveBeenCalled();
     });
 
     it("greys out carrier, edit and load actions of a loaded pallet", async () => {
@@ -265,7 +269,7 @@ describe("PalletDetailsView", () => {
         const toolbar = screen.getByRole("navigation", {name: pl.pallets.details.actions.title});
         expect(within(toolbar).getByRole("button", {name: pl.pallets.details.actions.edit})).toBeDisabled();
         expect(within(toolbar).getByRole("button", {name: pl.pallets.details.statusActions.dispatch})).toBeEnabled();
-        expect(within(toolbar).getByRole("button", {name: pl.pallets.details.statusActions.markDelivered})).toBeDisabled();
+        expect(within(toolbar).getByRole("button", {name: pl.pallets.details.statusActions.unload})).toBeDisabled();
 
         fireEvent.click(within(toolbar).getByRole("button", {name: pl.pallets.details.statusActions.operations}));
         expect(screen.getByRole("menuitem", {name: pl.pallets.details.load})).toBeDisabled();

@@ -47,8 +47,9 @@ const cancel = (palletId: string) =>
 const revertLoading = (palletId: string) =>
     client.put<undefined, PalletDto>(`/pallets/${encodeURIComponent(palletId)}/revert-loading`);
 
-const unload = (palletId: string, missingShipmentIds: number[] = []) =>
-    client.put<{missingShipmentIds: number[]}, PalletDto>(`/pallets/${encodeURIComponent(palletId)}/unload`,
+// Shipment IDs stay strings: they can exceed Number.MAX_SAFE_INTEGER and the backend accepts them as Long.
+const unload = (palletId: string, missingShipmentIds: string[] = []) =>
+    client.put<{missingShipmentIds: string[]}, PalletDto>(`/pallets/${encodeURIComponent(palletId)}/unload`,
         {missingShipmentIds});
 
 const addShipments = (palletId: string, shipmentIds: string[]) =>

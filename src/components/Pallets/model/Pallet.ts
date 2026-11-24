@@ -42,6 +42,7 @@ export interface PalletDto {
     palletType?: PalletTypeDto | null;
     handlingPriority?: PalletHandlingPriorityDto | null;
     refrigerated?: boolean | null;
+    mixedDestinationsAllowed?: boolean | null;
     dimension?: PalletDimensionDto | null;
     carrier?: PalletCarrierDto | null;
 }
@@ -61,6 +62,7 @@ export interface PalletUpdateRequestApi {
     palletType?: PalletTypeDto | null;
     handlingPriority?: PalletHandlingPriorityDto | null;
     refrigerated?: boolean | null;
+    mixedDestinationsAllowed?: boolean | null;
     length?: number | null;
     width?: number | null;
     height?: number | null;
@@ -147,8 +149,8 @@ export interface PalletHistoryEntryDto {
 }
 
 export interface PalletDepartmentsRequestApi {
-    originDepartmentId: number | null;
-    destinationDepartmentId: number | null;
+    originDepartmentId: string | null;
+    destinationDepartmentId: string | null;
 }
 
 export interface PalletScanRequestApi {

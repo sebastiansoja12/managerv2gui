@@ -9,18 +9,15 @@ import {
     DialogContent,
     DialogContentText,
     DialogTitle,
-    IconButton,
     MenuItem,
     TextField,
     Typography,
 } from "components/ui";
 import {
-    ArchiveOutlined,
     Block,
     Edit,
     FactCheckOutlined,
     InfoOutlined,
-    Inventory2,
     LocalShipping,
     QrCode2,
     Refresh,
@@ -38,7 +35,9 @@ import PalletEditDialog from "./PalletEditDialog";
 import {formatPalletDate, formatPalletWeight, palletErrorMessage, palletStatusLabel, palletStatusTone} from "./palletLabels";
 import {palletDetailsTab} from "./palletNavigation";
 import {usePalletDocuments} from "./usePalletDocuments";
+import "../Shipment/styles/shipments.css";
 import "./styles/pallets.css";
+import DepartmentPicker from "../Departments/DepartmentPicker";
 
 const FETCH_SIZE = 200;
 const PAGE_SIZE = 20;
@@ -54,12 +53,6 @@ type CarrierFilter = "ALL" | "WITH" | "WITHOUT";
 type PalletListProps = {
     variant: PalletListVariant;
     onOpenTab?: (tab: AppTabDefinition) => void;
-};
-
-const variantIcon: Record<PalletListVariant, React.ElementType> = {
-    all: Inventory2,
-    cancelled: Block,
-    empty: ArchiveOutlined,
 };
 
 const weightInKilograms = (pallet: PalletDto) => {
@@ -240,7 +233,6 @@ function PalletList({variant, onOpenTab}: PalletListProps) {
         setOriginFilter("");
     };
 
-    const Icon = variantIcon[variant];
     const columns: Array<{key: SortKey; label: string}> = [
         {key: "trackingNumber", label: translations.columns.trackingNumber},
         {key: "status", label: translations.columns.status},
@@ -253,32 +245,29 @@ function PalletList({variant, onOpenTab}: PalletListProps) {
     ];
 
     return (
-        <main className="pallet-page">
-            <div className="pallet-shell pallet-shell-wide">
-                <section className="pallet-header">
-                    <div className="pallet-title">
-                        <span className="pallet-title-icon"><Icon /></span>
-                        <div>
-                            <Typography variant="h4">{variantTranslations.title}</Typography>
-                            <p>{variantTranslations.subtitle}</p>
-                        </div>
-                    </div>
-                    <div className="pallet-actions">
-                        <Button disabled={!sorted.length || documents.loading !== null} startIcon={<TableView />} variant="outlined" onClick={() => documents.exportListExcel(sorted)}>
-                            {translations.exportList}
-                        </Button>
-                        <IconButton aria-label={translations.refresh} title={translations.refresh} onClick={loadPallets}>
-                            <Refresh fontSize="small" />
-                        </IconButton>
-                    </div>
-                </section>
-
+        <main className="tm-page tm-page-shipment-catalog tm-page-shipment-list">
+            <div className="tm-content">
                 {error ? <Alert severity="error">{error}</Alert> : null}
                 {documents.error ? <Alert severity="error">{documents.error}</Alert> : null}
                 {notice ? <Alert severity="success">{notice}</Alert> : null}
 
-                <section className="pallet-panel">
-                    <div className="pallet-filters" aria-label={translations.filters.title}>
+                <section className="tm-card tm-orders-card">
+                    <div className="tm-orders-header">
+                        <div className="tm-orders-title">
+                            <Typography variant="h5">{variantTranslations.title}</Typography>
+                            <span className="tm-orders-count">{sorted.length}</span>
+                        </div>
+                        <div className="tm-toolbar-actions">
+                            <Button disabled={!sorted.length || documents.loading !== null} startIcon={<TableView />} variant="outlined" onClick={() => documents.exportListExcel(sorted)}>
+                                {translations.exportList}
+                            </Button>
+                            <Button disabled={loading} startIcon={<Refresh />} variant="outlined" onClick={loadPallets}>
+                                {translations.refresh}
+                            </Button>
+                        </div>
+                    </div>
+
+                    <div className="tm-manual-load" aria-label={translations.filters.title}>
                         <TextField
                             label={translations.filters.search}
                             placeholder={translations.filters.searchPlaceholder}
@@ -297,18 +286,13 @@ function PalletList({variant, onOpenTab}: PalletListProps) {
                             <MenuItem value="WITH">{translations.filters.withCarrier}</MenuItem>
                             <MenuItem value="WITHOUT">{translations.filters.withoutCarrier}</MenuItem>
                         </TextField>
-                        <TextField select label={translations.filters.origin} size="small" value={originFilter} onChange={(event: React.ChangeEvent<HTMLSelectElement>) => setOriginFilter(event.target.value)}>
-                            <MenuItem value="">{pl.common.all}</MenuItem>
-                            {departments.map((department) => (
-                                <MenuItem key={department.departmentId} value={String(department.departmentId)}>{departmentLabel(department)}</MenuItem>
-                            ))}
-                        </TextField>
+                        <DepartmentPicker floating departments={departments} label={translations.filters.origin} placeholder={pl.common.all} value={originFilter} onChange={setOriginFilter} />
                         <Button variant="text" onClick={resetFilters}>{translations.filters.reset}</Button>
                     </div>
 
-                    <div className="pallet-results-layout">
-                        <div className="pallet-table-wrap">
-                            <table className="pallet-table pallet-list-table">
+                    <div className="tm-results-layout">
+                        <div className="tm-table-wrap">
+                            <table className="tm-orders-table pallet-list-table">
                                 <thead>
                                     <tr>
                                         {columns.map((column) => (
@@ -323,11 +307,11 @@ function PalletList({variant, onOpenTab}: PalletListProps) {
                                 </thead>
                                 <tbody>
                                     {loading ? (
-                                        <tr><td className="pallet-empty" colSpan={columns.length}>{translations.loading}</td></tr>
+                                        <tr><td className="tm-empty-row" colSpan={columns.length}>{translations.loading}</td></tr>
                                     ) : visible.length ? visible.map((pallet) => (
                                         <tr
                                             aria-selected={pallet.palletId === selectedId}
-                                            className="pallet-row"
+                                            className="tm-clickable-row"
                                             key={pallet.palletId}
                                             tabIndex={0}
                                             onClick={() => setSelectedId(pallet.palletId)}
@@ -341,7 +325,7 @@ function PalletList({variant, onOpenTab}: PalletListProps) {
                                                 }
                                             }}
                                         >
-                                            <td className="pallet-code">{pallet.trackingNumber}</td>
+                                            <td className="tm-id-cell">{pallet.trackingNumber}</td>
                                             <td><Chip color={palletStatusTone(pallet)} label={palletStatusLabel(pallet.palletStatus)} size="small" /></td>
                                             <td>{pallet.shipmentIds.length}</td>
                                             <td>{formatPalletWeight(pallet.grossWeight, pallet.grossWeightUnit)}</td>
@@ -351,15 +335,15 @@ function PalletList({variant, onOpenTab}: PalletListProps) {
                                             <td>{formatPalletDate(pallet.modified)}</td>
                                         </tr>
                                     )) : (
-                                        <tr><td className="pallet-empty" colSpan={columns.length}>{pallets.length ? translations.noMatches : variantTranslations.empty}</td></tr>
+                                        <tr><td className="tm-empty-row" colSpan={columns.length}>{pallets.length ? translations.noMatches : variantTranslations.empty}</td></tr>
                                     )}
                                 </tbody>
                             </table>
                         </div>
-                        <aside className="pallet-selection-actions" aria-label={translations.selectedActions}>
+                        <aside className="tm-selection-actions" aria-label={translations.selectedActions}>
                             <strong>{translations.selectedActions}</strong>
-                            <span className="pallet-selection-id">{selected ? selected.trackingNumber : translations.selectPallet}</span>
-                            <Button disabled={!selected || !onOpenTab} startIcon={<InfoOutlined />} onClick={() => selected && openDetails(selected)}>
+                            <span className="tm-selection-id">{selected ? selected.trackingNumber : translations.selectPallet}</span>
+                            <Button disabled={!selected || !onOpenTab} startIcon={<InfoOutlined />} variant="contained" onClick={() => selected && openDetails(selected)}>
                                 {translations.actions.open}
                             </Button>
                             <Button disabled={!selected || !isPalletEditable(selected)} startIcon={<Edit />} variant="outlined" onClick={() => setEditOpen(true)}>
@@ -386,17 +370,19 @@ function PalletList({variant, onOpenTab}: PalletListProps) {
                         </aside>
                     </div>
 
-                    <div className="pallet-pagination">
+                    <div className="tm-table-footer">
                         <span>{translations.pageSummary
                             .replace("{page}", String(page + 1))
                             .replace("{pages}", String(lastPage + 1))
                             .replace("{total}", String(sorted.length))}</span>
-                        <Button disabled={page === 0 || loading} variant="outlined" onClick={() => setPage((current) => Math.max(0, current - 1))}>
-                            {translations.previous}
-                        </Button>
-                        <Button disabled={page >= lastPage || loading} variant="outlined" onClick={() => setPage((current) => current + 1)}>
-                            {translations.next}
-                        </Button>
+                        <nav aria-label={translations.pageSummary
+                            .replace("{page}", String(page + 1))
+                            .replace("{pages}", String(lastPage + 1))
+                            .replace("{total}", String(sorted.length))} className="tm-pagination">
+                            <button aria-label={translations.previous} disabled={page === 0 || loading} type="button" onClick={() => setPage((current) => Math.max(0, current - 1))}>‹</button>
+                            <button aria-current="page" className="tm-page-active" disabled={loading} type="button">{page + 1}</button>
+                            <button aria-label={translations.next} disabled={page >= lastPage || loading} type="button" onClick={() => setPage((current) => current + 1)}>›</button>
+                        </nav>
                     </div>
                 </section>
             </div>

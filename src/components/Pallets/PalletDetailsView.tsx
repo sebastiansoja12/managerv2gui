@@ -1,5 +1,5 @@
 import React, {FormEvent, useCallback, useEffect, useMemo, useState} from "react";
-import {useParams} from "react-router-dom";
+import {useNavigate, useParams} from "react-router-dom";
 import {
     Alert,
     Button,
@@ -19,7 +19,6 @@ import {
 import {
     Add,
     Block,
-    CheckCircle,
     DeleteOutline,
     Edit,
     ExpandMore,
@@ -31,6 +30,7 @@ import {
     Send,
     TableView,
     FactCheckOutlined,
+    UnarchiveOutlined,
     Undo,
     ViewList,
 } from "components/ui/icons";
@@ -44,7 +44,7 @@ import {AppTabDefinition} from "../AppShell/types";
 import {Delivery} from "../Deliveries/model/Delivery";
 import {deliveryLifecycleLabel, deliveryMethodLabel, deliveryStatusLabel, formatDeliveryDateTime} from "../Deliveries/deliveryLabels";
 import {ShipmentDetailsDto, ShipmentDto} from "../Shipment/dto/ShipmentDto";
-import {PalletDto, PalletHistoryEntryDto, PalletManualStatusDto} from "./model/Pallet";
+import {PalletDto, PalletHistoryEntryDto} from "./model/Pallet";
 import PalletAddShipmentsDialog from "./PalletAddShipmentsDialog";
 import PalletCarrierDialog from "./PalletCarrierDialog";
 import PalletEditDialog from "./PalletEditDialog";
@@ -61,6 +61,7 @@ import {
     palletStatusTone,
     transportTypeLabel,
 } from "./palletLabels";
+import {palletUnloadTab} from "./palletNavigation";
 import {usePalletDocuments} from "./usePalletDocuments";
 import "./styles/pallets.css";
 
@@ -112,6 +113,7 @@ function PalletDetailsView({onOpenTab}: PalletDetailsViewProps) {
     const translations = pl.pallets.details;
     const {trackingNumber: trackingNumberParam = ""} = useParams();
     const trackingNumber = decodeURIComponent(trackingNumberParam);
+    const navigate = useNavigate();
 
     const [pallet, setPallet] = useState<PalletDto | null>(null);
     const [loading, setLoading] = useState(true);
@@ -297,23 +299,31 @@ function PalletDetailsView({onOpenTab}: PalletDetailsViewProps) {
         }, translations.loadSuccess);
     };
 
-    const changeStatus = (palletStatus: PalletManualStatusDto) => {
+    const dispatchPallet = () => {
         if (!pallet) {
             return;
         }
         const statusTranslations = translations.statusActions;
-        const dispatch = palletStatus === "IN_TRANSIT";
         setConfirmation({
-            title: dispatch ? statusTranslations.dispatchTitle : statusTranslations.deliveredTitle,
-            message: (dispatch ? statusTranslations.confirmDispatch : statusTranslations.confirmDelivered)
-                .replace("{trackingNumber}", pallet.trackingNumber),
-            confirmLabel: dispatch ? statusTranslations.dispatch : statusTranslations.markDelivered,
+            title: statusTranslations.dispatchTitle,
+            message: statusTranslations.confirmDispatch.replace("{trackingNumber}", pallet.trackingNumber),
+            confirmLabel: statusTranslations.dispatch,
             destructive: false,
-            onConfirm: () => runAction(async () => (dispatch
-                    ? await PalletService.changeStatus(pallet.palletId, palletStatus)
-                    : await PalletService.unload(pallet.palletId)).data,
-                dispatch ? statusTranslations.dispatched : statusTranslations.delivered),
+            onConfirm: () => runAction(async () => (await PalletService.changeStatus(pallet.palletId, "IN_TRANSIT")).data,
+                statusTranslations.dispatched),
         });
+    };
+
+    const openUnload = () => {
+        if (!pallet) {
+            return;
+        }
+        const tab = palletUnloadTab(pallet.trackingNumber);
+        if (onOpenTab) {
+            onOpenTab(tab);
+        } else {
+            navigate(tab.path);
+        }
     };
 
     const revertLoading = () => {
@@ -420,12 +430,12 @@ function PalletDetailsView({onOpenTab}: PalletDetailsViewProps) {
                         startIcon={<Send />}
                         title={loaded && !carrier ? translations.statusActions.carrierRequired : undefined}
                         variant="outlined"
-                        onClick={() => changeStatus("IN_TRANSIT")}
+                        onClick={dispatchPallet}
                     >
                         {translations.statusActions.dispatch}
                     </Button>
-                    <Button disabled={busy || pallet.palletStatus !== "IN_TRANSIT"} startIcon={<CheckCircle />} variant="outlined" onClick={() => changeStatus("DELIVERED")}>
-                        {translations.statusActions.markDelivered}
+                    <Button disabled={busy || pallet.palletStatus !== "IN_TRANSIT"} startIcon={<UnarchiveOutlined />} variant="outlined" onClick={openUnload}>
+                        {translations.statusActions.unload}
                     </Button>
                     <Button
                         aria-haspopup="menu"
@@ -591,6 +601,7 @@ function PalletDetailsView({onOpenTab}: PalletDetailsViewProps) {
                             <div><dt>{pl.pallets.edit.palletType}</dt><dd>{pallet.palletType ? pl.pallets.palletType[pallet.palletType] : pl.common.dash}</dd></div>
                             <div><dt>{pl.pallets.edit.priority}</dt><dd>{pallet.handlingPriority ? pl.pallets.priority[pallet.handlingPriority] : pl.common.dash}</dd></div>
                             <div><dt>{pl.pallets.edit.refrigerated}</dt><dd>{pallet.refrigerated ? pl.pallets.edit.yes : pl.pallets.edit.no}</dd></div>
+                            <div><dt>{pl.pallets.edit.mixedDestinationsAllowed}</dt><dd>{pallet.mixedDestinationsAllowed ? pl.pallets.edit.yes : pl.pallets.edit.no}</dd></div>
                             <div><dt>{pl.pallets.edit.dimensions}</dt><dd>{pallet.dimension ? `${pallet.dimension.length} × ${pallet.dimension.width} × ${pallet.dimension.height} cm` : pl.common.dash}</dd></div>
                             <div><dt>{translations.info.sealNumber}</dt><dd className="pallet-code">{pallet.sealNumber || pl.common.dash}</dd></div>
                             <div><dt>{translations.info.storageStatus}</dt><dd>{pallet.storageStatus ? pl.pallets.storageStatus[pallet.storageStatus as keyof typeof pl.pallets.storageStatus] || pallet.storageStatus : pl.common.dash}</dd></div>
