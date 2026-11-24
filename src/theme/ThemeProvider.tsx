@@ -19,6 +19,11 @@ export type AppTheme =
     | "aubergine"
     | "midnight-blue"
     | "carbon"
+    | "nocturne"
+    | "pearl"
+    | "dusk"
+    | "high-contrast"
+    | "sand"
     | "courier-blue";
 
 type ThemeContextValue = {
@@ -52,6 +57,11 @@ const isTheme = (value: string | null): value is AppTheme => Boolean(value && [
     "midnight-blue",
     "carbon",
     "courier-blue",
+    "nocturne",
+    "pearl",
+    "dusk",
+    "high-contrast",
+    "sand",
 ].includes(value));
 
 const prefersDarkMode = () => typeof window.matchMedia === "function"
@@ -91,6 +101,9 @@ const applyTheme = (theme: Exclude<AppTheme, "system">) => {
             "aubergine",
             "midnight-blue",
             "carbon",
+            "nocturne",
+            "dusk",
+            "high-contrast",
         ].includes(theme) ? "dark" : "light";
 };
 

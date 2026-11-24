@@ -19,6 +19,9 @@
 :root[data-theme="aubergine"] .departments-filter-bar,
 :root[data-theme="midnight-blue"] .departments-filter-bar,
 :root[data-theme="carbon"] .departments-filter-bar,
+:root[data-theme="nocturne"] .departments-filter-bar,
+:root[data-theme="dusk"] .departments-filter-bar,
+:root[data-theme="high-contrast"] .departments-filter-bar,
 :root[data-theme="operations-dark"] .couriers-filter-bar,
 :root[data-theme="warehouse"] .couriers-filter-bar,
 :root[data-theme="night-shift"] .couriers-filter-bar,
@@ -35,6 +38,9 @@
 :root[data-theme="aubergine"] .couriers-filter-bar,
 :root[data-theme="midnight-blue"] .couriers-filter-bar,
 :root[data-theme="carbon"] .couriers-filter-bar,
+:root[data-theme="nocturne"] .couriers-filter-bar,
+:root[data-theme="dusk"] .couriers-filter-bar,
+:root[data-theme="high-contrast"] .couriers-filter-bar,
 :root[data-theme="operations-dark"] .users-search,
 :root[data-theme="warehouse"] .users-search,
 :root[data-theme="night-shift"] .users-search,
@@ -51,6 +57,9 @@
 :root[data-theme="aubergine"] .users-search,
 :root[data-theme="midnight-blue"] .users-search,
 :root[data-theme="carbon"] .users-search,
+:root[data-theme="nocturne"] .users-search,
+:root[data-theme="dusk"] .users-search,
+:root[data-theme="high-contrast"] .users-search,
 :root[data-theme="operations-dark"] .shipment-scanner-input-shell,
 :root[data-theme="warehouse"] .shipment-scanner-input-shell,
 :root[data-theme="night-shift"] .shipment-scanner-input-shell,
@@ -67,6 +76,9 @@
 :root[data-theme="aubergine"] .shipment-scanner-input-shell,
 :root[data-theme="midnight-blue"] .shipment-scanner-input-shell,
 :root[data-theme="carbon"] .shipment-scanner-input-shell,
+:root[data-theme="nocturne"] .shipment-scanner-input-shell,
+:root[data-theme="dusk"] .shipment-scanner-input-shell,
+:root[data-theme="high-contrast"] .shipment-scanner-input-shell,
 :root[data-theme="operations-dark"] .shipment-scanner-feedback,
 :root[data-theme="warehouse"] .shipment-scanner-feedback,
 :root[data-theme="night-shift"] .shipment-scanner-feedback,
@@ -83,6 +95,9 @@
 :root[data-theme="aubergine"] .shipment-scanner-feedback,
 :root[data-theme="midnight-blue"] .shipment-scanner-feedback,
 :root[data-theme="carbon"] .shipment-scanner-feedback,
+:root[data-theme="nocturne"] .shipment-scanner-feedback,
+:root[data-theme="dusk"] .shipment-scanner-feedback,
+:root[data-theme="high-contrast"] .shipment-scanner-feedback,
 :root[data-theme="operations-dark"] .shipment-scanner-result-grid > div,
 :root[data-theme="warehouse"] .shipment-scanner-result-grid > div,
 :root[data-theme="night-shift"] .shipment-scanner-result-grid > div,
@@ -99,6 +114,9 @@
 :root[data-theme="aubergine"] .shipment-scanner-result-grid > div,
 :root[data-theme="midnight-blue"] .shipment-scanner-result-grid > div,
 :root[data-theme="carbon"] .shipment-scanner-result-grid > div,
+:root[data-theme="nocturne"] .shipment-scanner-result-grid > div,
+:root[data-theme="dusk"] .shipment-scanner-result-grid > div,
+:root[data-theme="high-contrast"] .shipment-scanner-result-grid > div,
 :root[data-theme="operations-dark"] .shipment-scanner-record,
 :root[data-theme="warehouse"] .shipment-scanner-record,
 :root[data-theme="night-shift"] .shipment-scanner-record,
@@ -115,6 +133,9 @@
 :root[data-theme="aubergine"] .shipment-scanner-record,
 :root[data-theme="midnight-blue"] .shipment-scanner-record,
 :root[data-theme="carbon"] .shipment-scanner-record,
+:root[data-theme="nocturne"] .shipment-scanner-record,
+:root[data-theme="dusk"] .shipment-scanner-record,
+:root[data-theme="high-contrast"] .shipment-scanner-record,
 :root[data-theme="operations-dark"] .shipment-scanner-help,
 :root[data-theme="warehouse"] .shipment-scanner-help,
 :root[data-theme="night-shift"] .shipment-scanner-help,
@@ -130,7 +151,10 @@
 :root[data-theme="deep-ocean"] .shipment-scanner-help,
 :root[data-theme="aubergine"] .shipment-scanner-help,
 :root[data-theme="midnight-blue"] .shipment-scanner-help,
-:root[data-theme="carbon"] .shipment-scanner-help {
+:root[data-theme="carbon"] .shipment-scanner-help,
+:root[data-theme="nocturne"] .shipment-scanner-help,
+:root[data-theme="dusk"] .shipment-scanner-help,
+:root[data-theme="high-contrast"] .shipment-scanner-help {
     background: var(--surface);
     border-color: var(--border);
     color: var(--foreground);
@@ -152,6 +176,9 @@
 :root[data-theme="aubergine"] .departments-table th,
 :root[data-theme="midnight-blue"] .departments-table th,
 :root[data-theme="carbon"] .departments-table th,
+:root[data-theme="nocturne"] .departments-table th,
+:root[data-theme="dusk"] .departments-table th,
+:root[data-theme="high-contrast"] .departments-table th,
 :root[data-theme="operations-dark"] .departments-table td,
 :root[data-theme="warehouse"] .departments-table td,
 :root[data-theme="night-shift"] .departments-table td,
@@ -168,6 +195,9 @@
 :root[data-theme="aubergine"] .departments-table td,
 :root[data-theme="midnight-blue"] .departments-table td,
 :root[data-theme="carbon"] .departments-table td,
+:root[data-theme="nocturne"] .departments-table td,
+:root[data-theme="dusk"] .departments-table td,
+:root[data-theme="high-contrast"] .departments-table td,
 :root[data-theme="operations-dark"] .couriers-table th,
 :root[data-theme="warehouse"] .couriers-table th,
 :root[data-theme="night-shift"] .couriers-table th,
@@ -184,6 +214,9 @@
 :root[data-theme="aubergine"] .couriers-table th,
 :root[data-theme="midnight-blue"] .couriers-table th,
 :root[data-theme="carbon"] .couriers-table th,
+:root[data-theme="nocturne"] .couriers-table th,
+:root[data-theme="dusk"] .couriers-table th,
+:root[data-theme="high-contrast"] .couriers-table th,
 :root[data-theme="operations-dark"] .couriers-table td,
 :root[data-theme="warehouse"] .couriers-table td,
 :root[data-theme="night-shift"] .couriers-table td,
@@ -200,6 +233,9 @@
 :root[data-theme="aubergine"] .couriers-table td,
 :root[data-theme="midnight-blue"] .couriers-table td,
 :root[data-theme="carbon"] .couriers-table td,
+:root[data-theme="nocturne"] .couriers-table td,
+:root[data-theme="dusk"] .couriers-table td,
+:root[data-theme="high-contrast"] .couriers-table td,
 :root[data-theme="operations-dark"] .users-table th,
 :root[data-theme="warehouse"] .users-table th,
 :root[data-theme="night-shift"] .users-table th,
@@ -216,6 +252,9 @@
 :root[data-theme="aubergine"] .users-table th,
 :root[data-theme="midnight-blue"] .users-table th,
 :root[data-theme="carbon"] .users-table th,
+:root[data-theme="nocturne"] .users-table th,
+:root[data-theme="dusk"] .users-table th,
+:root[data-theme="high-contrast"] .users-table th,
 :root[data-theme="operations-dark"] .users-table td,
 :root[data-theme="warehouse"] .users-table td,
 :root[data-theme="night-shift"] .users-table td,
@@ -232,6 +271,9 @@
 :root[data-theme="aubergine"] .users-table td,
 :root[data-theme="midnight-blue"] .users-table td,
 :root[data-theme="carbon"] .users-table td,
+:root[data-theme="nocturne"] .users-table td,
+:root[data-theme="dusk"] .users-table td,
+:root[data-theme="high-contrast"] .users-table td,
 :root[data-theme="operations-dark"] .processes-table th,
 :root[data-theme="warehouse"] .processes-table th,
 :root[data-theme="night-shift"] .processes-table th,
@@ -248,6 +290,9 @@
 :root[data-theme="aubergine"] .processes-table th,
 :root[data-theme="midnight-blue"] .processes-table th,
 :root[data-theme="carbon"] .processes-table th,
+:root[data-theme="nocturne"] .processes-table th,
+:root[data-theme="dusk"] .processes-table th,
+:root[data-theme="high-contrast"] .processes-table th,
 :root[data-theme="operations-dark"] .processes-table td,
 :root[data-theme="warehouse"] .processes-table td,
 :root[data-theme="night-shift"] .processes-table td,
@@ -264,6 +309,9 @@
 :root[data-theme="aubergine"] .processes-table td,
 :root[data-theme="midnight-blue"] .processes-table td,
 :root[data-theme="carbon"] .processes-table td,
+:root[data-theme="nocturne"] .processes-table td,
+:root[data-theme="dusk"] .processes-table td,
+:root[data-theme="high-contrast"] .processes-table td,
 :root[data-theme="operations-dark"] .microservice-status-table th,
 :root[data-theme="warehouse"] .microservice-status-table th,
 :root[data-theme="night-shift"] .microservice-status-table th,
@@ -280,6 +328,9 @@
 :root[data-theme="aubergine"] .microservice-status-table th,
 :root[data-theme="midnight-blue"] .microservice-status-table th,
 :root[data-theme="carbon"] .microservice-status-table th,
+:root[data-theme="nocturne"] .microservice-status-table th,
+:root[data-theme="dusk"] .microservice-status-table th,
+:root[data-theme="high-contrast"] .microservice-status-table th,
 :root[data-theme="operations-dark"] .microservice-status-table td,
 :root[data-theme="warehouse"] .microservice-status-table td,
 :root[data-theme="night-shift"] .microservice-status-table td,
@@ -296,6 +347,9 @@
 :root[data-theme="aubergine"] .microservice-status-table td,
 :root[data-theme="midnight-blue"] .microservice-status-table td,
 :root[data-theme="carbon"] .microservice-status-table td,
+:root[data-theme="nocturne"] .microservice-status-table td,
+:root[data-theme="dusk"] .microservice-status-table td,
+:root[data-theme="high-contrast"] .microservice-status-table td,
 :root[data-theme="operations-dark"] .device-pairing-table th,
 :root[data-theme="warehouse"] .device-pairing-table th,
 :root[data-theme="night-shift"] .device-pairing-table th,
@@ -311,7 +365,10 @@
 :root[data-theme="deep-ocean"] .device-pairing-table th,
 :root[data-theme="aubergine"] .device-pairing-table th,
 :root[data-theme="midnight-blue"] .device-pairing-table th,
-:root[data-theme="carbon"] .device-pairing-table th {
+:root[data-theme="carbon"] .device-pairing-table th,
+:root[data-theme="nocturne"] .device-pairing-table th,
+:root[data-theme="dusk"] .device-pairing-table th,
+:root[data-theme="high-contrast"] .device-pairing-table th {
     background: var(--surface);
     border-color: var(--border);
     color: var(--foreground);
@@ -333,6 +390,9 @@
 :root[data-theme="aubergine"] .departments-table th,
 :root[data-theme="midnight-blue"] .departments-table th,
 :root[data-theme="carbon"] .departments-table th,
+:root[data-theme="nocturne"] .departments-table th,
+:root[data-theme="dusk"] .departments-table th,
+:root[data-theme="high-contrast"] .departments-table th,
 :root[data-theme="operations-dark"] .couriers-table th,
 :root[data-theme="warehouse"] .couriers-table th,
 :root[data-theme="night-shift"] .couriers-table th,
@@ -349,6 +409,9 @@
 :root[data-theme="aubergine"] .couriers-table th,
 :root[data-theme="midnight-blue"] .couriers-table th,
 :root[data-theme="carbon"] .couriers-table th,
+:root[data-theme="nocturne"] .couriers-table th,
+:root[data-theme="dusk"] .couriers-table th,
+:root[data-theme="high-contrast"] .couriers-table th,
 :root[data-theme="operations-dark"] .users-table th,
 :root[data-theme="warehouse"] .users-table th,
 :root[data-theme="night-shift"] .users-table th,
@@ -365,6 +428,9 @@
 :root[data-theme="aubergine"] .users-table th,
 :root[data-theme="midnight-blue"] .users-table th,
 :root[data-theme="carbon"] .users-table th,
+:root[data-theme="nocturne"] .users-table th,
+:root[data-theme="dusk"] .users-table th,
+:root[data-theme="high-contrast"] .users-table th,
 :root[data-theme="operations-dark"] .processes-table th,
 :root[data-theme="warehouse"] .processes-table th,
 :root[data-theme="night-shift"] .processes-table th,
@@ -381,6 +447,9 @@
 :root[data-theme="aubergine"] .processes-table th,
 :root[data-theme="midnight-blue"] .processes-table th,
 :root[data-theme="carbon"] .processes-table th,
+:root[data-theme="nocturne"] .processes-table th,
+:root[data-theme="dusk"] .processes-table th,
+:root[data-theme="high-contrast"] .processes-table th,
 :root[data-theme="operations-dark"] .microservice-status-table th,
 :root[data-theme="warehouse"] .microservice-status-table th,
 :root[data-theme="night-shift"] .microservice-status-table th,
@@ -397,6 +466,9 @@
 :root[data-theme="aubergine"] .microservice-status-table th,
 :root[data-theme="midnight-blue"] .microservice-status-table th,
 :root[data-theme="carbon"] .microservice-status-table th,
+:root[data-theme="nocturne"] .microservice-status-table th,
+:root[data-theme="dusk"] .microservice-status-table th,
+:root[data-theme="high-contrast"] .microservice-status-table th,
 :root[data-theme="operations-dark"] .device-pairing-table th,
 :root[data-theme="warehouse"] .device-pairing-table th,
 :root[data-theme="night-shift"] .device-pairing-table th,
@@ -412,7 +484,10 @@
 :root[data-theme="deep-ocean"] .device-pairing-table th,
 :root[data-theme="aubergine"] .device-pairing-table th,
 :root[data-theme="midnight-blue"] .device-pairing-table th,
-:root[data-theme="carbon"] .device-pairing-table th {
+:root[data-theme="carbon"] .device-pairing-table th,
+:root[data-theme="nocturne"] .device-pairing-table th,
+:root[data-theme="dusk"] .device-pairing-table th,
+:root[data-theme="high-contrast"] .device-pairing-table th {
     background: var(--surface-secondary);
     color: var(--muted-foreground);
 }
@@ -433,6 +508,9 @@
 :root[data-theme="aubergine"] .departments-table tbody tr:hover td,
 :root[data-theme="midnight-blue"] .departments-table tbody tr:hover td,
 :root[data-theme="carbon"] .departments-table tbody tr:hover td,
+:root[data-theme="nocturne"] .departments-table tbody tr:hover td,
+:root[data-theme="dusk"] .departments-table tbody tr:hover td,
+:root[data-theme="high-contrast"] .departments-table tbody tr:hover td,
 :root[data-theme="operations-dark"] .couriers-table tbody tr:hover td,
 :root[data-theme="warehouse"] .couriers-table tbody tr:hover td,
 :root[data-theme="night-shift"] .couriers-table tbody tr:hover td,
@@ -449,6 +527,9 @@
 :root[data-theme="aubergine"] .couriers-table tbody tr:hover td,
 :root[data-theme="midnight-blue"] .couriers-table tbody tr:hover td,
 :root[data-theme="carbon"] .couriers-table tbody tr:hover td,
+:root[data-theme="nocturne"] .couriers-table tbody tr:hover td,
+:root[data-theme="dusk"] .couriers-table tbody tr:hover td,
+:root[data-theme="high-contrast"] .couriers-table tbody tr:hover td,
 :root[data-theme="operations-dark"] .users-table tbody tr:hover td,
 :root[data-theme="warehouse"] .users-table tbody tr:hover td,
 :root[data-theme="night-shift"] .users-table tbody tr:hover td,
@@ -465,6 +546,9 @@
 :root[data-theme="aubergine"] .users-table tbody tr:hover td,
 :root[data-theme="midnight-blue"] .users-table tbody tr:hover td,
 :root[data-theme="carbon"] .users-table tbody tr:hover td,
+:root[data-theme="nocturne"] .users-table tbody tr:hover td,
+:root[data-theme="dusk"] .users-table tbody tr:hover td,
+:root[data-theme="high-contrast"] .users-table tbody tr:hover td,
 :root[data-theme="operations-dark"] .processes-table tbody tr:hover,
 :root[data-theme="warehouse"] .processes-table tbody tr:hover,
 :root[data-theme="night-shift"] .processes-table tbody tr:hover,
@@ -480,7 +564,10 @@
 :root[data-theme="deep-ocean"] .processes-table tbody tr:hover,
 :root[data-theme="aubergine"] .processes-table tbody tr:hover,
 :root[data-theme="midnight-blue"] .processes-table tbody tr:hover,
-:root[data-theme="carbon"] .processes-table tbody tr:hover {
+:root[data-theme="carbon"] .processes-table tbody tr:hover,
+:root[data-theme="nocturne"] .processes-table tbody tr:hover,
+:root[data-theme="dusk"] .processes-table tbody tr:hover,
+:root[data-theme="high-contrast"] .processes-table tbody tr:hover {
     background: var(--surface-secondary);
 }
 
@@ -500,6 +587,9 @@
 :root[data-theme="aubergine"] .departments-table tbody tr.departments-row-selected td,
 :root[data-theme="midnight-blue"] .departments-table tbody tr.departments-row-selected td,
 :root[data-theme="carbon"] .departments-table tbody tr.departments-row-selected td,
+:root[data-theme="nocturne"] .departments-table tbody tr.departments-row-selected td,
+:root[data-theme="dusk"] .departments-table tbody tr.departments-row-selected td,
+:root[data-theme="high-contrast"] .departments-table tbody tr.departments-row-selected td,
 :root[data-theme="operations-dark"] .couriers-table tbody tr.couriers-row-selected td,
 :root[data-theme="warehouse"] .couriers-table tbody tr.couriers-row-selected td,
 :root[data-theme="night-shift"] .couriers-table tbody tr.couriers-row-selected td,
@@ -516,6 +606,9 @@
 :root[data-theme="aubergine"] .couriers-table tbody tr.couriers-row-selected td,
 :root[data-theme="midnight-blue"] .couriers-table tbody tr.couriers-row-selected td,
 :root[data-theme="carbon"] .couriers-table tbody tr.couriers-row-selected td,
+:root[data-theme="nocturne"] .couriers-table tbody tr.couriers-row-selected td,
+:root[data-theme="dusk"] .couriers-table tbody tr.couriers-row-selected td,
+:root[data-theme="high-contrast"] .couriers-table tbody tr.couriers-row-selected td,
 :root[data-theme="operations-dark"] .users-table tbody tr.users-row-selected td,
 :root[data-theme="warehouse"] .users-table tbody tr.users-row-selected td,
 :root[data-theme="night-shift"] .users-table tbody tr.users-row-selected td,
@@ -531,7 +624,10 @@
 :root[data-theme="deep-ocean"] .users-table tbody tr.users-row-selected td,
 :root[data-theme="aubergine"] .users-table tbody tr.users-row-selected td,
 :root[data-theme="midnight-blue"] .users-table tbody tr.users-row-selected td,
-:root[data-theme="carbon"] .users-table tbody tr.users-row-selected td {
+:root[data-theme="carbon"] .users-table tbody tr.users-row-selected td,
+:root[data-theme="nocturne"] .users-table tbody tr.users-row-selected td,
+:root[data-theme="dusk"] .users-table tbody tr.users-row-selected td,
+:root[data-theme="high-contrast"] .users-table tbody tr.users-row-selected td {
     background: color-mix(in srgb, var(--primary) 18%, var(--card));
     box-shadow: inset 0 1px 0 var(--border-strong), inset 0 -1px 0 var(--border-strong);
 }
@@ -552,6 +648,9 @@
 :root[data-theme="aubergine"] .departments-table tbody tr.departments-row-selected,
 :root[data-theme="midnight-blue"] .departments-table tbody tr.departments-row-selected,
 :root[data-theme="carbon"] .departments-table tbody tr.departments-row-selected,
+:root[data-theme="nocturne"] .departments-table tbody tr.departments-row-selected,
+:root[data-theme="dusk"] .departments-table tbody tr.departments-row-selected,
+:root[data-theme="high-contrast"] .departments-table tbody tr.departments-row-selected,
 :root[data-theme="operations-dark"] .couriers-table tbody tr.couriers-row-selected,
 :root[data-theme="warehouse"] .couriers-table tbody tr.couriers-row-selected,
 :root[data-theme="night-shift"] .couriers-table tbody tr.couriers-row-selected,
@@ -568,6 +667,9 @@
 :root[data-theme="aubergine"] .couriers-table tbody tr.couriers-row-selected,
 :root[data-theme="midnight-blue"] .couriers-table tbody tr.couriers-row-selected,
 :root[data-theme="carbon"] .couriers-table tbody tr.couriers-row-selected,
+:root[data-theme="nocturne"] .couriers-table tbody tr.couriers-row-selected,
+:root[data-theme="dusk"] .couriers-table tbody tr.couriers-row-selected,
+:root[data-theme="high-contrast"] .couriers-table tbody tr.couriers-row-selected,
 :root[data-theme="operations-dark"] .users-table tbody tr.users-row-selected,
 :root[data-theme="warehouse"] .users-table tbody tr.users-row-selected,
 :root[data-theme="night-shift"] .users-table tbody tr.users-row-selected,
@@ -583,7 +685,10 @@
 :root[data-theme="deep-ocean"] .users-table tbody tr.users-row-selected,
 :root[data-theme="aubergine"] .users-table tbody tr.users-row-selected,
 :root[data-theme="midnight-blue"] .users-table tbody tr.users-row-selected,
-:root[data-theme="carbon"] .users-table tbody tr.users-row-selected {
+:root[data-theme="carbon"] .users-table tbody tr.users-row-selected,
+:root[data-theme="nocturne"] .users-table tbody tr.users-row-selected,
+:root[data-theme="dusk"] .users-table tbody tr.users-row-selected,
+:root[data-theme="high-contrast"] .users-table tbody tr.users-row-selected {
     background: color-mix(in srgb, var(--primary) 18%, var(--card));
 }
 
@@ -603,6 +708,9 @@
 :root[data-theme="aubergine"] .departments-side-actions-title,
 :root[data-theme="midnight-blue"] .departments-side-actions-title,
 :root[data-theme="carbon"] .departments-side-actions-title,
+:root[data-theme="nocturne"] .departments-side-actions-title,
+:root[data-theme="dusk"] .departments-side-actions-title,
+:root[data-theme="high-contrast"] .departments-side-actions-title,
 :root[data-theme="operations-dark"] .couriers-side-actions-title,
 :root[data-theme="warehouse"] .couriers-side-actions-title,
 :root[data-theme="night-shift"] .couriers-side-actions-title,
@@ -619,6 +727,9 @@
 :root[data-theme="aubergine"] .couriers-side-actions-title,
 :root[data-theme="midnight-blue"] .couriers-side-actions-title,
 :root[data-theme="carbon"] .couriers-side-actions-title,
+:root[data-theme="nocturne"] .couriers-side-actions-title,
+:root[data-theme="dusk"] .couriers-side-actions-title,
+:root[data-theme="high-contrast"] .couriers-side-actions-title,
 :root[data-theme="operations-dark"] .users-side-actions-title,
 :root[data-theme="warehouse"] .users-side-actions-title,
 :root[data-theme="night-shift"] .users-side-actions-title,
@@ -634,7 +745,10 @@
 :root[data-theme="deep-ocean"] .users-side-actions-title,
 :root[data-theme="aubergine"] .users-side-actions-title,
 :root[data-theme="midnight-blue"] .users-side-actions-title,
-:root[data-theme="carbon"] .users-side-actions-title {
+:root[data-theme="carbon"] .users-side-actions-title,
+:root[data-theme="nocturne"] .users-side-actions-title,
+:root[data-theme="dusk"] .users-side-actions-title,
+:root[data-theme="high-contrast"] .users-side-actions-title {
     background: var(--surface-secondary);
     border-color: var(--border);
     color: var(--foreground);
@@ -656,6 +770,9 @@
 :root[data-theme="aubergine"] .departments-actions-table button,
 :root[data-theme="midnight-blue"] .departments-actions-table button,
 :root[data-theme="carbon"] .departments-actions-table button,
+:root[data-theme="nocturne"] .departments-actions-table button,
+:root[data-theme="dusk"] .departments-actions-table button,
+:root[data-theme="high-contrast"] .departments-actions-table button,
 :root[data-theme="operations-dark"] .couriers-actions-table button,
 :root[data-theme="warehouse"] .couriers-actions-table button,
 :root[data-theme="night-shift"] .couriers-actions-table button,
@@ -672,6 +789,9 @@
 :root[data-theme="aubergine"] .couriers-actions-table button,
 :root[data-theme="midnight-blue"] .couriers-actions-table button,
 :root[data-theme="carbon"] .couriers-actions-table button,
+:root[data-theme="nocturne"] .couriers-actions-table button,
+:root[data-theme="dusk"] .couriers-actions-table button,
+:root[data-theme="high-contrast"] .couriers-actions-table button,
 :root[data-theme="operations-dark"] .users-actions-table button,
 :root[data-theme="warehouse"] .users-actions-table button,
 :root[data-theme="night-shift"] .users-actions-table button,
@@ -688,6 +808,9 @@
 :root[data-theme="aubergine"] .users-actions-table button,
 :root[data-theme="midnight-blue"] .users-actions-table button,
 :root[data-theme="carbon"] .users-actions-table button,
+:root[data-theme="nocturne"] .users-actions-table button,
+:root[data-theme="dusk"] .users-actions-table button,
+:root[data-theme="high-contrast"] .users-actions-table button,
 :root[data-theme="operations-dark"] .users-secondary-button,
 :root[data-theme="warehouse"] .users-secondary-button,
 :root[data-theme="night-shift"] .users-secondary-button,
@@ -703,7 +826,10 @@
 :root[data-theme="deep-ocean"] .users-secondary-button,
 :root[data-theme="aubergine"] .users-secondary-button,
 :root[data-theme="midnight-blue"] .users-secondary-button,
-:root[data-theme="carbon"] .users-secondary-button {
+:root[data-theme="carbon"] .users-secondary-button,
+:root[data-theme="nocturne"] .users-secondary-button,
+:root[data-theme="dusk"] .users-secondary-button,
+:root[data-theme="high-contrast"] .users-secondary-button {
     background: var(--surface-elevated);
     border-color: var(--border);
     color: var(--foreground);
@@ -725,6 +851,9 @@
 :root[data-theme="aubergine"] .departments-status-active,
 :root[data-theme="midnight-blue"] .departments-status-active,
 :root[data-theme="carbon"] .departments-status-active,
+:root[data-theme="nocturne"] .departments-status-active,
+:root[data-theme="dusk"] .departments-status-active,
+:root[data-theme="high-contrast"] .departments-status-active,
 :root[data-theme="operations-dark"] .couriers-status-active,
 :root[data-theme="warehouse"] .couriers-status-active,
 :root[data-theme="night-shift"] .couriers-status-active,
@@ -741,6 +870,9 @@
 :root[data-theme="aubergine"] .couriers-status-active,
 :root[data-theme="midnight-blue"] .couriers-status-active,
 :root[data-theme="carbon"] .couriers-status-active,
+:root[data-theme="nocturne"] .couriers-status-active,
+:root[data-theme="dusk"] .couriers-status-active,
+:root[data-theme="high-contrast"] .couriers-status-active,
 :root[data-theme="operations-dark"] .microservice-status-badge-online,
 :root[data-theme="warehouse"] .microservice-status-badge-online,
 :root[data-theme="night-shift"] .microservice-status-badge-online,
@@ -757,6 +889,9 @@
 :root[data-theme="aubergine"] .microservice-status-badge-online,
 :root[data-theme="midnight-blue"] .microservice-status-badge-online,
 :root[data-theme="carbon"] .microservice-status-badge-online,
+:root[data-theme="nocturne"] .microservice-status-badge-online,
+:root[data-theme="dusk"] .microservice-status-badge-online,
+:root[data-theme="high-contrast"] .microservice-status-badge-online,
 :root[data-theme="operations-dark"] .shipment-scanner-record-success .shipment-scanner-record-icon,
 :root[data-theme="warehouse"] .shipment-scanner-record-success .shipment-scanner-record-icon,
 :root[data-theme="night-shift"] .shipment-scanner-record-success .shipment-scanner-record-icon,
@@ -772,7 +907,10 @@
 :root[data-theme="deep-ocean"] .shipment-scanner-record-success .shipment-scanner-record-icon,
 :root[data-theme="aubergine"] .shipment-scanner-record-success .shipment-scanner-record-icon,
 :root[data-theme="midnight-blue"] .shipment-scanner-record-success .shipment-scanner-record-icon,
-:root[data-theme="carbon"] .shipment-scanner-record-success .shipment-scanner-record-icon {
+:root[data-theme="carbon"] .shipment-scanner-record-success .shipment-scanner-record-icon,
+:root[data-theme="nocturne"] .shipment-scanner-record-success .shipment-scanner-record-icon,
+:root[data-theme="dusk"] .shipment-scanner-record-success .shipment-scanner-record-icon,
+:root[data-theme="high-contrast"] .shipment-scanner-record-success .shipment-scanner-record-icon {
     background: color-mix(in srgb, var(--success) 18%, var(--card));
     color: var(--success);
 }
@@ -794,6 +932,9 @@
 :root[data-theme="aubergine"] .departments-status-inactive,
 :root[data-theme="midnight-blue"] .departments-status-inactive,
 :root[data-theme="carbon"] .departments-status-inactive,
+:root[data-theme="nocturne"] .departments-status-inactive,
+:root[data-theme="dusk"] .departments-status-inactive,
+:root[data-theme="high-contrast"] .departments-status-inactive,
 :root[data-theme="warehouse"] .departments-status-suspended,
 :root[data-theme="night-shift"] .departments-status-suspended,
 :root[data-theme="neon-dark"] .departments-status-suspended,
@@ -809,6 +950,9 @@
 :root[data-theme="aubergine"] .departments-status-suspended,
 :root[data-theme="midnight-blue"] .departments-status-suspended,
 :root[data-theme="carbon"] .departments-status-suspended,
+:root[data-theme="nocturne"] .departments-status-suspended,
+:root[data-theme="dusk"] .departments-status-suspended,
+:root[data-theme="high-contrast"] .departments-status-suspended,
 :root[data-theme="operations-dark"] .couriers-status-inactive,
 :root[data-theme="warehouse"] .couriers-status-inactive,
 :root[data-theme="night-shift"] .couriers-status-inactive,
@@ -825,6 +969,9 @@
 :root[data-theme="aubergine"] .couriers-status-inactive,
 :root[data-theme="midnight-blue"] .couriers-status-inactive,
 :root[data-theme="carbon"] .couriers-status-inactive,
+:root[data-theme="nocturne"] .couriers-status-inactive,
+:root[data-theme="dusk"] .couriers-status-inactive,
+:root[data-theme="high-contrast"] .couriers-status-inactive,
 :root[data-theme="operations-dark"] .microservice-status-badge-unknown,
 :root[data-theme="warehouse"] .microservice-status-badge-unknown,
 :root[data-theme="night-shift"] .microservice-status-badge-unknown,
@@ -840,7 +987,10 @@
 :root[data-theme="deep-ocean"] .microservice-status-badge-unknown,
 :root[data-theme="aubergine"] .microservice-status-badge-unknown,
 :root[data-theme="midnight-blue"] .microservice-status-badge-unknown,
-:root[data-theme="carbon"] .microservice-status-badge-unknown {
+:root[data-theme="carbon"] .microservice-status-badge-unknown,
+:root[data-theme="nocturne"] .microservice-status-badge-unknown,
+:root[data-theme="dusk"] .microservice-status-badge-unknown,
+:root[data-theme="high-contrast"] .microservice-status-badge-unknown {
     background: color-mix(in srgb, var(--info) 18%, var(--card));
     color: var(--info);
 }
@@ -861,6 +1011,9 @@
 :root[data-theme="aubergine"] .microservice-status-badge-offline,
 :root[data-theme="midnight-blue"] .microservice-status-badge-offline,
 :root[data-theme="carbon"] .microservice-status-badge-offline,
+:root[data-theme="nocturne"] .microservice-status-badge-offline,
+:root[data-theme="dusk"] .microservice-status-badge-offline,
+:root[data-theme="high-contrast"] .microservice-status-badge-offline,
 :root[data-theme="operations-dark"] .shipment-scanner-record-error .shipment-scanner-record-icon,
 :root[data-theme="warehouse"] .shipment-scanner-record-error .shipment-scanner-record-icon,
 :root[data-theme="night-shift"] .shipment-scanner-record-error .shipment-scanner-record-icon,
@@ -876,7 +1029,10 @@
 :root[data-theme="deep-ocean"] .shipment-scanner-record-error .shipment-scanner-record-icon,
 :root[data-theme="aubergine"] .shipment-scanner-record-error .shipment-scanner-record-icon,
 :root[data-theme="midnight-blue"] .shipment-scanner-record-error .shipment-scanner-record-icon,
-:root[data-theme="carbon"] .shipment-scanner-record-error .shipment-scanner-record-icon {
+:root[data-theme="carbon"] .shipment-scanner-record-error .shipment-scanner-record-icon,
+:root[data-theme="nocturne"] .shipment-scanner-record-error .shipment-scanner-record-icon,
+:root[data-theme="dusk"] .shipment-scanner-record-error .shipment-scanner-record-icon,
+:root[data-theme="high-contrast"] .shipment-scanner-record-error .shipment-scanner-record-icon {
     background: color-mix(in srgb, var(--danger) 18%, var(--card));
     color: var(--danger);
 }
@@ -896,7 +1052,10 @@
 :root[data-theme="deep-ocean"] .shipment-scanner-record-duplicate .shipment-scanner-record-icon,
 :root[data-theme="aubergine"] .shipment-scanner-record-duplicate .shipment-scanner-record-icon,
 :root[data-theme="midnight-blue"] .shipment-scanner-record-duplicate .shipment-scanner-record-icon,
-:root[data-theme="carbon"] .shipment-scanner-record-duplicate .shipment-scanner-record-icon {
+:root[data-theme="carbon"] .shipment-scanner-record-duplicate .shipment-scanner-record-icon,
+:root[data-theme="nocturne"] .shipment-scanner-record-duplicate .shipment-scanner-record-icon,
+:root[data-theme="dusk"] .shipment-scanner-record-duplicate .shipment-scanner-record-icon,
+:root[data-theme="high-contrast"] .shipment-scanner-record-duplicate .shipment-scanner-record-icon {
     background: color-mix(in srgb, var(--warning) 18%, var(--card));
     color: var(--warning);
 }
@@ -917,6 +1076,9 @@
 :root[data-theme="aubergine"] .global-configuration-toolbar,
 :root[data-theme="midnight-blue"] .global-configuration-toolbar,
 :root[data-theme="carbon"] .global-configuration-toolbar,
+:root[data-theme="nocturne"] .global-configuration-toolbar,
+:root[data-theme="dusk"] .global-configuration-toolbar,
+:root[data-theme="high-contrast"] .global-configuration-toolbar,
 :root[data-theme="operations-dark"] .global-configuration-section,
 :root[data-theme="warehouse"] .global-configuration-section,
 :root[data-theme="night-shift"] .global-configuration-section,
@@ -933,6 +1095,9 @@
 :root[data-theme="aubergine"] .global-configuration-section,
 :root[data-theme="midnight-blue"] .global-configuration-section,
 :root[data-theme="carbon"] .global-configuration-section,
+:root[data-theme="nocturne"] .global-configuration-section,
+:root[data-theme="dusk"] .global-configuration-section,
+:root[data-theme="high-contrast"] .global-configuration-section,
 :root[data-theme="operations-dark"] .microservice-status-header,
 :root[data-theme="warehouse"] .microservice-status-header,
 :root[data-theme="night-shift"] .microservice-status-header,
@@ -949,6 +1114,9 @@
 :root[data-theme="aubergine"] .microservice-status-header,
 :root[data-theme="midnight-blue"] .microservice-status-header,
 :root[data-theme="carbon"] .microservice-status-header,
+:root[data-theme="nocturne"] .microservice-status-header,
+:root[data-theme="dusk"] .microservice-status-header,
+:root[data-theme="high-contrast"] .microservice-status-header,
 :root[data-theme="operations-dark"] .microservice-status-panel,
 :root[data-theme="warehouse"] .microservice-status-panel,
 :root[data-theme="night-shift"] .microservice-status-panel,
@@ -964,7 +1132,10 @@
 :root[data-theme="deep-ocean"] .microservice-status-panel,
 :root[data-theme="aubergine"] .microservice-status-panel,
 :root[data-theme="midnight-blue"] .microservice-status-panel,
-:root[data-theme="carbon"] .microservice-status-panel {
+:root[data-theme="carbon"] .microservice-status-panel,
+:root[data-theme="nocturne"] .microservice-status-panel,
+:root[data-theme="dusk"] .microservice-status-panel,
+:root[data-theme="high-contrast"] .microservice-status-panel {
     border-color: var(--border);
 }
 
@@ -984,6 +1155,9 @@
 :root[data-theme="aubergine"] .global-configuration-toolbar h2,
 :root[data-theme="midnight-blue"] .global-configuration-toolbar h2,
 :root[data-theme="carbon"] .global-configuration-toolbar h2,
+:root[data-theme="nocturne"] .global-configuration-toolbar h2,
+:root[data-theme="dusk"] .global-configuration-toolbar h2,
+:root[data-theme="high-contrast"] .global-configuration-toolbar h2,
 :root[data-theme="operations-dark"] .global-configuration-panel-header h3,
 :root[data-theme="warehouse"] .global-configuration-panel-header h3,
 :root[data-theme="night-shift"] .global-configuration-panel-header h3,
@@ -1000,6 +1174,9 @@
 :root[data-theme="aubergine"] .global-configuration-panel-header h3,
 :root[data-theme="midnight-blue"] .global-configuration-panel-header h3,
 :root[data-theme="carbon"] .global-configuration-panel-header h3,
+:root[data-theme="nocturne"] .global-configuration-panel-header h3,
+:root[data-theme="dusk"] .global-configuration-panel-header h3,
+:root[data-theme="high-contrast"] .global-configuration-panel-header h3,
 :root[data-theme="operations-dark"] .microservice-status-header h4,
 :root[data-theme="warehouse"] .microservice-status-header h4,
 :root[data-theme="night-shift"] .microservice-status-header h4,
@@ -1016,6 +1193,9 @@
 :root[data-theme="aubergine"] .microservice-status-header h4,
 :root[data-theme="midnight-blue"] .microservice-status-header h4,
 :root[data-theme="carbon"] .microservice-status-header h4,
+:root[data-theme="nocturne"] .microservice-status-header h4,
+:root[data-theme="dusk"] .microservice-status-header h4,
+:root[data-theme="high-contrast"] .microservice-status-header h4,
 :root[data-theme="operations-dark"] .microservice-status-panel-header h5,
 :root[data-theme="warehouse"] .microservice-status-panel-header h5,
 :root[data-theme="night-shift"] .microservice-status-panel-header h5,
@@ -1032,6 +1212,9 @@
 :root[data-theme="aubergine"] .microservice-status-panel-header h5,
 :root[data-theme="midnight-blue"] .microservice-status-panel-header h5,
 :root[data-theme="carbon"] .microservice-status-panel-header h5,
+:root[data-theme="nocturne"] .microservice-status-panel-header h5,
+:root[data-theme="dusk"] .microservice-status-panel-header h5,
+:root[data-theme="high-contrast"] .microservice-status-panel-header h5,
 :root[data-theme="operations-dark"] .user-profile-details strong,
 :root[data-theme="warehouse"] .user-profile-details strong,
 :root[data-theme="night-shift"] .user-profile-details strong,
@@ -1047,7 +1230,10 @@
 :root[data-theme="deep-ocean"] .user-profile-details strong,
 :root[data-theme="aubergine"] .user-profile-details strong,
 :root[data-theme="midnight-blue"] .user-profile-details strong,
-:root[data-theme="carbon"] .user-profile-details strong {
+:root[data-theme="carbon"] .user-profile-details strong,
+:root[data-theme="nocturne"] .user-profile-details strong,
+:root[data-theme="dusk"] .user-profile-details strong,
+:root[data-theme="high-contrast"] .user-profile-details strong {
     color: var(--foreground);
 }
 
@@ -1066,7 +1252,10 @@
 :root[data-theme="deep-ocean"] .global-configuration-category,
 :root[data-theme="aubergine"] .global-configuration-category,
 :root[data-theme="midnight-blue"] .global-configuration-category,
-:root[data-theme="carbon"] .global-configuration-category {
+:root[data-theme="carbon"] .global-configuration-category,
+:root[data-theme="nocturne"] .global-configuration-category,
+:root[data-theme="dusk"] .global-configuration-category,
+:root[data-theme="high-contrast"] .global-configuration-category {
     background: var(--surface-secondary);
     border-color: var(--border);
     color: var(--foreground);
@@ -1088,6 +1277,9 @@
 :root[data-theme="aubergine"] .tm-page-heading p,
 :root[data-theme="midnight-blue"] .tm-page-heading p,
 :root[data-theme="carbon"] .tm-page-heading p,
+:root[data-theme="nocturne"] .tm-page-heading p,
+:root[data-theme="dusk"] .tm-page-heading p,
+:root[data-theme="high-contrast"] .tm-page-heading p,
 :root[data-theme="operations-dark"] .tm-muted,
 :root[data-theme="warehouse"] .tm-muted,
 :root[data-theme="night-shift"] .tm-muted,
@@ -1104,6 +1296,9 @@
 :root[data-theme="aubergine"] .tm-muted,
 :root[data-theme="midnight-blue"] .tm-muted,
 :root[data-theme="carbon"] .tm-muted,
+:root[data-theme="nocturne"] .tm-muted,
+:root[data-theme="dusk"] .tm-muted,
+:root[data-theme="high-contrast"] .tm-muted,
 :root[data-theme="operations-dark"] .tm-total-line span,
 :root[data-theme="warehouse"] .tm-total-line span,
 :root[data-theme="night-shift"] .tm-total-line span,
@@ -1120,6 +1315,9 @@
 :root[data-theme="aubergine"] .tm-total-line span,
 :root[data-theme="midnight-blue"] .tm-total-line span,
 :root[data-theme="carbon"] .tm-total-line span,
+:root[data-theme="nocturne"] .tm-total-line span,
+:root[data-theme="dusk"] .tm-total-line span,
+:root[data-theme="high-contrast"] .tm-total-line span,
 :root[data-theme="operations-dark"] .tm-loss-line span,
 :root[data-theme="warehouse"] .tm-loss-line span,
 :root[data-theme="night-shift"] .tm-loss-line span,
@@ -1136,6 +1334,9 @@
 :root[data-theme="aubergine"] .tm-loss-line span,
 :root[data-theme="midnight-blue"] .tm-loss-line span,
 :root[data-theme="carbon"] .tm-loss-line span,
+:root[data-theme="nocturne"] .tm-loss-line span,
+:root[data-theme="dusk"] .tm-loss-line span,
+:root[data-theme="high-contrast"] .tm-loss-line span,
 :root[data-theme="operations-dark"] .tm-tabs button,
 :root[data-theme="warehouse"] .tm-tabs button,
 :root[data-theme="night-shift"] .tm-tabs button,
@@ -1151,7 +1352,10 @@
 :root[data-theme="deep-ocean"] .tm-tabs button,
 :root[data-theme="aubergine"] .tm-tabs button,
 :root[data-theme="midnight-blue"] .tm-tabs button,
-:root[data-theme="carbon"] .tm-tabs button {
+:root[data-theme="carbon"] .tm-tabs button,
+:root[data-theme="nocturne"] .tm-tabs button,
+:root[data-theme="dusk"] .tm-tabs button,
+:root[data-theme="high-contrast"] .tm-tabs button {
     color: var(--muted-foreground);
 }
 
@@ -1171,6 +1375,9 @@
 :root[data-theme="aubergine"] .tm-orders-table th,
 :root[data-theme="midnight-blue"] .tm-orders-table th,
 :root[data-theme="carbon"] .tm-orders-table th,
+:root[data-theme="nocturne"] .tm-orders-table th,
+:root[data-theme="dusk"] .tm-orders-table th,
+:root[data-theme="high-contrast"] .tm-orders-table th,
 :root[data-theme="operations-dark"] .tm-orders-table td,
 :root[data-theme="warehouse"] .tm-orders-table td,
 :root[data-theme="night-shift"] .tm-orders-table td,
@@ -1187,6 +1394,9 @@
 :root[data-theme="aubergine"] .tm-orders-table td,
 :root[data-theme="midnight-blue"] .tm-orders-table td,
 :root[data-theme="carbon"] .tm-orders-table td,
+:root[data-theme="nocturne"] .tm-orders-table td,
+:root[data-theme="dusk"] .tm-orders-table td,
+:root[data-theme="high-contrast"] .tm-orders-table td,
 :root[data-theme="operations-dark"] .tm-muted-cell,
 :root[data-theme="warehouse"] .tm-muted-cell,
 :root[data-theme="night-shift"] .tm-muted-cell,
@@ -1202,7 +1412,10 @@
 :root[data-theme="deep-ocean"] .tm-muted-cell,
 :root[data-theme="aubergine"] .tm-muted-cell,
 :root[data-theme="midnight-blue"] .tm-muted-cell,
-:root[data-theme="carbon"] .tm-muted-cell {
+:root[data-theme="carbon"] .tm-muted-cell,
+:root[data-theme="nocturne"] .tm-muted-cell,
+:root[data-theme="dusk"] .tm-muted-cell,
+:root[data-theme="high-contrast"] .tm-muted-cell {
     border-color: var(--border);
     color: var(--foreground);
 }
@@ -1222,7 +1435,10 @@
 :root[data-theme="deep-ocean"] .tm-orders-table th,
 :root[data-theme="aubergine"] .tm-orders-table th,
 :root[data-theme="midnight-blue"] .tm-orders-table th,
-:root[data-theme="carbon"] .tm-orders-table th {
+:root[data-theme="carbon"] .tm-orders-table th,
+:root[data-theme="nocturne"] .tm-orders-table th,
+:root[data-theme="dusk"] .tm-orders-table th,
+:root[data-theme="high-contrast"] .tm-orders-table th {
     background: var(--surface-secondary);
     color: var(--muted-foreground);
 }
@@ -1242,7 +1458,10 @@
 :root[data-theme="deep-ocean"] .device-pairing-pair-details,
 :root[data-theme="aubergine"] .device-pairing-pair-details,
 :root[data-theme="midnight-blue"] .device-pairing-pair-details,
-:root[data-theme="carbon"] .device-pairing-pair-details {
+:root[data-theme="carbon"] .device-pairing-pair-details,
+:root[data-theme="nocturne"] .device-pairing-pair-details,
+:root[data-theme="dusk"] .device-pairing-pair-details,
+:root[data-theme="high-contrast"] .device-pairing-pair-details {
     background: var(--surface);
     border-color: var(--border);
 }
@@ -1263,6 +1482,9 @@
 :root[data-theme="aubergine"] .user-profile-title p,
 :root[data-theme="midnight-blue"] .user-profile-title p,
 :root[data-theme="carbon"] .user-profile-title p,
+:root[data-theme="nocturne"] .user-profile-title p,
+:root[data-theme="dusk"] .user-profile-title p,
+:root[data-theme="high-contrast"] .user-profile-title p,
 :root[data-theme="operations-dark"] .user-profile-details span,
 :root[data-theme="warehouse"] .user-profile-details span,
 :root[data-theme="night-shift"] .user-profile-details span,
@@ -1279,6 +1501,9 @@
 :root[data-theme="aubergine"] .user-profile-details span,
 :root[data-theme="midnight-blue"] .user-profile-details span,
 :root[data-theme="carbon"] .user-profile-details span,
+:root[data-theme="nocturne"] .user-profile-details span,
+:root[data-theme="dusk"] .user-profile-details span,
+:root[data-theme="high-contrast"] .user-profile-details span,
 :root[data-theme="operations-dark"] .device-pairing-table th,
 :root[data-theme="warehouse"] .device-pairing-table th,
 :root[data-theme="night-shift"] .device-pairing-table th,
@@ -1294,7 +1519,10 @@
 :root[data-theme="deep-ocean"] .device-pairing-table th,
 :root[data-theme="aubergine"] .device-pairing-table th,
 :root[data-theme="midnight-blue"] .device-pairing-table th,
-:root[data-theme="carbon"] .device-pairing-table th {
+:root[data-theme="carbon"] .device-pairing-table th,
+:root[data-theme="nocturne"] .device-pairing-table th,
+:root[data-theme="dusk"] .device-pairing-table th,
+:root[data-theme="high-contrast"] .device-pairing-table th {
     color: var(--muted-foreground);
 }
 
@@ -1329,7 +1557,13 @@
 :root[data-theme="midnight-blue"] .users-role-admin,
 :root[data-theme="midnight-blue"] .users-role-superadmin,
 :root[data-theme="carbon"] .users-role-admin,
+:root[data-theme="nocturne"] .users-role-admin,
+:root[data-theme="dusk"] .users-role-admin,
+:root[data-theme="high-contrast"] .users-role-admin,
 :root[data-theme="carbon"] .users-role-superadmin,
+:root[data-theme="nocturne"] .users-role-superadmin,
+:root[data-theme="dusk"] .users-role-superadmin,
+:root[data-theme="high-contrast"] .users-role-superadmin,
 :root[data-theme="operations-dark"] .users-role-manager,
 :root[data-theme="warehouse"] .users-role-manager,
 :root[data-theme="night-shift"] .users-role-manager,
@@ -1346,6 +1580,9 @@
 :root[data-theme="aubergine"] .users-role-manager,
 :root[data-theme="midnight-blue"] .users-role-manager,
 :root[data-theme="carbon"] .users-role-manager,
+:root[data-theme="nocturne"] .users-role-manager,
+:root[data-theme="dusk"] .users-role-manager,
+:root[data-theme="high-contrast"] .users-role-manager,
 :root[data-theme="operations-dark"] .users-role-supplier,
 :root[data-theme="warehouse"] .users-role-supplier,
 :root[data-theme="night-shift"] .users-role-supplier,
@@ -1362,6 +1599,9 @@
 :root[data-theme="aubergine"] .users-role-supplier,
 :root[data-theme="midnight-blue"] .users-role-supplier,
 :root[data-theme="carbon"] .users-role-supplier,
+:root[data-theme="nocturne"] .users-role-supplier,
+:root[data-theme="dusk"] .users-role-supplier,
+:root[data-theme="high-contrast"] .users-role-supplier,
 :root[data-theme="operations-dark"] .users-role-user,
 :root[data-theme="warehouse"] .users-role-user,
 :root[data-theme="night-shift"] .users-role-user,
@@ -1377,7 +1617,10 @@
 :root[data-theme="deep-ocean"] .users-role-user,
 :root[data-theme="aubergine"] .users-role-user,
 :root[data-theme="midnight-blue"] .users-role-user,
-:root[data-theme="carbon"] .users-role-user {
+:root[data-theme="carbon"] .users-role-user,
+:root[data-theme="nocturne"] .users-role-user,
+:root[data-theme="dusk"] .users-role-user,
+:root[data-theme="high-contrast"] .users-role-user {
     background: color-mix(in srgb, var(--primary) 18%, var(--card));
     color: var(--primary);
 }
@@ -1398,6 +1641,9 @@
 :root[data-theme="aubergine"] .users-create-dialog-title,
 :root[data-theme="midnight-blue"] .users-create-dialog-title,
 :root[data-theme="carbon"] .users-create-dialog-title,
+:root[data-theme="nocturne"] .users-create-dialog-title,
+:root[data-theme="dusk"] .users-create-dialog-title,
+:root[data-theme="high-contrast"] .users-create-dialog-title,
 :root[data-theme="operations-dark"] .users-edit-dialog-title,
 :root[data-theme="warehouse"] .users-edit-dialog-title,
 :root[data-theme="night-shift"] .users-edit-dialog-title,
@@ -1414,6 +1660,9 @@
 :root[data-theme="aubergine"] .users-edit-dialog-title,
 :root[data-theme="midnight-blue"] .users-edit-dialog-title,
 :root[data-theme="carbon"] .users-edit-dialog-title,
+:root[data-theme="nocturne"] .users-edit-dialog-title,
+:root[data-theme="dusk"] .users-edit-dialog-title,
+:root[data-theme="high-contrast"] .users-edit-dialog-title,
 :root[data-theme="operations-dark"] .users-create-dialog-content,
 :root[data-theme="warehouse"] .users-create-dialog-content,
 :root[data-theme="night-shift"] .users-create-dialog-content,
@@ -1430,6 +1679,9 @@
 :root[data-theme="aubergine"] .users-create-dialog-content,
 :root[data-theme="midnight-blue"] .users-create-dialog-content,
 :root[data-theme="carbon"] .users-create-dialog-content,
+:root[data-theme="nocturne"] .users-create-dialog-content,
+:root[data-theme="dusk"] .users-create-dialog-content,
+:root[data-theme="high-contrast"] .users-create-dialog-content,
 :root[data-theme="operations-dark"] .users-edit-dialog-content,
 :root[data-theme="warehouse"] .users-edit-dialog-content,
 :root[data-theme="night-shift"] .users-edit-dialog-content,
@@ -1446,6 +1698,9 @@
 :root[data-theme="aubergine"] .users-edit-dialog-content,
 :root[data-theme="midnight-blue"] .users-edit-dialog-content,
 :root[data-theme="carbon"] .users-edit-dialog-content,
+:root[data-theme="nocturne"] .users-edit-dialog-content,
+:root[data-theme="dusk"] .users-edit-dialog-content,
+:root[data-theme="high-contrast"] .users-edit-dialog-content,
 :root[data-theme="operations-dark"] .users-create-dialog .users-dialog-actions,
 :root[data-theme="warehouse"] .users-create-dialog .users-dialog-actions,
 :root[data-theme="night-shift"] .users-create-dialog .users-dialog-actions,
@@ -1462,6 +1717,9 @@
 :root[data-theme="aubergine"] .users-create-dialog .users-dialog-actions,
 :root[data-theme="midnight-blue"] .users-create-dialog .users-dialog-actions,
 :root[data-theme="carbon"] .users-create-dialog .users-dialog-actions,
+:root[data-theme="nocturne"] .users-create-dialog .users-dialog-actions,
+:root[data-theme="dusk"] .users-create-dialog .users-dialog-actions,
+:root[data-theme="high-contrast"] .users-create-dialog .users-dialog-actions,
 :root[data-theme="operations-dark"] .users-edit-dialog .users-dialog-actions,
 :root[data-theme="warehouse"] .users-edit-dialog .users-dialog-actions,
 :root[data-theme="night-shift"] .users-edit-dialog .users-dialog-actions,
@@ -1477,7 +1735,10 @@
 :root[data-theme="deep-ocean"] .users-edit-dialog .users-dialog-actions,
 :root[data-theme="aubergine"] .users-edit-dialog .users-dialog-actions,
 :root[data-theme="midnight-blue"] .users-edit-dialog .users-dialog-actions,
-:root[data-theme="carbon"] .users-edit-dialog .users-dialog-actions {
+:root[data-theme="carbon"] .users-edit-dialog .users-dialog-actions,
+:root[data-theme="nocturne"] .users-edit-dialog .users-dialog-actions,
+:root[data-theme="dusk"] .users-edit-dialog .users-dialog-actions,
+:root[data-theme="high-contrast"] .users-edit-dialog .users-dialog-actions {
     background: var(--surface);
     border-color: var(--border);
     color: var(--foreground);
@@ -1499,6 +1760,9 @@
 :root[data-theme="aubergine"] .users-create-dialog-title [data-ui="icon-button"],
 :root[data-theme="midnight-blue"] .users-create-dialog-title [data-ui="icon-button"],
 :root[data-theme="carbon"] .users-create-dialog-title [data-ui="icon-button"],
+:root[data-theme="nocturne"] .users-create-dialog-title [data-ui="icon-button"],
+:root[data-theme="dusk"] .users-create-dialog-title [data-ui="icon-button"],
+:root[data-theme="high-contrast"] .users-create-dialog-title [data-ui="icon-button"],
 :root[data-theme="operations-dark"] .users-edit-dialog-title [data-ui="icon-button"],
 :root[data-theme="warehouse"] .users-edit-dialog-title [data-ui="icon-button"],
 :root[data-theme="night-shift"] .users-edit-dialog-title [data-ui="icon-button"],
@@ -1514,7 +1778,10 @@
 :root[data-theme="deep-ocean"] .users-edit-dialog-title [data-ui="icon-button"],
 :root[data-theme="aubergine"] .users-edit-dialog-title [data-ui="icon-button"],
 :root[data-theme="midnight-blue"] .users-edit-dialog-title [data-ui="icon-button"],
-:root[data-theme="carbon"] .users-edit-dialog-title [data-ui="icon-button"] {
+:root[data-theme="carbon"] .users-edit-dialog-title [data-ui="icon-button"],
+:root[data-theme="nocturne"] .users-edit-dialog-title [data-ui="icon-button"],
+:root[data-theme="dusk"] .users-edit-dialog-title [data-ui="icon-button"],
+:root[data-theme="high-contrast"] .users-edit-dialog-title [data-ui="icon-button"] {
     background: var(--surface-elevated);
     border-color: var(--border);
     color: var(--foreground);
