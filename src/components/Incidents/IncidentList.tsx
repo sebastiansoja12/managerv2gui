@@ -22,6 +22,7 @@ import {
     IncidentDto,
     IncidentFilters,
     IncidentResolution,
+    RepackagingRequest,
     IncidentSeverity,
     IncidentStatisticsDto,
     IncidentStatus,
@@ -96,7 +97,8 @@ function IncidentList({onOpenTab}: IncidentListProps) {
         }
     };
 
-    const resolve = async (resolution: IncidentResolution, note: string | null) => {
+    const resolve = async (resolution: IncidentResolution, note: string | null,
+                           repackaging: RepackagingRequest | null) => {
         if (!incidentToResolve) {
             return;
         }
@@ -104,7 +106,7 @@ function IncidentList({onOpenTab}: IncidentListProps) {
         setBusyIncidentId(incidentId);
         setResolveError(null);
         try {
-            await IncidentService.resolve(incidentId, {resolution, note});
+            await IncidentService.resolve(incidentId, {resolution, note, repackaging});
             setIncidentToResolve(null);
             await load();
         } catch (resolveFailure) {
@@ -264,6 +266,7 @@ function IncidentList({onOpenTab}: IncidentListProps) {
                 error={resolveError}
                 onClose={() => setIncidentToResolve(null)}
                 onResolve={resolve}
+                onOpenShipment={openShipment}
             />
         </main>
     );

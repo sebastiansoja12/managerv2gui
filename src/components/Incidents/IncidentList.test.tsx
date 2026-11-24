@@ -5,6 +5,11 @@ import pl from "../../i18n/translate";
 import IncidentList from "./IncidentList";
 import {IncidentDto} from "./model/Incident";
 
+jest.mock("../../hooks/ShipmentService", () => ({
+    __esModule: true,
+    default: {get: () => Promise.resolve({data: {shipmentStatus: "SENT", declaredValue: null}})},
+}));
+
 jest.mock("../../hooks/IncidentService", () => ({
     __esModule: true,
     default: {find: jest.fn(), statistics: jest.fn(), assignToMe: jest.fn(), resolve: jest.fn()},
@@ -107,10 +112,49 @@ describe("IncidentList", () => {
         });
         fireEvent.click(resolveButton);
         const dialog = await screen.findByRole("dialog");
-        fireEvent.change(within(dialog).getByLabelText(pl.incidents.resolveDialog.resolution), {target: {value: "RETURN_CREATED"}});
-        fireEvent.click(within(dialog).getByRole("button", {name: pl.incidents.resolveDialog.submit}));
+        fireEvent.click(await within(dialog).findByRole("button", {name: new RegExp(pl.incidents.resolutions.REFUSED_BY_RECIPIENT)}));
+        const submitButton = within(dialog).getByRole("button", {name: pl.incidents.resolveDialog.submit});
+        expect(submitButton).toBeDisabled();
+        fireEvent.click(within(dialog).getByLabelText(pl.incidents.resolveDialog.confirm));
+        fireEvent.click(submitButton);
 
-        await waitFor(() => expect(incidentService.resolve).toHaveBeenCalledWith("1", {resolution: "RETURN_CREATED", note: null}));
+        await waitFor(() => expect(incidentService.resolve).toHaveBeenCalledWith("1", {resolution: "REFUSED_BY_RECIPIENT", note: null, repackaging: null}));
+    });
+
+    it("sends new packaging data when the shipment was repacked", async () => {
+        render(<IncidentList />);
+        const row = (await screen.findByText("KT1")).closest("tr") as HTMLElement;
+        fireEvent.click(within(row).getByRole("button", {name: pl.incidents.list.assign}));
+        const resolveButton = await waitFor(() => {
+            const button = within(screen.getByText("KT1").closest("tr") as HTMLElement).getByRole("button", {name: pl.incidents.list.resolve});
+            expect(button).toBeEnabled();
+            return button;
+        });
+        fireEvent.click(resolveButton);
+        const dialog = await screen.findByRole("dialog");
+
+        fireEvent.click(await within(dialog).findByRole("button", {name: new RegExp(pl.incidents.resolutions.REPACKED)}));
+        fireEvent.change(within(dialog).getByLabelText(pl.incidents.resolveDialog.repackaging.weight), {target: {value: "2,5"}});
+        fireEvent.change(within(dialog).getByLabelText(pl.incidents.resolveDialog.repackaging.length), {target: {value: "40"}});
+        const submitButton = within(dialog).getByRole("button", {name: pl.incidents.resolveDialog.submit});
+        fireEvent.change(within(dialog).getByLabelText(new RegExp(pl.incidents.resolveDialog.note)), {target: {value: "Nowy karton"}});
+        expect(submitButton).toBeDisabled();
+
+        fireEvent.change(within(dialog).getByLabelText(pl.incidents.resolveDialog.repackaging.width), {target: {value: "30"}});
+        fireEvent.change(within(dialog).getByLabelText(pl.incidents.resolveDialog.repackaging.height), {target: {value: "20"}});
+        fireEvent.click(submitButton);
+
+        await waitFor(() => expect(incidentService.resolve).toHaveBeenCalledWith("1", {
+            resolution: "REPACKED",
+            note: "Nowy karton",
+            repackaging: {
+                packagingType: null,
+                weightInKilograms: 2.5,
+                lengthInCentimeters: 40,
+                widthInCentimeters: 30,
+                heightInCentimeters: 20,
+            },
+        }));
     });
 
     it("shows a conflict message when the incident changed in the meantime", async () => {

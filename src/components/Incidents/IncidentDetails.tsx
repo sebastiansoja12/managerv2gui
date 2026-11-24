@@ -27,7 +27,7 @@ import {
     severityColor,
     statusColor,
 } from "./incidentPresentation";
-import {IncidentDto, IncidentResolution} from "./model/Incident";
+import {IncidentDto, IncidentResolution, RepackagingRequest} from "./model/Incident";
 import "../Pallets/styles/pallets.css";
 import "./styles/incidents.css";
 
@@ -101,8 +101,9 @@ function IncidentDetails({onOpenTab}: IncidentDetailsProps) {
         }
     };
 
-    const resolve = async (resolution: IncidentResolution, note: string | null) => {
-        if (await run("resolve", () => IncidentService.resolve(incidentId, {resolution, note}), true)) {
+    const resolve = async (resolution: IncidentResolution, note: string | null,
+                           repackaging: RepackagingRequest | null) => {
+        if (await run("resolve", () => IncidentService.resolve(incidentId, {resolution, note, repackaging}), true)) {
             setResolveOpen(false);
         }
     };
@@ -245,6 +246,7 @@ function IncidentDetails({onOpenTab}: IncidentDetailsProps) {
                 error={dialogError}
                 onClose={() => setResolveOpen(false)}
                 onResolve={resolve}
+                onOpenShipment={(currentIncident) => onOpenTab?.(incidentShipmentTab(currentIncident))}
             />
 
             <Dialog open={reopenOpen} onClose={() => runningAction !== "reopen" && setReopenOpen(false)} fullWidth>

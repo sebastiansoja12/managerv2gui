@@ -25,6 +25,9 @@ const IncidentService = {
             size,
         },
     }),
+    findByShipment: (shipmentId: string) => client.get<IncidentPageDto>("/incidents", {
+        params: {shipmentId, size: 20},
+    }),
     statistics: () => client.get<IncidentStatisticsDto>("/incidents/statistics"),
     get: (incidentId: number | string) => client.get<IncidentDto>(path(incidentId)),
     report: (request: ReportIncidentRequest) => client.post<ReportIncidentRequest, IncidentIdDto>("/incidents", request),

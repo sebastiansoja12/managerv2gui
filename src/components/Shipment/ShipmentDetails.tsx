@@ -76,11 +76,13 @@ import {shipmentEventDescription} from "./shipmentEventDescription";
 import "./styles/shipments.css";
 import ShipmentReturnSummary from "./ShipmentReturnSummary";
 import IncidentReportDialog from "../Incidents/IncidentReportDialog";
+import ShipmentIncidentCard from "./ShipmentIncidentCard";
 import ShipmentAddressRouteMap from "./ShipmentAddressRouteMap";
 import {ReturnPackageDto} from "../Returns/model/ReturnPackage";
 import {Delivery} from "../Deliveries/model/Delivery";
 import {useDeliveryPeople} from "../Deliveries/details/useDeliveryPeople";
-import {ShipmentDocument, ShipmentNote} from "./dto/ShipmentContentDto";
+import {ShipmentDocument, ShipmentIncidentNoteType, ShipmentNote} from "./dto/ShipmentContentDto";
+import {IncidentCategory, IncidentResolution} from "../Incidents/model/Incident";
 import {emitOnboardingEvent} from "../Onboarding/onboardingEvents";
 import {
     deliveryLifecycleLabel,
@@ -254,6 +256,26 @@ const detailValue = (label: string, value?: React.ReactNode) => (
     </div>
 );
 
+const incidentNoteReason = (note: ShipmentNote) => {
+    if (!note.incidentReason) {
+        return null;
+    }
+    if (note.incidentNoteType === "REPORTED") {
+        return pl.incidents.categories[note.incidentReason as IncidentCategory] || note.incidentReason;
+    }
+    if (note.incidentNoteType === "RESOLVED") {
+        return pl.incidents.resolutions[note.incidentReason as IncidentResolution] || note.incidentReason;
+    }
+    return null;
+};
+
+const incidentNoteLabel = (note: ShipmentNote) => {
+    const label = `${pl.incidents.shipmentNote.incident.replace("{incidentId}", String(note.incidentId))} · `
+        + pl.incidents.shipmentNote.types[note.incidentNoteType as ShipmentIncidentNoteType];
+    const reason = incidentNoteReason(note);
+    return reason ? `${label}: ${reason}` : label;
+};
+
 const ShipmentDetails: React.FC = () => {
     const navigate = useNavigate();
     const {shipmentId, trackingNumber} = useParams();
@@ -287,6 +309,7 @@ const ShipmentDetails: React.FC = () => {
     const [statusDialogOpen, setStatusDialogOpen] = useState<boolean>(false);
     const [cancelShipmentDialogOpen, setCancelShipmentDialogOpen] = useState<boolean>(false);
     const [incidentReportOpen, setIncidentReportOpen] = useState<boolean>(false);
+    const [incidentReloadKey, setIncidentReloadKey] = useState<number>(0);
     const [downloadingDocument, setDownloadingDocument] = useState<DocumentAction | null>(null);
     const [shipmentNotes, setShipmentNotes] = useState<ShipmentNote[]>([]);
     const [shipmentDocuments, setShipmentDocuments] = useState<ShipmentDocument[]>([]);
@@ -314,12 +337,15 @@ const ShipmentDetails: React.FC = () => {
     const decodedTrackingNumber = trackingNumber ? decodeURIComponent(trackingNumber) : "";
     const personDialogSource = personDialogType === "SENDER" ? shipment?.sender : shipment?.recipient;
     const personDialogChanged = personDialogType ? !personsEqual(personDialogSource, personDraft) : false;
+    const shipmentReadOnly = shipment?.shipmentStatus === "LOST";
     const shipmentDataMutable = Boolean(
         shipment
+        && !shipmentReadOnly
         && !shipment.locked
-        && !["SENT", "DELIVERY", "RETURN"].includes(shipment.shipmentStatus)
+        && !["SENT", "HANDOVER", "DELIVERY", "RETURN"].includes(shipment.shipmentStatus)
     );
-    const shipmentStatusMutable = Boolean(shipment && !["DELIVERY", "CANCELED"].includes(shipment.shipmentStatus));
+    const shipmentStatusMutable = Boolean(shipment && !shipmentReadOnly
+        && !["DELIVERY", "CANCELED"].includes(shipment.shipmentStatus));
 
     const details = useMemo(() => routeDetails(routeLog), [routeLog]);
     const recentDetails = useMemo(() => details.slice(0, 5), [details]);
@@ -348,6 +374,14 @@ const ShipmentDetails: React.FC = () => {
 
         return departments.find((department) => String(department.departmentId) === originDepartmentId) || null;
     }, [delivery?.originDepartmentId, departments]);
+    const currentDepartment = useMemo(() => {
+        const currentDepartmentId = delivery?.currentDepartmentId;
+        if (!currentDepartmentId) {
+            return null;
+        }
+
+        return departments.find((department) => String(department.departmentId) === currentDepartmentId) || null;
+    }, [delivery?.currentDepartmentId, departments]);
     const cancellationWindowTimeLeft = useMemo(
         () => cancellationTimeLeft(shipment?.createdAt, cancellationWindowMinutes, currentTime),
         [cancellationWindowMinutes, currentTime, shipment?.createdAt],
@@ -1057,10 +1091,19 @@ const ShipmentDetails: React.FC = () => {
                         <article className="shipment-content-item" key={note.noteId}>
                             <div className="shipment-content-meta">
                                 <time dateTime={note.createdAt}>{formatDateTime(note.createdAt)}</time>
-                                <span>{pl.shipments.dashboard.workspace.author}: {note.authorUserId}</span>
+                                <span>{pl.shipments.dashboard.workspace.author}: {note.authorUsername || note.authorUserId}</span>
                                 {note.internal ? <Chip label={pl.shipments.dashboard.internalNote} size="small" /> : null}
                             </div>
-                            <p>{note.body}</p>
+                            {note.incidentId && note.incidentNoteType ? (
+                                <button
+                                    className="shipment-note-incident"
+                                    type="button"
+                                    onClick={() => navigate(`/incidents/${encodeURIComponent(String(note.incidentId))}`)}
+                                >
+                                    {incidentNoteLabel(note)}
+                                </button>
+                            ) : null}
+                            {note.body ? <p>{note.body}</p> : null}
                         </article>
                     ))}
                 </div>
@@ -1169,7 +1212,7 @@ const ShipmentDetails: React.FC = () => {
                             </div>
                             <Typography variant="body2" color="text.secondary">
                                 {shipment
-                                    ? `${fullName(shipment.sender)} → ${fullName(shipment.recipient)} · #${shipment.shipmentId.value}`
+                                    ? `${fullName(shipment.sender)} → ${fullName(shipment.recipient)} · #${shipment.trackingNumber?.value || shipment.shipmentId.value}`
                                     : pl.shipments.page.detailsSubtitle}
                             </Typography>
                         </Box>
@@ -1178,7 +1221,10 @@ const ShipmentDetails: React.FC = () => {
                         <Button startIcon={<ArrowBack />} variant="outlined" onClick={() => navigate("/shipments/list")}>
                             {pl.navigation.shipmentList}
                         </Button>
-                        <Button disabled={loadingShipment} startIcon={<Refresh />} variant="outlined" onClick={loadShipment}>
+                        <Button disabled={loadingShipment} startIcon={<Refresh />} variant="outlined" onClick={() => {
+                            loadShipment();
+                            setIncidentReloadKey((current) => current + 1);
+                        }}>
                             {pl.common.refresh}
                         </Button>
                         <Button
@@ -1253,11 +1299,11 @@ const ShipmentDetails: React.FC = () => {
                                 <Loop fontSize="small" />
                                 {pl.shipments.actions.reroute}
                             </MenuItem>
-                            <MenuItem className="shipment-document-menu-item" disabled={!shipment} onClick={openNoteForm}>
+                            <MenuItem className="shipment-document-menu-item" disabled={!shipment || shipmentReadOnly} onClick={openNoteForm}>
                                 <ChatBubbleOutline fontSize="small" />
                                 {pl.shipments.actions.addNote}
                             </MenuItem>
-                            <MenuItem className="shipment-document-menu-item" disabled={!shipment || uploadingDocument || loadingDocuments} onClick={openDocumentPicker}>
+                            <MenuItem className="shipment-document-menu-item" disabled={!shipment || shipmentReadOnly || uploadingDocument || loadingDocuments} onClick={openDocumentPicker}>
                                 <DocumentScanner fontSize="small" />
                                 {pl.shipments.actions.addDocument}
                             </MenuItem>
@@ -1320,6 +1366,15 @@ const ShipmentDetails: React.FC = () => {
                     </button>
                 </nav>
 
+                {!loadingShipment && shipment ? (
+                    <ShipmentIncidentCard
+                        shipmentId={shipment.shipmentId.value}
+                        shipmentStatus={shipment.shipmentStatus}
+                        reloadKey={incidentReloadKey}
+                        onOpenIncident={(incidentId) => navigate(`/incidents/${encodeURIComponent(incidentId)}`)}
+                    />
+                ) : null}
+
                 {!loadingShipment && shipment ? <ShipmentReturnSummary returnPackage={returnPackage} unavailable={returnPackageUnavailable} /> : null}
 
                 {loadingShipment ? (
@@ -1343,7 +1398,6 @@ const ShipmentDetails: React.FC = () => {
 
                                         <div className="shipment-dashboard-facts shipment-dashboard-facts-primary">
                                             <div><span>{pl.shipments.summary.tracking}</span><strong>{shipment.trackingNumber?.value || pl.common.dash}</strong></div>
-                                            <div><span>{pl.shipments.summary.id}</span><strong>#{shipment.shipmentId.value}</strong></div>
                                             <div><span>{pl.shipments.summary.type}</span><strong>{pl.shipments.type[shipment.shipmentType]}</strong></div>
                                             <div><span>{pl.shipments.summary.relatedShipment}</span><strong>{shipment.shipmentRelatedId?.value ? `#${shipment.shipmentRelatedId.value}` : pl.common.dash}</strong></div>
                                             <div className="shipment-dashboard-person-fact">
@@ -1357,6 +1411,7 @@ const ShipmentDetails: React.FC = () => {
                                                 <small>{personAddress(recipient)}</small>
                                             </div>
                                             <div><span>{pl.shipments.summary.originDepartment}</span><strong>{originDepartment?.departmentCode?.value || pl.common.dash}</strong></div>
+                                            <div><span>{pl.shipments.summary.currentDepartment}</span><strong>{currentDepartment?.departmentCode?.value || pl.common.dash}</strong></div>
                                             <div>
                                                 <span>{pl.shipments.summary.destination}</span>
                                                 <div className="shipment-destination-control">
@@ -1541,14 +1596,14 @@ const ShipmentDetails: React.FC = () => {
                                                     value={noteDraft}
                                                 />
                                                 <label><input checked={internalNote} onChange={(event) => setInternalNote(event.target.checked)} type="checkbox" /> {pl.shipments.dashboard.internalNote}</label>
-                                                <Button disabled={!noteDraft.trim() || savingNote || loadingNotes || !shipment} onClick={addShipmentNote} startIcon={savingNote ? <CircularProgress size={16} /> : <Add fontSize="small" />}>{pl.shipments.actions.addNote}</Button>
+                                                <Button disabled={!noteDraft.trim() || savingNote || loadingNotes || !shipment || shipmentReadOnly} onClick={addShipmentNote} startIcon={savingNote ? <CircularProgress size={16} /> : <Add fontSize="small" />}>{pl.shipments.actions.addNote}</Button>
                                             </div>
                                         </section>
 
                                         <section className="shipment-dashboard-card shipment-attachments">
                                             <div className="shipment-attachments-header">
                                                 <div className="shipment-dashboard-card-title"><span><DocumentScanner fontSize="small" /></span><Typography variant="h6">{pl.shipments.dashboard.attachments}</Typography></div>
-                                                <Button disabled={uploadingDocument || loadingDocuments || !shipment} onClick={openDocumentPicker} size="small" startIcon={uploadingDocument ? <CircularProgress size={16} /> : <Upload fontSize="small" />} variant="outlined">{pl.shipments.dashboard.addAttachment}</Button>
+                                                <Button disabled={uploadingDocument || loadingDocuments || !shipment || shipmentReadOnly} onClick={openDocumentPicker} size="small" startIcon={uploadingDocument ? <CircularProgress size={16} /> : <Upload fontSize="small" />} variant="outlined">{pl.shipments.dashboard.addAttachment}</Button>
                                             </div>
                                             {loadingDocuments ? <p>{pl.shipments.dashboard.workspace.loadingDocuments}</p> : documentsError ? (
                                                 <p role="alert">{documentsError}</p>
@@ -1857,6 +1912,7 @@ const ShipmentDetails: React.FC = () => {
                 onClose={() => setIncidentReportOpen(false)}
                 onReported={(incidentId) => {
                     setIncidentReportOpen(false);
+                    setIncidentReloadKey((current) => current + 1);
                     setNotice({severity: "success", message: pl.incidents.report.success.replace("{incidentId}", incidentId)});
                 }}
             />

@@ -1,7 +1,16 @@
+import {PackagingTypeDto} from "../../Shipment/dto/ShipmentDto";
+
 export const INCIDENT_CATEGORIES = ["DAMAGED", "MISSING", "INVALID_ADDRESS", "LABEL_ISSUE", "WEIGHT_MISMATCH", "MISSING_DOCUMENTS", "OTHER"] as const;
 export const INCIDENT_SEVERITIES = ["LOW", "MEDIUM", "CRITICAL"] as const;
 export const INCIDENT_STATUSES = ["OPEN", "IN_PROGRESS", "RESOLVED"] as const;
-export const INCIDENT_RESOLUTIONS = ["EXPLAINED", "RETURN_CREATED", "REROUTED", "WRITTEN_OFF"] as const;
+export const INCIDENT_RESOLUTIONS = [
+    "EXPLAINED", "DATA_CORRECTED", "DUPLICATE", "INVALID_REPORT", "CANCELED",
+    "REPACKED", "COSMETIC_DAMAGE_ACCEPTED", "DESTROYED_DISPOSED", "REFUSED_BY_RECIPIENT", "DAMAGE_CLAIM_FILED",
+    "FOUND", "MISSORTED_REDIRECTED", "DELIVERED_WITHOUT_SCAN", "STOLEN", "WRITTEN_OFF",
+    "ADDRESS_CORRECTED", "ADDRESS_OBTAINED", "REDIRECTED_TO_PICKUP_POINT", "RETURN_CREATED",
+    "LABEL_REPRINTED", "MANUALLY_LABELED", "WEIGHT_CORRECTED", "WEIGHT_CORRECTED_SURCHARGE",
+    "DOCUMENTS_RECEIVED", "DOCUMENTS_REGENERATED", "REROUTED",
+] as const;
 
 export type IncidentCategory = typeof INCIDENT_CATEGORIES[number];
 export type IncidentSeverity = typeof INCIDENT_SEVERITIES[number];
@@ -70,7 +79,16 @@ export type ReportIncidentRequest = {
     description: string | null;
 };
 
+export type RepackagingRequest = {
+    packagingType: PackagingTypeDto | null;
+    weightInKilograms: number | null;
+    lengthInCentimeters: number | null;
+    widthInCentimeters: number | null;
+    heightInCentimeters: number | null;
+};
+
 export type ResolveIncidentRequest = {
     resolution: IncidentResolution;
     note: string | null;
+    repackaging?: RepackagingRequest | null;
 };
