@@ -2,6 +2,8 @@ import React, {createContext, ReactNode, useContext, useEffect, useState} from "
 import {useAuthState} from "../../auth/AuthState";
 import OperatorConfigurationService from "../../hooks/OperatorConfigurationService";
 
+export const CAPABILITIES_REFRESH_INTERVAL_MS = 5 * 60 * 1000;
+
 type ReturnsStatus = "loading" | "available" | "unavailable";
 
 type OperatorCapabilitiesContextValue = {
@@ -27,8 +29,10 @@ export function OperatorCapabilitiesProvider({children}: {children: ReactNode}) 
 
         let active = true;
         let latestRequest = 0;
+        let lastRequestedAt = 0;
         const loadCapabilities = () => {
             const request = ++latestRequest;
+            lastRequestedAt = Date.now();
             OperatorConfigurationService.getCurrent()
                 .then((response) => {
                     if (active && request === latestRequest) {
@@ -44,12 +48,20 @@ export function OperatorCapabilitiesProvider({children}: {children: ReactNode}) 
                     }
                 });
         };
+        const refreshWhenStale = () => {
+            if (document.visibilityState === "visible"
+                && Date.now() - lastRequestedAt >= CAPABILITIES_REFRESH_INTERVAL_MS) {
+                loadCapabilities();
+            }
+        };
         loadCapabilities();
-        window.addEventListener("focus", loadCapabilities);
+        window.addEventListener("focus", refreshWhenStale);
+        document.addEventListener("visibilitychange", refreshWhenStale);
 
         return () => {
             active = false;
-            window.removeEventListener("focus", loadCapabilities);
+            window.removeEventListener("focus", refreshWhenStale);
+            document.removeEventListener("visibilitychange", refreshWhenStale);
         };
     }, [identity]);
 
