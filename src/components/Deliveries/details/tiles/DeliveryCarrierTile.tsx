@@ -1,4 +1,5 @@
 import React from "react";
+import {DirectionsCar} from "components/ui/icons";
 import {CarrierDto} from "../../../Carriers/model/Carrier";
 import {courierVehicleOptions, vehicleLabel} from "../../../Couriers/courierOperationalData";
 import {CourierDto} from "../../../Couriers/dto/CourierDto";
@@ -17,7 +18,8 @@ type DeliveryCarrierTileProps = {
 
 function DeliveryCarrierTile({delivery, couriers, carriers, onEdit, editDisabled}: DeliveryCarrierTileProps) {
     const courier = findCourier(couriers, delivery.supplierId);
-    return <DeliveryTile onEdit={onEdit} editDisabled={editDisabled} title={pl.deliveries.details.carrierTitle} rows={[
+    return <DeliveryTile onEdit={onEdit} editDisabled={editDisabled} icon={<DirectionsCar fontSize="small"/>}
+                         title={pl.deliveries.details.carrierTitle} rows={[
         [pl.deliveries.supplierLabel, delivery.supplierId
             ? courierLabel(couriers, delivery.supplierId) : pl.deliveries.details.noCarrier],
         [pl.deliveries.vehicleLabel, delivery.vehicleId

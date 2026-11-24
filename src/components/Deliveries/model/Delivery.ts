@@ -34,6 +34,7 @@ export type Delivery = {
     lifecycleStatus: string;
     originDepartmentId: string | null;
     destinationDepartmentId: string | null;
+    currentDepartmentId: string | null;
     pickupMethod: string | null;
     method: string | null;
     pickupPointId: string | null;

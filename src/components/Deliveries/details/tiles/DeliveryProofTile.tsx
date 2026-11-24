@@ -1,4 +1,5 @@
 import React from "react";
+import {TaskAlt} from "components/ui/icons";
 import pl from "../../../../i18n/translate";
 import {formatDeliveryDateTime} from "../../deliveryLabels";
 import {Delivery, DeliverySignature} from "../../model/Delivery";
@@ -19,7 +20,7 @@ function DeliveryProofTile({delivery, signature}: {delivery: Delivery; signature
     const source = signature?.signature ? signatureImageSource(signature.signature) : null;
     const signedStep = delivery.steps.find((step) => step.signatureId);
     return (
-        <DeliveryTile title={pl.deliveries.details.proofTitle} rows={[
+        <DeliveryTile icon={<TaskAlt fontSize="small"/>} title={pl.deliveries.details.proofTitle} rows={[
             [pl.deliveries.details.signerLabel, signature?.signerName || pl.common.dash],
             [pl.deliveries.details.signedAtLabel, formatDeliveryDateTime(signature?.signedAt)],
             [pl.deliveries.details.signatureMethodLabel, signature

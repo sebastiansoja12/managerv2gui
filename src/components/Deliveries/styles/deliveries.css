@@ -142,18 +142,7 @@
 .dlv-card-section {
     display: grid;
     gap: 0.75rem;
-    padding: 0 20px 18px;
-}
-
-.dlv-pagination {
-    display: flex;
-    gap: 0.5rem;
-}
-
-.dlv-pagination [data-ui="button"] {
-    min-height: 2rem;
-    padding: 0 0.75rem;
-    font-size: 0.75rem;
+    padding: 12px 18px;
 }
 
 .app-main-content .tm-results-layout .tm-orders-table.dlv-table {
@@ -364,24 +353,6 @@ a.dlv-target:hover {
     grid-column: 1 / -1;
 }
 
-.deliveries-tile-heading {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
-    margin: 0 0 0.875rem;
-}
-
-.deliveries-info-tile h3 {
-    margin: 0;
-    font-size: 0.95rem;
-}
-
-.deliveries-tile-heading [data-ui="button"] {
-    min-height: 2rem;
-    padding: 0 0.75rem;
-}
-
 .deliveries-info-tile .deliveries-metadata {
     grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
 }
@@ -394,10 +365,6 @@ a.dlv-target:hover {
     color: var(--primary);
     text-decoration: underline;
     text-underline-offset: 3px;
-}
-
-.deliveries-history-card {
-    min-width: 0;
 }
 
 .deliveries-attempt-details {
@@ -462,27 +429,6 @@ a.dlv-target:hover {
 .deliveries-timeline p {
     margin: 0.25rem 0 0;
     font-size: 0.875rem;
-}
-
-.deliveries-operations {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.75rem;
-}
-
-.deliveries-operations-group {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.deliveries-operations-hint {
-    flex-basis: 100%;
-    margin: 0;
-    color: var(--muted-foreground);
-    font-size: 0.85rem;
 }
 
 .deliveries-step-heading {
@@ -666,28 +612,6 @@ a.dlv-target:hover {
     background: #fff;
 }
 
-.deliveries-tabs {
-    display: flex;
-    gap: 0.25rem;
-    margin-bottom: 1rem;
-    border-bottom: 1px solid var(--border);
-}
-
-.deliveries-tab {
-    padding: 0.6rem 0.9rem;
-    border: 0;
-    border-bottom: 2px solid transparent;
-    background: transparent;
-    color: var(--muted-foreground);
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.deliveries-tab-active {
-    border-bottom-color: var(--primary);
-    color: var(--foreground);
-}
-
 .deliveries-change-history {
     display: grid;
     gap: 0.875rem;
@@ -784,82 +708,6 @@ a.dlv-target:hover {
     color: var(--muted-foreground);
 }
 
-.deliveries-detail-split {
-    display: grid;
-    grid-template-columns: minmax(0, 2fr) minmax(22rem, 1fr);
-    align-items: stretch;
-    gap: 1.25rem;
-}
-
-.deliveries-history-aside {
-    display: flex;
-    min-width: 0;
-}
-
-.deliveries-history-aside > .deliveries-history-card {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    gap: 0;
-    position: sticky;
-    top: 1rem;
-    flex: 1;
-    align-self: stretch;
-    max-height: calc(100dvh - 2rem);
-    overflow-y: auto;
-}
-
-.deliveries-dashboard {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    align-content: start;
-    align-items: stretch;
-    gap: 1.25rem;
-}
-
-.deliveries-cell {
-    display: flex;
-    min-width: 0;
-}
-
-.deliveries-cell > * {
-    flex: 1;
-    min-width: 0;
-}
-
-.deliveries-cell-wide {
-    grid-column: span 2;
-}
-
-.deliveries-cell-full {
-    grid-column: 1 / -1;
-}
-
-.deliveries-dashboard .deliveries-info-tile {
-    padding: 1.25rem;
-    border-radius: 1rem;
-    background: var(--card);
-}
-
-.deliveries-dashboard .deliveries-history-card {
-    margin: 0;
-}
-
-.deliveries-dashboard .deliveries-map {
-    height: 320px;
-}
-
-@media (max-width: 1100px) {
-    .deliveries-detail-split {
-        grid-template-columns: minmax(0, 1fr);
-    }
-
-    .deliveries-history-aside > .deliveries-history-card {
-        position: static;
-        max-height: none;
-    }
-}
-
 @media (max-width: 700px) {
     .deliveries-page {
         padding: 1rem;
@@ -873,14 +721,8 @@ a.dlv-target:hover {
 
     .deliveries-detail-layout,
     .deliveries-info-grid,
-    .deliveries-dashboard,
     .deliveries-progress ol {
         grid-template-columns: minmax(0, 1fr);
-    }
-
-    .deliveries-cell-wide,
-    .deliveries-cell-full {
-        grid-column: auto;
     }
 }
 
@@ -894,5 +736,287 @@ a.dlv-target:hover {
     .deliveries-info-grid,
     .deliveries-attempt-details {
         grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* Delivery details: same header, cards and right rail as the shipment details view. */
+.dlv-detail-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 0.34fr);
+    align-items: start;
+    gap: 16px;
+    min-width: 0;
+}
+
+.dlv-detail-main {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    min-width: 0;
+}
+
+.dlv-detail-card-wide {
+    grid-column: 1 / -1;
+}
+
+/* Header: the delivery id is a long UUID, so keep it on one line next to a single row of actions. */
+.dlv-detail-page .shipments-title {
+    min-width: 0;
+}
+
+.app-main-content .dlv-detail-page .shipments-title [data-ui="typography"][data-variant="h4"] {
+    font-size: clamp(1rem, 1.2vw, 1.25rem) !important;
+    overflow-wrap: anywhere;
+}
+
+.dlv-detail-page .shipment-edit-header-actions {
+    flex-shrink: 0;
+    flex-wrap: nowrap;
+}
+
+.dlv-detail-page .shipment-dashboard-card-header [data-ui="button"] svg {
+    width: 14px;
+    height: 14px;
+}
+
+/* Half-width cards list their facts as compact label / value rows. */
+.dlv-detail-rows {
+    margin: 0;
+    padding: 6px 0;
+}
+
+.dlv-detail-rows > div {
+    display: grid;
+    grid-template-columns: minmax(7.5rem, 0.42fr) minmax(0, 1fr);
+    align-items: baseline;
+    gap: 12px;
+    padding: 9px 18px;
+}
+
+.dlv-detail-rows > div + div {
+    border-top: 1px solid color-mix(in srgb, var(--foreground) 7%, transparent);
+}
+
+.dlv-detail-rows dt {
+    color: var(--muted-foreground);
+    font-size: 0.78rem;
+    font-weight: 400;
+}
+
+.dlv-detail-rows dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+    color: var(--foreground);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.dlv-detail-page .shipment-dashboard-card-header {
+    gap: 12px;
+}
+
+.dlv-detail-page .shipment-dashboard-card-header [data-ui="button"] {
+    border-radius: 999px !important;
+    font-size: 0.78rem !important;
+    min-height: 30px !important;
+    padding-inline: 12px !important;
+}
+
+/* Fact cells share hairlines; the negative margin hides the outer right and bottom lines under the card edge. */
+.dlv-detail-facts {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin: 0 -1px -1px 0;
+}
+
+/* The last fact fills the rest of its row, so no row ends with empty cells. */
+.dlv-detail-facts > div:last-child:nth-child(4n + 1) {
+    grid-column: span 4;
+}
+
+.dlv-detail-facts > div:last-child:nth-child(4n + 2) {
+    grid-column: span 3;
+}
+
+.dlv-detail-facts > div:last-child:nth-child(4n + 3) {
+    grid-column: span 2;
+}
+
+.dlv-detail-facts > div {
+    display: grid;
+    align-content: start;
+    gap: 6px;
+    padding: 12px 18px;
+    border-right: 1px solid color-mix(in srgb, var(--foreground) 7%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--foreground) 7%, transparent);
+}
+
+.dlv-detail-facts dt,
+.dlv-detail-page .deliveries-attempt-details dt,
+.dlv-detail-page .deliveries-change-list dt {
+    color: var(--muted-foreground);
+    font-size: 0.78rem;
+    font-weight: 400;
+}
+
+.dlv-detail-facts dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+    color: var(--foreground);
+    font-size: 0.94rem;
+    font-weight: 500;
+}
+
+.dlv-detail-card-body,
+.dlv-detail-card > .deliveries-tile-empty,
+.dlv-detail-card > .deliveries-related-list {
+    padding: 16px 18px;
+}
+
+.dlv-detail-page .deliveries-map {
+    height: 320px;
+    border-radius: 10px;
+}
+
+.dlv-detail-page .deliveries-progress {
+    padding: 14px 18px;
+}
+
+.dlv-detail-page .deliveries-progress li[data-state="done"] .deliveries-progress-dot {
+    border-color: var(--foreground);
+    background: var(--foreground);
+    color: var(--background);
+}
+
+.dlv-detail-page .deliveries-progress li[data-state="done"]::after {
+    background: var(--foreground);
+}
+
+.dlv-detail-page .deliveries-progress li[data-state="current"] .deliveries-progress-dot {
+    border-color: var(--foreground);
+    color: var(--foreground);
+}
+
+.dlv-detail-page .deliveries-progress-dot {
+    width: 1.6rem;
+    height: 1.6rem;
+    border-width: 1px;
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+/* Right rail: attempts and change history as a timeline, like the shipment route history. */
+.dlv-detail-rail {
+    position: sticky;
+    top: 1rem;
+    min-width: 0;
+}
+
+.dlv-detail-history {
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100dvh - 2rem);
+}
+
+.dlv-detail-history .shipment-dashboard-card-header {
+    flex: 0 0 auto;
+}
+
+.dlv-detail-history-body {
+    overflow-y: auto;
+    padding: 18px 18px 20px;
+}
+
+.dlv-detail-history .deliveries-timeline,
+.dlv-detail-page .deliveries-change-history {
+    gap: 0;
+}
+
+.dlv-detail-history .deliveries-timeline li,
+.dlv-detail-page .deliveries-change-history li {
+    padding: 0 0 18px;
+    border: 0;
+    border-radius: 0;
+}
+
+.dlv-detail-history .deliveries-timeline li + li,
+.dlv-detail-page .deliveries-change-history li + li {
+    padding-top: 18px;
+    border-top: 1px solid var(--border);
+}
+
+.dlv-detail-page :is(.deliveries-timeline, .deliveries-change-history) li:last-child {
+    padding-bottom: 0;
+}
+
+.dlv-detail-history .deliveries-step-number {
+    width: 1.6rem;
+    height: 1.6rem;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--foreground);
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.dlv-detail-history .deliveries-timeline li {
+    grid-template-columns: 1.6rem 1fr;
+}
+
+.dlv-detail-history .deliveries-step-heading strong {
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.dlv-detail-history .deliveries-attempt-details dd {
+    font-size: 0.86rem;
+    font-weight: 500;
+}
+
+@media (max-width: 1120px) {
+    .dlv-detail-page .shipment-edit-header-actions {
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 1180px) {
+    .dlv-detail-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .dlv-detail-rail {
+        position: static;
+    }
+
+    .dlv-detail-history {
+        max-height: none;
+    }
+}
+
+@media (max-width: 820px) {
+    .dlv-detail-main {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .dlv-detail-facts {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .dlv-detail-facts > div:last-child:nth-child(n) {
+        grid-column: auto;
+    }
+
+    .dlv-detail-facts > div:last-child:nth-child(2n + 1) {
+        grid-column: span 2;
+    }
+}
+
+@media (max-width: 520px) {
+    .dlv-detail-facts {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .dlv-detail-facts > div:last-child:nth-child(n) {
+        grid-column: auto;
     }
 }

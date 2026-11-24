@@ -1,4 +1,5 @@
 import React from "react";
+import {PersonPinCircle} from "components/ui/icons";
 import {Link} from "react-router-dom";
 import pl from "../../../../i18n/translate";
 import {ShipmentDto} from "../../../Shipment/dto/ShipmentDto";
@@ -9,7 +10,7 @@ import DeliveryTile from "./DeliveryTile";
 
 function DeliveryTargetTile({delivery, shipment}: {delivery: Delivery; shipment: ShipmentDto | null}) {
     const recipient = shipment?.recipient;
-    return <DeliveryTile title={pl.deliveries.destinationCardTitle} rows={[
+    return <DeliveryTile wide icon={<PersonPinCircle fontSize="small"/>} title={pl.deliveries.destinationCardTitle} rows={[
         [pl.deliveries.columns.target, delivery.targetType === "PALLET"
             ? <Link className="deliveries-shipment-link" to={deliveryTargetPath(delivery) as string}>
                 {`${deliveryTargetLabel(delivery.targetType)} · ${delivery.targetId}`} ↗</Link>

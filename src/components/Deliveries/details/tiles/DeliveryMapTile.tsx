@@ -1,10 +1,12 @@
 import React, {useEffect, useMemo, useRef} from "react";
 import * as L from "leaflet";
+import {Map as MapIcon} from "components/ui/icons";
 import "leaflet/dist/leaflet.css";
 import Department from "../../../../class/depots/Department";
 import pl from "../../../../i18n/translate";
 import {PickupPointDetails} from "../../../PickupPoints/model/PickupPoint";
 import {Delivery} from "../../model/Delivery";
+import {DeliveryCard} from "./DeliveryTile";
 
 type DeliveryMapPoint = {
     key: string;
@@ -99,19 +101,18 @@ function DeliveryMapTile({delivery, departments, pickupPoints}: DeliveryMapTileP
 
     const title = pl.deliveries.details.mapTitle;
     return (
-        <article className="deliveries-info-tile deliveries-info-tile-wide" aria-label={title}>
-            <div className="deliveries-tile-heading"><h3>{title}</h3></div>
+        <DeliveryCard wide icon={<MapIcon fontSize="small"/>} title={title}>
             {points.length === 0 ? <p className="deliveries-tile-empty">{pl.deliveries.details.mapUnavailable}</p> : (
-                <>
+                <div className="dlv-detail-card-body">
                     <div ref={mapElementRef} className="deliveries-map"/>
                     <ul className="deliveries-map-legend">
                         {points.map((point) => (
                             <li key={point.key}><span style={{background: point.color}}/>{`${point.role}: ${point.label}`}</li>
                         ))}
                     </ul>
-                </>
+                </div>
             )}
-        </article>
+        </DeliveryCard>
     );
 }
 

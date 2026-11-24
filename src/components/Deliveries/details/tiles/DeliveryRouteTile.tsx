@@ -1,4 +1,5 @@
 import React from "react";
+import {Route} from "components/ui/icons";
 import Department from "../../../../class/depots/Department";
 import pl from "../../../../i18n/translate";
 import {PickupPointDetails} from "../../../PickupPoints/model/PickupPoint";
@@ -24,7 +25,7 @@ const pointValue = (pickupPoints: Record<string, PickupPointDetails>, pickupPoin
 };
 
 function DeliveryRouteTile({delivery, departments, pickupPoints, onEdit, editDisabled}: DeliveryRouteTileProps) {
-    return <DeliveryTile onEdit={onEdit} editDisabled={editDisabled} title={pl.deliveries.details.routeTitle} rows={[
+    return <DeliveryTile wide icon={<Route fontSize="small"/>} onEdit={onEdit} editDisabled={editDisabled} title={pl.deliveries.details.routeTitle} rows={[
         [pl.shipments.summary.originDepartment, departmentCodeLabel(departments, delivery.originDepartmentId)],
         [pl.shipments.summary.destination, destinationDepartmentLabel(departments, delivery)],
         [pl.shipments.form.fields.pickupMethod, pickupMethodLabel(delivery.pickupMethod)],

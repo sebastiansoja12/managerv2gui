@@ -104,6 +104,7 @@ const delivery: Delivery = {
     lifecycleStatus: "CREATED",
     originDepartmentId: "3",
     destinationDepartmentId: "5",
+    currentDepartmentId: "3",
     pickupMethod: "PICKUP_POINT",
     method: "COURIER",
     pickupPointId: null,
@@ -214,10 +215,12 @@ describe("Deliveries", () => {
             .getByText(pl.deliveries.courierLabel)).toBeInTheDocument();
         expect(screen.getByText("12")).toBeInTheDocument();
         expect(screen.getByText(pl.deliveries.attemptDateLabel)).toBeInTheDocument();
+        openTab(pl.deliveries.details.routeTitle);
         expect(screen.getByText(pl.shipments.summary.originDepartment).nextSibling).toHaveTextContent("KT1");
         expect(screen.getByText(pl.shipments.summary.destination).nextSibling).toHaveTextContent("WAW1");
         expect(screen.getByText(pl.shipments.form.fields.pickupMethod).nextSibling)
             .toHaveTextContent(pl.shipments.pickupMethod.PICKUP_POINT);
+        openTab(pl.deliveries.destinationCardTitle);
         expect(screen.getByRole("link", {name: /9223372036854775001/})).toHaveAttribute("href", "/shipments/9223372036854775001/edit");
         expect(mockedService.get).toHaveBeenCalledWith(delivery.id);
     });
@@ -243,8 +246,10 @@ describe("Deliveries", () => {
         await screen.findByText(delivery.shipmentId as string);
         fireEvent.click(screen.getByText(delivery.id.slice(0, 8)));
         fireEvent.click(screen.getByRole("button", {name: pl.deliveries.edit}));
-        await screen.findByRole("region", {name: pl.deliveries.details.operationsTitle});
+        await screen.findByRole("navigation", {name: pl.deliveries.details.progressTitle});
     };
+
+    const openTab = (label: string) => fireEvent.click(screen.getByRole("tab", {name: label}));
 
     const chooseOption = (label: string, option: string) => {
         fireEvent.mouseDown(screen.getByRole("combobox", {name: label}));
@@ -317,6 +322,7 @@ describe("Deliveries", () => {
 
         await openDetails();
         expect(screen.getByText(pl.deliveries.details.lockedHint)).toBeInTheDocument();
+        openTab(pl.deliveries.details.routeTitle);
         expect(screen.getByRole("button", {name: `${pl.deliveries.edit} · ${pl.deliveries.details.routeTitle}`})).toBeDisabled();
         fireEvent.click(screen.getByRole("button", {name: pl.deliveries.details.stepActions.replace("{step}", "1")}));
         expect(screen.getByRole("menuitem", {name: pl.deliveries.details.stepCorrectStatus})).toBeDisabled();
@@ -354,11 +360,12 @@ describe("Deliveries", () => {
         renderDeliveries();
 
         await openDetails();
-        expect(await screen.findByText("TRK-555")).toBeInTheDocument();
-        expect(screen.getByText("Anna Kowalska")).toBeInTheDocument();
-        expect(screen.getByText("Anna K.")).toBeInTheDocument();
+        expect(await screen.findByText("Anna K.")).toBeInTheDocument();
         expect(screen.getByText("1 / 3")).toBeInTheDocument();
         expect(screen.getByText(pl.deliveries.details.sla.OVERDUE)).toBeInTheDocument();
+        openTab(pl.deliveries.destinationCardTitle);
+        expect(await screen.findByText("TRK-555")).toBeInTheDocument();
+        expect(screen.getByText("Anna Kowalska")).toBeInTheDocument();
         const related = await screen.findByRole("link", {name: /100/});
         expect(related).toHaveAttribute("href", "/deliveries/source-delivery/edit");
         expect(screen.getByText(pl.deliveries.details.relation.SOURCE)).toBeInTheDocument();
@@ -383,6 +390,7 @@ describe("Deliveries", () => {
         renderDeliveries();
 
         await openDetails();
+        openTab(pl.deliveries.details.routeTitle);
         fireEvent.click(screen.getByRole("button", {name: `${pl.deliveries.edit} · ${pl.deliveries.details.routeTitle}`}));
         fireEvent.change(screen.getByLabelText(
             `${pl.shipments.summary.deliveryPickupPoint} · ${pl.deliveries.details.searchPickupPoint}`),
@@ -420,6 +428,7 @@ describe("Deliveries", () => {
         renderDeliveries();
 
         await screen.findByText(delivery.shipmentId as string);
+        fireEvent.click(screen.getByRole("button", {name: pl.deliveries.filters.title}));
         fireEvent.click(screen.getByRole("checkbox", {name: pl.deliveries.filters.hideCanceled}));
         await waitFor(() => expect(mockedService.query).toHaveBeenLastCalledWith(0, 25,
             expect.objectContaining({hideCanceled: false})));

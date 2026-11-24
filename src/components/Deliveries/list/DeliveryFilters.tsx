@@ -7,6 +7,7 @@ import {deliveryLifecycleLabel, deliveryMethodLabel, deliveryStatusLabel, delive
     deliveryTypeLabel} from "../deliveryLabels";
 import {deliveryMethods, deliveryStatuses} from "../details/deliveryDetails";
 import {activeFilterCount, defaultDeliveryListFilters, DeliveryListFilters} from "./deliveryListModel";
+import DepartmentPicker from "../../Departments/DepartmentPicker";
 
 type DeliveryFiltersProps = {
     filters: DeliveryListFilters;
@@ -63,11 +64,9 @@ function DeliveryFilters({filters, departments, onChange}: DeliveryFiltersProps)
                     (value) => set({targetType: value}))}
                 {select(labels.method, filters.method, deliveryMethods, (value) => deliveryMethodLabel(value),
                     (value) => set({method: value}))}
-                {select(labels.department, filters.departmentId,
-                    departments.map((department) => String(department.departmentId)),
-                    (value) => departments.find((department) => String(department.departmentId) === value)
-                        ?.departmentCode?.value || value,
-                    (value) => set({departmentId: value}))}
+                <DepartmentPicker floating departments={departments} label={labels.department} placeholder={labels.all}
+                                  value={filters.departmentId || ""}
+                                  onChange={(value) => set({departmentId: value || undefined})}/>
                 <TextField size="small" type="date" label={labels.createdFrom} value={filters.createdFrom || ""}
                            onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
                                set({createdFrom: event.target.value || undefined})}/>

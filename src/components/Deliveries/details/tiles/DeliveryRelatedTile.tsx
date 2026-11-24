@@ -3,12 +3,12 @@ import {Link} from "react-router-dom";
 import pl from "../../../../i18n/translate";
 import {deliveryLifecycleLabel, deliveryTargetLabel} from "../../deliveryLabels";
 import {DeliveryRelation} from "../../model/Delivery";
+import {DeliveryCard} from "./DeliveryTile";
 
 function DeliveryRelatedTile({relations}: {relations: DeliveryRelation[]}) {
     const title = pl.deliveries.details.relatedTitle;
     return (
-        <article className="deliveries-info-tile deliveries-info-tile-wide" aria-label={title}>
-            <div className="deliveries-tile-heading"><h3>{title}</h3></div>
+        <DeliveryCard wide title={title}>
             {relations.length === 0 ? <p className="deliveries-tile-empty">{pl.deliveries.details.noRelated}</p> : (
                 <ul className="deliveries-related-list">
                     {relations.map(({relation, delivery}) => (
@@ -21,7 +21,7 @@ function DeliveryRelatedTile({relations}: {relations: DeliveryRelation[]}) {
                     ))}
                 </ul>
             )}
-        </article>
+        </DeliveryCard>
     );
 }
 

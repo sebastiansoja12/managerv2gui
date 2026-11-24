@@ -1,4 +1,5 @@
 import React from "react";
+import {LocalShipping} from "components/ui/icons";
 import pl from "../../../../i18n/translate";
 import {deliveryLifecycleLabel, deliveryStatusLabel, deliveryTypeLabel} from "../../deliveryLabels";
 import {Delivery} from "../../model/Delivery";
@@ -14,9 +15,8 @@ type DeliveryStatusTileProps = {
 
 function DeliveryStatusTile({delivery, editDisabled, onOpen}: DeliveryStatusTileProps) {
     const limitReached = attemptLimitReached(delivery);
-    return <DeliveryTile wide title={pl.deliveries.deliveryCardTitle}
+    return <DeliveryTile wide icon={<LocalShipping fontSize="small"/>} title={pl.deliveries.deliveryCardTitle}
                          action={<DeliveryLifecycleMenu disabled={editDisabled} onOpen={onOpen}/>} rows={[
-        [pl.deliveries.columns.id, delivery.id],
         [pl.deliveries.columns.type, deliveryTypeLabel(delivery.type)],
         [pl.deliveries.columns.status, deliveryStatusLabel(delivery.deliveryStatus)],
         [pl.deliveries.lifecycleLabel, deliveryLifecycleLabel(delivery.lifecycleStatus)],

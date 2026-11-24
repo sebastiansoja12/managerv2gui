@@ -1,7 +1,7 @@
 import React, {useCallback, useEffect, useState} from "react";
 import {Alert, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, MenuItem, TextField,
     Typography} from "components/ui";
-import {Refresh} from "components/ui/icons";
+import {FilterList, Refresh} from "components/ui/icons";
 import {useNavigate} from "react-router-dom";
 import {getBackendErrorMessage} from "../../api/errorMessage";
 import Department from "../../class/depots/Department";
@@ -39,6 +39,7 @@ function Deliveries({variant = "all"}: DeliveriesProps) {
     const [reloadKey, setReloadKey] = useState(0);
     const [deliveries, setDeliveries] = useState<DeliveryListItem[]>([]);
     const [selectedId, setSelectedId] = useState<string | null>(null);
+    const [filtersExpanded, setFiltersExpanded] = useState(false);
     const [departments, setDepartments] = useState<Department[]>([]);
     const [deliveryToCancel, setDeliveryToCancel] = useState<DeliveryListItem | null>(null);
     const [canceling, setCanceling] = useState(false);
@@ -169,50 +170,43 @@ function Deliveries({variant = "all"}: DeliveriesProps) {
     };
 
     return (
-        <div className="tm-page tm-page-shipment-catalog dlv-page">
+        <div className="tm-page tm-page-shipment-catalog tm-page-shipment-list dlv-page">
             <div className="tm-content">
-                <div className="tm-top-row">
-                    <div className="tm-page-heading">
-                        <span className="tm-heading-kicker">{pl.common.brand}</span>
-                        <Typography variant="h4">
-                            {incomplete ? pl.navigation.incompleteDeliveries : pl.deliveries.title}
-                        </Typography>
-                        <p>{incomplete ? pl.deliveries.incomplete.subtitle : pl.deliveries.subtitle}</p>
-                    </div>
-                    <div className="tm-top-actions">
-                        <Button className="tm-refresh" variant="outlined" startIcon={<Refresh/>} disabled={loading}
-                                onClick={() => setReloadKey((current) => current + 1)}>
-                            {pl.common.refresh}
-                        </Button>
-                    </div>
-                </div>
-
                 <section className="tm-card tm-orders-card" aria-label={pl.deliveries.listTitle}>
                     <div className="tm-orders-header">
-                        <Typography variant="h5">
-                            {incomplete ? pl.deliveries.incomplete.listTitle : pl.deliveries.listTitle}
-                        </Typography>
-                        <div className="dlv-page-size">
-                            <TextField select size="small" label={pl.deliveries.filters.pageSize} value={String(pageSize)}
-                                       onChange={(event: React.ChangeEvent<HTMLSelectElement>) => {
-                                           setPageSize(Number(event.target.value));
-                                           setPage(0);
-                                       }}>
-                                {deliveryPageSizes.map((size) => <MenuItem key={size} value={String(size)}>{size}</MenuItem>)}
-                            </TextField>
+                        <div className="tm-orders-title">
+                            <Typography variant="h5">
+                                {incomplete ? pl.navigation.incompleteDeliveries : pl.deliveries.title}
+                            </Typography>
+                        </div>
+                        <div className="tm-toolbar-actions">
+                            <Button aria-expanded={filtersExpanded} startIcon={<FilterList/>} variant="outlined"
+                                    onClick={() => setFiltersExpanded((expanded) => !expanded)}>
+                                {pl.deliveries.filters.title}
+                            </Button>
+                            <Button startIcon={<Refresh/>} variant="outlined" disabled={loading}
+                                    onClick={() => setReloadKey((current) => current + 1)}>
+                                {pl.common.refresh}
+                            </Button>
                         </div>
                     </div>
-                    <div className="dlv-card-section">
-                        <DeliveryFilters filters={filters} departments={departments} onChange={changeFilters}/>
-                        {exportError && <Alert severity="error">{exportError}</Alert>}
-                        {resolveNotice && <Alert severity="success">{resolveNotice}</Alert>}
-                        {resolveError && <Alert severity="error">{resolveError}</Alert>}
-                        {error && <Alert severity="error" action={
-                            <Button variant="text" onClick={() => setReloadKey((current) => current + 1)}>
-                                {pl.deliveries.retry}
-                            </Button>
-                        }>{error}</Alert>}
-                    </div>
+                    {filtersExpanded ? (
+                        <div className="dlv-card-section">
+                            <DeliveryFilters filters={filters} departments={departments} onChange={changeFilters}/>
+                        </div>
+                    ) : null}
+                    {exportError || resolveNotice || resolveError || error ? (
+                        <div className="dlv-card-section">
+                            {exportError && <Alert severity="error">{exportError}</Alert>}
+                            {resolveNotice && <Alert severity="success">{resolveNotice}</Alert>}
+                            {resolveError && <Alert severity="error">{resolveError}</Alert>}
+                            {error && <Alert severity="error" action={
+                                <Button variant="text" onClick={() => setReloadKey((current) => current + 1)}>
+                                    {pl.deliveries.retry}
+                                </Button>
+                            }>{error}</Alert>}
+                        </div>
+                    ) : null}
                     {loading ? (
                         <div className="deliveries-state"><CircularProgress size={24}/>{pl.deliveries.loading}</div>
                     ) : !error && deliveries.length === 0 ? (
@@ -238,13 +232,23 @@ function Deliveries({variant = "all"}: DeliveriesProps) {
                         </div>
                     ) : null}
                     <div className="tm-table-footer">
-                        <span>{pl.deliveries.page.replace("{page}", String(page + 1))}</span>
-                        <div className="dlv-pagination">
-                            <Button variant="outlined" disabled={loading || page === 0}
-                                    onClick={() => setPage((current) => current - 1)}>{pl.deliveries.previous}</Button>
-                            <Button variant="outlined" disabled={loading || !hasNextPage}
-                                    onClick={() => setPage((current) => current + 1)}>{pl.deliveries.next}</Button>
+                        <div className="dlv-page-size">
+                            <TextField select size="small" label={pl.deliveries.filters.pageSize} value={String(pageSize)}
+                                       onChange={(event: React.ChangeEvent<HTMLSelectElement>) => {
+                                           setPageSize(Number(event.target.value));
+                                           setPage(0);
+                                       }}>
+                                {deliveryPageSizes.map((size) => <MenuItem key={size} value={String(size)}>{size}</MenuItem>)}
+                            </TextField>
                         </div>
+                        <nav aria-label={pl.deliveries.page.replace("{page}", String(page + 1))} className="tm-pagination">
+                            <button aria-label={pl.deliveries.previous} disabled={loading || page === 0}
+                                    onClick={() => setPage((current) => current - 1)} type="button">‹</button>
+                            <button aria-current="page" className="tm-page-active" disabled={loading}
+                                    type="button">{page + 1}</button>
+                            <button aria-label={pl.deliveries.next} disabled={loading || !hasNextPage}
+                                    onClick={() => setPage((current) => current + 1)} type="button">›</button>
+                        </nav>
                     </div>
                 </section>
 

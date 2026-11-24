@@ -1,4 +1,5 @@
 import React from "react";
+import {History} from "components/ui/icons";
 import pl from "../../../../i18n/translate";
 import {deliveryMethodLabel, formatDeliveryDateTime} from "../../deliveryLabels";
 import {Delivery} from "../../model/Delivery";
@@ -26,7 +27,7 @@ function DeliveryConditionsTile({delivery, onEdit, editDisabled, now = new Date(
     const planned = delivery.plannedAt ? new Date(delivery.plannedAt).getTime() : null;
     const reference = delivery.deliveredAt ? new Date(delivery.deliveredAt).getTime() : now.getTime();
     const difference = planned === null ? null : planned - reference;
-    return <DeliveryTile onEdit={onEdit} editDisabled={editDisabled}
+    return <DeliveryTile wide icon={<History fontSize="small"/>} onEdit={onEdit} editDisabled={editDisabled}
                          title={pl.deliveries.details.conditionsScheduleTitle} rows={[
         [pl.deliveries.methodLabel, deliveryMethodLabel(delivery.method)],
         [pl.deliveries.details.signatureRequiredLabel,

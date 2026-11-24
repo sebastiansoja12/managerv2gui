@@ -18,7 +18,8 @@ const step = (stepNumber: number, outcome: string) => ({
 
 const delivery = (overrides: Partial<Delivery> = {}): Delivery => ({
     id: "d-1", targetType: "SHIPMENT", targetId: "1", shipmentId: "1", type: "OUTBOUND", deliveryStatus: "DEPOT",
-    lifecycleStatus: "CREATED", originDepartmentId: "3", destinationDepartmentId: "5", pickupMethod: null,
+    lifecycleStatus: "CREATED", originDepartmentId: "3", destinationDepartmentId: "5", currentDepartmentId: "3",
+    pickupMethod: null,
     method: "COURIER", pickupPointId: null, deliveryPickupPointId: "pp-1", supplierId: null, vehicleId: null,
     signatureRequired: false, instructions: null, createdAt: "2026-10-01T08:00:00", plannedAt: null,
     deliveredAt: null, attemptLimit: 2, steps: [step(1, "IN_PROGRESS")], ...overrides,

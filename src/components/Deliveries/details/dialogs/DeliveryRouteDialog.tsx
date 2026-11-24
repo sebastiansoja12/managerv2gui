@@ -9,6 +9,7 @@ import {pickupMethods} from "../deliveryDetails";
 import {pickupPointLabel} from "../pickupPointLabels";
 import DeliveryDialogFrame from "./DeliveryDialogFrame";
 import PickupPointPicker from "./PickupPointPicker";
+import DepartmentPicker from "../../../Departments/DepartmentPicker";
 
 type DeliveryRouteDialogProps = {
     delivery: Delivery;
@@ -32,16 +33,6 @@ function DeliveryRouteDialog({delivery, departments, pickupPoints, busy, onClose
         useState(pickupPointLabel(pickupPoints, delivery.deliveryPickupPointId));
     const [validationError, setValidationError] = useState<string | null>(null);
 
-    const departmentOptions = (selected: string) => [
-        <MenuItem key="" value="">{pl.common.dash}</MenuItem>,
-        ...(selected && !departments.some((department) => String(department.departmentId) === selected)
-            ? [<MenuItem key={selected} value={selected}>{selected}</MenuItem>] : []),
-        ...departments.map((department) => (
-            <MenuItem key={department.departmentId} value={String(department.departmentId)}>
-                {department.departmentCode?.value || department.departmentId}</MenuItem>
-        )),
-    ];
-
     const submit = () => {
         const points = [pickupPointId.trim(), deliveryPickupPointId.trim()];
         if (points.some((point) => point && !uuidPattern.test(point))) {
@@ -60,14 +51,10 @@ function DeliveryRouteDialog({delivery, departments, pickupPoints, busy, onClose
     return (
         <DeliveryDialogFrame title={pl.deliveries.details.routeTitle} busy={busy} validationError={validationError}
                              onClose={onClose} onSubmit={submit}>
-            <TextField select size="small" label={pl.shipments.summary.originDepartment} value={origin}
-                       onChange={(event: React.ChangeEvent<HTMLSelectElement>) => setOrigin(event.target.value)}>
-                {departmentOptions(origin)}
-            </TextField>
-            <TextField select size="small" label={pl.shipments.summary.destination} value={destination}
-                       onChange={(event: React.ChangeEvent<HTMLSelectElement>) => setDestination(event.target.value)}>
-                {departmentOptions(destination)}
-            </TextField>
+            <DepartmentPicker floating departments={departments} label={pl.shipments.summary.originDepartment} value={origin}
+                              onChange={setOrigin}/>
+            <DepartmentPicker floating departments={departments} label={pl.shipments.summary.destination} value={destination}
+                              onChange={setDestination}/>
             <TextField select size="small" label={pl.shipments.form.fields.pickupMethod} value={pickupMethod}
                        onChange={(event: React.ChangeEvent<HTMLSelectElement>) => setPickupMethod(event.target.value)}>
                 <MenuItem value="">{pl.common.dash}</MenuItem>

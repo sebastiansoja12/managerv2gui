@@ -7,7 +7,7 @@ function DeliveryLifecycleProgress({delivery}: {delivery: Delivery}) {
     const canceled = delivery.lifecycleStatus === "CANCELED";
     const currentIndex = deliveryLifecycleStages.indexOf(deliveryLifecycleStage(delivery));
     return (
-        <nav className="deliveries-card deliveries-progress" aria-label={pl.deliveries.details.progressTitle}>
+        <nav className="shipment-dashboard-card deliveries-progress" aria-label={pl.deliveries.details.progressTitle}>
             <ol>
                 {deliveryLifecycleStages.map((stage, index) => {
                     const state = canceled ? (index <= currentIndex ? "canceled" : "pending")
