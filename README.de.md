@@ -66,6 +66,10 @@ Dieselben Ansichten in drei der verfügbaren Designs. Ein Klick auf ein Vorschau
 | Prozesse | Prozessprotokoll der Microservices mit Status | [Hell](docs/screenshots/de/light/processes.png) | [Graphit](docs/screenshots/de/graphite/processes.png) | [Lager](docs/screenshots/de/warehouse/processes.png) |
 | Chat | Organisationschat mit Mitarbeiterverzeichnis | [Hell](docs/screenshots/de/light/chat.png) | [Graphit](docs/screenshots/de/graphite/chat.png) | [Lager](docs/screenshots/de/warehouse/chat.png) |
 | Globale Konfiguration | Betreiberweite Einstellungen nach Bereichen | [Hell](docs/screenshots/de/light/global-configuration.png) | [Graphit](docs/screenshots/de/graphite/global-configuration.png) | [Lager](docs/screenshots/de/warehouse/global-configuration.png) |
+| Kuriere | Kurierliste mit Führerschein-, Zertifikats- und Fahrzeugstatus | [Hell](docs/screenshots/de/light/couriers.png) | [Graphit](docs/screenshots/de/graphite/couriers.png) | [Lager](docs/screenshots/de/warehouse/couriers.png) |
+| Benutzer | Benutzer des Betreibers mit Login, E-Mail, Niederlassung und Rolle | [Hell](docs/screenshots/de/light/users.png) | [Graphit](docs/screenshots/de/graphite/users.png) | [Lager](docs/screenshots/de/warehouse/users.png) |
+| Vorfälle | Sendungsvorfälle mit Schweregrad, Status und Verantwortlichem | [Hell](docs/screenshots/de/light/incidents.png) | [Graphit](docs/screenshots/de/graphite/incidents.png) | [Lager](docs/screenshots/de/warehouse/incidents.png) |
+| Analytik | Erlöse, Kosten, Ergebnis und Prognose der Organisation | [Hell](docs/screenshots/de/light/analytics.png) | [Graphit](docs/screenshots/de/graphite/analytics.png) | [Lager](docs/screenshots/de/warehouse/analytics.png) |
 
 <details>
 <summary>Alle Ansichten im Design Hell</summary>
@@ -84,6 +88,10 @@ Dieselben Ansichten in drei der verfügbaren Designs. Ein Klick auf ein Vorschau
   <img src="docs/screenshots/de/light/processes.png" alt="Prozesse – Hell" width="49%">
   <img src="docs/screenshots/de/light/chat.png" alt="Chat – Hell" width="49%">
   <img src="docs/screenshots/de/light/global-configuration.png" alt="Globale Konfiguration – Hell" width="49%">
+  <img src="docs/screenshots/de/light/couriers.png" alt="Kuriere – Hell" width="49%">
+  <img src="docs/screenshots/de/light/users.png" alt="Benutzer – Hell" width="49%">
+  <img src="docs/screenshots/de/light/incidents.png" alt="Vorfälle – Hell" width="49%">
+  <img src="docs/screenshots/de/light/analytics.png" alt="Analytik – Hell" width="49%">
 </p>
 </details>
 
@@ -104,6 +112,10 @@ Dieselben Ansichten in drei der verfügbaren Designs. Ein Klick auf ein Vorschau
   <img src="docs/screenshots/de/graphite/processes.png" alt="Prozesse – Graphit" width="49%">
   <img src="docs/screenshots/de/graphite/chat.png" alt="Chat – Graphit" width="49%">
   <img src="docs/screenshots/de/graphite/global-configuration.png" alt="Globale Konfiguration – Graphit" width="49%">
+  <img src="docs/screenshots/de/graphite/couriers.png" alt="Kuriere – Graphit" width="49%">
+  <img src="docs/screenshots/de/graphite/users.png" alt="Benutzer – Graphit" width="49%">
+  <img src="docs/screenshots/de/graphite/incidents.png" alt="Vorfälle – Graphit" width="49%">
+  <img src="docs/screenshots/de/graphite/analytics.png" alt="Analytik – Graphit" width="49%">
 </p>
 </details>
 
@@ -124,6 +136,10 @@ Dieselben Ansichten in drei der verfügbaren Designs. Ein Klick auf ein Vorschau
   <img src="docs/screenshots/de/warehouse/processes.png" alt="Prozesse – Lager" width="49%">
   <img src="docs/screenshots/de/warehouse/chat.png" alt="Chat – Lager" width="49%">
   <img src="docs/screenshots/de/warehouse/global-configuration.png" alt="Globale Konfiguration – Lager" width="49%">
+  <img src="docs/screenshots/de/warehouse/couriers.png" alt="Kuriere – Lager" width="49%">
+  <img src="docs/screenshots/de/warehouse/users.png" alt="Benutzer – Lager" width="49%">
+  <img src="docs/screenshots/de/warehouse/incidents.png" alt="Vorfälle – Lager" width="49%">
+  <img src="docs/screenshots/de/warehouse/analytics.png" alt="Analytik – Lager" width="49%">
 </p>
 </details>
 

@@ -64,6 +64,10 @@ The same screens in three of the available themes. Click a thumbnail or a theme 
 | Processes | Microservice process log with status | [Light](docs/screenshots/en/light/processes.png) | [Graphite](docs/screenshots/en/graphite/processes.png) | [Warehouse](docs/screenshots/en/warehouse/processes.png) |
 | Chat | Organization chat with employee directory | [Light](docs/screenshots/en/light/chat.png) | [Graphite](docs/screenshots/en/graphite/chat.png) | [Warehouse](docs/screenshots/en/warehouse/chat.png) |
 | Global configuration | Operator-wide settings by section | [Light](docs/screenshots/en/light/global-configuration.png) | [Graphite](docs/screenshots/en/graphite/global-configuration.png) | [Warehouse](docs/screenshots/en/warehouse/global-configuration.png) |
+| Couriers | Courier list with license, certificate and vehicle status | [Light](docs/screenshots/en/light/couriers.png) | [Graphite](docs/screenshots/en/graphite/couriers.png) | [Warehouse](docs/screenshots/en/warehouse/couriers.png) |
+| Users | Operator users with login, e-mail, department and role | [Light](docs/screenshots/en/light/users.png) | [Graphite](docs/screenshots/en/graphite/users.png) | [Warehouse](docs/screenshots/en/warehouse/users.png) |
+| Incidents | Shipment incidents with severity, status and owner | [Light](docs/screenshots/en/light/incidents.png) | [Graphite](docs/screenshots/en/graphite/incidents.png) | [Warehouse](docs/screenshots/en/warehouse/incidents.png) |
+| Analytics | Organization revenue, costs, result and forecast | [Light](docs/screenshots/en/light/analytics.png) | [Graphite](docs/screenshots/en/graphite/analytics.png) | [Warehouse](docs/screenshots/en/warehouse/analytics.png) |
 
 <details>
 <summary>All screens in the Light theme</summary>
@@ -82,6 +86,10 @@ The same screens in three of the available themes. Click a thumbnail or a theme 
   <img src="docs/screenshots/en/light/processes.png" alt="Processes – Light" width="49%">
   <img src="docs/screenshots/en/light/chat.png" alt="Chat – Light" width="49%">
   <img src="docs/screenshots/en/light/global-configuration.png" alt="Global configuration – Light" width="49%">
+  <img src="docs/screenshots/en/light/couriers.png" alt="Couriers – Light" width="49%">
+  <img src="docs/screenshots/en/light/users.png" alt="Users – Light" width="49%">
+  <img src="docs/screenshots/en/light/incidents.png" alt="Incidents – Light" width="49%">
+  <img src="docs/screenshots/en/light/analytics.png" alt="Analytics – Light" width="49%">
 </p>
 </details>
 
@@ -102,6 +110,10 @@ The same screens in three of the available themes. Click a thumbnail or a theme 
   <img src="docs/screenshots/en/graphite/processes.png" alt="Processes – Graphite" width="49%">
   <img src="docs/screenshots/en/graphite/chat.png" alt="Chat – Graphite" width="49%">
   <img src="docs/screenshots/en/graphite/global-configuration.png" alt="Global configuration – Graphite" width="49%">
+  <img src="docs/screenshots/en/graphite/couriers.png" alt="Couriers – Graphite" width="49%">
+  <img src="docs/screenshots/en/graphite/users.png" alt="Users – Graphite" width="49%">
+  <img src="docs/screenshots/en/graphite/incidents.png" alt="Incidents – Graphite" width="49%">
+  <img src="docs/screenshots/en/graphite/analytics.png" alt="Analytics – Graphite" width="49%">
 </p>
 </details>
 
@@ -122,6 +134,10 @@ The same screens in three of the available themes. Click a thumbnail or a theme 
   <img src="docs/screenshots/en/warehouse/processes.png" alt="Processes – Warehouse" width="49%">
   <img src="docs/screenshots/en/warehouse/chat.png" alt="Chat – Warehouse" width="49%">
   <img src="docs/screenshots/en/warehouse/global-configuration.png" alt="Global configuration – Warehouse" width="49%">
+  <img src="docs/screenshots/en/warehouse/couriers.png" alt="Couriers – Warehouse" width="49%">
+  <img src="docs/screenshots/en/warehouse/users.png" alt="Users – Warehouse" width="49%">
+  <img src="docs/screenshots/en/warehouse/incidents.png" alt="Incidents – Warehouse" width="49%">
+  <img src="docs/screenshots/en/warehouse/analytics.png" alt="Analytics – Warehouse" width="49%">
 </p>
 </details>
 

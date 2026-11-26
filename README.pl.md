@@ -65,6 +65,10 @@ Te same ekrany w trzech z dostępnych motywów. Kliknij miniaturę lub nazwę mo
 | Procesy | Log procesów mikroserwisów ze statusem | [Jasny](docs/screenshots/pl/light/processes.png) | [Grafitowy](docs/screenshots/pl/graphite/processes.png) | [Magazyn](docs/screenshots/pl/warehouse/processes.png) |
 | Czat | Czat organizacji z katalogiem pracowników | [Jasny](docs/screenshots/pl/light/chat.png) | [Grafitowy](docs/screenshots/pl/graphite/chat.png) | [Magazyn](docs/screenshots/pl/warehouse/chat.png) |
 | Konfiguracja globalna | Ustawienia operatora w podziale na sekcje | [Jasny](docs/screenshots/pl/light/global-configuration.png) | [Grafitowy](docs/screenshots/pl/graphite/global-configuration.png) | [Magazyn](docs/screenshots/pl/warehouse/global-configuration.png) |
+| Kurierzy | Lista kurierów ze statusem prawa jazdy, certyfikatów i pojazdu | [Jasny](docs/screenshots/pl/light/couriers.png) | [Grafitowy](docs/screenshots/pl/graphite/couriers.png) | [Magazyn](docs/screenshots/pl/warehouse/couriers.png) |
+| Użytkownicy | Użytkownicy operatora z loginem, e-mailem, oddziałem i rolą | [Jasny](docs/screenshots/pl/light/users.png) | [Grafitowy](docs/screenshots/pl/graphite/users.png) | [Magazyn](docs/screenshots/pl/warehouse/users.png) |
+| Incydenty | Incydenty przesyłek z wagą, stanem i osobą odpowiedzialną | [Jasny](docs/screenshots/pl/light/incidents.png) | [Grafitowy](docs/screenshots/pl/graphite/incidents.png) | [Magazyn](docs/screenshots/pl/warehouse/incidents.png) |
+| Analityka | Przychód, koszty, wynik i prognoza organizacji | [Jasny](docs/screenshots/pl/light/analytics.png) | [Grafitowy](docs/screenshots/pl/graphite/analytics.png) | [Magazyn](docs/screenshots/pl/warehouse/analytics.png) |
 
 <details>
 <summary>Wszystkie ekrany w motywie Jasny</summary>
@@ -83,6 +87,10 @@ Te same ekrany w trzech z dostępnych motywów. Kliknij miniaturę lub nazwę mo
   <img src="docs/screenshots/pl/light/processes.png" alt="Procesy – Jasny" width="49%">
   <img src="docs/screenshots/pl/light/chat.png" alt="Czat – Jasny" width="49%">
   <img src="docs/screenshots/pl/light/global-configuration.png" alt="Konfiguracja globalna – Jasny" width="49%">
+  <img src="docs/screenshots/pl/light/couriers.png" alt="Kurierzy – Jasny" width="49%">
+  <img src="docs/screenshots/pl/light/users.png" alt="Użytkownicy – Jasny" width="49%">
+  <img src="docs/screenshots/pl/light/incidents.png" alt="Incydenty – Jasny" width="49%">
+  <img src="docs/screenshots/pl/light/analytics.png" alt="Analityka – Jasny" width="49%">
 </p>
 </details>
 
@@ -103,6 +111,10 @@ Te same ekrany w trzech z dostępnych motywów. Kliknij miniaturę lub nazwę mo
   <img src="docs/screenshots/pl/graphite/processes.png" alt="Procesy – Grafitowy" width="49%">
   <img src="docs/screenshots/pl/graphite/chat.png" alt="Czat – Grafitowy" width="49%">
   <img src="docs/screenshots/pl/graphite/global-configuration.png" alt="Konfiguracja globalna – Grafitowy" width="49%">
+  <img src="docs/screenshots/pl/graphite/couriers.png" alt="Kurierzy – Grafitowy" width="49%">
+  <img src="docs/screenshots/pl/graphite/users.png" alt="Użytkownicy – Grafitowy" width="49%">
+  <img src="docs/screenshots/pl/graphite/incidents.png" alt="Incydenty – Grafitowy" width="49%">
+  <img src="docs/screenshots/pl/graphite/analytics.png" alt="Analityka – Grafitowy" width="49%">
 </p>
 </details>
 
@@ -123,6 +135,10 @@ Te same ekrany w trzech z dostępnych motywów. Kliknij miniaturę lub nazwę mo
   <img src="docs/screenshots/pl/warehouse/processes.png" alt="Procesy – Magazyn" width="49%">
   <img src="docs/screenshots/pl/warehouse/chat.png" alt="Czat – Magazyn" width="49%">
   <img src="docs/screenshots/pl/warehouse/global-configuration.png" alt="Konfiguracja globalna – Magazyn" width="49%">
+  <img src="docs/screenshots/pl/warehouse/couriers.png" alt="Kurierzy – Magazyn" width="49%">
+  <img src="docs/screenshots/pl/warehouse/users.png" alt="Użytkownicy – Magazyn" width="49%">
+  <img src="docs/screenshots/pl/warehouse/incidents.png" alt="Incydenty – Magazyn" width="49%">
+  <img src="docs/screenshots/pl/warehouse/analytics.png" alt="Analityka – Magazyn" width="49%">
 </p>
 </details>
 
