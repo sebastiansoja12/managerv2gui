@@ -1,8 +1,10 @@
 import http from "../http-super-admin";
 import {
+    DepartmentAssignmentRun,
     OperatorApiKey,
     OperatorDataErasure,
     OperatorDevice,
+    OperatorJobRun,
     OperatorOnboarding,
 } from "../components/SuperAdmin/operators/model/OperatorOperations";
 
@@ -65,6 +67,20 @@ const eraseData = (operatorId: string, confirmation: string) => (
         .then((response) => response.data)
 );
 
+const getOperatorJobs = () => (
+    http.get<string[]>("/platform/operator-jobs").then((response) => response.data)
+);
+
+const runOperatorJob = (operatorId: string, jobType: string) => (
+    http.post<OperatorJobRun>(`${operatorPath(operatorId)}/admin-actions/jobs/${encodeURIComponent(jobType)}`)
+        .then((response) => response.data)
+);
+
+const getCourierAssignmentRuns = (operatorId: string) => (
+    http.get<DepartmentAssignmentRun[]>(`${operatorPath(operatorId)}/admin-actions/courier-assignment-runs`)
+        .then((response) => response.data)
+);
+
 const OperatorOperationsService = {
     getOnboarding,
     getDevices,
@@ -75,6 +91,9 @@ const OperatorOperationsService = {
     downloadExport,
     getLastErasure,
     eraseData,
+    getOperatorJobs,
+    runOperatorJob,
+    getCourierAssignmentRuns,
 };
 
 export default OperatorOperationsService;
