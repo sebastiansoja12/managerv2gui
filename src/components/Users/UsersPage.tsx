@@ -16,6 +16,7 @@ import {
 } from "./model/User";
 import UserCreateDialog from "./UserCreateDialog";
 import UserEditDialog from "./UserEditDialog";
+import McpAccessDialog from "../Mcp/McpAccessDialog";
 import UserPermissionsDialog from "./UserPermissionsDialog";
 import UserRoleDialog from "./UserRoleDialog";
 import {
@@ -43,6 +44,7 @@ function UsersPage() {
     const [editedUser, setEditedUser] = useState<User>();
     const [roleUser, setRoleUser] = useState<User>();
     const [permissionsUser, setPermissionsUser] = useState<User>();
+    const [mcpUser, setMcpUser] = useState<User>();
     const [selectedUserId, setSelectedUserId] = useState<string>("");
     const isAdministrator = isAdministratorRole(currentUser?.role);
     const canManageUsers = canRoleManageUsers(currentUser?.role);
@@ -377,6 +379,14 @@ function UsersPage() {
                                 </button>
                             </td>
                         </tr>
+                        {isAdministrator && <tr>
+                            <td>
+                                <button disabled={!selectedUser || !canManageSelectedUser} onClick={() => setMcpUser(selectedUser)} type="button">
+                                    <VpnKey fontSize="small"/>
+                                    <span>{pl.mcp.title}</span>
+                                </button>
+                            </td>
+                        </tr>}
                         <tr>
                             <td>
                                 <button disabled={!selectedUser || !canDeleteSelectedUser || saving} onClick={() => deleteUser(selectedUser)} type="button">
@@ -390,6 +400,7 @@ function UsersPage() {
                 </aside>
             </div>
 
+            <McpAccessDialog user={mcpUser} onClose={() => setMcpUser(undefined)} />
             <UserCreateDialog
                 departments={availableDepartments}
                 departmentsLoading={departmentsLoading}

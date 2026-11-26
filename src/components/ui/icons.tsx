@@ -4,7 +4,7 @@ import {
     FiActivity, FiAlertCircle, FiAlertTriangle, FiAperture, FiArchive, FiArrowLeft, FiBarChart2,
     FiBell, FiBox, FiBriefcase, FiCheckCircle, FiCheckSquare, FiChevronDown,
     FiChevronRight, FiClock, FiCode, FiCompass, FiCopy, FiDatabase,
-    FiDelete, FiDollarSign, FiDownload, FiEdit, FiEye, FiFilter, FiGrid,
+    FiDelete, FiDollarSign, FiDownload, FiEdit, FiEye, FiEyeOff, FiFilter, FiGrid,
     FiHardDrive, FiInfo, FiKey, FiLayers, FiLayout, FiLink2, FiList,
     FiLogOut, FiMap, FiMapPin, FiMaximize2, FiMonitor, FiMoreHorizontal, FiMoreVertical, FiPackage,
     FiMessageCircle, FiPhone, FiPlus, FiPrinter, FiRadio, FiRefreshCw, FiRepeat, FiRotateCcw, FiRotateCw, FiSave, FiSend,
@@ -153,6 +153,7 @@ export const Undo = makeIcon(FiRotateCcw);
 export const Upload = makeIcon(FiUpload);
 export const ViewList = makeIcon(FiList);
 export const Visibility = makeIcon(FiEye);
+export const VisibilityOff = makeIcon(FiEyeOff);
 export const VpnKey = makeIcon(FiKey);
 export const Warehouse = makeIcon(FiBox);
 export const WarehouseRounded = makeIcon(FiBox);

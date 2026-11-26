@@ -1,0 +1,242 @@
+.mcp-profile-section {
+    border-top: 1px solid var(--border);
+    gap: 10px;
+    min-width: 0;
+}
+
+.mcp-profile-section > .mcp-content {
+    gap: 12px;
+    padding: 0;
+}
+
+:is(.mcp-profile-section, .profile-api-key-section) .user-profile-api-key-label {
+    align-items: center;
+}
+
+:is(.mcp-profile-section, .profile-api-key-section) .user-profile-api-key-label > small {
+    max-width: 55%;
+}
+
+:is(.mcp-profile-section, .profile-api-key-section) .profile-credential-field {
+    min-height: 44px;
+}
+
+:is(.mcp-profile-section, .profile-api-key-section) .profile-credential-field > input {
+    font-family: var(--font-mono, monospace);
+    font-size: 0.82rem;
+    letter-spacing: 0.04em;
+}
+
+:is(.mcp-profile-section, .profile-api-key-section) .user-profile-api-key-actions {
+    gap: 2px;
+    padding: 4px;
+}
+
+:is(.mcp-profile-section, .profile-api-key-section) [data-ui="icon-button"] {
+    border: 0;
+    border-radius: var(--radius-control);
+    box-shadow: none;
+    height: 30px;
+    min-height: 30px;
+    padding: 5px;
+    width: 30px;
+}
+
+:is(.mcp-profile-section, .profile-api-key-section) [data-ui="icon-button"]:hover:not(:disabled) {
+    background: var(--surface-secondary);
+    color: var(--primary);
+}
+
+:is(.mcp-profile-section, .profile-api-key-section) [data-ui="icon-button"][aria-pressed="true"] {
+    background: var(--surface-secondary);
+    color: var(--primary);
+}
+
+.mcp-key-meta {
+    align-items: center;
+    color: var(--muted-foreground);
+    display: flex;
+    flex-wrap: wrap;
+    font-size: 0.72rem;
+    gap: 7px 16px;
+}
+
+.mcp-key-meta > strong {
+    color: var(--foreground);
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.mcp-key-hint,
+.mcp-form-hint {
+    color: var(--muted-foreground);
+    font-size: 0.72rem;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.mcp-content {
+    display: grid;
+    gap: 14px;
+    min-width: 0;
+    padding: 16px;
+}
+
+.mcp-content > p {
+    margin: 0;
+}
+
+.mcp-key-form {
+    align-items: end;
+    background: var(--surface-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-control);
+    display: grid;
+    gap: 12px;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    padding: 12px;
+}
+
+.mcp-form-hint,
+.mcp-form-actions {
+    grid-column: 1 / -1;
+}
+
+.mcp-form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: end;
+}
+
+.mcp-key-form [data-ui="input-label"] {
+    color: var(--muted-foreground);
+    font-size: 0.72rem;
+}
+
+.mcp-key-form [data-ui="input"] {
+    border-radius: var(--radius-control);
+    font-size: 0.8rem;
+    min-height: 36px;
+    padding: 7px 9px;
+}
+
+.mcp-profile-section [data-ui="button"] {
+    border-radius: var(--radius-control);
+    box-shadow: none;
+    font-size: 0.76rem;
+    min-height: 32px;
+    padding: 5px 12px;
+}
+
+.mcp-enabled {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.mcp-history {
+    border-top: 1px solid var(--border);
+    min-width: 0;
+    padding-top: 10px;
+}
+
+.mcp-history > summary {
+    color: var(--muted-foreground);
+    cursor: pointer;
+    font-size: 0.74rem;
+    font-weight: 600;
+    padding: 3px 0;
+}
+
+.mcp-history > summary > span {
+    background: var(--surface-secondary);
+    border-radius: var(--radius-control);
+    font-size: 0.68rem;
+    margin-left: 8px;
+    padding: 2px 6px;
+}
+
+.mcp-history[open] > summary {
+    margin-bottom: 8px;
+}
+
+.mcp-table-scroll {
+    overflow-x: auto;
+}
+
+.mcp-table {
+    border-collapse: collapse;
+    font-size: 0.78rem;
+    text-align: left;
+    width: 100%;
+}
+
+.mcp-table th,
+.mcp-table td {
+    border-bottom: 1px solid var(--border);
+    padding: 8px 10px;
+    vertical-align: middle;
+}
+
+.mcp-table th {
+    color: var(--muted-foreground);
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+.mcp-history .mcp-table th {
+    background: transparent;
+    white-space: nowrap;
+}
+
+.mcp-prefix {
+    color: var(--muted-foreground);
+    display: block;
+    font-size: 0.68rem;
+    margin-top: 3px;
+}
+
+.mcp-status {
+    background: var(--surface-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-control);
+    color: var(--muted-foreground);
+    display: inline-block;
+    font-size: 0.68rem;
+    padding: 2px 7px;
+    white-space: nowrap;
+}
+
+.mcp-status[data-status="ACTIVE"] {
+    border-color: color-mix(in srgb, var(--primary) 30%, var(--border));
+    color: var(--primary);
+}
+
+@media (max-width: 600px) {
+    :is(.mcp-profile-section, .profile-api-key-section) .user-profile-api-key-label {
+        align-items: start;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    :is(.mcp-profile-section, .profile-api-key-section) .user-profile-api-key-label > small {
+        max-width: none;
+        text-align: left;
+    }
+
+    .mcp-key-form {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    :is(.mcp-profile-section, .profile-api-key-section) .profile-credential-field {
+        grid-template-columns: auto minmax(0, 1fr);
+    }
+
+    :is(.mcp-profile-section, .profile-api-key-section) .user-profile-api-key-actions {
+        border-top: 1px solid var(--border);
+        grid-column: 1 / -1;
+        justify-content: end;
+    }
+}

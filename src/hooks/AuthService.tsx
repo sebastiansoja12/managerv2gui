@@ -34,6 +34,8 @@ const generateApiKey = () => {
     return http.post<GeneratedApiKeyResponse>(`/auth/me/api-key`);
 };
 
+const revealApiKey = () => http.post<GeneratedApiKeyResponse>(`/auth/me/api-key/reveal`);
+
 const deleteApiKey = () => {
     return http.delete<void>(`/auth/me/api-key`);
 };
@@ -53,6 +55,7 @@ const AuthService = {
     changeLanguage,
     generateApiKey,
     deleteApiKey,
+    revealApiKey,
     signup,
     logout
 };

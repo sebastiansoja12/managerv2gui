@@ -40,6 +40,7 @@ import DepartmentService from "../../hooks/DepartmentService";
 import ReturnService from "../../hooks/ReturnService";
 import {canAccessDepartment} from "../Users/model/UserRoleAccess";
 import pl from "../../i18n/translate";
+import {copyText} from "../../utils/copyText";
 import {
     ReturnPackageDto,
     ReturnReasonCode,
@@ -441,7 +442,7 @@ function Returns({onOpenTab}: ReturnsProps) {
         }
 
         try {
-            await navigator.clipboard.writeText(returnPackage.returnToken.value);
+            await copyText(returnPackage.returnToken.value);
             setNotice({severity: "success", message: pl.returns.messages.tokenCopied});
         } catch (error) {
             setNotice({severity: "error", message: pl.returns.messages.tokenCopyError});

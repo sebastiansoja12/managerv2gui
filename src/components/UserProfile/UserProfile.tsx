@@ -12,11 +12,14 @@ import {
     TextField,
     Typography,
 } from "components/ui";
-import {Close, ContentCopy, DeleteOutline, Edit, Key, Person, Refresh, Save, SecurityOutlined} from "components/ui/icons";
+import {Close, ContentCopy, DeleteOutline, Edit, Key, Person, Refresh, Save, SecurityOutlined, Visibility, VisibilityOff} from "components/ui/icons";
+import useTemporarySecret, {MASKED_SECRET} from "../../auth/useTemporarySecret";
+import {getBackendErrorMessage} from "../../api/errorMessage";
 import AuthService from "../../hooks/AuthService";
 import {ApiErrorResponse} from "../../api/ApiResult";
 import {CurrentUserDto} from "../../auth/UserProfileDto";
 import pl from "../../i18n/translate";
+import McpKeysSection from "../Mcp/McpKeysSection";
 import OperatorPlanSection from "../Subscription/OperatorPlanSection";
 import "./styles/user-profile.css";
 
@@ -36,6 +39,7 @@ export default function UserProfile() {
     const [fullNameBusy, setFullNameBusy] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
     const [apiKeyBusy, setApiKeyBusy] = useState<boolean>(false);
+    const {secret: apiKeySecret, busy: apiKeySecretBusy, hideSecret: hideApiKey, readSecret: readApiKey} = useTemporarySecret();
     const [notice, setNotice] = useState<Notice | null>(null);
 
     const permissions = useMemo(() => user?.rolePermissions || [], [user]);
@@ -46,6 +50,7 @@ export default function UserProfile() {
     }, []);
 
     const loadProfile = React.useCallback(async () => {
+        hideApiKey();
         setLoading(true);
         try {
             const response = await AuthService.me();
@@ -57,7 +62,7 @@ export default function UserProfile() {
         } finally {
             setLoading(false);
         }
-    }, [showError]);
+    }, [showError, hideApiKey]);
 
     useEffect(() => {
         loadProfile();
@@ -90,9 +95,10 @@ export default function UserProfile() {
 
     const regenerateApiKey = async () => {
         setApiKeyBusy(true);
+        hideApiKey();
         try {
-            const response = await AuthService.generateApiKey();
-            setUser((currentUser) => currentUser ? {...currentUser, apiKey: response.data.apiKey, hasApiKey: true} : currentUser);
+            await AuthService.generateApiKey();
+            setUser((currentUser) => currentUser ? {...currentUser, apiKey: null, hasApiKey: true} : currentUser);
             setNotice({severity: "success", message: pl.userProfile.messages.apiKeyGenerated});
         } catch (error) {
             showError(error, pl.userProfile.messages.apiKeyGenerationError);
@@ -142,19 +148,16 @@ export default function UserProfile() {
         }
     };
 
-    const copyApiKey = async () => {
-        if (!user?.apiKey) {
-            return;
-        }
-
+    const revealApiKey = async (copy = false) => {
+        if (!user?.hasApiKey) { return; }
+        if (apiKeySecret && !copy) { hideApiKey(); return; }
         try {
-            if (!navigator.clipboard) {
-                throw new Error("Clipboard API is unavailable");
-            }
-            await navigator.clipboard.writeText(user.apiKey);
-            setNotice({severity: "success", message: pl.userProfile.messages.apiKeyCopied});
+            const completed = await readApiKey(async () => (await AuthService.revealApiKey()).data.apiKey, copy);
+            if (completed && copy) { setNotice({severity: "success", message: pl.userProfile.messages.apiKeyCopied}); }
         } catch (error) {
-            showError(error, pl.userProfile.messages.apiKeyCopyError);
+            const status = (error as {status?: number; response?: {status?: number}}).response?.status || (error as ApiErrorResponse).status;
+            setNotice({severity: "error", message: status === 409 ? pl.userProfile.apiKeyRevealUnavailable
+                : getBackendErrorMessage(error, pl.userProfile.apiKeyRevealError)});
         }
     };
 
@@ -164,6 +167,7 @@ export default function UserProfile() {
         }
 
         setApiKeyBusy(true);
+        hideApiKey();
         try {
             await AuthService.deleteApiKey();
             setUser((currentUser) => currentUser ? {...currentUser, apiKey: null, hasApiKey: false} : currentUser);
@@ -239,24 +243,33 @@ export default function UserProfile() {
                                 <strong>{user?.language ? pl.common.languages[user.language as keyof typeof pl.common.languages] : pl.common.dash}</strong>
                             </div>
 
-                            <div className="user-profile-api-key-detail">
+                            <div className="user-profile-api-key-detail profile-api-key-section">
                                 <div className="user-profile-api-key-label">
                                     <span>{pl.userProfile.fields.apiKey}</span>
                                     <small>{pl.userProfile.apiKeyHelper}</small>
                                 </div>
-                                <div className="user-profile-api-key-field" data-empty={!user?.apiKey}>
+                                <div className="user-profile-api-key-field profile-credential-field" data-empty={!user?.hasApiKey}>
                                     <Key fontSize="small" />
                                     <input
                                         aria-label={pl.userProfile.fields.apiKey}
-                                        placeholder={user?.hasApiKey ? pl.userProfile.apiKeyHidden : pl.userProfile.apiKeyMissing}
+                                        placeholder={pl.userProfile.apiKeyMissing}
                                         readOnly
                                         type="text"
-                                        value={user?.apiKey || ""}
+                                        value={user?.hasApiKey ? apiKeySecret || MASKED_SECRET : ""}
                                     />
                                     <div className="user-profile-api-key-actions">
                                         <IconButton
+                                            aria-label={apiKeySecret ? pl.userProfile.apiKeyHide : pl.userProfile.apiKeyReveal}
+                                            title={apiKeySecret ? pl.userProfile.apiKeyHide : pl.userProfile.apiKeyReveal}
+                                            aria-pressed={Boolean(apiKeySecret)}
+                                            disabled={!user?.hasApiKey || loading || apiKeyBusy || apiKeySecretBusy}
+                                            onClick={() => void revealApiKey()}
+                                        >
+                                            {apiKeySecret ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
+                                        </IconButton>
+                                        <IconButton
                                             aria-label={pl.userProfile.actions.regenerateApiKey}
-                                            disabled={loading || apiKeyBusy}
+                                            disabled={loading || apiKeyBusy || apiKeySecretBusy}
                                             title={pl.userProfile.actions.regenerateApiKey}
                                             onClick={regenerateApiKey}
                                         >
@@ -264,16 +277,16 @@ export default function UserProfile() {
                                         </IconButton>
                                         <IconButton
                                             aria-label={pl.userProfile.actions.copyApiKey}
-                                            disabled={!user?.apiKey || apiKeyBusy}
+                                            disabled={!user?.hasApiKey || loading || apiKeyBusy || apiKeySecretBusy}
                                             title={pl.userProfile.actions.copyApiKey}
-                                            onClick={copyApiKey}
+                                            onClick={() => void revealApiKey(true)}
                                         >
                                             <ContentCopy fontSize="small" />
                                         </IconButton>
                                         <IconButton
                                             aria-label={pl.userProfile.actions.deleteApiKey}
                                             className="user-profile-api-key-delete"
-                                            disabled={!user?.hasApiKey || apiKeyBusy}
+                                            disabled={!user?.hasApiKey || loading || apiKeyBusy || apiKeySecretBusy}
                                             title={pl.userProfile.actions.deleteApiKey}
                                             onClick={deleteApiKey}
                                         >
@@ -282,6 +295,7 @@ export default function UserProfile() {
                                     </div>
                                 </div>
                             </div>
+                            <McpKeysSection />
                         </div>
                     </section>
 
