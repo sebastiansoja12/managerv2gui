@@ -1,4 +1,4 @@
-## [2026.4] - Unreleased
+## [2026.4] - 2026-11-26
 
 ### Added
 - Fleet map with vehicles on active routes, signal freshness, speed, carrier registration numbers and the travelled route of the selected vehicle, refreshed every 15 seconds.
@@ -20,6 +20,11 @@
 - Impersonation with operator consent and an impersonation banner.
 - Maintenance and inactive-subscription screens.
 - OpenCage geocoding provider and footer.
+- Analytics dashboard with department comparison, cost register and shipment forecast charts.
+- Nocturne, pearl, dusk, high-contrast and sand themes.
+- Pallet unload scanning view and extended pallet details and editing.
+- Incident resolution options with repackaging and an incident card in shipment details.
+- `HANDOVER` and `LOST` shipment statuses, pallet tracking numbers and updated content details in the shipment list, details and Excel export.
 - Translations for all new screens in Polish, English and German.
 
 ### Changed
@@ -29,6 +34,9 @@
 - Delivery signatures and comment codes are shown on deliveries instead of editing shipment signatures.
 - Restyled process details, global configuration, departments, home dashboard and navbar.
 - SUPPLIER users are restricted to the courier profile.
+- Reworked the delivery list and detail tiles with collapsible filters and removed the delivery operations toolbar.
+- Department select fields in users, couriers, returns, pickup points and operator dialogs use the shared DepartmentPicker.
+- Operator capabilities are refreshed every five minutes while the tab is visible.
 
 ### Fixed
 - Courier, vehicle, signature and incident identifiers are kept as exact strings so 63-bit ids are not corrupted.
@@ -38,7 +46,7 @@
 ### Deprecated
 - Removed the deprecated software configuration screens and the old shipment signature editing.
 
-## [2026.3] - 2026-09-10
+## [2026.3] - 2026-07-17
 
 ### Added
 - Pickup-point catalog with create/edit dialogs, lifecycle actions, filters and a map showing point locations.
@@ -98,7 +106,7 @@
 - Old token-storage and refresh-token request DTO handling in the GUI.
 - Legacy authentication token model.
 
-## [2026.2] - 2026-07-01
+## [2026.2] - 2026-03-16
 
 ### Added
 - Shipment UI.
@@ -119,7 +127,7 @@
 ### Deprecated
 - -------
 
-## [2025.1] - 2026-06-18
+## [2025.1] - 2026-02-01
 
 ### Added
 - Department model updates aligned with backend changes.
