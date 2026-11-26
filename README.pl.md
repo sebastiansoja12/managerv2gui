@@ -168,6 +168,26 @@ Te same ekrany w trzech z dostępnych motywów. Kliknij miniaturę lub nazwę mo
 Część tras to zaślepki planowanych modułów: pojazdy, doręczenia kurierskie,
 dostawcy, umowy, rozliczenia i pomoc.
 
+## Tryb impersonacji
+
+Właściciel platformy może pracować w aplikacji operatora w imieniu jego superadministratora, ale tylko za zgodą
+operatora:
+
+- W obszarze operatora aplikacji superadministratora przycisk **Wejdź jako operator** otwiera okno, w którym właściciel
+  platformy wysyła prośbę o zgodę z opcjonalnym powodem widocznym dla operatora. Okno odświeża status prośby co pięć
+  sekund.
+- Superadministratorzy operatora widzą prośbę na pasku u góry aplikacji i w powiadomieniach w nawigacji. Wybierają
+  czas dostępu (od 30 minut do 8 godzin) i zatwierdzają lub odrzucają prośbę, a aktywny dostęp mogą później cofnąć.
+  Lista aktualizuje się na bieżąco przez WebSocket.
+- Po zatwierdzeniu **Wejdź do aplikacji** otwiera aplikację operatora w nowej karcie z pełnymi uprawnieniami jego
+  superadministratora. Sesja trwa najwyżej 30 minut i kończy się wcześniej, gdy dostęp wygaśnie albo zostanie cofnięty.
+- Podczas sesji baner **Tryb impersonacji** pokazuje, kto pracuje w imieniu operatora. **Zakończ sesję** wylogowuje
+  i wraca do listy operatorów superadministratora. Ekran trybu serwisowego nie jest pokazywany podczas impersonacji.
+- Każda zmiana wykonana podczas impersonacji trafia do dziennika audytu platformy.
+
+Korzysta z endpointów backendu `/operators/{operatorId}/impersonation-consents`, `/platform/auth/impersonations`,
+`/impersonation-consents` i `/auth/me/impersonation`.
+
 ## Struktura projektu
 
 | Ścieżka | Przeznaczenie |

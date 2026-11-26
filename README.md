@@ -168,6 +168,25 @@ The same screens in three of the available themes. Click a thumbnail or a theme 
 Some routes are placeholders for planned modules: vehicles, courier
 deliveries, suppliers, deals, billing and support.
 
+## Impersonation Mode
+
+A platform owner can work in an operator application on behalf of its superadministrator, but only with the
+operator's consent:
+
+- In the super-admin operator workspace, **Enter as operator** opens a dialog where the platform owner sends a consent
+  request with an optional reason visible to the operator. The dialog refreshes the request status every five seconds.
+- The operator's superadministrators see the request in a bar at the top of the application and in the navbar
+  notifications. They choose the access duration (30 minutes to 8 hours) and approve or reject it, and they can revoke
+  active access later. The list updates live over WebSocket.
+- After approval, **Enter application** opens the operator application in a new tab with the full permissions of its
+  superadministrator. The session lasts at most 30 minutes and ends earlier when access expires or is revoked.
+- During the session an **Impersonation mode** banner shows who is working on the operator's behalf. **End session**
+  signs out and returns to the super-admin operator list. The maintenance screen is not shown during impersonation.
+- Every change made during impersonation is written to the platform audit log.
+
+It uses the backend endpoints `/operators/{operatorId}/impersonation-consents`, `/platform/auth/impersonations`,
+`/impersonation-consents` and `/auth/me/impersonation`.
+
 ## Project Structure
 
 | Path | Purpose |

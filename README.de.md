@@ -170,6 +170,28 @@ Dieselben Ansichten in drei der verfügbaren Designs. Ein Klick auf ein Vorschau
 Einige Routen sind Platzhalter für geplante Module: Fahrzeuge,
 Kurierzustellungen, Lieferanten, Verträge, Abrechnung und Support.
 
+## Impersonationsmodus
+
+Ein Plattformbetreiber kann im Namen des Superadministrators eines Betreibers in dessen Anwendung arbeiten, aber nur
+mit Einwilligung des Betreibers:
+
+- Im Betreiberbereich der Super-Admin-Anwendung öffnet **Als Operator anmelden** einen Dialog, in dem der
+  Plattformbetreiber eine Einwilligungsanfrage mit optionalem, für den Betreiber sichtbarem Grund sendet. Der Dialog
+  aktualisiert den Status der Anfrage alle fünf Sekunden.
+- Die Superadministratoren des Betreibers sehen die Anfrage in einer Leiste oben in der Anwendung und in den
+  Benachrichtigungen der Navigation. Sie wählen die Zugriffsdauer (30 Minuten bis 8 Stunden), stimmen zu oder lehnen
+  ab und können aktiven Zugriff später widerrufen. Die Liste wird per WebSocket live aktualisiert.
+- Nach der Zustimmung öffnet **Anwendung öffnen** die Betreiberanwendung in einem neuen Tab mit allen Rechten ihres
+  Superadministrators. Die Sitzung dauert höchstens 30 Minuten und endet früher, wenn der Zugriff abläuft oder
+  widerrufen wird.
+- Während der Sitzung zeigt ein Banner **Identitätsübernahme**, wer im Namen des Betreibers arbeitet. **Sitzung
+  beenden** meldet ab und führt zur Betreiberliste der Super-Admin-Anwendung zurück. Der Wartungsbildschirm wird
+  während der Impersonation nicht angezeigt.
+- Jede Änderung während der Impersonation wird im Plattform-Auditprotokoll gespeichert.
+
+Genutzt werden die Backend-Endpunkte `/operators/{operatorId}/impersonation-consents`, `/platform/auth/impersonations`,
+`/impersonation-consents` und `/auth/me/impersonation`.
+
 ## Projektstruktur
 
 | Pfad | Zweck |
