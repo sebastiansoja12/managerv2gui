@@ -2,7 +2,7 @@
 
 [English](README.md) | **Polski** | [Deutsch](README.de.md)
 
-**Wersja rozwojowa 2026.4 - 10 września 2026**
+**Wersja rozwojowa 1.0.0-RC - 26 listopada 2026**
 
 Manager 2.0 GUI to frontend w React/TypeScript dla backendu logistycznego
 Manager 2.0. Zawiera ekrany magazynu, przesyłek, procesów, oddziałów, kurierów,
