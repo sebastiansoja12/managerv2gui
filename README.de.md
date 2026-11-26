@@ -144,7 +144,7 @@ Dieselben Ansichten in drei der verfügbaren Designs. Ein Klick auf ein Vorschau
 - Karte des Sendungsverlaufs mit Route über die Niederlassungen und übersetzten Ereignisbezeichnungen.
 - Download von Sendungsdokumenten, Vorschau und Druck des QR-Etiketts.
 - Retourenerfassung, Liste und Details, Aktionen zum Bearbeiten/Abschließen/Stornieren, Änderung des Grundes und Token-Prüfung.
-- Zustellregister mit aktuellen Zustellungen, Bearbeitungsansicht mit Schrittverlauf und Zustellart sowie einer Stornoaktion. Es nutzt `GET /deliveries`, `GET /deliveries/{id}`, `PUT /deliveries/{id}/method` und `POST /deliveries/{id}/cancel` des Managers.
+- Zustellliste mit einklappbaren Filtern, serverseitiger Sortierung, Sammel- und Zeilenaktionen sowie Zustelldetails mit Lebenszyklusphasen, Zustellnachweis, Routenkarte, verknüpften Zustellungen und Änderungsverlauf.
 - Niederlassungsliste und Anlegen von Niederlassungen. Die Liste zeigt eine Karte der gespeicherten Zustellgebietsgrenzen und Standorte entsprechend den Listenfiltern. Ein Klick auf eine Niederlassung öffnet einen eigenen Tab (`/departments/:departmentId`) mit bearbeitbaren Daten, Benutzern, Niederlassungsplan und Editor für das Zustellgebiet.
 - Editor für Zustellgebiete: mehrere Grenzen auf einer großen Leaflet-Karte zeichnen (mit erweiterter Ansicht), eine Grenze am Startpunkt schließen, Eckpunkte hinzufügen oder ziehen und einen Entwurf im lokalen Speicher des Browsers sichern. Unter Globale Konfiguration → Niederlassungen teilt die Einstellung für automatische Zustellgebiete Polen beim Speichern und nach dem Anlegen einer Niederlassung unter den aktiven Niederlassungen mit gültigen Koordinaten auf. Sie ersetzt lokale Entwürfe der beteiligten Niederlassungen. Im selben Bereich kann jede neue Niederlassung mit dem nächstgelegenen aktiven Sortierzentrum verbunden und das Löschen oder Archivieren von Niederlassungen in der GUI ausgeblendet werden. Diese Schalter und Gebietsentwürfe sind lokal im Browser gespeichert; die API erzwingt diese Einschränkungen nicht. Netzverbindungen werden über die API des Zustellnetzes gespeichert. Gebietsentwürfe wirken sich nicht auf die Zuordnung von Sendungen aus. Entfernungen werden in einer näherungsweisen ebenen Kartenprojektion berechnet; Straßen und Fahrzeiten werden nicht berücksichtigt. Der mitgelieferte, näherungsweise Umriss Polens stammt aus [Natural Earth 1:10m Admin-0](https://www.naturalearthdata.com/downloads/10m-cultural-vectors/10m-admin-0-countries/) über den [geo-countries-GeoJSON-Datensatz](https://github.com/datasets/geo-countries) (gemeinfrei).
 - Niederlassungsplan: SVG-Editor in Draufsicht für Räume, Wände, Gänge, Zonen, Regale und Lagerplätze (Zoom, Verschieben der Ansicht, Raster, Bewegen, Drehen, Größe ändern, Rückgängig) sowie ein Betriebsmodus zum Einlagern, Umlagern, Reservieren, Suchen und Verfolgen von Palettenstellplätzen. Er nutzt die `/department-maps`-Endpunkte des Managers.
@@ -154,17 +154,21 @@ Dieselben Ansichten in drei der verfügbaren Designs. Ein Klick auf ein Vorschau
 - Organisationschat auf Basis des echten Benutzerverzeichnisses und dauerhafter REST-Unterhaltungen, mit Suche und Gesprächsblasen unten rechts.
 - Gerätekopplung.
 - Bereiche für globale Konfiguration, Geokodierung und Integrationen.
-- Liste der Softwarekonfigurationen.
 - Statusseite der Microservices.
 - Benutzerprofilseite.
 - Super-Admin-Anwendung mit eigener Anmeldung und Betreiberverwaltung.
 - Abonnementpläne für Betreiber (`MINI`, `BASIC`, `ENTERPRISE`), verwaltet im Betreiberbereich des Super-Admins; Betreiber
   ohne Plan oder mit abgelaufenem bzw. noch nicht begonnenem Plan sehen einen Hinweis, sich an den Support zu wenden.
+- Palettenliste, Details, Dokumente, Frachtführerzuordnung, Sendungsscan und eine Scanansicht für das Entladen von Paletten.
+- Vorfallliste, Details, Dialoge zum Melden und Lösen (einschließlich Umverpackung) mit Statistiken, Filtern und Zuweisung.
+- Flottenkarte mit Fahrzeugen auf aktiven Routen und der gefahrenen Route des ausgewählten Fahrzeugs.
+- Analyse-Dashboard mit Niederlassungsvergleich, Kostenregister und Diagrammen zur Sendungsprognose.
+- Module für Frachtführer und Fahrer, Auditprotokoll und Onboarding für Benutzer mit Einwilligungen und geführtem Tutorial.
+- Auswählbare Farbthemen, darunter ein Thema mit hohem Kontrast.
 - Polnische, englische und deutsche Übersetzungen.
 
-Einige Routen sind Platzhalter für geplante Module, z. B. Analysen, Fahrzeuge,
-Paletten, Scanner, Kurierzustellungen, Lieferanten, Verträge, Abrechnung und
-Support.
+Einige Routen sind Platzhalter für geplante Module: Fahrzeuge,
+Kurierzustellungen, Lieferanten, Verträge, Abrechnung und Support.
 
 ## Projektstruktur
 
@@ -191,7 +195,6 @@ Wichtige Variablen:
 - `REACT_APP_SERVER_URL` - Haupt-API des Managers, Standard `http://localhost:8080/v1/api`
 - `REACT_APP_MANAGER_API_URL` - Alias der Manager-API
 - `REACT_APP_GATEWAY_URL` - Gateway-URL, Standard `http://localhost:8088/gateway`
-- `REACT_APP_SOFTWARE_CONFIGURATION_URL` - Dienst für Softwarekonfiguration
 - `REACT_APP_DELIVERY_PROTECTION_URL` - Dienst für Zustellschutz
 - `REACT_APP_RETURNING_TRACK_MANAGER_URL` - Retourendienst
 - `REACT_APP_ROUTE_TRACKER_FLOW_URL` - Dienst zur Routenverfolgung

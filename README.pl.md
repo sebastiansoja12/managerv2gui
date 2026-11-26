@@ -142,7 +142,7 @@ Te same ekrany w trzech z dostępnych motywów. Kliknij miniaturę lub nazwę mo
 - Mapa historii przesyłki z trasą przez oddziały i przetłumaczonymi nazwami zdarzeń.
 - Pobieranie dokumentów przesyłki, podgląd i wydruk etykiety QR.
 - Rejestracja zwrotów, lista i szczegóły, akcje przetwarzania/zakończenia/anulowania, zmiana powodu i walidacja tokenu.
-- Rejestr doręczeń z ostatnimi doręczeniami, ekran edycji z historią kroków i sposobem doręczenia oraz akcja anulowania. Korzysta z `GET /deliveries`, `GET /deliveries/{id}`, `PUT /deliveries/{id}/method` i `POST /deliveries/{id}/cancel` Managera.
+- Lista dostaw ze zwijanymi filtrami, sortowaniem po stronie serwera, akcjami zbiorczymi i dla wierszy oraz szczegóły dostawy z etapami cyklu życia, potwierdzeniem doręczenia, mapą trasy, powiązanymi dostawami i historią zmian.
 - Lista oddziałów i tworzenie oddziału. Lista pokazuje mapę zapisanych granic obszarów doręczeń i lokalizacji oddziałów zgodnie z filtrami listy. Kliknięcie oddziału otwiera osobną kartę (`/departments/:departmentId`) z edytowalnymi danymi, użytkownikami, mapą oddziału i edytorem obszaru doręczeń.
 - Edytor obszaru doręczeń: rysowanie wielu granic na dużej mapie Leaflet (z widokiem rozszerzonym), zamykanie granicy w punkcie początkowym, dodawanie i przeciąganie wierzchołków oraz zapis szkicu w pamięci lokalnej przeglądarki. W Konfiguracja globalna → Oddziały ustawienie automatycznego obszaru doręczeń dzieli Polskę między aktywne oddziały z poprawnymi współrzędnymi przy zapisie i po utworzeniu oddziału. Zastępuje lokalne szkice uczestniczących oddziałów. W tej samej sekcji można łączyć każdy nowy oddział z najbliższą aktywną sortownią oraz ukryć w GUI usuwanie i archiwizację oddziałów. Te flagi i szkice obszarów są lokalne dla przeglądarki; API nie egzekwuje tych ograniczeń. Połączenia sieci są zapisywane przez API sieci doręczeń. Szkice obszarów nie wpływają na przypisywanie przesyłek. Odległość liczona jest w przybliżonym płaskim rzucie mapy; drogi i czas przejazdu nie są brane pod uwagę. Dołączony, przybliżony kontur Polski pochodzi z [Natural Earth 1:10m Admin-0](https://www.naturalearthdata.com/downloads/10m-cultural-vectors/10m-admin-0-countries/) przez [zbiór GeoJSON geo-countries](https://github.com/datasets/geo-countries) (domena publiczna).
 - Mapa oddziału: edytor SVG w widoku z góry dla pomieszczeń, ścian, alejek, stref, regałów i miejsc składowania (zoom, przesuwanie, siatka, przenoszenie, obrót, zmiana rozmiaru, cofanie) oraz tryb operacyjny do odkładania, przenoszenia, rezerwowania, wyszukiwania i śledzenia lokalizacji palet. Korzysta z endpointów `/department-maps` Managera.
@@ -152,16 +152,21 @@ Te same ekrany w trzech z dostępnych motywów. Kliknij miniaturę lub nazwę mo
 - Czat organizacji oparty na prawdziwym katalogu użytkowników i trwałych rozmowach REST, z wyszukiwaniem i dymkami rozmów zgrupowanymi w prawym dolnym rogu.
 - Parowanie urządzeń.
 - Panele konfiguracji globalnej, geokodowania i integracji.
-- Lista konfiguracji oprogramowania.
 - Strona statusu mikroserwisów.
 - Strona profilu użytkownika.
 - Aplikacja superadministratora z osobnym logowaniem i zarządzaniem operatorami.
 - Plany subskrypcji operatorów (`MINI`, `BASIC`, `ENTERPRISE`) zarządzane w obszarze operatora superadministratora; operatorzy
   bez planu albo z planem wygasłym lub jeszcze nierozpoczętym widzą ekran z prośbą o kontakt z pomocą techniczną.
+- Lista palet, szczegóły, dokumenty, przypisanie przewoźnika, skanowanie przesyłek i widok skanowania przy rozładunku palet.
+- Lista incydentów, szczegóły, okna zgłaszania i rozwiązywania (także przepakowanie) ze statystykami, filtrami i przypisaniem.
+- Mapa floty z pojazdami na aktywnych trasach i przejechaną trasą wybranego pojazdu.
+- Panel analityki z porównaniem oddziałów, rejestrem kosztów i wykresami prognozy przesyłek.
+- Moduły przewoźników i kierowców, widok dziennika audytu oraz onboarding użytkownika ze zgodami i samouczkiem.
+- Wybór motywu kolorystycznego, w tym motyw o wysokim kontraście.
 - Tłumaczenia polskie, angielskie i niemieckie.
 
-Część tras to zaślepki planowanych modułów, np. analityka, pojazdy, palety,
-skaner, doręczenia kurierskie, dostawcy, umowy, rozliczenia i pomoc.
+Część tras to zaślepki planowanych modułów: pojazdy, doręczenia kurierskie,
+dostawcy, umowy, rozliczenia i pomoc.
 
 ## Struktura projektu
 
@@ -188,7 +193,6 @@ Najważniejsze zmienne:
 - `REACT_APP_SERVER_URL` - główne API Managera, domyślnie `http://localhost:8080/v1/api`
 - `REACT_APP_MANAGER_API_URL` - alias API Managera
 - `REACT_APP_GATEWAY_URL` - adres bramy, domyślnie `http://localhost:8088/gateway`
-- `REACT_APP_SOFTWARE_CONFIGURATION_URL` - serwis konfiguracji oprogramowania
 - `REACT_APP_DELIVERY_PROTECTION_URL` - serwis ochrony doręczeń
 - `REACT_APP_RETURNING_TRACK_MANAGER_URL` - serwis zwrotów
 - `REACT_APP_ROUTE_TRACKER_FLOW_URL` - serwis śledzenia tras

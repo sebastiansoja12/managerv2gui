@@ -142,7 +142,7 @@ The same screens in three of the available themes. Click a thumbnail or a theme 
 - Shipment history map with department routes and translated event labels.
 - Shipment document download, QR label preview and print support.
 - Return registration, list and detail views, processing/completion/cancellation actions, reason updates and token validation.
-- Delivery register with recent deliveries, an edit screen with step history and delivery method, and a cancel action. It uses Manager `GET /deliveries`, `GET /deliveries/{id}`, `PUT /deliveries/{id}/method`, and `POST /deliveries/{id}/cancel`.
+- Delivery list with collapsible filters, server-side sorting, bulk and row actions, and delivery details with lifecycle stages, proof of delivery, route map, related deliveries and change history.
 - Department list and department creation. The list shows a map of saved delivery boundaries and department locations, following the list filters. Clicking a department opens its own tab (`/departments/:departmentId`) with editable details, users, the department map and a delivery area editor.
 - Delivery area editor: draw multiple boundaries on a large Leaflet map (with an expanded view), close a boundary at its starting point, add or drag vertices and save a draft in this browser's local storage. Under Global configuration → Departments, the automatic delivery area setting divides Poland among active departments with valid coordinates on save and after department creation. It replaces local drafts for participating departments. The same configuration section can connect each newly created department to its nearest active sorting facility and hide department deletion or archiving in the GUI. These configuration flags and area drafts are browser local; restrictions are not enforced by the API. Network connections are saved through the delivery network API. Area drafts do not affect shipment assignment. Distance uses an approximate planar map projection; roads and driving times are not considered. The bundled, approximate Polish outline is derived from [Natural Earth 1:10m Admin-0](https://www.naturalearthdata.com/downloads/10m-cultural-vectors/10m-admin-0-countries/) through the [geo-countries GeoJSON dataset](https://github.com/datasets/geo-countries) (public domain).
 - Department map: SVG top-view editor for rooms, walls, aisles, zones, racks and storage locations (zoom, pan, grid, move, rotate, resize, undo) and an operational mode for placing, moving, reserving, searching and tracking pallet locations. It uses Manager `/department-maps` endpoints.
@@ -152,17 +152,21 @@ The same screens in three of the available themes. Click a thumbnail or a theme 
 - Organization chat backed by the real organization user directory and persistent REST conversations, with search and conversation bubbles grouped in the bottom-right dock.
 - Device pairing.
 - Global configuration, geocoding configuration and integration configuration panels.
-- Software configuration list.
 - Microservice status page.
 - User profile page.
 - Super-admin application with its own login and operator management UI.
 - Operator subscription plans (`MINI`, `BASIC`, `ENTERPRISE`) managed in the super-admin operator workspace; operators
   without a plan or with an expired or not yet started plan see a screen asking them to contact support.
+- Pallet list, details, documents, carrier assignment, shipment scanning and a pallet unload scanning view.
+- Incident list, details, report and resolve dialogs (including repackaging) with statistics, filters and assignment.
+- Fleet map with vehicles on active routes and the travelled route of the selected vehicle.
+- Analytics dashboard with department comparison, cost register and shipment forecast charts.
+- Carriers and drivers modules, audit log view and user onboarding with consents and a guided tutorial.
+- Selectable colour themes, including a high-contrast theme.
 - Polish, English and German translations.
 
-Some routes are placeholders for planned modules, for example analytics,
-vehicles, pallets, scanner, courier deliveries, suppliers, deals, billing and
-support.
+Some routes are placeholders for planned modules: vehicles, courier
+deliveries, suppliers, deals, billing and support.
 
 ## Project Structure
 
@@ -189,7 +193,6 @@ Important variables:
 - `REACT_APP_SERVER_URL` - main Manager API, default `http://localhost:8080/v1/api`
 - `REACT_APP_MANAGER_API_URL` - manager API alias
 - `REACT_APP_GATEWAY_URL` - gateway URL, default `http://localhost:8088/gateway`
-- `REACT_APP_SOFTWARE_CONFIGURATION_URL` - software configuration service
 - `REACT_APP_DELIVERY_PROTECTION_URL` - delivery protection service
 - `REACT_APP_RETURNING_TRACK_MANAGER_URL` - returning service
 - `REACT_APP_ROUTE_TRACKER_FLOW_URL` - route tracker service
