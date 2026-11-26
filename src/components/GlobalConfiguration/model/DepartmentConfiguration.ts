@@ -36,11 +36,30 @@ export type DepartmentCapacityPolicy = {
     maxCouriersPerDepartment: number;
 };
 
+export type CourierAssignmentDateField = "DESTINATION_ARRIVAL" | "CREATION";
+
+export type CourierAssignmentWindowType = "TIME_OF_DAY" | "PREVIOUS_OPERATIONAL_DAY" | "ROLLING";
+
+export type DepartmentCourierAssignmentPolicy = {
+    enabled: boolean;
+    dateField: CourierAssignmentDateField;
+    windowType: CourierAssignmentWindowType;
+    windowStart: string;
+    windowEnd: string;
+    timeZone: string;
+    processingDelayMinutes: number;
+    overlapMinutes: number;
+    maxWindowHours: number;
+    lookbackDays: number;
+    batchSize: number;
+};
+
 export type DepartmentPolicies = {
     deliveryAreaPolicy: DepartmentDeliveryAreaPolicy;
     connectionPolicy: DepartmentConnectionPolicy;
     lifecyclePolicy: DepartmentLifecyclePolicy;
     capacityPolicy: DepartmentCapacityPolicy;
+    courierAssignmentPolicy: DepartmentCourierAssignmentPolicy;
 };
 
 export type DepartmentPolicyKey = keyof DepartmentPolicies;
@@ -87,6 +106,19 @@ export const defaultDepartmentPolicies: DepartmentPolicies = {
         redirectOverflowToNeighbour: false,
         maxCouriersPerDepartment: 0,
     },
+    courierAssignmentPolicy: {
+        enabled: false,
+        dateField: "DESTINATION_ARRIVAL",
+        windowType: "ROLLING",
+        windowStart: "00:00",
+        windowEnd: "00:00",
+        timeZone: "",
+        processingDelayMinutes: 5,
+        overlapMinutes: 15,
+        maxWindowHours: 24,
+        lookbackDays: 3,
+        batchSize: 500,
+    },
 };
 
 export const defaultDepartmentConfiguration: DepartmentConfiguration = {
@@ -99,6 +131,41 @@ export const defaultDepartmentConfiguration: DepartmentConfiguration = {
 
 const eventName = "manager:department-configuration-changed";
 
+const toTimeOfDay = (value: unknown, fallback: string) => (
+    typeof value === "string" && /^\d{2}:\d{2}/.test(value) ? value.slice(0, 5) : fallback
+);
+
+const normalizeCourierAssignmentPolicy = (
+    saved?: Partial<Record<keyof DepartmentCourierAssignmentPolicy, unknown>> | null,
+): DepartmentCourierAssignmentPolicy => {
+    const defaults = defaultDepartmentPolicies.courierAssignmentPolicy;
+    const policy = {...defaults, ...saved} as DepartmentCourierAssignmentPolicy;
+    return {
+        ...policy,
+        windowStart: toTimeOfDay(saved?.windowStart, defaults.windowStart),
+        windowEnd: toTimeOfDay(saved?.windowEnd, defaults.windowEnd),
+        timeZone: typeof saved?.timeZone === "string" ? saved.timeZone : "",
+    };
+};
+
+export const toDepartmentOverridePayload = (
+    override: DepartmentConfigurationOverride,
+    inherited: DepartmentConfiguration,
+): DepartmentConfigurationOverride => {
+    if (override.courierAssignmentPolicy === undefined) {
+        return override;
+    }
+    const overridden = Object.entries(override.courierAssignmentPolicy || {})
+        .filter(([, value]) => value !== null && value !== undefined);
+    return {
+        ...override,
+        courierAssignmentPolicy: overridden.length === 0 ? null : {
+            ...normalizeCourierAssignmentPolicy(inherited.courierAssignmentPolicy),
+            ...Object.fromEntries(overridden),
+        },
+    };
+};
+
 const normalizeDepartmentConfiguration = (saved?: Partial<DepartmentConfiguration> | null): DepartmentConfiguration => (
     {
         autoAssignDeliveryAreas: saved?.autoAssignDeliveryAreas === true,
@@ -109,6 +176,7 @@ const normalizeDepartmentConfiguration = (saved?: Partial<DepartmentConfiguratio
         connectionPolicy: {...defaultDepartmentPolicies.connectionPolicy, ...saved?.connectionPolicy},
         lifecyclePolicy: {...defaultDepartmentPolicies.lifecyclePolicy, ...saved?.lifecyclePolicy},
         capacityPolicy: {...defaultDepartmentPolicies.capacityPolicy, ...saved?.capacityPolicy},
+        courierAssignmentPolicy: normalizeCourierAssignmentPolicy(saved?.courierAssignmentPolicy),
     }
 );
 
@@ -118,10 +186,23 @@ export const readDepartmentConfiguration = async (departmentId?: number | string
         : await OperatorConfigurationService.getDepartmentConfiguration(departmentId)).data)
 );
 
+const normalizeDepartmentConfigurationOverride = (
+    saved?: DepartmentConfigurationOverride | null,
+): DepartmentConfigurationOverride => {
+    if (!saved?.courierAssignmentPolicy) {
+        return saved || {};
+    }
+    return {
+        ...saved,
+        courierAssignmentPolicy: normalizeCourierAssignmentPolicy(saved.courierAssignmentPolicy),
+    };
+};
+
 export const readDepartmentConfigurationOverride = async (
     departmentId: number | string,
 ): Promise<DepartmentConfigurationOverride> => (
-    (await OperatorConfigurationService.getDepartmentConfigurationOverride(departmentId)).data || {}
+    normalizeDepartmentConfigurationOverride(
+        (await OperatorConfigurationService.getDepartmentConfigurationOverride(departmentId)).data)
 );
 
 export const writeDepartmentConfigurationOverride = async (
@@ -130,7 +211,7 @@ export const writeDepartmentConfigurationOverride = async (
 ) => {
     const saved = (await OperatorConfigurationService.updateDepartmentConfigurationOverride(departmentId, override)).data;
     window.dispatchEvent(new Event(eventName));
-    return saved;
+    return normalizeDepartmentConfigurationOverride(saved);
 };
 
 export const writeDepartmentConfiguration = async (configuration: DepartmentConfiguration) => {

@@ -16,6 +16,7 @@ import {
     DepartmentPolicyKey,
     DepartmentSettingKey,
     readDepartmentConfigurationOverride,
+    toDepartmentOverridePayload,
     useDepartmentConfiguration,
     writeDepartmentConfiguration,
     writeDepartmentConfigurationOverride,
@@ -31,16 +32,23 @@ const sectionSettings: Record<SectionKey, SettingKey[]> = {
     connectionPolicy: ["autoConnectDepartments"],
     lifecyclePolicy: [],
     capacityPolicy: [],
+    courierAssignmentPolicy: [],
     protection: ["preventDepartmentDeletion", "preventDepartmentArchiving"],
 };
 
 const sectionKeys: SectionKey[] = ["deliveryAreaPolicy", "connectionPolicy", "lifecyclePolicy", "protection",
-    "capacityPolicy"];
+    "capacityPolicy", "courierAssignmentPolicy"];
 
 type PolicyField =
     | {key: string; kind: "boolean"}
     | {key: string; kind: "select"; options: string[]}
-    | {key: string; kind: "number"; min: number; max: number; unit?: "km" | "days" | "percent" | "shipments" | "couriers"};
+    | {key: string; kind: "time"}
+    | {key: string; kind: "timeZone"}
+    | {key: string; kind: "number"; min: number; max: number;
+        unit?: "km" | "days" | "percent" | "shipments" | "couriers" | "minutes" | "hours"};
+
+const timeZoneOptions = ["", "Europe/Warsaw", "Europe/Berlin", "Europe/Prague", "Europe/Vienna", "Europe/London",
+    "Europe/Paris", "UTC"];
 
 const policyFields: Record<DepartmentPolicyKey, PolicyField[]> = {
     deliveryAreaPolicy: [
@@ -68,6 +76,19 @@ const policyFields: Record<DepartmentPolicyKey, PolicyField[]> = {
         {key: "redirectOverflowToNeighbour", kind: "boolean"},
         {key: "maxCouriersPerDepartment", kind: "number", min: 0, max: 1000, unit: "couriers"},
     ],
+    courierAssignmentPolicy: [
+        {key: "enabled", kind: "boolean"},
+        {key: "dateField", kind: "select", options: ["DESTINATION_ARRIVAL", "CREATION"]},
+        {key: "windowType", kind: "select", options: ["ROLLING", "TIME_OF_DAY", "PREVIOUS_OPERATIONAL_DAY"]},
+        {key: "windowStart", kind: "time"},
+        {key: "windowEnd", kind: "time"},
+        {key: "timeZone", kind: "timeZone"},
+        {key: "processingDelayMinutes", kind: "number", min: 0, max: 1440, unit: "minutes"},
+        {key: "overlapMinutes", kind: "number", min: 0, max: 1440, unit: "minutes"},
+        {key: "maxWindowHours", kind: "number", min: 1, max: 168, unit: "hours"},
+        {key: "lookbackDays", kind: "number", min: 1, max: 30, unit: "days"},
+        {key: "batchSize", kind: "number", min: 1, max: 5000, unit: "shipments"},
+    ],
 };
 
 const policyKeys = Object.keys(policyFields) as DepartmentPolicyKey[];
@@ -79,8 +100,11 @@ const policyValues = (draft: DepartmentConfiguration, policy: DepartmentPolicyKe
 );
 
 const numberFieldError = (field: PolicyField, value: unknown) => {
-    if (field.kind !== "number") return null;
     const messages = pl.globalConfiguration.departmentConfiguration.validation;
+    if (field.kind === "time") {
+        return typeof value === "string" && /^\d{2}:\d{2}$/.test(value) ? null : messages.time;
+    }
+    if (field.kind !== "number") return null;
     const numberValue = Number(value);
     if (!Number.isInteger(numberValue)) return messages.integer;
     if (numberValue < field.min || numberValue > field.max) {
@@ -89,10 +113,14 @@ const numberFieldError = (field: PolicyField, value: unknown) => {
     return null;
 };
 
-const isFieldDisabled = (policy: DepartmentPolicyKey, fieldKey: string, deliveryAreaMode: unknown) => (
-    policy === "deliveryAreaPolicy"
-    && fieldKey === "maxDeliveryRadiusKm"
-    && deliveryAreaMode !== "RADIUS"
+const isFieldDisabled = (policy: DepartmentPolicyKey, fieldKey: string,
+                         valueOf: (policy: DepartmentPolicyKey, key: string) => unknown) => (
+    (policy === "deliveryAreaPolicy"
+        && fieldKey === "maxDeliveryRadiusKm"
+        && valueOf("deliveryAreaPolicy", "deliveryAreaMode") !== "RADIUS")
+    || (policy === "courierAssignmentPolicy"
+        && (fieldKey === "windowStart" || fieldKey === "windowEnd")
+        && valueOf("courierAssignmentPolicy", "windowType") !== "TIME_OF_DAY")
 );
 
 const departmentLabel = (department: Department) => [department.departmentCode?.value, department.address?.city]
@@ -179,7 +207,7 @@ function DepartmentConfigurationPanel() {
     );
 
     const fieldDisabled = (policy: DepartmentPolicyKey, key: string) => (
-        isFieldDisabled(policy, key, policyValue("deliveryAreaPolicy", "deliveryAreaMode"))
+        isFieldDisabled(policy, key, policyValue)
     );
 
     const hasErrors = policyKeys.some((policy) => policyFields[policy].some((field) => (
@@ -216,7 +244,8 @@ function DepartmentConfigurationPanel() {
         setSuccess(null);
         try {
             if (departmentScope) {
-                setOverrideDraft(await writeDepartmentConfigurationOverride(scope, overrideDraft));
+                setOverrideDraft(await writeDepartmentConfigurationOverride(scope,
+                    toDepartmentOverridePayload(overrideDraft, current)));
                 const department = departments.find((item) => String(item.departmentId) === scope);
                 setSuccess(labels.scope.saved.replace("{department}", department ? departmentLabel(department) : scope));
             } else {
@@ -357,7 +386,56 @@ function DepartmentConfigurationPanel() {
             );
         }
 
+        if (field.kind === "timeZone") {
+            const timeZones = labels.options.timeZone;
+            return (
+                <div className={rowClassName(overridden)} key={field.key}>
+                    {copy}
+                    <TextField
+                        aria-label={fieldLabels.label}
+                        className="shipment-setting-select"
+                        disabled={disabled}
+                        fullWidth
+                        select
+                        size="small"
+                        value={value ?? ""}
+                        onChange={(event) => updatePolicy(policy, field.key, event.target.value)}
+                    >
+                        {timeZoneOptions.map((option) => (
+                            <MenuItem key={option || "regional"} value={option}>
+                                {option === "" ? timeZones.regional : option}
+                            </MenuItem>
+                        ))}
+                    </TextField>
+                </div>
+            );
+        }
+
         const fieldError = disabled ? null : numberFieldError(field, value);
+        if (field.kind === "time") {
+            return (
+                <div
+                    aria-disabled={disabled || undefined}
+                    className={rowClassName(overridden, disabled)}
+                    key={field.key}
+                >
+                    {copy}
+                    <div className="shipment-setting-input">
+                        <TextField
+                            aria-label={fieldLabels.label}
+                            disabled={disabled}
+                            error={Boolean(fieldError)}
+                            fullWidth
+                            helperText={fieldError || undefined}
+                            size="small"
+                            type="time"
+                            value={String(value ?? "")}
+                            onChange={(event) => updatePolicy(policy, field.key, event.target.value)}
+                        />
+                    </div>
+                </div>
+            );
+        }
         return (
             <div
                 aria-disabled={disabled || undefined}

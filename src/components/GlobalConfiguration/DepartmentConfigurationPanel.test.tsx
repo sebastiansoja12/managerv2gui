@@ -84,6 +84,11 @@ describe("DepartmentConfigurationPanel", () => {
         expect(section).not.toHaveTextContent(labels.settings.autoAssignDeliveryAreas.label);
     });
 
+    const selectDepartment = async (label: string, code: string) => {
+        fireEvent.change(screen.getByRole("combobox", {name: label}), {target: {value: code}});
+        fireEvent.mouseDown(await screen.findByRole("option", {name: new RegExp(code)}));
+    };
+
     const renderLoadedPanel = async () => {
         render(<DepartmentConfigurationPanel />);
         await waitFor(() => expect(configurationService.getCurrentDepartmentConfiguration).toHaveBeenCalled());
@@ -140,7 +145,7 @@ describe("DepartmentConfigurationPanel", () => {
         const labels = pl.globalConfiguration.departmentConfiguration;
         await renderLoadedPanel();
 
-        fireEvent.change(screen.getByRole("combobox", {name: labels.scope.label}), {target: {value: "9"}});
+        await selectDepartment(labels.scope.label, "KT1");
 
         const capacity = await screen.findByRole("spinbutton", {name: labels.scope.dailyCapacity.label});
         await waitFor(() => expect(capacity).toHaveValue(250));
@@ -154,5 +159,81 @@ describe("DepartmentConfigurationPanel", () => {
             lifecyclePolicy: {requireStatusChangeReason: true},
         }));
         expect(configurationService.updateCurrentDepartmentConfiguration).not.toHaveBeenCalled();
+    });
+    it("enables courier assignment with a time of day window", async () => {
+        await renderLoadedPanel();
+        const fields = pl.globalConfiguration.departmentConfiguration.policies.courierAssignmentPolicy.fields;
+        const options = pl.globalConfiguration.departmentConfiguration.options;
+
+        const windowStart = screen.getByLabelText(fields.windowStart.label);
+        expect(windowStart).toBeDisabled();
+        fireEvent.click(screen.getByRole("checkbox", {name: fields.enabled.label}));
+        fireEvent.click(screen.getByRole("combobox", {name: fields.windowType.label}));
+        fireEvent.click(await screen.findByRole("option", {name: options.windowType.TIME_OF_DAY}));
+        await waitFor(() => expect(windowStart).toBeEnabled());
+        fireEvent.change(windowStart, {target: {value: "08:00"}});
+        fireEvent.change(screen.getByRole("spinbutton", {name: fields.batchSize.label}), {target: {value: "200"}});
+        fireEvent.click(screen.getByRole("button", {name: pl.common.saveChanges}));
+
+        await waitFor(() => expect(configurationService.updateCurrentDepartmentConfiguration).toHaveBeenCalledWith(
+            expect.objectContaining({
+                courierAssignmentPolicy: {
+                    ...defaultDepartmentPolicies.courierAssignmentPolicy,
+                    enabled: true,
+                    windowType: "TIME_OF_DAY",
+                    windowStart: "08:00",
+                    batchSize: 200,
+                },
+            })));
+    });
+
+    it("keeps a saved courier assignment policy when other rules are saved", async () => {
+        configurationService.getCurrentDepartmentConfiguration.mockResolvedValue({data: {
+            autoAssignDeliveryAreas: false, autoConnectDepartments: false,
+            preventDepartmentDeletion: false, preventDepartmentArchiving: false,
+            courierAssignmentPolicy: {
+                ...defaultDepartmentPolicies.courierAssignmentPolicy,
+                enabled: true, windowType: "TIME_OF_DAY", windowStart: "06:30:00", windowEnd: "14:00:00",
+                timeZone: null,
+            },
+        }, status: 200} as never);
+        await renderLoadedPanel();
+        const labels = pl.globalConfiguration.departmentConfiguration;
+
+        await waitFor(() => expect(screen.getByLabelText(labels.policies.courierAssignmentPolicy.fields.windowStart.label))
+            .toHaveValue("06:30"));
+        fireEvent.click(screen.getByRole("checkbox", {name: labels.settings.preventDepartmentDeletion.label}));
+        fireEvent.click(screen.getByRole("button", {name: pl.common.saveChanges}));
+
+        await waitFor(() => expect(configurationService.updateCurrentDepartmentConfiguration).toHaveBeenCalledWith(
+            expect.objectContaining({
+                courierAssignmentPolicy: {
+                    ...defaultDepartmentPolicies.courierAssignmentPolicy,
+                    enabled: true, windowType: "TIME_OF_DAY", windowStart: "06:30", windowEnd: "14:00", timeZone: "",
+                },
+            })));
+    });
+
+    it("sends the complete courier assignment policy when a department overrides one of its fields", async () => {
+        (departmentService.getAll as jest.Mock).mockResolvedValue({data: [{
+            departmentId: 9, departmentCode: {value: "KT1"}, address: {city: "Katowice"},
+        }]});
+        configurationService.getDepartmentConfigurationOverride.mockResolvedValue({data: {}, status: 200});
+        configurationService.updateDepartmentConfigurationOverride.mockImplementation(async (departmentId, override) => (
+            {data: override, status: 200}));
+        const labels = pl.globalConfiguration.departmentConfiguration;
+        await renderLoadedPanel();
+
+        await selectDepartment(labels.scope.label, "KT1");
+        await waitFor(() => expect(configurationService.getDepartmentConfigurationOverride).toHaveBeenCalledWith("9"));
+        await act(async () => undefined);
+        fireEvent.click(screen.getByRole("checkbox", {
+            name: labels.policies.courierAssignmentPolicy.fields.enabled.label,
+        }));
+        fireEvent.click(screen.getByRole("button", {name: pl.common.saveChanges}));
+
+        await waitFor(() => expect(configurationService.updateDepartmentConfigurationOverride).toHaveBeenCalledWith("9", {
+            courierAssignmentPolicy: {...defaultDepartmentPolicies.courierAssignmentPolicy, enabled: true},
+        }));
     });
 });
