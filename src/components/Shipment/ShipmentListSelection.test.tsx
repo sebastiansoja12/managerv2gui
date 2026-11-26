@@ -96,6 +96,19 @@ describe("shipment list selection", () => {
         expect(within(row).getAllByRole("cell")[5]).not.toHaveTextContent(pl.common.dash);
     });
 
+    it("shows the courier assigned to the delivery and unassigned when there is none", async () => {
+        (ShipmentService.search as jest.Mock).mockResolvedValue({data: {content: [
+            {...shipment, delivery: {...shipment.delivery, courierCode: "genfgr", courierName: "Agnieszka Lewandowicz"}},
+            {...shipment, shipmentId: {value: "303"}, trackingNumber: {value: "TRACK-303"}},
+        ], page: 0, size: 25, totalElements: 2, totalPages: 1}, status: 200});
+        render(<MemoryRouter><ShipmentList/></MemoryRouter>);
+
+        const row = await screen.findByRole("row", {name: /TRACK-101(?!\d)/});
+        expect(within(row).getByText("Agnieszka Lewandowicz")).toBeInTheDocument();
+        const unassignedRow = screen.getByRole("row", {name: /TRACK-303/});
+        expect(within(unassignedRow).getByText(pl.shipments.table.unassigned)).toBeInTheDocument();
+    });
+
     it("loads the selected page from the server", async () => {
         render(<MemoryRouter><ShipmentList/></MemoryRouter>);
         await screen.findByRole("row", {name: /TRACK-101(?!\d)/});

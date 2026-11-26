@@ -288,6 +288,7 @@ const ShipmentDetails: React.FC = () => {
     const [deliveryHistoryOpen, setDeliveryHistoryOpen] = useState<boolean>(false);
     const [deliveryPickupPointCode, setDeliveryPickupPointCode] = useState<string | null>(null);
     const [returnPackage, setReturnPackage] = useState<ReturnPackageDto | null>(null);
+    const [relatedTrackingNumber, setRelatedTrackingNumber] = useState<string | null>(null);
     const [returnPackageUnavailable, setReturnPackageUnavailable] = useState<boolean>(false);
     const [activeDetailTab, setActiveDetailTab] = useState<ShipmentDetailsTab>("overview");
     const [activeWorkspaceTab, setActiveWorkspaceTab] = useState<ShipmentWorkspaceTab>("history");
@@ -596,6 +597,25 @@ const ShipmentDetails: React.FC = () => {
         loadShipment();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [shipmentId, trackingNumber]);
+
+    useEffect(() => {
+        const relatedShipmentId = shipment?.shipmentRelatedId?.value;
+        setRelatedTrackingNumber(null);
+        if (!relatedShipmentId) {
+            return;
+        }
+        let cancelled = false;
+        ShipmentService.get(relatedShipmentId)
+            .then((response) => {
+                if (!cancelled) {
+                    setRelatedTrackingNumber(response.data.trackingNumber?.value || null);
+                }
+            })
+            .catch(() => undefined);
+        return () => {
+            cancelled = true;
+        };
+    }, [shipment?.shipmentRelatedId?.value]);
 
     useEffect(() => {
         setNoteDraft("");
@@ -1153,7 +1173,7 @@ const ShipmentDetails: React.FC = () => {
                 <div className="shipment-workspace-related">
                     <div>
                         <span>{pl.shipments.summary.relatedShipment}</span>
-                        <strong>#{shipment.shipmentRelatedId.value}</strong>
+                        <strong>{relatedTrackingNumber || shipment.shipmentRelatedId.value}</strong>
                     </div>
                     <Button variant="outlined" onClick={() => navigate(`/shipments/${shipment.shipmentRelatedId?.value}/edit`)}>
                         {pl.shipments.actions.details}
@@ -1399,7 +1419,7 @@ const ShipmentDetails: React.FC = () => {
                                         <div className="shipment-dashboard-facts shipment-dashboard-facts-primary">
                                             <div><span>{pl.shipments.summary.tracking}</span><strong>{shipment.trackingNumber?.value || pl.common.dash}</strong></div>
                                             <div><span>{pl.shipments.summary.type}</span><strong>{pl.shipments.type[shipment.shipmentType]}</strong></div>
-                                            <div><span>{pl.shipments.summary.relatedShipment}</span><strong>{shipment.shipmentRelatedId?.value ? `#${shipment.shipmentRelatedId.value}` : pl.common.dash}</strong></div>
+                                            <div><span>{pl.shipments.summary.relatedShipment}</span><strong>{relatedTrackingNumber || shipment.shipmentRelatedId?.value || pl.common.dash}</strong></div>
                                             <div className="shipment-dashboard-person-fact">
                                                 <span>{pl.shipments.form.sections.sender}</span>
                                                 <strong>{fullName(sender)}</strong>

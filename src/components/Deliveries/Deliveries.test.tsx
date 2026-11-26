@@ -221,7 +221,7 @@ describe("Deliveries", () => {
         expect(screen.getByText(pl.shipments.form.fields.pickupMethod).nextSibling)
             .toHaveTextContent(pl.shipments.pickupMethod.PICKUP_POINT);
         openTab(pl.deliveries.destinationCardTitle);
-        expect(screen.getByRole("link", {name: /9223372036854775001/})).toHaveAttribute("href", "/shipments/9223372036854775001/edit");
+        expect(screen.queryByText(/9223372036854775001/)).not.toBeInTheDocument();
         expect(mockedService.get).toHaveBeenCalledWith(delivery.id);
     });
 
@@ -365,6 +365,9 @@ describe("Deliveries", () => {
         expect(screen.getByText(pl.deliveries.details.sla.OVERDUE)).toBeInTheDocument();
         openTab(pl.deliveries.destinationCardTitle);
         expect(await screen.findByText("TRK-555")).toBeInTheDocument();
+        expect(screen.getByRole("link", {name: /TRK-555/}))
+            .toHaveAttribute("href", "/shipments/9223372036854775001/edit");
+        expect(screen.queryByText(/9223372036854775001/)).not.toBeInTheDocument();
         expect(screen.getByText("Anna Kowalska")).toBeInTheDocument();
         const related = await screen.findByRole("link", {name: /100/});
         expect(related).toHaveAttribute("href", "/deliveries/source-delivery/edit");

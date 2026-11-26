@@ -110,6 +110,8 @@ export interface ShipmentDeliveryDto {
     currentDepartmentId: DepartmentIdDto | null;
     plannedDeliveryAt: string | null;
     deliveredAt: string | null;
+    courierCode?: string | null;
+    courierName?: string | null;
 }
 
 export interface ShipmentDetailsDto {

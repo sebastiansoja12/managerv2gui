@@ -14,12 +14,12 @@ function DeliveryTargetTile({delivery, shipment}: {delivery: Delivery; shipment:
         [pl.deliveries.columns.target, delivery.targetType === "PALLET"
             ? <Link className="deliveries-shipment-link" to={deliveryTargetPath(delivery) as string}>
                 {`${deliveryTargetLabel(delivery.targetType)} · ${delivery.targetId}`} ↗</Link>
-            : `${deliveryTargetLabel(delivery.targetType)} · ${delivery.targetId}`],
-        [pl.deliveries.columns.shipment, delivery.shipmentId
+            : deliveryTargetLabel(delivery.targetType)],
+        [pl.deliveries.details.trackingNumberLabel, shipment?.trackingNumber?.value && delivery.shipmentId
             ? <Link className="deliveries-shipment-link"
-                    to={`/shipments/${encodeURIComponent(delivery.shipmentId)}/edit`}>{delivery.shipmentId} ↗</Link>
-            : pl.common.dash],
-        [pl.deliveries.details.trackingNumberLabel, shipment?.trackingNumber?.value || pl.common.dash],
+                    to={`/shipments/${encodeURIComponent(delivery.shipmentId)}/edit`}>
+                {shipment.trackingNumber.value}<span aria-hidden="true"> ↗</span></Link>
+            : shipment?.trackingNumber?.value || pl.common.dash],
         [pl.deliveries.details.shipmentStatusLabel, shipment
             ? pl.shipments.status[shipment.shipmentStatus] || shipment.shipmentStatus : pl.common.dash],
         [pl.deliveries.details.recipientLabel, recipient

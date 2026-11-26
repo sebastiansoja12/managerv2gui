@@ -167,7 +167,7 @@ const mapShipmentToRow = (shipment: ShipmentDto, origin: string, currentDepartme
     origin,
     currentDepartment,
     price: formatPrice(shipment),
-    user: shipmentTranslations.table.unassigned,
+    user: shipment.delivery?.courierName || shipmentTranslations.table.unassigned,
     destination,
     relatedShipmentId: shipment.shipmentRelatedId?.value || null,
     palletTrackingNumber: shipment.palletTrackingNumber?.value || null,
