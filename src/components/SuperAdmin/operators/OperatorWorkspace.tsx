@@ -26,6 +26,7 @@ import {Operator, OperatorDraft, ShippingCapabilities} from "../../Operators/mod
 import pl from "../../../i18n/translate";
 import {getOperatorIdValue} from "./operatorPanelUtils";
 import OperatorAccessPanel from "./OperatorAccessPanel";
+import OperatorAdminActions from "./OperatorAdminActions";
 import OperatorDataPanel from "./OperatorDataPanel";
 import OperatorDevicesPanel from "./OperatorDevicesPanel";
 import OperatorOnboardingCard from "./OperatorOnboardingCard";
@@ -274,7 +275,18 @@ function OperatorWorkspace({
                     <span className="super-admin-workspace-avatar">{operator.companyName.slice(0, 2).toUpperCase()}</span>
                     <div><span className="super-admin-kicker">{pl.superAdmin.workspace.operatorDetails}</span><h2>{operator.companyName}</h2><p>#{operatorId} · {operator.contactEmail || pl.common.dash}</p></div>
                 </div>
-                <span className={`super-admin-status ${operator.status === "ACTIVE" ? "is-active" : "is-inactive"}`}>{operator.status === "ACTIVE" ? pl.superAdmin.editor.active : pl.superAdmin.editor.inactive}</span>
+                <div className="super-admin-workspace-heading-side">
+                    <span className={`super-admin-status ${operator.status === "ACTIVE" ? "is-active" : "is-inactive"}`}>{operator.status === "ACTIVE" ? pl.superAdmin.editor.active : pl.superAdmin.editor.inactive}</span>
+                    <OperatorAdminActions
+                        active={operator.status === "ACTIVE"}
+                        departments={departments}
+                        key={operatorId}
+                        onImpersonate={onImpersonate}
+                        onOpenTab={setTab}
+                        operatorId={operatorId}
+                        operatorName={operator.companyName}
+                    />
+                </div>
             </div>
 
             <div className="super-admin-workspace-actions">

@@ -921,6 +921,68 @@ button.super-admin-table-row {
     justify-content: space-between;
 }
 
+.super-admin-workspace-heading-side {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.super-admin-admin-actions {
+    align-items: flex-end;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.super-admin-admin-action-label {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.super-admin-admin-action-label small {
+    color: var(--muted-foreground);
+    font-size: 0.75rem;
+}
+
+.super-admin-admin-action-result {
+    max-width: 360px;
+}
+
+.super-admin-admin-action-group {
+    color: var(--muted-foreground);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    padding: 8px 12px 4px;
+    text-transform: uppercase;
+}
+
+.super-admin-job-dialog {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.super-admin-job-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.super-admin-job-description {
+    color: var(--muted-foreground);
+    font-size: 0.85rem;
+    margin: 0;
+}
+
+.super-admin-assignment-run-row {
+    grid-template-columns: 0.8fr 2.2fr 1.2fr repeat(4, 0.7fr) 1.2fr;
+}
+
 .super-admin-workspace-identity {
     align-items: center;
     display: flex;
