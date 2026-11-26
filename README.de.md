@@ -10,6 +10,14 @@ Kuriere, Benutzer und Konfiguration sowie einen separaten Super-Admin-Bereich.
 
 ![Dashboard der Niederlassung](docs/screenshots/de/light/dashboard.png)
 
+## MCP-Zugriff
+
+Das Benutzerprofil unterstützt separate MCP-Schlüssel mit optionalem Ablaufdatum, fünfsekündiger Anzeige, Kopieren
+und Widerruf. Unter **Benutzer → MCP-Zugriff** sperren Administratoren MCP, widerrufen Schlüssel und legen
+Sichtbarkeit sowie Lese-/Schreibrechte je Bereich innerhalb ihres Verwaltungsbereichs fest. Benötigt werden die
+Backend-Migration und `/auth/me/mcp-keys` sowie `/users/{userId}/mcp-access`.
+Nach Berechtigungsänderungen die Werkzeugliste im MCP-Client aktualisieren.
+
 ## Über die Anwendung
 
 Manager 2.0 ist eine Back-Office-Anwendung für Paket- und Logistikunternehmen.
@@ -286,3 +294,5 @@ Die Authentifizierung basiert auf Cookies/JWT, und die CORS-Konfiguration des
 Backends muss den GUI-Ursprung erlauben, üblicherweise `http://localhost:3000`.
 
 Release Notes werden in `CHANGELOG.md` gepflegt.
+
+API- und MCP-Schlüssel sind standardmäßig maskiert. Die Anzeige benötigt die Verschlüsselungsmigrationen; ältere reine Hash-Schlüssel müssen einmal neu generiert werden.

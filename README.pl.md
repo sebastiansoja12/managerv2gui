@@ -10,6 +10,14 @@ użytkowników i konfiguracji, a także osobny obszar superadministratora.
 
 ![Pulpit oddziału](docs/screenshots/pl/light/dashboard.png)
 
+## Dostęp MCP
+
+Profil użytkownika obsługuje dedykowane klucze MCP: opcjonalny termin ważności, maskowanie i odsłanianie na pięć sekund,
+kopiowanie i unieważnianie. Administrator w **Użytkownicy → Dostęp MCP** blokuje użytkownikowi MCP, unieważnia klucze
+i ustawia widoczność oraz odczyt/zapis dla obszarów w dotychczasowym zakresie zarządzania użytkownikami. Wymagana
+jest migracja backendu oraz endpointy `/auth/me/mcp-keys` i `/users/{userId}/mcp-access`.
+Po zmianie praw odśwież listę narzędzi w kliencie MCP.
+
 ## O aplikacji
 
 Manager 2.0 to aplikacja biurowa dla firm kurierskich i logistycznych. Po
@@ -282,3 +290,5 @@ Uwierzytelnianie opiera się na ciasteczkach/JWT, a konfiguracja CORS backendu m
 dopuszczać adres GUI, zwykle `http://localhost:3000`.
 
 Informacje o wydaniach są prowadzone w `CHANGELOG.md`.
+
+Klucze API i MCP są domyślnie zasłonięte. Odsłanianie wymaga migracji szyfrowania w backendzie; stare klucze zapisane tylko jako skrót trzeba jednorazowo wygenerować ponownie.

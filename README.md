@@ -10,6 +10,13 @@ configuration screens, plus a separate super-admin area.
 
 ![Department dashboard](docs/screenshots/en/light/dashboard.png)
 
+## MCP access
+
+The user profile supports dedicated MCP keys with optional expiry, masked values, five-second reveal, copying and revocation. API keys use the same masking and reveal controls.
+Administrators use **Users → MCP access** to block a user, revoke keys and set visibility and read/write rights per
+system area, within their existing user management scope. Requires the backend MCP access Liquibase migration
+and `/auth/me/mcp-keys` plus `/users/{userId}/mcp-access`. Refresh the MCP client's tool list after permission changes.
+
 ## About the Application
 
 Manager 2.0 is a back-office application for parcel logistics companies. After
@@ -280,3 +287,5 @@ Authentication is cookie/JWT based and the backend CORS configuration must allow
 the GUI origin, usually `http://localhost:3000`.
 
 Release notes are maintained in `CHANGELOG.md`.
+
+API and MCP keys are masked by default. Revealing requires the backend encrypted-key migrations; older hash-only keys need one regeneration.
