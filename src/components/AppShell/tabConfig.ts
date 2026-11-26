@@ -21,6 +21,7 @@ export const tabTitles = (): Record<string, string> => ({
     "/vehicles": pl.navigation.vehicles,
     "/pallets": pl.navigation.pallets,
     "/pallets/scan": pl.navigation.palletScanner,
+    "/pallets/unload": pl.navigation.palletUnload,
     "/pallets/create": pl.pallets.createOptions.title,
     "/pallets/create-from-shipments": pl.pallets.createFromShipments.title,
     "/pallets/cancelled": pl.navigation.palletsCancelled,

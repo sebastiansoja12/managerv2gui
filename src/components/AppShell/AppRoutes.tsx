@@ -14,6 +14,7 @@ import OperationalDashboard from "../Home/OperationalDashboard";
 import ModulePlaceholder from "../Home/ModulePlaceholder";
 import IncidentDetails from "../Incidents/IncidentDetails";
 import IncidentList from "../Incidents/IncidentList";
+import AnalyticsDashboard from "../Analytics/AnalyticsDashboard";
 import FleetTrackingMap from "../FleetTracking/FleetTrackingMap";
 import LoginPage from "../LoginPage/LoginPage";
 import ProcessDetails from "../Process/ProcessDetails";
@@ -24,6 +25,7 @@ import PalletByIdRedirect from "../Pallets/PalletByIdRedirect";
 import PalletDetailsView from "../Pallets/PalletDetailsView";
 import PalletList from "../Pallets/PalletList";
 import PalletScanner from "../Pallets/PalletScanner";
+import PalletUnload from "../Pallets/PalletUnload";
 import CarrierList from "../Carriers/CarrierList";
 import DriverList from "../Carriers/DriverList";
 import CarrierDetailsView from "../Carriers/CarrierDetailsView";
@@ -82,7 +84,7 @@ function AppRoutes({onOpenTab, operationalProfile = "warehouse", location}: AppR
             <Route path="shipments/tracking/:trackingNumber/history" element={guarded("/shipments/tracking/:trackingNumber/history", <ShipmentHistoryDetails/>)}/>
             <Route path="shipments/:shipmentId/edit" element={guarded("/shipments/1/edit", <ShipmentDetails/>)}/>
             <Route path="shipments/:shipmentId/history" element={guarded("/shipments/1/history", <ShipmentHistoryDetails/>)}/>
-            <Route path="analytics" element={guarded("/analytics", <ModulePlaceholder title={pl.home.tiles.analytics.title}/>)}/>
+            <Route path="analytics" element={guarded("/analytics", <AnalyticsDashboard/>)}/>
             <Route path="processes" element={guarded("/processes", <Processes/>)}/>
             <Route path="processes/:processId" element={guarded("/processes/1", <ProcessDetails/>)}/>
             <Route path="returns" element={guardedReturns(<Returns onOpenTab={onOpenTab}/>)}/>
@@ -98,6 +100,8 @@ function AppRoutes({onOpenTab, operationalProfile = "warehouse", location}: AppR
             <Route path="vehicles" element={guarded("/vehicles", <ModulePlaceholder title={pl.home.tiles.vehicles.title}/>)}/>
             <Route path="pallets" element={guarded("/pallets", <PalletList onOpenTab={onOpenTab} variant="all"/>)}/>
             <Route path="pallets/scan" element={guarded("/pallets/scan", <PalletScanner onOpenTab={onOpenTab}/>)}/>
+            <Route path="pallets/unload" element={guarded("/pallets/unload", <PalletUnload onOpenTab={onOpenTab}/>)}/>
+            <Route path="pallets/unload/:trackingNumber" element={guarded("/pallets/unload/1", <PalletUnload onOpenTab={onOpenTab}/>)}/>
             <Route path="pallets/create" element={guarded("/pallets/create", <PalletCreate onOpenTab={onOpenTab}/>)}/>
             <Route path="pallets/create-from-shipments" element={guarded("/pallets/create-from-shipments", <PalletCreateFromShipments onOpenTab={onOpenTab}/>)}/>
             <Route path="pallets/cancelled" element={guarded("/pallets/cancelled", <PalletList key="cancelled" onOpenTab={onOpenTab} variant="cancelled"/>)}/>

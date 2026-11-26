@@ -29,6 +29,7 @@ import {
     ShoppingCart,
     SupportAgent,
     TaskAlt,
+    UnarchiveOutlined,
     ViewList,
     Warehouse,
     WarehouseRounded,
@@ -231,6 +232,7 @@ function Navbar({
                     icon: Inventory2,
                     items: [
                         {label: pl.navigation.palletScanner, path: '/pallets/scan', icon: QrCodeScanner},
+                        {label: pl.navigation.palletUnload, path: '/pallets/unload', icon: UnarchiveOutlined},
                         {
                             label: pl.navigation.palletCreate,
                             path: '/pallets/create',
@@ -620,6 +622,11 @@ function Navbar({
                     {([
                         ["system", pl.common.themes.system],
                         ["logistics-light", pl.common.themes.logisticsLight],
+                        ["pearl", pl.common.themes.pearl],
+                        ["sand", pl.common.themes.sand],
+                        ["nocturne", pl.common.themes.nocturne],
+                        ["dusk", pl.common.themes.dusk],
+                        ["high-contrast", pl.common.themes.highContrast],
                         ["operations-dark", pl.common.themes.operationsDark],
                         ["warehouse", pl.common.themes.warehouse],
                         ["night-shift", pl.common.themes.nightShift],

@@ -40,6 +40,7 @@ import {
     TurnoverDay,
 } from "./homeDashboardData";
 import "./styles/home-dashboard.css";
+import {useMeasuredWidth} from "../../utils/useMeasuredWidth";
 
 type OperationalDashboardProps = {
     onOpenTab?: (tab: AppTabDefinition) => void;
@@ -50,7 +51,7 @@ type ShipmentLookupCriterion = "TRACKING_NUMBER" | "SHIPMENT_ID";
 const SHIPMENT_PAGE_SIZE = 100;
 const MAX_SHIPMENT_PAGES = 20;
 const LONGEST_DASHBOARD_PERIOD: DashboardPeriodDays = 30;
-const ACTIVE_SHIPMENT_STATUSES: ShipmentStatusDto[] = ["PREPARED", "COLLECTED", "ACCEPTED", "REROUTE", "SENT", "REDIRECT"];
+const ACTIVE_SHIPMENT_STATUSES: ShipmentStatusDto[] = ["PREPARED", "COLLECTED", "ACCEPTED", "REROUTE", "SENT", "HANDOVER", "REDIRECT"];
 
 const formatDateTime = (value?: string | null) => {
     if (!value) {
@@ -155,31 +156,6 @@ type TurnoverChartProps = {
     currency: string;
     periodDays: DashboardPeriodDays;
     series: TurnoverDay[];
-};
-
-const DEFAULT_CHART_WIDTH = 760;
-
-// Draws at the container's real width so labels keep their size instead of scaling with the panel.
-const useMeasuredWidth = (elementRef: React.RefObject<HTMLElement>) => {
-    const [measuredWidth, setMeasuredWidth] = React.useState(DEFAULT_CHART_WIDTH);
-
-    React.useEffect(() => {
-        const element = elementRef.current;
-        if (!element || typeof ResizeObserver === "undefined") {
-            return undefined;
-        }
-
-        const observer = new ResizeObserver(([entry]) => {
-            const contentWidth = Math.round(entry.contentRect.width);
-            if (contentWidth > 0) {
-                setMeasuredWidth(contentWidth);
-            }
-        });
-        observer.observe(element);
-        return () => observer.disconnect();
-    }, [elementRef]);
-
-    return measuredWidth;
 };
 
 function TurnoverChart({currency, periodDays, series}: TurnoverChartProps) {
@@ -623,7 +599,7 @@ function OperationalDashboard({onOpenTab}: OperationalDashboardProps) {
                             <button className="home-activity-row is-return" key={returnPackage.returnPackageId.value} onClick={() => openReturnDetails(returnPackage)} type="button">
                                 <span className="home-activity-id">R#{returnPackage.returnPackageId.value}</span>
                                 <span className="home-activity-main">
-                                    <strong>{pl.home.dashboard.returns.shipment.replace("{id}", returnPackage.shipmentId.value)}</strong>
+                                    <strong>{pl.home.dashboard.returns.shipment.replace("{trackingNumber}", returnPackage.trackingNumber?.value || pl.common.dash)}</strong>
                                     <small>{pl.returns.reasonCodes[returnPackage.reasonCode.value as keyof typeof pl.returns.reasonCodes] || returnPackage.reasonCode.value} · {formatDateTime(returnPackage.createdAt)}</small>
                                 </span>
                                 <span className={`home-status is-${returnPackage.returnStatus.toLowerCase()}`}>

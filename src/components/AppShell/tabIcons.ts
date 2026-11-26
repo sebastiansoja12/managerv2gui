@@ -18,12 +18,14 @@ import {
     ShoppingCart,
     SupportAgent,
     TaskAlt,
+    UnarchiveOutlined,
     WarehouseRounded,
 } from "components/ui/icons";
 
 // Ordered from the most specific prefix, so the first match wins.
 const tabIconsByPathPrefix: Array<[string, React.ElementType]> = [
     ["/pallets/scan", QrCodeScanner],
+    ["/pallets/unload", UnarchiveOutlined],
     ["/shipment-scanner", QrCodeScanner],
     ["/shipment-route", Route],
     ["/pallets", Inventory2],
